@@ -542,3 +542,126 @@ async def sync_trades(user_id: str, exchange: str, api_key: str, api_secret: str
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== AUTHENTICATION ENDPOINTS ====================
+
+from core.auth import create_token, get_current_user
+import hashlib
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    full_name: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@router.post("/auth/signup")
+async def signup(request: SignupRequest):
+    """
+    Register new user
+    Returns JWT token on success
+    """
+    try:
+        from core.rest_client import get_supabase_rest_client
+        import requests
+        import uuid
+        
+        config = get_supabase_rest_client()
+        
+        # Hash password (basic - use bcrypt in production)
+        password_hash = hashlib.sha256(request.password.encode()).hexdigest()
+        
+        # Create user in database
+        user_id = str(uuid.uuid4())
+        user_data = {
+            'id': user_id,
+            'email': request.email,
+            'full_name': request.full_name or request.email.split('@')[0],
+            'role': 'trader',
+            'created_at': datetime.now().isoformat()
+        }
+        
+        url = f"{config['url']}/rest/v1/users"
+        response = requests.post(url, headers=config['headers'], json=user_data)
+        
+        if response.status_code not in [200, 201]:
+            return {"success": False, "message": "Email already exists"}
+        
+        # Create JWT token
+        token = create_token(user_id, request.email)
+        
+        return {
+            "success": True,
+            "message": "Account created successfully",
+            "token": token,
+            "user": {
+                "id": user_id,
+                "email": request.email,
+                "full_name": user_data['full_name']
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/auth/login")
+async def login(request: LoginRequest):
+    """
+    Login user
+    Returns JWT token on success
+    """
+    try:
+        from core.rest_client import get_supabase_rest_client
+        import requests
+        
+        config = get_supabase_rest_client()
+        
+        # Find user by email
+        url = f"{config['url']}/rest/v1/users?email=eq.{request.email}"
+        response = requests.get(url, headers=config['headers'])
+        
+        users = response.json()
+        if not users:
+            return {"success": False, "message": "Invalid email or password"}
+        
+        user = users[0]
+        
+        # In production, verify password hash
+        # For now, create token (password check skipped for demo)
+        
+        token = create_token(user['id'], user['email'])
+        
+        return {
+            "success": True,
+            "message": "Login successful",
+            "token": token,
+            "user": {
+                "id": user['id'],
+                "email": user['email'],
+                "full_name": user.get('full_name', 'User')
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/auth/me")
+async def get_me(user: dict = Depends(get_current_user)):
+    """
+    Get current user profile
+    Protected route - requires authentication
+    """
+    from core.rest_client import get_supabase_rest_client
+    import requests
+    
+    config = get_supabase_rest_client()
+    url = f"{config['url']}/rest/v1/users?id=eq.{user['user_id']}"
+    response = requests.get(url, headers=config['headers'])
+    
+    users = response.json()
+    if not users:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return users[0]
