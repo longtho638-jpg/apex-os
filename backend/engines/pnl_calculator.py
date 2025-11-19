@@ -241,15 +241,23 @@ class PnLCalculator:
         since_date = (datetime.now() - timedelta(days=days)).isoformat()
         
         try:
-            supabase = get_supabase_client()
-            result = supabase.table('trade_history')\
-                .select('*')\
-                .eq('user_id', user_id)\
-                .gte('timestamp', since_date)\
-                .order('timestamp', desc=False)\
-                .execute()
+            from core.rest_client import query_table
             
-            return result.data if result.data else []
+            # Fetch via REST API
+            trades = query_table(
+                'trade_history',
+                filters={'user_id': user_id},
+                order_by='timestamp.asc',
+                limit=1000
+            )
+            
+            # Filter by date
+            filtered = [
+                t for t in trades 
+                if t['timestamp'] >= since_date
+            ]
+            
+            return filtered
         except Exception as e:
             print(f"Error fetching trades: {e}")
             return []
@@ -260,18 +268,17 @@ class PnLCalculator:
         In production, this should use CCXT or WebSocket feed.
         """
         try:
-            supabase = get_supabase_client()
-            # TODO: Implement real-time price fetching
-            # For now, fetch last trade price from database
-            result = supabase.table('trade_history')\
-                .select('price')\
-                .eq('symbol', symbol)\
-                .order('timestamp', desc=True)\
-                .limit(1)\
-                .execute()
+            from core.rest_client import query_table
             
-            if result.data:
-                return float(result.data[0]['price'])
+            trades = query_table(
+                'trade_history',
+                filters={'symbol': symbol},
+                order_by='timestamp.desc',
+                limit=1
+            )
+            
+            if trades:
+                return float(trades[0]['price'])
             return None
         except Exception:
             return None

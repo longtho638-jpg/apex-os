@@ -203,15 +203,16 @@ class AuditorAgent:
         since_date = (datetime.now() - timedelta(days=days)).isoformat()
         
         try:
-            supabase = get_supabase_client()
-            result = supabase.table('trade_history')\
-                .select('*')\
-                .eq('user_id', user_id)\
-                .gte('timestamp', since_date)\
-                .order('timestamp', desc=False)\
-                .execute()
+            from core.rest_client import query_table
             
-            return result.data if result.data else []
+            trades = query_table(
+                'trade_history',
+                filters={'user_id': user_id},
+                order_by='timestamp.asc',
+                limit=1000
+            )
+            
+            return [t for t in trades if t['timestamp'] >= since_date]
         except Exception as e:
             print(f"Error fetching trades: {e}")
             return []
