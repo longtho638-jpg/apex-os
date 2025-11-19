@@ -182,16 +182,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-12 bg-[#0A0A0A]">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 bg-[#00FF00] rounded-sm flex items-center justify-center">
-              <div className="h-3 w-3 bg-black transform rotate-45" />
-            </div>
-            <span className="text-lg font-bold tracking-tighter">
-              APEX<span className="text-[#00FF00]">OS</span>
-            </span>
-          </div>
+      <footer className="border-t border-white/5 py-12 px-6">
+        <div className="max-w-7xl mx-auto text-center">
           <div className="text-sm text-gray-500">
             © 2024 Apex Financial Technologies. All rights reserved.
           </div>
