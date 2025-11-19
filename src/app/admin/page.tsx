@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Users, DollarSign, Activity, Lock, Search, AlertTriangle, CheckCircle, Terminal, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sidebar } from '@/components/os/sidebar';
+import { useSystemMetrics } from '@/hooks/useApi';
 
 export default function AdminGodMode() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('users');
+    const { metrics, loading } = useSystemMetrics();
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -105,8 +107,8 @@ export default function AdminGodMode() {
                         {/* Tab Content */}
                         <div className="min-h-[500px]">
                             {activeTab === 'users' && <UserManagementTab />}
-                            {activeTab === 'finance' && <FinancialTab />}
-                            {activeTab === 'system' && <SystemHealthTab />}
+                            {activeTab === 'finance' && <FinancialTab metrics={metrics} loading={loading} />}
+                            {activeTab === 'system' && <SystemHealthTab metrics={metrics} loading={loading} />}
                         </div>
                     </div>
                 </div>
@@ -202,7 +204,7 @@ function UserManagementTab() {
     );
 }
 
-function FinancialTab() {
+function FinancialTab({ metrics, loading }: any) {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const handlePayout = () => {
@@ -210,15 +212,34 @@ function FinancialTab() {
         setTimeout(() => setIsProcessing(false), 3000);
     };
 
+    if (loading) {
+        return <div className="text-center py-20 text-amber-500">Loading financial data...</div>;
+    }
+
     return (
         <div className="space-y-8">
+            <div className="grid grid-cols-3 gap-6 mb-8">
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6">
+                    <div className="text-sm text-gray-400 mb-1">Total Fees Collected</div>
+                    <div className="text-2xl font-bold text-green-500">${(metrics?.totalFees || 0).toFixed(2)}</div>
+                </div>
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6">
+                    <div className="text-sm text-gray-400 mb-1">Rebates Distributed</div>
+                    <div className="text-2xl font-bold text-blue-500">${(metrics?.totalRebates || 0).toFixed(2)}</div>
+                </div>
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6">
+                    <div className="text-sm text-gray-400 mb-1">Apex Profit</div>
+                    <div className="text-2xl font-bold text-amber-500">${((metrics?.totalFees || 0) - (metrics?.totalRebates || 0)).toFixed(2)}</div>
+                </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-8">
                 <div className="p-8 rounded-2xl border border-amber-500/20 bg-amber-500/5 flex flex-col items-center justify-center text-center">
                     <div className="mb-4 p-4 rounded-full bg-amber-500/10">
                         <DollarSign className="h-8 w-8 text-amber-500" />
                     </div>
                     <h3 className="text-gray-400 font-medium mb-2">Total Commission Received</h3>
-                    <div className="text-4xl font-bold text-white">$142,850.00</div>
+                    <div className="text-4xl font-bold text-white">${(metrics?.totalFees || 0).toFixed(2)}</div>
                     <div className="text-sm text-green-500 mt-2">+12.4% vs last month</div>
                 </div>
 
@@ -227,7 +248,7 @@ function FinancialTab() {
                         <AlertTriangle className="h-8 w-8 text-red-500" />
                     </div>
                     <h3 className="text-gray-400 font-medium mb-2">Total Rebate Pending</h3>
-                    <div className="text-4xl font-bold text-white">$85,200.00</div>
+                    <div className="text-4xl font-bold text-white">${(metrics?.pendingRebates || 0).toFixed(2)}</div>
                     <div className="text-sm text-red-400 mt-2">Due in 2 days</div>
                 </div>
             </div>

@@ -84,3 +84,50 @@ export function useLeverage() {
 
     return { data, loading };
 }
+
+// Trade page hooks
+export function usePortfolio() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/pnl/summary?user_id=${USER_ID}`)
+      .then(res => res.json())
+      .then(pnl => {
+        setData({
+          totalValue: Math.abs(pnl.total_pnl) + 10000,
+          pnl: pnl.total_pnl,
+          pnlPercent: ((pnl.total_pnl / 10000) * 100).toFixed(2),
+          winRate: pnl.win_rate,
+          totalTrades: pnl.total_trades
+        });
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { data, loading };
+}
+
+// Admin page metrics
+export function useSystemMetrics() {
+  const [metrics, setMetrics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API_BASE}/pnl/summary?user_id=${USER_ID}`).then(r => r.json()),
+      fetch(`${API_BASE}/auditor/rebates?user_id=${USER_ID}`).then(r => r.json())
+    ]).then(([pnl, rebate]) => {
+      setMetrics({
+        totalUsers: 1,
+        totalTrades: pnl.total_trades,
+        totalVolume: (pnl.total_trades * 2500).toFixed(0),
+        totalFees: rebate.total_fees_paid,
+        totalRebates: rebate.user_rebate,
+        systemStatus: 'healthy'
+      });
+    }).finally(() => setLoading(false));
+  }, []);
+
+  return { metrics, loading };
+}
