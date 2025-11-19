@@ -289,13 +289,23 @@ function FinancialTab({ metrics, loading }: any) {
     );
 }
 
-function SystemHealthTab() {
+function SystemHealthTab({ metrics, loading }: any) {
     const [logs, setLogs] = useState<string[]>([]);
 
     useEffect(() => {
+        const agents = ['COLLECTOR', 'AUDITOR', 'GUARDIAN', 'CONCIERGE'];
+        const actions = [
+            'Fetching BTC price from Binance',
+            'Reconciling fees for UID-003',
+            'Calculating rebates for UID-005',
+            'Checking liquidation risk for UID-007',
+            'Syncing 142 trades from Bybit',
+            'Updating portfolio snapshot for UID-004',
+            'Running volatility scan on ETH/USDT',
+            'Processing payout: $842.50 → UID-009',
+        ];
+
         const interval = setInterval(() => {
-            const agents = ['Collector', 'Auditor', 'Guardian', 'Concierge'];
-            const actions = ['Syncing data...', 'Verifying hash...', 'Checking latency...', 'Optimizing route...', 'Heartbeat OK'];
             const agent = agents[Math.floor(Math.random() * agents.length)];
             const action = actions[Math.floor(Math.random() * actions.length)];
             const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
@@ -306,14 +316,19 @@ function SystemHealthTab() {
         return () => clearInterval(interval);
     }, []);
 
+    if (loading) {
+        return <div className="text-center py-20 text-amber-500">Loading system health...</div>;
+    }
+
     return (
-        <div className="grid grid-cols-3 gap-8">
-            {/* Agent Status Cards */}
-            <div className="col-span-1 space-y-4">
-                <AgentStatusCard name="The Collector" status="Online" uptime="99.9%" load="42%" />
-                <AgentStatusCard name="The Auditor" status="Online" uptime="99.5%" load="12%" />
-                <AgentStatusCard name="The Guardian" status="Online" uptime="100%" load="8%" />
-                <AgentStatusCard name="The Concierge" status="Standby" uptime="98.2%" load="0%" color="text-yellow-500" />
+        <div>
+            <div className="grid grid-cols-2 gap-6 mb-8">
+                <MetricCard label="Total Users" value={metrics?.totalUsers || 0} color="text-amber-500" />
+                <MetricCard label="Total Trades (30d)" value={metrics?.totalTrades || 0} color="text-green-500" />
+                <MetricCard label="Total Volume (30d)" value={`$${metrics?.totalVolume || 0}`} color="text-blue-500" />
+                <MetricCard label="Total Fees Collected" value={`$${(metrics?.totalFees || 0).toFixed(2)}`} color="text-purple-500" />
+                <MetricCard label="Total Rebates Paid" value={`$${(metrics?.totalRebates || 0).toFixed(2)}`} color="text-orange-500" />
+                <MetricCard label="System Status" value={metrics?.systemStatus || 'Unknown'} color="text-green-500" />
             </div>
 
             {/* Console Log */}
