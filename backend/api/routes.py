@@ -1,6 +1,17 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
-from typing import List, Dict
+from typing import List, Dict, Optional
 from pydantic import BaseModel
+
+from core.database import db
+from core.security import encrypt_value
+from engines.pnl_calculator import PnLCalculator
+from agents.collector import CollectorAgent
+from agents.auditor import AuditorAgent
+from agents.guardian import GuardianAgent
+
+collector = CollectorAgent()
+auditor = AuditorAgent()
+guardian = GuardianAgent()
 
 router = APIRouter()
 
@@ -18,6 +29,8 @@ POSITIONS = [
     {"symbol": "TSLA", "qty": 100, "avg": 215.00, "current": 205.60, "pnl": -940.00, "pnl_percent": -4.37},
 ]
 
+from core.database import db
+from core.security import encrypt_value
 from agents.collector import CollectorAgent
 
 collector = CollectorAgent()
@@ -132,6 +145,119 @@ async def get_sync_status(user_id: str = "demo-user", exchange: str = "binance")
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== PNL ENDPOINTS ====================
+
+@router.get("/pnl/summary")
+async def get_pnl_summary(user_id: str = "demo-user", days: int = 30):
+    """
+    Get comprehensive PnL summary for user.
+    
+    Args:
+        user_id: User UUID
+        days: Look back period (default 30)
+        
+    Returns:
+        Complete PnL breakdown with statistics
+    """
+    try:
+        calculator = PnLCalculator()
+        result = calculator.calculate_user_pnl(user_id, days)
+        
+        return {
+            "realized_pnl": result.realized_pnl,
+            "unrealized_pnl": result.unrealized_pnl,
+            "total_pnl": result.total_pnl,
+            "total_fees": result.total_fees,
+            "total_funding_fees": result.total_funding_fees,
+            "win_rate": result.win_rate,
+            "total_trades": result.total_trades,
+            "winning_trades": result.winning_trades,
+            "losing_trades": result.losing_trades,
+            "largest_win": result.largest_win,
+            "largest_loss": result.largest_loss,
+            "average_win": result.average_win,
+            "average_loss": result.average_loss,
+            "profit_factor": result.profit_factor
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== AUDITOR ENDPOINTS ====================
+
+@router.post("/auditor/reconcile")
+async def reconcile_fees(user_id: str = "demo-user", days: int = 30):
+    """
+    Run fee reconciliation audit.
+    Compares expected fees vs actual fees to detect discrepancies.
+    """
+    try:
+        result = auditor.reconcile_fees(user_id, days)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/auditor/rebates")
+async def get_rebates(user_id: str = "demo-user", days: int = 30):
+    """
+    Calculate rebate owed to user based on commission splits.
+    """
+    try:
+        result = auditor.calculate_rebates(user_id, days)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/auditor/tax-report")
+async def get_tax_report(user_id: str = "demo-user", year: int = 2024):
+    """
+    Generate annual tax report with CSV export.
+    """
+    try:
+        result = auditor.generate_tax_report(user_id, year)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== GUARDIAN ENDPOINTS ====================
+
+@router.get("/guardian/liquidation-risk")
+async def get_liquidation_risk(user_id: str = "demo-user"):
+    """
+    Check liquidation risk for all open positions.
+    Calculates liquidation prices and distance to liquidation.
+    """
+    try:
+        result = guardian.check_liquidation_risk(user_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/guardian/leverage-check")
+async def check_leverage(user_id: str = "demo-user", risk_profile: str = "moderate"):
+    """
+    Check if user is over-leveraged based on risk profile.
+    
+    Risk profiles: conservative (max 3x), moderate (max 5x), aggressive (max 10x)
+    """
+    try:
+        result = guardian.detect_over_leverage(user_id, risk_profile)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/guardian/funding-rates")
+async def monitor_funding(user_id: str = "demo-user"):
+    """
+    Monitor funding rates for open positions.
+    Alerts on high funding costs (>0.1% per 8 hours).
+    """
+    try:
+        result = guardian.monitor_funding_rates(user_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 class SyncRequest(BaseModel):
     user_id: str

@@ -1,13 +1,41 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+import sentry_sdk
+from sentry_sdk.integrations.starlette import StarletteIntegration
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from api.routes import router as api_router
+
+# Load environment variables
+load_dotenv()
+
+# Initialize Sentry with explicit integrations and disable defaults to avoid conflicts
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    traces_sample_rate=0.1,
+    environment=os.getenv("ENVIRONMENT", "development"),
+    default_integrations=False,
+    integrations=[
+        StarletteIntegration(),
+        FastApiIntegration(),
+    ],
+)
+
+# Initialize Rate Limiter
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="Apex Financial OS API",
     description="Backend API for Apex Financial OS Agents",
     version="1.0.0"
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configure CORS
 app.add_middleware(
