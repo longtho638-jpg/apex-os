@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Authentication context for React
  * Manages user login state and JWT tokens
