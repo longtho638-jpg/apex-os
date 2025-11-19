@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { Sidebar } from '@/components/os/sidebar';
 import ZenWidget from '@/components/dashboard/ZenWidget';
 import ConnectExchange from '@/components/dashboard/ConnectExchange';
+import { usePnL, useRebates, useLeverage } from '@/hooks/useApi';
 
 // Types
 type Tab = 'dashboard' | 'audit' | 'architecture' | 'wolfpack' | 'roadmap' | 'settings';
@@ -24,6 +25,11 @@ type Tab = 'dashboard' | 'audit' | 'architecture' | 'wolfpack' | 'roadmap' | 'se
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState<Tab>('dashboard');
     const [apiKey, setApiKey] = useState('');
+
+    // Fetch real data from APIs
+    const { data: pnlData, loading: pnlLoading } = usePnL();
+    const { data: rebateData, loading: rebateLoading } = useRebates();
+    const { data: leverageData, loading: leverageLoading } = useLeverage();
 
     return (
         <div className="flex h-screen w-full bg-[#0A0A0A] text-white font-sans overflow-hidden selection:bg-[#00FF00]/20">
@@ -51,21 +57,21 @@ export default function DashboardPage() {
                             <div className="grid grid-cols-3 gap-6">
                                 <MetricCard
                                     label="TOTAL PNL (30D)"
-                                    value="+$4,291.00"
-                                    change="+12.4%"
-                                    isPositive={true}
+                                    value={pnlLoading ? "Loading..." : `${(pnlData?.total_pnl ?? 0) >= 0 ? '+' : ''}$${(pnlData?.total_pnl ?? 0).toFixed(2)}`}
+                                    change={pnlLoading ? "" : `${(pnlData?.win_rate ?? 0).toFixed(1)}% Win Rate`}
+                                    isPositive={(pnlData?.total_pnl ?? 0) >= 0}
                                 />
                                 <MetricCard
                                     label="REBATES EARNED"
-                                    value="$842.50"
-                                    subtext="Avg 40%"
+                                    value={rebateLoading ? "Loading..." : `$${(rebateData?.user_rebate ?? 0).toFixed(2)}`}
+                                    subtext={rebateLoading ? "" : `${(rebateData?.rebate_percentage ?? 0).toFixed(0)}% of fees`}
                                     accentColor="text-blue-400"
                                 />
                                 <MetricCard
                                     label="RISK SCORE"
-                                    value="Low"
+                                    value={leverageLoading ? "Loading..." : leverageData?.status === 'no_data' ? 'No Data' : leverageData?.is_over_leveraged ? 'High' : 'Low'}
                                     subtext="Guardian Active"
-                                    accentColor="text-[#00FF00]"
+                                    accentColor={leverageData?.is_over_leveraged ? "text-red-400" : "text-[#00FF00]"}
                                 />
                             </div>
 
