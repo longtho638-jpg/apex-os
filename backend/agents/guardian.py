@@ -91,6 +91,20 @@ class GuardianAgent:
             if distance < 5:
                 risk_level = 'critical'
                 high_risk_count += 1
+                
+                # Send Slack alert for critical risk
+                try:
+                    from integrations.slack_notifier import get_slack_notifier
+                    slack = get_slack_notifier()
+                    slack.notify_liquidation_risk(
+                        user_email=user_id,  # TODO: fetch real email
+                        symbol=position['symbol'],
+                        distance=f"{distance:.2f}%",
+                        liquidation_price=liq_price
+                    )
+                except:
+                    pass  # Silent fail if Slack not configured
+                    
             elif distance < 10:
                 risk_level = 'high'
                 high_risk_count += 1
@@ -161,6 +175,19 @@ class GuardianAgent:
         effective_leverage = total_position_value / total_balance if total_balance > 0 else 0
         
         is_over_leveraged = effective_leverage > max_leverage
+        
+        # Send Slack alert if over-leveraged
+        if is_over_leveraged:
+            try:
+                from integrations.slack_notifier import get_slack_notifier
+                slack = get_slack_notifier()
+                slack.notify_over_leverage(
+                    user_email=user_id,  # TODO: fetch real email
+                    current_leverage=effective_leverage,
+                    max_leverage=max_leverage
+                )
+            except:
+                pass
         
         # Calculate reduction needed
         if is_over_leveraged:
