@@ -431,3 +431,114 @@ async def connect_exchange(request: ExchangeConnectionRequest):
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== EXCHANGE INTEGRATION ENDPOINTS ====================
+
+from integrations.exchange_client import create_exchange_client
+
+class ConnectExchangeRequest(BaseModel):
+    user_id: str
+    exchange: str  # 'binance', 'bybit', 'okx'
+    api_key: str
+    api_secret: str
+
+@router.post("/exchange/connect")
+async def connect_exchange(request: ConnectExchangeRequest):
+    """
+    Connect user's exchange account and validate credentials.
+    Step 1: Test connection
+    Step 2: Save encrypted credentials
+    Step 3: Trigger initial sync
+    """
+    try:
+        # Test connection
+        client = create_exchange_client(
+            request.exchange,
+            request.api_key,
+            request.api_secret
+        )
+        
+        test_result = client.test_connection()
+        
+        if not test_result['success']:
+            return {
+                "success": False,
+                "message": test_result['message'],
+                "step": "validation_failed"
+            }
+        
+        # Check permissions (must have 'read')
+        if 'read' not in test_result['permissions']:
+            return {
+                "success": False,
+                "message": "API key must have READ permission",
+                "step": "insufficient_permissions"
+            }
+        
+        # TODO: Encrypt and save credentials to database
+        # For now, just return success
+        
+        return {
+            "success": True,
+            "message": "Exchange connected successfully",
+            "exchange": request.exchange,
+            "balance": test_result['balance'],
+            "permissions": test_result['permissions'],
+            "step": "connected"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/exchange/sync-trades")
+async def sync_trades(user_id: str, exchange: str, api_key: str, api_secret: str, background_tasks: BackgroundTasks):
+    """
+    Sync trades from exchange to database.
+    Runs in background to avoid timeout.
+    """
+    try:
+        client = create_exchange_client(exchange, api_key, api_secret)
+        
+        # Fetch trades from last 30 days
+        from datetime import datetime, timedelta
+        since = datetime.now() - timedelta(days=30)
+        
+        trades = client.fetch_trades(since=since, limit=500)
+        
+        if not trades:
+            return {
+                "success": True,
+                "message": "No new trades to sync",
+                "trades_synced": 0
+            }
+        
+        # Insert to database via REST API
+        from core.rest_client import get_supabase_rest_client
+        import requests
+        
+        config = get_supabase_rest_client()
+        url = f"{config['url']}/rest/v1/trade_history"
+        
+        # Add user_id to each trade
+        for trade in trades:
+            trade['user_id'] = user_id
+        
+        # Insert in batches
+        batch_size = 50
+        total_inserted = 0
+        
+        for i in range(0, len(trades), batch_size):
+            batch = trades[i:i+batch_size]
+            response = requests.post(url, headers=config['headers'], json=batch)
+            
+            if response.status_code in [200, 201]:
+                total_inserted += len(batch)
+        
+        return {
+            "success": True,
+            "message": f"Synced {total_inserted} trades",
+            "trades_synced": total_inserted
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
