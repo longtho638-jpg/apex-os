@@ -1,65 +1,195 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowRight, Shield, Zap, Activity, Layers, Terminal } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+export default function LandingPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-sans overflow-x-hidden selection:bg-[#00FF00]/20">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#0A0A0A]/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 bg-[#00FF00] rounded-sm flex items-center justify-center shadow-[0_0_10px_rgba(0,255,0,0.5)]">
+              <div className="h-4 w-4 bg-black transform rotate-45" />
+            </div>
+            <span className="text-xl font-bold tracking-tighter">
+              APEX<span className="text-[#00FF00]">OS</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+              Sign In
+            </Link>
+            <Link
+              href="/login"
+              className="bg-[#00FF00] text-black text-sm font-bold px-4 py-2 rounded-lg hover:bg-[#00FF00]/90 transition-all shadow-[0_0_15px_rgba(0,255,0,0.3)] hover:shadow-[0_0_25px_rgba(0,255,0,0.5)]"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Request Access
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 px-6">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#00FF00]/10 via-[#0A0A0A] to-[#0A0A0A] pointer-events-none" />
+
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8">
+              <span className="flex h-2 w-2 rounded-full bg-[#00FF00] animate-pulse" />
+              <span className="text-xs font-medium text-gray-300 tracking-wide uppercase">System Operational v2.0</span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+              The Agentic Infrastructure <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00FF00] to-emerald-600">
+                for Pro Traders
+              </span>
+            </h1>
+
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+              Automate your edge with institutional-grade AI agents.
+              Real-time auditing, risk management, and rebate optimization in one operating system.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href="/login"
+                className="group flex items-center gap-2 bg-[#00FF00] text-black text-lg font-bold px-8 py-4 rounded-xl hover:bg-[#00FF00]/90 transition-all shadow-[0_0_20px_rgba(0,255,0,0.3)] hover:shadow-[0_0_30px_rgba(0,255,0,0.5)]"
+              >
+                Request Access
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <button className="flex items-center gap-2 px-8 py-4 rounded-xl border border-white/10 hover:bg-white/5 transition-all font-medium text-gray-300">
+                <Terminal className="h-5 w-5" />
+                View Documentation
+              </button>
+            </div>
+          </motion.div>
         </div>
-      </main>
+      </section>
+
+      {/* Social Proof Ticker */}
+      <div className="border-y border-white/5 bg-white/[0.02] overflow-hidden py-4">
+        <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+              <span className="text-lg font-bold font-mono text-gray-500">TRUSTED BY 50+ WHALES</span>
+              <span className="text-[#00FF00]">•</span>
+              <span className="text-lg font-bold font-mono text-gray-500">$10M+ VOLUME PROCESSED</span>
+              <span className="text-[#00FF00]">•</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Features Grid (Bento) */}
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">The Wolf Pack</h2>
+            <p className="text-gray-400">Four specialized agents working in concert to protect and grow your portfolio.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+            {/* Card 1: Collector (Large) */}
+            <div className="md:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-8 relative overflow-hidden group hover:border-[#00FF00]/30 transition-colors">
+              <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/20 transition-all duration-500" />
+              <div className="relative z-10 h-full flex flex-col justify-between">
+                <div>
+                  <div className="h-12 w-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6">
+                    <Activity className="h-6 w-6 text-blue-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">The Collector</h3>
+                  <p className="text-gray-400 max-w-md">
+                    Real-time data aggregation from Binance, Bybit, and OKX.
+                    Unifies your fragmented liquidity into a single, coherent dashboard with sub-millisecond latency.
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-sm font-mono text-blue-400">
+                  <span>Latency: 12ms</span>
+                  <span>•</span>
+                  <span>Uptime: 99.99%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Guardian */}
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 relative overflow-hidden group hover:border-[#00FF00]/30 transition-colors">
+              <div className="absolute top-0 right-0 p-24 bg-[#00FF00]/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#00FF00]/20 transition-all duration-500" />
+              <div className="relative z-10">
+                <div className="h-12 w-12 rounded-xl bg-[#00FF00]/20 flex items-center justify-center mb-6">
+                  <Shield className="h-6 w-6 text-[#00FF00]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">The Guardian</h3>
+                <p className="text-sm text-gray-400">
+                  24/7 Risk Management. Monitors margin utilization and liquidation prices, alerting you before disaster strikes.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 3: Auditor */}
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 relative overflow-hidden group hover:border-[#00FF00]/30 transition-colors">
+              <div className="absolute top-0 right-0 p-24 bg-yellow-500/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-yellow-500/20 transition-all duration-500" />
+              <div className="relative z-10">
+                <div className="h-12 w-12 rounded-xl bg-yellow-500/20 flex items-center justify-center mb-6">
+                  <Zap className="h-6 w-6 text-yellow-400" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">The Auditor</h3>
+                <p className="text-sm text-gray-400">
+                  Fee & Rebate Reconciliation. Automatically verifies every trade execution against exchange fee tiers to ensure you get paid correctly.
+                </p>
+              </div>
+            </div>
+
+            {/* Card 4: Concierge (Large) */}
+            <div className="md:col-span-2 rounded-3xl border border-white/10 bg-white/5 p-8 relative overflow-hidden group hover:border-[#00FF00]/30 transition-colors">
+              <div className="absolute top-0 right-0 p-32 bg-purple-500/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-500/20 transition-all duration-500" />
+              <div className="relative z-10 h-full flex flex-col justify-between">
+                <div>
+                  <div className="h-12 w-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6">
+                    <Layers className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">The Concierge</h3>
+                  <p className="text-gray-400 max-w-md">
+                    Your personal interface to the Apex ecosystem. Handles reporting, settings, and system orchestration through a natural language interface.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-mono text-purple-400">
+                  <Terminal className="h-4 w-4" />
+                  <span>Ready for command input...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-12 bg-[#0A0A0A]">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 bg-[#00FF00] rounded-sm flex items-center justify-center">
+              <div className="h-3 w-3 bg-black transform rotate-45" />
+            </div>
+            <span className="text-lg font-bold tracking-tighter">
+              APEX<span className="text-[#00FF00]">OS</span>
+            </span>
+          </div>
+          <div className="text-sm text-gray-500">
+            © 2024 Apex Financial Technologies. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
