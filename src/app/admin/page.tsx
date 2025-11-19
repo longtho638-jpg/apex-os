@@ -368,3 +368,12 @@ function AgentStatusCard({ name, status, uptime, load, color }: any) {
         </div>
     );
 }
+
+function MetricCard({ label, value, color }: any) {
+    return (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6">
+            <div className="text-sm text-gray-400 mb-2">{label}</div>
+            <div className={cn("text-3xl font-bold", color)}>{value}</div>
+        </div>
+    );
+}
