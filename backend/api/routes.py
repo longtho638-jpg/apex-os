@@ -665,3 +665,140 @@ async def get_me(user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="User not found")
     
     return users[0]
+
+
+# ============== USER TIER & SUBSCRIPTION ==============
+
+@router.get("/user/tier")
+async def get_user_tier(user: dict = Depends(get_current_user)):
+    """
+    Get user's subscription tier and related info
+    
+    Returns:
+        - tier: 'free', 'founders', or 'admin'
+        - slot_number: Founders Circle slot (1-100) if applicable
+        - joined_at: Timestamp when user joined tier
+        - features: Dict of available features for this tier
+    
+    Used by frontend for feature gating and UI customization
+    """
+    from core.rest_client import get_supabase_rest_client
+    import requests
+    from datetime import datetime
+    
+    try:
+        config = get_supabase_rest_client()
+        
+        # Fetch user data
+        url = f"{config['url']}/rest/v1/users?id=eq.{user['user_id']}&select=*"
+        response = requests.get(url, headers=config['headers'])
+        
+        if response.status_code != 200:
+            # Fallback to free tier if query fails
+            return {
+                "tier": "free",
+                "slot_number": None,
+                "joined_at": None,
+                "features": get_tier_features("free")
+            }
+        
+        users = response.json()
+        if not users:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        user_data = users[0]
+        
+        # Get tier (default to 'free' if column doesn't exist yet)
+        tier = user_data.get('subscription_tier', 'free')
+        
+        # Get founders slot if applicable
+        slot_number = None
+        if tier == 'founders':
+            # Query founders_circle table for slot number
+            try:
+                slot_url = f"{config['url']}/rest/v1/founders_circle?user_id=eq.{user['user_id']}&select=slot_number"
+                slot_response = requests.get(slot_url, headers=config['headers'])
+                
+                if slot_response.status_code == 200:
+                    slots = slot_response.json()
+                    if slots:
+                        slot_number = slots[0].get('slot_number')
+            except:
+                # Table might not exist yet, ignore
+                pass
+        
+        # Get joined_at timestamp
+        joined_at = user_data.get('joined_at') or user_data.get('created_at')
+        
+        return {
+            "tier": tier,
+            "is_founders": tier == 'founders',
+            "is_admin": tier == 'admin',
+            "slot_number": slot_number,
+            "joined_at": joined_at,
+            "features": get_tier_features(tier)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error fetching user tier: {str(e)}")
+        # Graceful fallback - return free tier
+        return {
+            "tier": "free",
+            "slot_number": None,
+            "joined_at": None,
+            "features": get_tier_features("free")
+        }
+
+
+def get_tier_features(tier: str) -> dict:
+    """
+    Return feature flags for a given tier
+    Used for frontend feature gating
+    """
+    features = {
+        "free": {
+            "wolf_pack_agents": False,
+            "real_time_sync": False,
+            "ai_auditor": False,
+            "risk_guardian": False,
+            "unlimited_exchanges": False,
+            "lifetime_data": False,
+            "referral_commission": 0,
+            "api_rate_limit": 10,  # requests per minute
+            "export_formats": ["csv"],
+            "support_sla": "48h",
+            "max_trade_history_days": 30
+        },
+        "founders": {
+            "wolf_pack_agents": True,
+            "real_time_sync": True,
+            "ai_auditor": True,
+            "risk_guardian": True,
+            "unlimited_exchanges": True,
+            "lifetime_data": True,
+            "referral_commission": 20,  # 20% of referred user fees
+            "api_rate_limit": 1000,
+            "export_formats": ["csv", "pdf", "excel", "tax"],
+            "support_sla": "2h",
+            "max_trade_history_days": -1  # unlimited
+        },
+        "admin": {
+            "wolf_pack_agents": True,
+            "real_time_sync": True,
+            "ai_auditor": True,
+            "risk_guardian": True,
+            "unlimited_exchanges": True,
+            "lifetime_data": True,
+            "referral_commission": 0,
+            "api_rate_limit": 10000,
+            "export_formats": ["csv", "pdf", "excel", "tax", "json"],
+            "support_sla": "immediate",
+            "max_trade_history_days": -1,
+            "admin_panel": True,
+            "system_analytics": True
+        }
+    }
+    
+    return features.get(tier, features["free"])
