@@ -10,6 +10,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from api.routes import router as api_router
+from api.verification_routes import router as verification_router
 
 # Load environment variables
 load_dotenv()
@@ -47,6 +48,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(verification_router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
