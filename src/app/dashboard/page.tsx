@@ -9,6 +9,7 @@ import {
 import { Sidebar } from '@/components/os/sidebar';
 import { useUserTier } from '@/hooks/useUserTier';
 import UpgradeBanner from '@/components/dashboard/UpgradeBanner';
+import SmartSwitchWizard from '@/components/dashboard/SmartSwitchWizard';
 import { usePnL, useRebates, useLeverage } from '@/hooks/useApi';
 
 export default function DashboardPage() {
@@ -98,6 +99,9 @@ export default function DashboardPage() {
                                 </>
                             )}
                         </div>
+
+                        {/* Sub-Account Verification Wizard */}
+                        <SmartSwitchWizard />
 
                         {/* Free: Locked Features Showcase */}
                         {isFree && (
