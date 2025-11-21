@@ -70,6 +70,12 @@ CREATE INDEX IF NOT EXISTS idx_user_exchange_accounts_pending
   ON public.user_exchange_accounts(verification_status, created_at DESC)
   WHERE verification_status IN ('pending', 'manual_review');
 
+-- Composite index for fraud detection (reciprocal verification check)
+-- Speeds up queries: "Is this UID already verified by another user?"
+CREATE INDEX IF NOT EXISTS idx_user_exchange_accounts_fraud_check
+  ON public.user_exchange_accounts(user_uid, exchange, verification_status)
+  WHERE verification_status = 'verified';
+
 -- RLS Policies (Users view own, admins view all)
 ALTER TABLE public.user_exchange_accounts ENABLE ROW LEVEL SECURITY;
 

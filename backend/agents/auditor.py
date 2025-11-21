@@ -13,10 +13,14 @@ import os
 import hmac
 import hashlib
 import re
-from urllib.parse import urlencode
+import logging
+from urllib.parse import urlencode, quote
 
 from core.rest_client import query_table, get_supabase_rest_client
 from services.vault import decrypt_secret
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 class AuditorAgent:
@@ -323,7 +327,12 @@ class AuditorAgent:
             return result
 
         except Exception as e:
-            print(f"Verification error ({exchange}): {e}")
+            logger.error("Verification error", extra={
+                'exchange': exchange,
+                'user_id': user_id,
+                'error': str(e),
+                'error_type': type(e).__name__
+            })
             return {
                 'verified': False,
                 'status': 'failed',
@@ -616,7 +625,7 @@ class AuditorAgent:
 
         try:
             config = get_supabase_rest_client()
-            url = f"{config['url']}/rest/v1/verification_audit_log?user_id=eq.{user_id}&exchange=eq.{exchange}&action=eq.verify_attempt&created_at=gte.{one_hour_ago}&select=count"
+            url = f"{config['url']}/rest/v1/verification_audit_log?user_id=eq.{quote(str(user_id))}&exchange=eq.{quote(str(exchange))}&action=eq.verify_attempt&created_at=gte.{quote(one_hour_ago)}&select=count"
 
             response = requests.get(url, headers=config['headers'])
             response.raise_for_status()
@@ -627,7 +636,11 @@ class AuditorAgent:
             return attempt_count < 3  # Allow 3 attempts per hour
 
         except Exception as e:
-            print(f"Rate limit check error: {e}")
+            logger.warning("Rate limit check failed, failing open", extra={
+                'user_id': user_id,
+                'exchange': exchange,
+                'error': str(e)
+            })
             return True  # Allow attempt on error (fail open)
 
     def _get_exchange_config(self, exchange: str) -> Optional[Dict]:
@@ -638,7 +651,7 @@ class AuditorAgent:
         """
         try:
             config = get_supabase_rest_client()
-            url = f"{config['url']}/rest/v1/exchange_configs?exchange=eq.{exchange}&is_active=eq.true&select=*&limit=1"
+            url = f"{config['url']}/rest/v1/exchange_configs?exchange=eq.{quote(str(exchange))}&is_active=eq.true&select=*&limit=1"
 
             response = requests.get(url, headers=config['headers'])
             response.raise_for_status()
@@ -647,7 +660,10 @@ class AuditorAgent:
             return data[0] if data else None
 
         except Exception as e:
-            print(f"Error fetching exchange config: {e}")
+            logger.error("Failed to fetch exchange config", extra={
+                'exchange': exchange,
+                'error': str(e)
+            })
             return None
 
     def _detect_fraud(self, user_id: str, exchange: str, user_uid: str, ip_address: str) -> Dict:
@@ -667,7 +683,7 @@ class AuditorAgent:
         # 1. Check reciprocal verification
         try:
             config = get_supabase_rest_client()
-            url = f"{config['url']}/rest/v1/user_exchange_accounts?user_uid=eq.{user_uid}&exchange=eq.{exchange}&user_id=neq.{user_id}&verification_status=eq.verified&select=user_id"
+            url = f"{config['url']}/rest/v1/user_exchange_accounts?user_uid=eq.{quote(str(user_uid))}&exchange=eq.{quote(str(exchange))}&user_id=neq.{quote(str(user_id))}&verification_status=eq.verified&select=user_id"
 
             response = requests.get(url, headers=config['headers'])
             if response.status_code == 200:
@@ -675,13 +691,18 @@ class AuditorAgent:
                 if data:
                     signals.append('reciprocal_verification')  # UID already verified by another user
         except Exception as e:
-            print(f"Fraud detection error (reciprocal): {e}")
+            logger.warning("Fraud detection check failed (reciprocal)", extra={
+                'user_id': user_id,
+                'user_uid': user_uid,
+                'exchange': exchange,
+                'error': str(e)
+            })
 
         # 2. Check IP abuse (>5 different UIDs from same IP today)
         if ip_address:
             try:
                 today_start = datetime.now().replace(hour=0, minute=0, second=0).isoformat()
-                url = f"{config['url']}/rest/v1/verification_audit_log?ip_address=eq.{ip_address}&created_at=gte.{today_start}&select=user_uid"
+                url = f"{config['url']}/rest/v1/verification_audit_log?ip_address=eq.{quote(str(ip_address))}&created_at=gte.{quote(today_start)}&select=user_uid"
 
                 response = requests.get(url, headers=config['headers'])
                 if response.status_code == 200:
@@ -690,12 +711,16 @@ class AuditorAgent:
                     if len(unique_uids) > 5:
                         signals.append('ip_abuse')
             except Exception as e:
-                print(f"Fraud detection error (IP abuse): {e}")
+                logger.warning("Fraud detection check failed (IP abuse)", extra={
+                    'user_id': user_id,
+                    'ip_address': ip_address,
+                    'error': str(e)
+                })
 
         # 3. Check rapid retry pattern (>3 failed attempts in last 10 minutes)
         try:
             ten_min_ago = (datetime.now() - timedelta(minutes=10)).isoformat()
-            url = f"{config['url']}/rest/v1/verification_audit_log?user_id=eq.{user_id}&action=eq.verify_failed&created_at=gte.{ten_min_ago}&select=count"
+            url = f"{config['url']}/rest/v1/verification_audit_log?user_id=eq.{quote(str(user_id))}&action=eq.verify_failed&created_at=gte.{quote(ten_min_ago)}&select=count"
 
             response = requests.get(url, headers=config['headers'])
             if response.status_code == 200:
@@ -703,7 +728,11 @@ class AuditorAgent:
                 if len(data) > 3:
                     signals.append('rapid_retry')
         except Exception as e:
-            print(f"Fraud detection error (rapid retry): {e}")
+            logger.warning("Fraud detection check failed (rapid retry)", extra={
+                'user_id': user_id,
+                'exchange': exchange,
+                'error': str(e)
+            })
 
         # Calculate confidence score (0-1)
         confidence = min(len(signals) * 0.4, 1.0)  # Each signal = 40% confidence

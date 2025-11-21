@@ -11,11 +11,16 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+from urllib.parse import quote
+import logging
 
 from core.auth import get_current_user  # Existing user auth
 from agents.auditor import AuditorAgent
 from core.rest_client import get_supabase_rest_client
 import requests
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -62,7 +67,7 @@ async def verify_subaccount(
     try:
         # Check if already verified
         supabase_config = get_supabase_rest_client()
-        existing_url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts?user_id=eq.{user_id}&exchange=eq.{exchange}&select=*"
+        existing_url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts?user_id=eq.{quote(str(user_id))}&exchange=eq.{quote(str(exchange))}&select=*"
         existing_response = requests.get(existing_url, headers=supabase_config['headers'])
 
         if existing_response.status_code == 200:
@@ -107,8 +112,9 @@ async def verify_subaccount(
         }
 
         # Use upsert (INSERT or UPDATE on conflict)
-        upsert_url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts?on_conflict=user_id,exchange"
-        requests.post(upsert_url, headers={**supabase_config['headers'], 'Prefer': 'resolution=merge-duplicates'}, json=account_payload)
+        upsert_url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts"
+        upsert_headers = {**supabase_config['headers'], 'Prefer': 'resolution=merge-duplicates'}
+        requests.post(upsert_url, headers=upsert_headers, json=account_payload)
 
         # Log verification result
         result_action = 'verify_success' if result['verified'] else 'verify_failed'
@@ -144,7 +150,13 @@ async def verify_subaccount(
         }
 
     except Exception as e:
-        print(f"Verification endpoint error: {e}")
+        logger.error("Verification endpoint error", extra={
+            'user_id': user_id,
+            'exchange': exchange,
+            'user_uid': user_uid,
+            'error': str(e),
+            'error_type': type(e).__name__
+        })
         raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
 
 
@@ -178,9 +190,9 @@ async def get_verification_status(
 
         # Build query
         if exchange:
-            url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts?user_id=eq.{user_id}&exchange=eq.{exchange}&select=*"
+            url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts?user_id=eq.{quote(str(user_id))}&exchange=eq.{quote(str(exchange))}&select=*"
         else:
-            url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts?user_id=eq.{user_id}&select=*"
+            url = f"{supabase_config['url']}/rest/v1/user_exchange_accounts?user_id=eq.{quote(str(user_id))}&select=*"
 
         response = requests.get(url, headers=supabase_config['headers'])
         response.raise_for_status()
@@ -197,5 +209,10 @@ async def get_verification_status(
         }
 
     except Exception as e:
-        print(f"Error fetching verification status: {e}")
+        logger.error("Error fetching verification status", extra={
+            'user_id': user_id,
+            'exchange': exchange,
+            'error': str(e),
+            'error_type': type(e).__name__
+        })
         raise HTTPException(status_code=500, detail=str(e))
