@@ -1,15 +1,16 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { Link, useRouter, usePathname } from '@/i18n/routing';
 import {
     LayoutDashboard, LineChart, Shield, LogOut, Activity,
     Settings, Bot, Search, Users, FileText, CreditCard, BookOpen, Crown, Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserTier, type MenuId } from '@/hooks/useUserTier';
+import { useUpgradeTier } from '@/hooks/useUpgradeTier';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslations } from 'next-intl';
 
 // Menu configuration with tier requirements
 const NAV_ITEMS: Array<{
@@ -21,15 +22,16 @@ const NAV_ITEMS: Array<{
     requiresAdmin?: boolean;
 }> = [
         { id: 'overview', name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-        { id: 'pnl', name: 'PnL Tracker', icon: LineChart, path: '/dashboard' }, // TODO: Create separate page
-        { id: 'wolfpack', name: 'Wolf Pack', icon: Bot, path: '/dashboard', requiresFounders: true },
-        { id: 'audit', name: 'Fee Audit', icon: Search, path: '/dashboard', requiresFounders: true },
-        { id: 'guardian', name: 'Risk Guardian', icon: Shield, path: '/dashboard', requiresFounders: true },
-        { id: 'referrals', name: 'Referrals', icon: Users, path: '/dashboard' }, // Teaser for free
-        { id: 'reports', name: 'Reports', icon: FileText, path: '/dashboard' },
-        { id: 'billing', name: 'Billing', icon: CreditCard, path: '/dashboard', requiresFounders: true },
-        { id: 'resources', name: 'Resources', icon: BookOpen, path: '/dashboard' },
-        { id: 'settings', name: 'Settings', icon: Settings, path: '/dashboard' },
+        { id: 'trade', name: 'Trade', icon: Activity, path: '/trade' },
+        { id: 'pnl', name: 'PnL Tracker', icon: LineChart, path: '/pnl' },
+        { id: 'wolfpack', name: 'Wolf Pack', icon: Bot, path: '/wolfpack', requiresFounders: true },
+        { id: 'audit', name: 'Fee Audit', icon: Search, path: '/audit', requiresFounders: true },
+        { id: 'guardian', name: 'Risk Guardian', icon: Shield, path: '/guardian', requiresFounders: true },
+        { id: 'referrals', name: 'Referrals', icon: Users, path: '/referrals' },
+        { id: 'reports', name: 'Reports', icon: FileText, path: '/reports' },
+        { id: 'billing', name: 'Billing', icon: CreditCard, path: '/billing', requiresFounders: true },
+        { id: 'resources', name: 'Resources', icon: BookOpen, path: '/resources' },
+        { id: 'settings', name: 'Settings', icon: Settings, path: '/settings' },
         { id: 'admin', name: 'Admin Panel', icon: Shield, path: '/admin', requiresAdmin: true },
     ];
 
@@ -38,6 +40,8 @@ export function Sidebar() {
     const router = useRouter();
     const { user } = useAuth();
     const { tier, slot, canViewMenu, isFree, isFounders, loading } = useUserTier();
+    const { upgradeToFounders, isLoading: isUpgrading, error: upgradeError, success: upgradeSuccess } = useUpgradeTier();
+    const t = useTranslations('Sidebar');
 
     // Filter menu items based on tier
     const visibleItems = NAV_ITEMS.filter(item => canViewMenu(item.id));
@@ -47,45 +51,59 @@ export function Sidebar() {
         router.push('/login');
     };
 
+    // Map ID to translation key
+    const getTranslationKey = (id: string) => {
+        if (id === 'overview') return 'dashboard';
+        return id;
+    };
+
     return (
-        <div className="w-[240px] flex flex-col border-r border-white/10 bg-[#0A0A0A] h-full">
+        <aside
+            role="navigation"
+            data-testid="sidebar-navigation"
+            className="w-[260px] flex flex-col h-full glass-panel m-4 rounded-2xl overflow-hidden transition-all duration-300"
+        >
             {/* Logo Area */}
-            <div className="h-16 flex items-center px-6 border-b border-white/10">
-                <div className="h-8 w-8 bg-[#00FF00] rounded-sm flex items-center justify-center mr-3 shadow-[0_0_10px_rgba(0,255,0,0.5)]">
-                    <div className="h-4 w-4 bg-black transform rotate-45" />
+            <div className="h-20 flex items-center px-6 border-b border-white/5 bg-white/[0.02]">
+                <div className="h-10 w-10 bg-gradient-to-br from-[#00FF94] to-[#06B6D4] rounded-lg flex items-center justify-center mr-3 shadow-[0_0_20px_rgba(0,255,148,0.3)]">
+                    <div className="h-5 w-5 bg-black transform rotate-45" />
                 </div>
-                <span className="text-xl font-bold tracking-tighter text-white">
-                    APEX<span className="text-[#00FF00]">OS</span>
+                <span className="text-2xl font-bold tracking-tighter text-white">
+                    APEX<span className="text-gradient-primary">OS</span>
                 </span>
             </div>
 
             {/* Main Navigation */}
-            <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+            <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto custom-scrollbar">
                 {!loading && (
                     <>
-                        <div className="text-xs font-bold text-gray-500 px-3 mb-2 uppercase tracking-wider">
-                            Platform
+                        <div className="text-[10px] font-bold text-gray-500 px-3 mb-3 uppercase tracking-[0.2em]">
+                            {t('platform')}
                         </div>
 
                         {visibleItems.map((item) => {
                             const isActive = pathname === item.path;
-                            const isLocked = (item.requiresFounders && isFree) || (item.requiresAdmin && !isFounders);
 
                             return (
                                 <Link
                                     key={item.path + item.name}
                                     href={item.path}
+                                    data-testid={`nav-${item.id}`}
+                                    data-founders-only={item.requiresFounders ? 'true' : 'false'}
                                     className={cn(
-                                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group relative overflow-hidden",
                                         isActive
-                                            ? "bg-[#00FF00]/10 text-[#00FF00] shadow-[0_0_10px_rgba(0,255,0,0.1)]"
-                                            : "text-gray-400 hover:text-white hover:bg-white/5"
+                                            ? "bg-white/[0.08] text-[#00FF94] shadow-[0_0_20px_rgba(0,255,148,0.1)] border border-white/10"
+                                            : "text-gray-400 hover:text-white hover:bg-white/[0.05] hover:translate-x-1"
                                     )}
                                 >
-                                    <item.icon className={cn("h-4 w-4", isActive ? "text-[#00FF00]" : "text-gray-500 group-hover:text-white")} />
-                                    {item.name}
+                                    {isActive && (
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#00FF94] shadow-[0_0_10px_#00FF94]" />
+                                    )}
+                                    <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-[#00FF94]" : "text-gray-500 group-hover:text-white")} />
+                                    <span className="relative z-10">{t(getTranslationKey(item.id))}</span>
                                     {item.requiresFounders && isFree && (
-                                        <Crown className="h-3 w-3 text-yellow-500 ml-auto" />
+                                        <Crown className="h-3 w-3 text-yellow-500 ml-auto animate-pulse" />
                                     )}
                                 </Link>
                             );
@@ -94,55 +112,85 @@ export function Sidebar() {
                 )}
 
                 {loading && (
-                    <div className="text-center text-gray-500 text-sm py-4">
-                        Loading menu...
+                    <div className="text-center text-gray-500 text-sm py-4 animate-pulse">
+                        {t('loading_menu')}
                     </div>
                 )}
             </div>
 
             {/* Upgrade CTA for Free Users */}
             {isFree && !loading && (
-                <div className="px-3 pb-4">
+                <div className="px-4 pb-4">
                     <button
-                        onClick={() => router.push('/offer')}
-                        className="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg"
+                        onClick={async () => {
+                            if (!user?.id) return;
+                            const result = await upgradeToFounders(user.id);
+                            if (result) {
+                                setTimeout(() => window.location.reload(), 1500);
+                            }
+                        }}
+                        disabled={isUpgrading || upgradeSuccess}
+                        className={cn(
+                            "w-full font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg relative overflow-hidden group",
+                            upgradeSuccess
+                                ? "bg-emerald-500 text-white cursor-default"
+                                : "bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 text-black hover:shadow-[0_0_20px_rgba(234,179,8,0.4)]"
+                        )}
                     >
-                        <Zap size={16} />
-                        <span className="text-sm">Upgrade to Founders</span>
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                        {isUpgrading ? (
+                            <Activity className="h-5 w-5 animate-spin relative z-10" />
+                        ) : upgradeSuccess ? (
+                            <Crown className="h-5 w-5 relative z-10" />
+                        ) : (
+                            <Zap size={18} className="relative z-10 fill-black" />
+                        )}
+                        <span className="text-sm relative z-10">
+                            {isUpgrading ? t('processing') : upgradeSuccess ? t('welcome_founder') : t('upgrade_to_founders')}
+                        </span>
                     </button>
-                    <div className="text-center mt-2 text-xs text-zinc-500">
-                        13/100 spots left • $99
-                    </div>
+                    {upgradeError && (
+                        <div className="text-center mt-2 text-xs text-red-500 font-medium">
+                            {upgradeError}
+                        </div>
+                    )}
+                    {!upgradeSuccess && !upgradeError && (
+                        <div className="text-center mt-3 text-xs text-zinc-500 font-mono">
+                            {t('spots_left')}
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* User Profile & Logout */}
-            <div className="p-4 border-t border-white/10">
-                <div className="flex items-center gap-3 px-3 py-3 rounded-lg bg-white/5 mb-2">
+            <div className="p-4 border-t border-white/5 bg-white/[0.02]">
+                <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 mb-2 border border-white/5">
                     <div className={cn(
-                        "h-8 w-8 rounded-full",
+                        "h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold text-black shadow-lg",
                         isFounders
-                            ? "bg-gradient-to-br from-emerald-500 to-cyan-500"
-                            : "bg-gradient-to-br from-[#00FF00] to-blue-500"
-                    )} />
+                            ? "bg-gradient-to-br from-[#00FF94] to-[#06B6D4]"
+                            : "bg-gradient-to-br from-gray-400 to-gray-600"
+                    )}>
+                        {user?.email?.charAt(0).toUpperCase()}
+                    </div>
                     <div className="flex-1 min-w-0">
                         <div className="text-sm font-bold text-white truncate flex items-center gap-1">
                             {user?.email?.split('@')[0] || 'User'}
-                            {isFounders && <Crown className="h-3 w-3 text-emerald-500" />}
+                            {isFounders && <Crown className="h-3 w-3 text-[#00FF94]" />}
                         </div>
-                        <div className="text-xs text-gray-500 truncate">
+                        <div className="text-[10px] text-gray-400 truncate uppercase tracking-wider">
                             {isFounders ? `Founders #${slot}` : tier === 'admin' ? 'Admin' : 'Free Tier'}
                         </div>
                     </div>
                 </div>
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 w-full group"
                 >
-                    <LogOut className="h-4 w-4" />
-                    Log out
+                    <LogOut className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                    {t('logout')}
                 </button>
             </div>
-        </div>
+        </aside>
     );
 }
