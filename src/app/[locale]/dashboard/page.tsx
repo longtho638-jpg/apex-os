@@ -202,7 +202,7 @@ export default function DashboardPage() {
 
                             {/* Identity Engine / Zen Widget */}
                             <div className="md:col-span-1 row-span-2">
-                                <ApexIdentityEngine currentPrice={87064.05} />
+                                <ApexIdentityEngine />
                             </div>
 
                             {/* Exchange Uplink */}
