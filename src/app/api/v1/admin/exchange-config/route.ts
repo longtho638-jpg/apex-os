@@ -8,7 +8,7 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 // Encryption setup (Fernet-compatible AES-256-CBC)
-const VAULT_KEY = process.env.VAULT_KEY!;
+const VAULT_KEY = process.env.VAULT_KEY_MASTER!;
 
 function encrypt(secret: string): string {
     if (!VAULT_KEY) throw new Error('VAULT_KEY not configured');
