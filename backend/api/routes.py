@@ -610,13 +610,69 @@ class LoginRequest(BaseModel):
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
-# @router.post("/auth/login")
-# async def login(request: LoginRequest):
-#     ... (commented out)
-
-@router.get("/test")
-async def test():
-    return {"message": "Router is working"}
+@router.post("/auth/login")
+async def login(request: LoginRequest):
+    """
+    Login user with secure password verification
+    Returns JWT token on success
+    """
+    try:
+        from supabase import create_client, Client
+        import os
+        from core.rest_client import get_supabase_rest_client
+        from core.security import create_token
+        import requests
+        
+        url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+        key = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+        
+        if not url or not key:
+            raise HTTPException(status_code=500, detail="Missing Supabase credentials")
+            
+        supabase: Client = create_client(url, key)
+        
+        try:
+            # SECURE: Verify credentials with Supabase Auth
+            auth_response = supabase.auth.sign_in_with_password({
+                "email": request.email,
+                "password": request.password
+            })
+            
+            if not auth_response.user or not auth_response.session:
+                return {"success": False, "message": "Invalid email or password"}
+            
+            user = auth_response.user
+            
+            # Create JWT token for middleware
+            token = create_token(user.id, user.email)
+            
+            # Fetch user details from users table
+            user_details = {}
+            try:
+                config = get_supabase_rest_client()
+                detail_url = f"{config['url']}/rest/v1/users?id=eq.{user.id}&select=*"
+                detail_response = requests.get(detail_url, headers=config['headers'])
+                if detail_response.status_code == 200 and detail_response.json():
+                    user_details = detail_response.json()[0]
+            except Exception:
+                pass
+            
+            return {
+                "success": True,
+                "message": "Login successful",
+                "token": token,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": user_details.get('full_name', 'User')
+                }
+            }
+            
+        except Exception:
+            return {"success": False, "message": "Invalid email or password"}
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # @router.get("/auth/me")
 # async def get_me(user: dict = Depends(get_current_user)):
