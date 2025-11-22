@@ -148,6 +148,25 @@
         "title": "Cài Đặt",
         "subtitle": "Thiết Lập Tài Khoản"
     },
+    "Resources": {
+        "title": "Tài Nguyên",
+        "subtitle": "Trung Tâm Kiến Thức",
+        "searchPlaceholder": "Tìm kiếm tài nguyên...",
+        "categories": {
+            "gettingStarted": "Bắt Đầu",
+            "tradingGuides": "Hướng Dẫn Giao Dịch",
+            "apiDocs": "Tài Liệu API",
+            "community": "Cộng Đồng"
+        },
+        "faq": {
+            "title": "Câu Hỏi Thường Gặp"
+        },
+        "support": {
+            "title": "Cần thêm trợ giúp?",
+            "subtitle": "Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng 24/7.",
+            "button": "Liên Hệ Hỗ Trợ"
+        }
+    },
     "Common": {
         "loading": "Đang tải..."
     }
