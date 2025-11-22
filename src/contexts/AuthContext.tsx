@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             const data = await response.json();
+            console.log('Login response data:', data);
 
             if (data.success) {
                 setToken(data.token);
