@@ -610,85 +610,13 @@ class LoginRequest(BaseModel):
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/auth/login")
-async def login(request: LoginRequest):
-    """
-    Login user
-    Returns JWT token on success
-    """
-    try:
-        print(f"Login attempt for: {request.email}")
-        from supabase import create_client, Client
-        import os
-        from core.rest_client import get_supabase_rest_client
-        from core.security import create_token
-        import requests
-        
-        url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
-        key = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-        
-        print(f"Supabase URL present: {bool(url)}")
-        print(f"Supabase Key present: {bool(key)}")
-        
-        if not url or not key:
-            print("Missing Supabase credentials")
-            raise HTTPException(status_code=500, detail="Missing Supabase credentials")
-            
-        supabase: Client = create_client(url, key)
-        
-        try:
-            # Verify credentials with Supabase Auth
-            print("Calling supabase.auth.sign_in_with_password...")
-            auth_response = supabase.auth.sign_in_with_password({
-                "email": request.email,
-                "password": request.password
-            })
-            
-            print(f"Auth Response User: {auth_response.user}")
-            print(f"Auth Response Session: {auth_response.session}")
-            
-            if not auth_response.user or not auth_response.session:
-                print("Auth failed: No user or session returned")
-                return {"success": False, "message": "Invalid email or password"}
-            
-            user = auth_response.user
-            print(f"Auth successful for user: {user.id}")
-            
-            # Create our own JWT token (or use Supabase's access_token)
-            # Using our own create_token to ensure consistent signing key with middleware
-            token = create_token(user.id, user.email)
-            print("Token created successfully")
-            
-            # Fetch user details from users table
-            user_details = {}
-            try:
-                config = get_supabase_rest_client()
-                detail_url = f"{config['url']}/rest/v1/users?id=eq.{user.id}&select=*"
-                detail_response = requests.get(detail_url, headers=config['headers'])
-                if detail_response.status_code == 200 and detail_response.json():
-                    user_details = detail_response.json()[0]
-            except Exception as detail_error:
-                print(f"Error fetching user details: {detail_error}")
-                pass
-            
-            return {
-                "success": True,
-                "message": "Login successful",
-                "token": token,
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "full_name": user_details.get('full_name', 'User')
-                }
-            }
-            
-        except Exception as auth_error:
-            print(f"Auth error exception: {auth_error}")
-            return {"success": False, "message": "Invalid email or password"}
-            
-    except Exception as e:
-        print(f"Login endpoint error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# @router.post("/auth/login")
+# async def login(request: LoginRequest):
+#     ... (commented out)
+
+@router.get("/test")
+async def test():
+    return {"message": "Router is working"}
 
 # @router.get("/auth/me")
 # async def get_me(user: dict = Depends(get_current_user)):
