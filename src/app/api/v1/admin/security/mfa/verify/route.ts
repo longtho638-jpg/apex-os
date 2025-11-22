@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
 
         // 3. Enable MFA in DB
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; // Ideally use Service Role for admin updates if RLS blocks
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
         // But we set RLS to allow user to update own profile, so ANON key with user context is fine if we use supabase.auth.setSession?
         // Actually, we are in API route, we can use Service Role Key to bypass RLS for admin actions if needed, 
         // OR use the user's JWT to act as them.
         // Let's use Service Role for reliability in this critical step, ensuring we write to admin_users.
 
-        const supabaseAdmin = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
         const { error } = await supabaseAdmin
             .from('admin_users')

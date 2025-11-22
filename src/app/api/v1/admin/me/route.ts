@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
 
         // 2. Fetch Admin Profile
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+        // Use Service Role Key to bypass RLS since we verified the JWT manually
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         const { data, error } = await supabase

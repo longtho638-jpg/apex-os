@@ -7,6 +7,10 @@ const JWT_SECRET = new TextEncoder().encode(
     process.env.SUPABASE_JWT_SECRET || 'your-secret-key-change-in-production'
 );
 
+// Use Service Role Key for DB operations to bypass RLS
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
 export async function POST(request: NextRequest) {
     try {
         // 1. Verify Auth
