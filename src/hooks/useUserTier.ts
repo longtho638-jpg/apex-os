@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export type UserTier = 'free' | 'founders' | 'admin';
-export type MenuId = 'overview' | 'pnl' | 'wolfpack' | 'audit' | 'guardian' | 'referrals' | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
+export type MenuId = 'overview' | 'trade' | 'pnl' | 'wolfpack' | 'audit' | 'guardian' | 'referrals' | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
 
 interface TierInfo {
     tier: UserTier;
@@ -15,7 +15,7 @@ interface TierInfo {
 }
 
 export function useUserTier() {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, token } = useAuth();
     const [tierInfo, setTierInfo] = useState<TierInfo>({
         tier: 'free',
         slot: null,
@@ -32,7 +32,7 @@ export function useUserTier() {
         // Fetch tier from backend
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/tier`, {
             headers: {
-                'Authorization': `Bearer ${user.token}`
+                'Authorization': `Bearer ${token}`
             }
         })
             .then(res => res.json())
@@ -53,6 +53,7 @@ export function useUserTier() {
     const canViewMenu = (menuId: MenuId): boolean => {
         const menuAccess: Record<MenuId, UserTier[]> = {
             overview: ['free', 'founders', 'admin'],
+            trade: ['free', 'founders', 'admin'],
             pnl: ['free', 'founders', 'admin'],
             wolfpack: ['founders', 'admin'], // Hidden from free
             audit: ['founders', 'admin'], // Founders only
