@@ -94,7 +94,7 @@ def get_current_user(token_payload: dict = Depends(verify_token)) -> dict:
     }
 
 
-def optional_auth(credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False)) -> Optional[dict]:
+def optional_auth(credentials: Optional[HTTPAuthorizationCredentials] = Depends(lambda: security(auto_error=False))) -> Optional[dict]:
     """
     Optional authentication - doesn't raise error if no token
     Use for endpoints that work with or without auth
@@ -113,6 +113,10 @@ def optional_auth(credentials: Optional[HTTPAuthorizationCredentials] = Security
         return None
     
     try:
-        return get_current_user(credentials)
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return {
+            'user_id': payload['sub'],
+            'email': payload['email']
+        }
     except:
         return None

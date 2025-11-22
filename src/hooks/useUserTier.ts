@@ -24,7 +24,7 @@ export function useUserTier() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!isAuthenticated || !user) {
+        if (!isAuthenticated || !user || !token) {
             setLoading(false);
             return;
         }
@@ -48,7 +48,7 @@ export function useUserTier() {
                 console.error('Failed to fetch user tier:', err);
                 setLoading(false);
             });
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user, token]);
 
     const canViewMenu = (menuId: MenuId): boolean => {
         const menuAccess: Record<MenuId, UserTier[]> = {
