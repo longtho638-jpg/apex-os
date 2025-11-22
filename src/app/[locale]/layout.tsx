@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { ClientProviders } from '@/components/ClientProviders';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 
 export default async function LocaleLayout({
@@ -26,9 +26,9 @@ export default async function LocaleLayout({
 
     return (
         <NextIntlClientProvider messages={messages}>
-            <ClientProviders>
+            <AuthProvider>
                 {children}
-            </ClientProviders>
+            </AuthProvider>
         </NextIntlClientProvider>
     );
 }
