@@ -3,12 +3,10 @@
 import React from 'react';
 import { Sidebar } from '@/components/os/sidebar';
 import { Shield, AlertTriangle, RefreshCw, TrendingDown } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useRiskMetrics } from '@/hooks/useRiskMetrics';
 import { cn } from '@/lib/utils';
 
 export default function RiskPage() {
-    const t = useTranslations('Risk');
     const { liquidationData, leverageData, fundingData, loading, error, refetch } = useRiskMetrics();
 
     // Calculate risk level color

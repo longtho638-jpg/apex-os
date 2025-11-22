@@ -3,13 +3,11 @@
 import React, { useState } from 'react';
 import { Sidebar } from '@/components/os/sidebar';
 import { Coins, RefreshCw, Download, Calculator } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useRebates } from '@/hooks/useRebates';
 import { calculateEstimatedRebate } from '@/lib/api/rebates';
 import { cn } from '@/lib/utils';
 
 export default function RebatesPage() {
-    const t = useTranslations('Rebates');
     const { data, loading, error, refetch } = useRebates(60000); // Poll every minute
     const [calcVolume, setCalcVolume] = useState<string>('');
     const [currentPage, setCurrentPage] = useState(1);
