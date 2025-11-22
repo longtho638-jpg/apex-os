@@ -67,7 +67,10 @@ export async function middleware(request: NextRequest) {
     // No token = not authenticated
     if (!token) {
       console.log('Middleware: No token found in request');
-      return new NextResponse('Not Found', { status: 404 });
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('error', 'middleware_no_token');
+      return NextResponse.redirect(url);
     }
 
     try {
@@ -77,15 +80,21 @@ export async function middleware(request: NextRequest) {
 
       if (!email) {
         // Token missing email claim
-        return new NextResponse('Not Found', { status: 404 });
+        const url = request.nextUrl.clone();
+        url.pathname = '/login';
+        url.searchParams.set('error', 'middleware_no_email');
+        return NextResponse.redirect(url);
       }
 
       // Timing-safe admin check
       const isAdmin = timingSafeCompare(email, ADMIN_EMAIL);
 
       if (!isAdmin) {
-        // Not admin - return 404 (hide admin route existence)
-        return new NextResponse('Not Found', { status: 404 });
+        // Not admin
+        const url = request.nextUrl.clone();
+        url.pathname = '/login';
+        url.searchParams.set('error', 'middleware_not_admin');
+        return NextResponse.redirect(url);
       }
 
       // Valid admin - attach email to request headers
@@ -98,9 +107,12 @@ export async function middleware(request: NextRequest) {
       return response;
 
     } catch (error) {
-      // Token invalid/expired - return 404
+      // Token invalid/expired
       console.error('Middleware: JWT verification failed:', error);
-      return new NextResponse('Not Found', { status: 404 });
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('error', 'middleware_invalid_token');
+      return NextResponse.redirect(url);
     }
   }
 
