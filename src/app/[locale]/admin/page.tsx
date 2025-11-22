@@ -7,6 +7,7 @@ import { useUserTier } from '@/hooks/useUserTier';
 import { useRouter } from '@/i18n/routing';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from 'next-intl';
+import { ExchangeConfigPanel } from '@/components/admin/ExchangeConfigPanel';
 
 export default function AdminPage() {
     const { tier, loading: tierLoading } = useUserTier();
@@ -35,10 +36,12 @@ export default function AdminPage() {
 
     const fetchAdminProfile = async () => {
         try {
+            console.log('Fetching admin profile...');
             const res = await fetch('/api/v1/admin/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
+            console.log('Admin profile response:', data);
             if (data.success) {
                 setAdminProfile(data.admin);
             }
@@ -171,25 +174,8 @@ export default function AdminPage() {
                             </div>
                         </div>
 
-                        {/* User Management Placeholder */}
-                        <div className="glass-card rounded-xl p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold">User Management</h2>
-                                <div className="relative">
-                                    <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search users..."
-                                        className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="text-center py-12 text-gray-500 bg-white/5 rounded-lg border border-white/5 border-dashed">
-                                <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                <p>User list integration coming soon</p>
-                            </div>
-                        </div>
+                        {/* Exchange API Configuration */}
+                        <ExchangeConfigPanel />
 
                     </div>
                 </div>
