@@ -121,14 +121,14 @@ export default function RebatesPage() {
                                         <Coins className="h-4 w-4 text-[#00FF94]" />
                                     </div>
                                     <div className="text-3xl font-bold text-[#00FF94]">
-                                        ${data.total_rebates.toFixed(2)}
+                                        ${(data.total_rebates || 0).toFixed(2)}
                                     </div>
                                 </div>
 
                                 <div className="glass-card rounded-xl p-6">
                                     <span className="text-sm text-gray-400 block mb-2">Monthly Average</span>
                                     <div className="text-3xl font-bold text-white">
-                                        ${data.monthly_average.toFixed(2)}
+                                        ${(data.monthly_average || 0).toFixed(2)}
                                     </div>
                                 </div>
                             </div>
@@ -181,7 +181,7 @@ export default function RebatesPage() {
                                                         <tr key={idx} className="border-b border-white/5 hover:bg-white/5">
                                                             <td className="py-3 text-gray-300">{rebate.date}</td>
                                                             <td className="py-3 text-right font-bold text-[#00FF94]">
-                                                                ${rebate.amount.toFixed(2)}
+                                                                ${(rebate.amount || 0).toFixed(2)}
                                                             </td>
                                                             <td className="py-3 text-right text-gray-300">{rebate.trades_count}</td>
                                                             <td className="py-3 text-gray-300">{rebate.exchange}</td>
