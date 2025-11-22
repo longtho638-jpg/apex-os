@@ -52,10 +52,11 @@ function extractToken(request: NextRequest): string | null {
 }
 
 import createMiddleware from 'next-intl/middleware';
+import { routing } from '@/i18n/routing';
 
 const intlMiddleware = createMiddleware({
-  locales: ['en', 'vi'],
-  defaultLocale: 'en'
+  locales: routing.locales,
+  defaultLocale: routing.defaultLocale
 });
 
 export async function middleware(request: NextRequest) {

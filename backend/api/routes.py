@@ -802,3 +802,71 @@ def get_tier_features(tier: str) -> dict:
     }
     
     return features.get(tier, features["free"])
+# ==================== REFERRAL & REBATE ENDPOINTS ====================
+
+class VerifyReferralRequest(BaseModel):
+    user_id: str = "demo-user" # Optional if authenticated, but good for public check
+    exchange: str
+    user_uid: str
+    ip_address: Optional[str] = None
+
+@router.post("/referral/verify")
+async def verify_referral(request: VerifyReferralRequest):
+    """
+    Verify if a user's exchange UID is correctly linked to Apex's referral program.
+    Used for the "Auto User Transfer" feature on the landing page.
+    """
+    try:
+        # Call Auditor Agent's verification logic
+        result = auditor.verify_subaccount_via_api(
+            user_id=request.user_id,
+            exchange=request.exchange,
+            user_uid=request.user_uid,
+            ip_address=request.ip_address
+        )
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class AdminAutoRefRequest(BaseModel):
+    exchange: str
+    api_key: str
+    api_secret: str
+    target_user_id: Optional[str] = None # If known, otherwise just resolve UID
+
+@router.post("/admin/auto-ref-update")
+async def admin_auto_ref_update(request: AdminAutoRefRequest):
+    """
+    Admin Tool: Automatically resolve User UID from API Key and update referral status.
+    """
+    try:
+        # 1. Resolve UID from API Key
+        resolution = auditor.resolve_uid_from_api_key(
+            request.exchange, 
+            request.api_key, 
+            request.api_secret
+        )
+        
+        if not resolution['success']:
+            return resolution
+            
+        uid = resolution['uid']
+        
+        # 2. If successful, we can verify this UID in the referral system
+        # (Simulating the "Auto Update" part)
+        verification = auditor.verify_subaccount_via_api(
+            user_id=request.target_user_id or "admin-action",
+            exchange=request.exchange,
+            user_uid=uid
+        )
+        
+        return {
+            "resolution": resolution,
+            "verification": verification,
+            "message": f"Resolved UID {uid} and attempted verification."
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

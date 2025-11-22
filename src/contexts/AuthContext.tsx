@@ -41,7 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async (email: string, password: string): Promise<boolean> => {
         try {
-            const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+            const response = await fetch(`${baseUrl}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -66,7 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signup = async (email: string, password: string, fullName?: string): Promise<boolean> => {
         try {
-            const response = await fetch('http://localhost:8000/api/v1/auth/signup', {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+            const response = await fetch(`${baseUrl}/auth/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, full_name: fullName })
