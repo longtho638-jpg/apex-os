@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (!authData.user || !authData.session) {
+        if (!authData.user) {
             return NextResponse.json(
                 { success: false, message: 'Signup failed' },
                 { status: 500 }
@@ -92,7 +92,21 @@ export async function POST(request: NextRequest) {
             // Continue anyway - user is created in Auth
         }
 
-        // Generate JWT token for immediate login
+        // If email confirmation is enabled, session will be null
+        if (!authData.session) {
+            return NextResponse.json({
+                success: true,
+                message: 'Account created. Please check your email to confirm.',
+                require_confirmation: true,
+                user: {
+                    id: authData.user.id,
+                    email: authData.user.email,
+                    full_name: full_name || authData.user.email?.split('@')[0] || 'User',
+                },
+            });
+        }
+
+        // Generate JWT token for immediate login (only if session exists)
         const token = await new SignJWT({
             sub: authData.user.id,
             email: authData.user.email,

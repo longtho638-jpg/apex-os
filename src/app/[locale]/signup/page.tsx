@@ -51,12 +51,17 @@ export default function SignupPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || 'Signup failed');
+                throw new Error(data.message || 'Signup failed');
             }
 
             setSuccess(true);
 
-            // Redirect to login after short delay
+            if (data.require_confirmation) {
+                // Stay on success screen with email check message
+                return;
+            }
+
+            // Redirect to login after short delay if no confirmation needed
             setTimeout(() => {
                 router.push('/login?message=account_created');
             }, 2000);
@@ -74,7 +79,15 @@ export default function SignupPage() {
                         <ShieldCheck className="h-8 w-8" />
                     </div>
                     <h2 className="text-2xl font-bold mb-2">{t('success')}</h2>
-                    <p className="text-gray-400">Redirecting to login...</p>
+                    <p className="text-gray-400 mt-2">
+                        Please check your email to confirm your account before logging in.
+                    </p>
+                    <button
+                        onClick={() => router.push('/login')}
+                        className="mt-6 px-6 py-2 bg-[#00FF94] text-black font-bold rounded-lg hover:bg-[#00CC76] transition-colors"
+                    >
+                        Go to Login
+                    </button>
                 </div>
             </div>
         );
