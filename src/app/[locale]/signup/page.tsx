@@ -2,20 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { Terminal, ChevronRight, Lock, ShieldCheck, Globe } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Terminal, ChevronRight, Lock, ShieldCheck, Globe, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-export default function LoginPage() {
+export default function SignupPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionId] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
     const router = useRouter();
-    const { login } = useAuth();
-    const t = useTranslations('Login');
+    const t = useTranslations('Signup');
 
     // Generate session ID on client-side only
     useEffect(() => {
@@ -24,19 +25,60 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
+        if (password.length < 8) {
+            setError(t('error_length'));
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setError(t('error_match'));
+            return;
+        }
+
         setIsLoading(true);
 
-        const success = await login(email, password);
+        try {
+            const response = await fetch('/api/v1/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
 
-        if (success) {
-            // Navigate to dashboard after successful login
-            router.push('/dashboard');
-        } else {
-            // Handle login failure
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Signup failed');
+            }
+
+            setSuccess(true);
+
+            // Redirect to login after short delay
+            setTimeout(() => {
+                router.push('/login?message=account_created');
+            }, 2000);
+        } catch (err: any) {
+            setError(err.message);
             setIsLoading(false);
-            alert(t('error'));
         }
     };
+
+    if (success) {
+        return (
+            <div className="min-h-screen w-full bg-[#030303] text-white font-sans flex items-center justify-center p-4">
+                <div className="glass-panel rounded-2xl p-8 md:p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 max-w-md w-full text-center">
+                    <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-500/20 text-green-500 mb-6">
+                        <ShieldCheck className="h-8 w-8" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">{t('success')}</h2>
+                    <p className="text-gray-400">Redirecting to login...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen w-full bg-[#030303] text-white font-sans flex items-center justify-center p-4 overflow-hidden relative selection:bg-[#00FF94]/20">
@@ -59,7 +101,7 @@ export default function LoginPage() {
                     {/* Header */}
                     <div className="text-center mb-10">
                         <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-[#00FF94]/20 to-[#06B6D4]/20 border border-[#00FF94]/30 mb-6 shadow-[0_0_20px_rgba(0,255,148,0.2)]">
-                            <Terminal className="h-8 w-8 text-[#00FF94]" />
+                            <UserPlus className="h-8 w-8 text-[#00FF94]" />
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight mb-2">
                             APEX<span className="text-[#00FF94]">OS</span>
@@ -67,8 +109,14 @@ export default function LoginPage() {
                         <p className="text-gray-400 text-sm">{t('subtitle')}</p>
                     </div>
 
-                    {/* Login Form */}
+                    {/* Signup Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm text-center">
+                                {error}
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('email_placeholder')}</label>
                             <div className="relative group">
@@ -100,6 +148,25 @@ export default function LoginPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#8B5CF6]/50 focus:bg-black/60 transition-all"
                                     placeholder="••••••••"
+                                    minLength={8}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('confirm_password_placeholder')}</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-500 group-focus-within:text-[#8B5CF6] transition-colors" />
+                                </div>
+                                <input
+                                    type="password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#8B5CF6]/50 focus:bg-black/60 transition-all"
+                                    placeholder="••••••••"
+                                    minLength={8}
                                 />
                             </div>
                         </div>
@@ -131,21 +198,15 @@ export default function LoginPage() {
                         </div>
 
                         <div className="text-center text-xs">
-                            <span className="text-gray-500">{t('no_account')} </span>
+                            <span className="text-gray-500">{t('has_account')} </span>
                             <button
-                                onClick={() => router.push('/signup')}
+                                onClick={() => router.push('/login')}
                                 className="text-[#00FF94] hover:text-[#00CC76] font-bold transition-colors"
                             >
-                                {t('signup_link')}
+                                {t('login_link')}
                             </button>
                         </div>
                     </div>
-                </div>
-
-                <div className="mt-6 text-center">
-                    <p className="text-xs text-gray-600">
-                        By accessing ApexOS, you agree to our <span className="text-gray-400 hover:text-white cursor-pointer transition-colors">Terms of Service</span>
-                    </p>
                 </div>
             </motion.div>
         </div>

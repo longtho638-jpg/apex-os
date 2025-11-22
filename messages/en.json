@@ -6,7 +6,23 @@
         "password_placeholder": "Enter your password",
         "submit": "Sign In",
         "loading": "Authenticating...",
-        "error": "Invalid credentials"
+        "error": "Invalid credentials",
+        "no_account": "Don't have an account?",
+        "signup_link": "Sign up"
+    },
+    "Signup": {
+        "title": "Create Account",
+        "subtitle": "Join ApexOS to start trading",
+        "email_placeholder": "Email Address",
+        "password_placeholder": "Password (min 8 chars)",
+        "confirm_password_placeholder": "Confirm Password",
+        "submit": "Create Account",
+        "loading": "Creating Account...",
+        "success": "Account created! Redirecting...",
+        "error_match": "Passwords do not match",
+        "error_length": "Password must be at least 8 characters",
+        "has_account": "Already have an account?",
+        "login_link": "Sign In"
     },
     "Dashboard": {
         "title": "Dashboard",

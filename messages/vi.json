@@ -1,12 +1,28 @@
 {
     "Login": {
         "title": "Chào mừng trở lại",
-        "subtitle": "Nhập thông tin đăng nhập để truy cập hệ thống",
-        "email_placeholder": "ten@vidu.com",
+        "subtitle": "Nhập thông tin xác thực để truy cập hệ thống",
+        "email_placeholder": "name@example.com",
         "password_placeholder": "Nhập mật khẩu của bạn",
-        "submit": "Đăng Nhập",
+        "submit": "Đăng nhập",
         "loading": "Đang xác thực...",
-        "error": "Thông tin đăng nhập không hợp lệ"
+        "error": "Thông tin đăng nhập không hợp lệ",
+        "no_account": "Chưa có tài khoản?",
+        "signup_link": "Đăng ký"
+    },
+    "Signup": {
+        "title": "Tạo tài khoản",
+        "subtitle": "Tham gia ApexOS để bắt đầu giao dịch",
+        "email_placeholder": "Địa chỉ Email",
+        "password_placeholder": "Mật khẩu (tối thiểu 8 ký tự)",
+        "confirm_password_placeholder": "Xác nhận mật khẩu",
+        "submit": "Tạo tài khoản",
+        "loading": "Đang tạo tài khoản...",
+        "success": "Tạo tài khoản thành công! Đang chuyển hướng...",
+        "error_match": "Mật khẩu không khớp",
+        "error_length": "Mật khẩu phải có ít nhất 8 ký tự",
+        "has_account": "Đã có tài khoản?",
+        "login_link": "Đăng nhập"
     },
     "Dashboard": {
         "title": "Bảng Điều Khiển",
