@@ -9,25 +9,25 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from api.routes import router as api_router
-from api.verification_routes import router as verification_router
-from api.phase2_routes import router as phase2_router
-from api.settings_routes import router as settings_router
+# from api.routes import router as api_router
+# from api.verification_routes import router as verification_router
+# from api.phase2_routes import router as phase2_router
+# from api.settings_routes import router as settings_router
 
 # Load environment variables
 load_dotenv()
 
 # Initialize Sentry with explicit integrations and disable defaults to avoid conflicts
-sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),
-    traces_sample_rate=0.1,
-    environment=os.getenv("ENVIRONMENT", "development"),
-    default_integrations=False,
-    integrations=[
-        StarletteIntegration(),
-        FastApiIntegration(),
-    ],
-)
+# sentry_sdk.init(
+#     dsn=os.getenv("SENTRY_DSN"),
+#     traces_sample_rate=0.1,
+#     environment=os.getenv("ENVIRONMENT", "development"),
+#     default_integrations=False,
+#     integrations=[
+#         StarletteIntegration(),
+#         FastApiIntegration(),
+#     ],
+# )
 
 # Initialize Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -49,10 +49,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api_router, prefix="/api/v1")
-app.include_router(verification_router, prefix="/api/v1")
-app.include_router(phase2_router, prefix="/api/v1")
-app.include_router(settings_router)
+# app.include_router(api_router, prefix="/api/v1")
+# app.include_router(verification_router, prefix="/api/v1")
+# app.include_router(phase2_router, prefix="/api/v1")
+# app.include_router(settings_router)
 
 @app.get("/")
 async def root():
