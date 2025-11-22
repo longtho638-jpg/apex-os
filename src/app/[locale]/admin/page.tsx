@@ -19,12 +19,33 @@ export default function AdminPage() {
         totalRevenue: 0,
         systemHealth: 'Healthy'
     });
+    const [adminProfile, setAdminProfile] = useState<any>(null);
 
     useEffect(() => {
         if (!tierLoading && tier !== 'admin') {
             router.push('/dashboard');
         }
     }, [tier, tierLoading, router]);
+
+    useEffect(() => {
+        if (token && tier === 'admin') {
+            fetchAdminProfile();
+        }
+    }, [token, tier]);
+
+    const fetchAdminProfile = async () => {
+        try {
+            const res = await fetch('/api/v1/admin/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setAdminProfile(data.admin);
+            }
+        } catch (err) {
+            console.error('Failed to fetch admin profile', err);
+        }
+    };
 
     if (tierLoading || tier !== 'admin') {
         return (
@@ -62,6 +83,27 @@ export default function AdminPage() {
                                 <span className="text-sm font-bold">{t('systemOperational')}</span>
                             </div>
                         </div>
+
+                        {/* Security Alert - MFA */}
+                        {adminProfile && !adminProfile.mfa_enabled && (
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 flex items-center justify-between animate-pulse">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 bg-red-500/20 rounded-full flex items-center justify-center text-red-500">
+                                        <Shield className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white">Security Risk Detected</h3>
+                                        <p className="text-red-200 text-sm">Multi-Factor Authentication (MFA) is disabled. Secure your admin account now.</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => router.push('/admin/security/mfa/setup')}
+                                    className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-colors"
+                                >
+                                    Enable MFA
+                                </button>
+                            </div>
+                        )}
 
                         {/* Stats Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
