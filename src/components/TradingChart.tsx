@@ -49,14 +49,14 @@ export default function TradingChart() {
             },
         });
 
-        // 2. Create Candlestick Series  
-        const candlestickSeries = chart.addSeries('Candlestick', {
+        // 2. Create Candlestick Series
+        const candlestickSeries = chart.addCandlestickSeries({
             upColor: '#00FF94',
             downColor: '#EF4444',
             borderVisible: false,
             wickUpColor: '#00FF94',
             wickDownColor: '#EF4444',
-        }) as ISeriesApi<'Candlestick'>;
+        });
 
         // 3. Generate Initial Data (Mock History)
         const initialData = generateInitialData(100);
