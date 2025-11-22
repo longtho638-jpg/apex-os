@@ -144,6 +144,10 @@
         "title": "Thanh Toán",
         "subtitle": "Quản Lý Đăng Ký"
     },
+    "Settings": {
+        "title": "Cài Đặt",
+        "subtitle": "Thiết Lập Tài Khoản"
+    },
     "Common": {
         "loading": "Đang tải..."
     }

@@ -144,6 +144,10 @@
         "title": "Payment & Billing",
         "subtitle": "Subscription Management"
     },
+    "Settings": {
+        "title": "Settings",
+        "subtitle": "Account Settings"
+    },
     "Common": {
         "loading": "Loading..."
     }
