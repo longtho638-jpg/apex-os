@@ -32,3 +32,44 @@ export async function fetchSystemStatus() {
         return { market: "OFFLINE", connection: "ERROR", agents_active: 0 };
     }
 }
+
+export async function fetchMarketConditions(symbol: string) {
+    try {
+        // Mock data for now if backend endpoint doesn't exist
+        return {
+            symbol,
+            price: 45000 + Math.random() * 100,
+            spread: 0.5,
+            spread_percent: "0.01%",
+            volatility_percent: "1.2%"
+        };
+    } catch (error) {
+        console.error("fetchMarketConditions error", error);
+        return null;
+    }
+}
+
+export async function fetchTradeHistory(userId: string, symbol: string) {
+    try {
+        // Mock data
+        return {
+            trades: [
+                { price: 45100, quantity: 0.5, timestamp: Date.now() - 10000, side: 'buy' },
+                { price: 45150, quantity: 0.2, timestamp: Date.now() - 50000, side: 'sell' }
+            ]
+        };
+    } catch (error) {
+        console.error("fetchTradeHistory error", error);
+        return { trades: [] };
+    }
+}
+
+export async function triggerSync(userId: string, exchange: string, key: string, secret: string) {
+    try {
+        // Mock sync
+        return { success: true };
+    } catch (error) {
+        console.error("triggerSync error", error);
+        throw error;
+    }
+}
