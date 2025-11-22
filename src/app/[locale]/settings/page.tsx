@@ -73,7 +73,7 @@ export default function SettingsPage() {
         }
     };
 
-    const handleTogglePref = async (key: keyof typeof preferences) => {
+    const handleTogglePref = async (key: 'email_notifications' | 'push_notifications') => {
         if (!preferences) return;
         try {
             await updatePrefs({ [key]: !preferences[key] });

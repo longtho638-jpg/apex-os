@@ -130,3 +130,6 @@ export function put<T>(
 export function del<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     return apiRequest<T>(endpoint, { ...options, method: 'DELETE' });
 }
+
+// Export apiClient as alias for apiRequest for backwards compatibility
+export { apiRequest as apiClient };
