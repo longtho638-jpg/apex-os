@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchRebates, RebateData } from '@/lib/api/rebates';
 
@@ -20,7 +20,7 @@ export function useRebates(pollingInterval: number = 60000): UseRebatesResult {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!user || !token) {
             setLoading(false);
             return;
@@ -36,7 +36,7 @@ export function useRebates(pollingInterval: number = 60000): UseRebatesResult {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, token]);
 
     useEffect(() => {
         fetchData();
@@ -46,7 +46,7 @@ export function useRebates(pollingInterval: number = 60000): UseRebatesResult {
             const interval = setInterval(fetchData, pollingInterval);
             return () => clearInterval(interval);
         }
-    }, [user, token, pollingInterval]);
+    }, [fetchData, pollingInterval]);
 
     return { data, loading, error, refetch: fetchData };
 }

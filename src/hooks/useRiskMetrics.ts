@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
     fetchLiquidationRisk,
@@ -31,7 +31,7 @@ export function useRiskMetrics(): UseRiskMetricsResult {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         if (!user || !token) {
             setLoading(false);
             return;
@@ -56,7 +56,7 @@ export function useRiskMetrics(): UseRiskMetricsResult {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, token]);
 
     useEffect(() => {
         fetchData();
@@ -64,7 +64,7 @@ export function useRiskMetrics(): UseRiskMetricsResult {
         // Poll for updates every 30 seconds
         const interval = setInterval(fetchData, 30000);
         return () => clearInterval(interval);
-    }, [user, token]);
+    }, [fetchData]);
 
     return { liquidationData, leverageData, fundingData, loading, error, refetch: fetchData };
 }
