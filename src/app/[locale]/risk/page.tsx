@@ -132,8 +132,8 @@ export default function RiskPage() {
                                         <div>
                                             <div className="flex justify-between text-sm mb-1">
                                                 <span className="text-gray-400">Liquidation Distance</span>
-                                                <span className={getRiskColor(liquidationData.distance_percent)}>
-                                                    {liquidationData.distance_percent.toFixed(2)}%
+                                                <span className={getRiskColor(liquidationData.distance_percent || 0)}>
+                                                    {(liquidationData.distance_percent || 0).toFixed(2)}%
                                                 </span>
                                             </div>
                                             <div className="h-2 bg-white/10 rounded-full overflow-hidden">
@@ -150,7 +150,7 @@ export default function RiskPage() {
                                                 <span className="text-sm font-medium text-yellow-500">Liquidation Price</span>
                                             </div>
                                             <div className="text-2xl font-bold text-white">
-                                                ${liquidationData.liquidation_price.toFixed(2)}
+                                                ${(liquidationData.liquidation_price || 0).toFixed(2)}
                                             </div>
                                         </div>
                                     </div>
@@ -186,7 +186,7 @@ export default function RiskPage() {
                             <div className="glass-card rounded-xl p-6">
                                 <h2 className="text-lg font-bold mb-4">Position Exposure</h2>
 
-                                {liquidationData.positions.length > 0 ? (
+                                {(liquidationData.positions?.length || 0) > 0 ? (
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
                                             <thead>
@@ -202,7 +202,7 @@ export default function RiskPage() {
                                                     <tr key={idx} className="border-b border-white/5 hover:bg-white/5">
                                                         <td className="py-3 font-mono font-bold">{pos.symbol}</td>
                                                         <td className="py-3 text-right text-gray-300">
-                                                            {pos.size.toFixed(4)}
+                                                            {(pos.size || 0).toFixed(4)}
                                                         </td>
                                                         <td className="py-3 text-right">
                                                             <span className={cn(
@@ -213,7 +213,7 @@ export default function RiskPage() {
                                                             </span>
                                                         </td>
                                                         <td className="py-3 text-right text-gray-300">
-                                                            ${pos.liquidation_price.toFixed(2)}
+                                                            ${(pos.liquidation_price || 0).toFixed(2)}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -233,7 +233,7 @@ export default function RiskPage() {
                                 <div className="glass-card rounded-xl p-6">
                                     <h2 className="text-lg font-bold mb-4">Funding Rates Monitor</h2>
 
-                                    {fundingData.rates.length > 0 ? (
+                                    {(fundingData?.rates?.length || 0) > 0 ? (
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
                                                 <thead>
@@ -252,7 +252,7 @@ export default function RiskPage() {
                                                                 "py-3 text-right font-bold",
                                                                 rate.rate > 0 ? "text-red-500" : "text-[#00FF94]"
                                                             )}>
-                                                                {(rate.rate * 100).toFixed(4)}%
+                                                                {((rate.rate || 0) * 100).toFixed(4)}%
                                                             </td>
                                                             <td className="py-3 text-gray-300">
                                                                 {new Date(rate.next_funding).toLocaleString()}
@@ -261,7 +261,7 @@ export default function RiskPage() {
                                                                 "py-3 text-right font-bold",
                                                                 rate.estimated_payment > 0 ? "text-red-500" : "text-[#00FF94]"
                                                             )}>
-                                                                ${Math.abs(rate.estimated_payment).toFixed(2)}
+                                                                ${Math.abs(rate.estimated_payment || 0).toFixed(2)}
                                                             </td>
                                                         </tr>
                                                     ))}
