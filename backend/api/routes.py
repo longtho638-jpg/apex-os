@@ -612,6 +612,7 @@ async def login(request: LoginRequest):
     Login user
     Returns JWT token on success
     """
+    return {"success": False, "message": "FORCED FAILURE TEST"}
     try:
         print(f"Login attempt for: {request.email}")
         from supabase import create_client, Client
