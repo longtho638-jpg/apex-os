@@ -28,7 +28,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
 
-    // Load token from localStorage on mount
+    // Helper to set cookie
+    const setCookie = (name: string, value: string, days = 7) => {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
+    };
+
+    // Helper to remove cookie
+    const removeCookie = (name: string) => {
+        document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax; Secure`;
+    };
+
+    // Load token from localStorage on mount and sync to cookie
     useEffect(() => {
         const savedToken = localStorage.getItem('apex_token');
         const savedUser = localStorage.getItem('apex_user');
@@ -36,6 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (savedToken && savedUser) {
             setToken(savedToken);
             setUser(JSON.parse(savedUser));
+            // Ensure cookie is set for middleware
+            setCookie('sb-access-token', savedToken);
         }
     }, []);
 
@@ -55,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(data.user);
                 localStorage.setItem('apex_token', data.token);
                 localStorage.setItem('apex_user', JSON.stringify(data.user));
+                setCookie('sb-access-token', data.token);
                 return true;
             }
 
@@ -81,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(data.user);
                 localStorage.setItem('apex_token', data.token);
                 localStorage.setItem('apex_user', JSON.stringify(data.user));
+                setCookie('sb-access-token', data.token);
                 return true;
             }
 
@@ -96,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         localStorage.removeItem('apex_token');
         localStorage.removeItem('apex_user');
+        removeCookie('sb-access-token');
     };
 
     return (
