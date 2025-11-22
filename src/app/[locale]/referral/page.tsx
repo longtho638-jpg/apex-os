@@ -21,11 +21,11 @@ export default function ReferralPage() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const paginatedReferrals = data?.referrals.slice(
+    const paginatedReferrals = data?.referrals?.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     ) || [];
-    const totalPages = Math.ceil((data?.referrals.length || 0) / itemsPerPage);
+    const totalPages = Math.ceil((data?.referrals?.length || 0) / itemsPerPage);
 
     return (
         <div className="flex h-screen w-full bg-[#030303] text-white font-sans overflow-hidden">

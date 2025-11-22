@@ -14,11 +14,11 @@ export default function RebatesPage() {
     const itemsPerPage = 10;
 
     // Pagination
-    const paginatedHistory = data?.rebate_history.slice(
+    const paginatedHistory = data?.rebate_history?.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     ) || [];
-    const totalPages = Math.ceil((data?.rebate_history.length || 0) / itemsPerPage);
+    const totalPages = Math.ceil((data?.rebate_history?.length || 0) / itemsPerPage);
 
     // CSV Export
     const exportCSV = () => {
