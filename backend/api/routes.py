@@ -13,6 +13,9 @@ from pydantic import BaseModel
 # auditor = AuditorAgent()
 # guardian = GuardianAgent()
 
+async def get_current_user():
+    return {}
+
 router = APIRouter()
 
 # Mock Data (Moved from Frontend to Backend for "Real" API simulation)
