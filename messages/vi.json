@@ -120,6 +120,30 @@
         "more_reports": "Còn {count} báo cáo khác dành cho thành viên Founder",
         "demo_alert": "Đã tạo báo cáo {type}! (Chế độ Demo)"
     },
+    "PnL": {
+        "title": "Theo Dõi PnL",
+        "subtitle": "Phân Tích Lợi Nhuận & Thua Lỗ"
+    },
+    "Rebates": {
+        "title": "Kiếm Toàn Phí",
+        "subtitle": "Hoàn Phí & Thưởng"
+    },
+    "Risk": {
+        "title": "Báo Về Rủi Ro",
+        "subtitle": "Giám Sát Rủi Ro Guardian"
+    },
+    "WolfPack": {
+        "title": "Wolf Pack",
+        "subtitle": "Cộng Đồng & Hợp Tác"
+    },
+    "Referral": {
+        "title": "Giới Thiệu",
+        "subtitle": "Mời Bạn Bè & Nhận Hoa Hồng"
+    },
+    "Payment": {
+        "title": "Thanh Toán",
+        "subtitle": "Quản Lý Đăng Ký"
+    },
     "Common": {
         "loading": "Đang tải..."
     }

@@ -120,6 +120,30 @@
         "more_reports": "{count} more reports available for Founders members",
         "demo_alert": "{type} report generated! (Demo mode)"
     },
+    "PnL": {
+        "title": "PnL Tracking",
+        "subtitle": "Profit & Loss Analysis"
+    },
+    "Rebates": {
+        "title": "Trading Rebates",
+        "subtitle": "Fee Rebates & Rewards"
+    },
+    "Risk": {
+        "title": "Risk Management",
+        "subtitle": "Guardian Risk Monitor"
+    },
+    "WolfPack": {
+        "title": "Wolf Pack",
+        "subtitle": "Community & Collaboration"
+    },
+    "Referral": {
+        "title": "Referral Program",
+        "subtitle": "Invite & Earn Commission"
+    },
+    "Payment": {
+        "title": "Payment & Billing",
+        "subtitle": "Subscription Management"
+    },
     "Common": {
         "loading": "Loading..."
     }
