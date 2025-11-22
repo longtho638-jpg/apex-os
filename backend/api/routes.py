@@ -633,6 +633,10 @@ async def login(request: LoginRequest):
                 "password": request.password
             })
             
+            if not auth_response.user or not auth_response.session:
+                print("Auth failed: No user or session returned")
+                return {"success": False, "message": "Invalid email or password"}
+            
             user = auth_response.user
             
             # Create our own JWT token (or use Supabase's access_token)
