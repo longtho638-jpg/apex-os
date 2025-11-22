@@ -26,7 +26,7 @@ export default function RebatesPage() {
 
         const csv = [
             ['Date', 'Amount', 'Trades', 'Exchange'],
-            ...data.rebate_history.map(r => [r.date, r.amount, r.trades_count, r.exchange])
+            ...(data.rebate_history || []).map(r => [r.date, r.amount, r.trades_count, r.exchange])
         ].map(row => row.join(',')).join('\n');
 
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -63,7 +63,7 @@ export default function RebatesPage() {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={exportCSV}
-                            disabled={!data || data.rebate_history.length === 0}
+                            disabled={!data || (data.rebate_history?.length || 0) === 0}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all disabled:opacity-50"
                         >
                             <Download className="h-4 w-4" />
@@ -164,7 +164,7 @@ export default function RebatesPage() {
                             <div className="glass-card rounded-xl p-6">
                                 <h2 className="text-lg font-bold mb-4">Rebate History</h2>
 
-                                {data.rebate_history.length > 0 ? (
+                                {(data.rebate_history?.length || 0) > 0 ? (
                                     <>
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
