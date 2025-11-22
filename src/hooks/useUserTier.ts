@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export type UserTier = 'free' | 'founders' | 'admin';
-export type MenuId = 'overview' | 'trade' | 'pnl' | 'wolfpack' | 'audit' | 'guardian' | 'referrals' | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
+export type MenuId = 'overview' | 'trade' | 'pnl' | 'wolfpack' | 'rebates' | 'risk' | 'referrals' | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
 
 interface TierInfo {
     tier: UserTier;
@@ -56,11 +56,11 @@ export function useUserTier() {
             trade: ['free', 'founders', 'admin'],
             pnl: ['free', 'founders', 'admin'],
             wolfpack: ['founders', 'admin'], // Hidden from free
-            audit: ['founders', 'admin'], // Founders only
-            guardian: ['founders', 'admin'],
+            rebates: ['free', 'founders', 'admin'], // All users
+            risk: ['founders', 'admin'], // Founders only
             referrals: ['free', 'founders', 'admin'], // All (teaser for free)
             reports: ['free', 'founders', 'admin'],
-            billing: ['founders', 'admin'], // Hidden from free
+            billing: ['free', 'founders', 'admin'], // Payment page for all
             resources: ['free', 'founders', 'admin'],
             settings: ['free', 'founders', 'admin'],
             admin: ['admin'] // Admin only
