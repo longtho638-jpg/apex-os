@@ -2,12 +2,12 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends
 from typing import List, Dict, Optional
 from pydantic import BaseModel
 
-from core.database import db
-from core.security import encrypt_value
-from engines.pnl_calculator import PnLCalculator
-from agents.collector import CollectorAgent
-from agents.auditor import AuditorAgent
-from agents.guardian import GuardianAgent
+# from core.database import db
+# from core.security import encrypt_value
+# from engines.pnl_calculator import PnLCalculator
+# from agents.collector import CollectorAgent
+# from agents.auditor import AuditorAgent
+# from agents.guardian import GuardianAgent
 
 # collector = CollectorAgent()
 # auditor = AuditorAgent()
@@ -29,9 +29,9 @@ POSITIONS = [
     {"symbol": "TSLA", "qty": 100, "avg": 215.00, "current": 205.60, "pnl": -940.00, "pnl_percent": -4.37},
 ]
 
-from core.database import db
-from core.security import encrypt_value
-from agents.collector import CollectorAgent
+# from core.database import db
+# from core.security import encrypt_value
+# from agents.collector import CollectorAgent
 
 # collector = CollectorAgent()
 
@@ -618,6 +618,7 @@ async def login(request: LoginRequest):
         from supabase import create_client, Client
         import os
         from core.rest_client import get_supabase_rest_client
+        from core.security import create_token
         import requests
         
         url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
