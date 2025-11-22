@@ -1,4 +1,6 @@
+from fastapi import Request, Response
 from backend.main import app
+from mangum import Mangum
 
-# Vercel expects a variable named 'app' or 'handler'
-# We import the FastAPI app instance from backend/main.py
+# Mangum adapter for AWS Lambda/Vercel compatibility
+handler = Mangum(app, lifespan="off")
