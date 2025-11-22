@@ -7,15 +7,19 @@ export default function LandingRedirectPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Check if there's a hash fragment (magic link token)
+        // Get the full hash fragment (magic link token)
         const hash = window.location.hash;
 
-        if (hash && hash.includes('access_token')) {
+        console.log('Landing page hash:', hash);
+
+        if (hash && (hash.includes('access_token') || hash.includes('type=recovery'))) {
             // Magic link or password reset token detected
-            // Redirect to reset-password page with the hash
+            // Redirect to reset-password page with the FULL hash preserved
+            console.log('Redirecting to reset-password with hash:', hash);
             router.replace(`/reset-password${hash}`);
         } else {
-            // No token, redirect to home/login
+            // No token found, redirecting to login
+            console.log('No token found, redirecting to login');
             router.replace('/login');
         }
     }, [router]);
