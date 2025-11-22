@@ -2,25 +2,17 @@ services:
   - type: web
     name: apex-backend
     env: python
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
       - key: SUPABASE_URL
-        sync: false
+        value: https://ryvpqbuftmlsynmajecx.supabase.co
       - key: SUPABASE_SERVICE_KEY
         sync: false
-
-  - type: worker
-    name: apex-worker
-    env: python
-    buildCommand: pip install -r backend/requirements-sync.txt
-    startCommand: python backend/workers/trade_sync.py
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.0
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SERVICE_KEY
+      - key: VAULT_KEY
         sync: false
