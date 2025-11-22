@@ -26,7 +26,8 @@ export default function LocaleRoot() {
             // Check for magic link/recovery tokens
             if (hash.includes('access_token') || hash.includes('type=')) {
                 console.log('Auth token detected, redirecting to reset-password');
-                router.replace(`/reset-password${hash}`);
+                // Use window.location.href to PRESERVE hash (router.replace might lose it)
+                window.location.href = `/reset-password${hash}`;
                 return;
             }
         }
