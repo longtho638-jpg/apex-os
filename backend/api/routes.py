@@ -9,9 +9,9 @@ from agents.collector import CollectorAgent
 from agents.auditor import AuditorAgent
 from agents.guardian import GuardianAgent
 
-collector = CollectorAgent()
-auditor = AuditorAgent()
-guardian = GuardianAgent()
+# collector = CollectorAgent()
+# auditor = AuditorAgent()
+# guardian = GuardianAgent()
 
 router = APIRouter()
 
@@ -33,14 +33,15 @@ from core.database import db
 from core.security import encrypt_value
 from agents.collector import CollectorAgent
 
-collector = CollectorAgent()
+# collector = CollectorAgent()
 
 # ============== EXISTING ENDPOINTS ==============
 
 @router.get("/dashboard/watchlist")
 async def get_watchlist():
     # Fetch real BTC price
-    btc_data = await collector.fetch_btc_price()
+    # btc_data = await collector.fetch_btc_price()
+    btc_data = None
     
     # Update mock data with real BTC data if available
     updated_watchlist = []
@@ -612,7 +613,6 @@ async def login(request: LoginRequest):
     Login user
     Returns JWT token on success
     """
-    return {"success": False, "message": "FORCED FAILURE TEST"}
     try:
         print(f"Login attempt for: {request.email}")
         from supabase import create_client, Client
