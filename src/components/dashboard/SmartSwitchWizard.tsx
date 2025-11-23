@@ -40,27 +40,44 @@ export default function SmartSwitchWizard({ defaultExchange = 'binance' }: Smart
 
     setLoading(true);
     try {
-      // Call API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/verify-account`, {
+      // Get JWT token from cookie or localStorage
+      const token = document.cookie.split('; ').find(row => row.startsWith('sb-access-token='))?.split('=')[1]
+        || localStorage.getItem('apex_token');
+
+      if (!token) {
+        setResult({ success: false, message: 'Please log in to verify your account' });
+        setLoading(false);
+        return;
+      }
+
+      // Call API with authentication
+      const response = await fetch('/api/v1/user/verify-account', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          user_id: 'public-check', // Replace with actual user ID if logged in
           exchange,
           user_uid: uid
         }),
       });
       const data = await response.json();
 
-      if (data.verified) {
-        setResult({ success: true, message: 'Account Verified!' });
+      if (data.success && data.verified) {
+        setResult({ success: true, message: data.message || 'Account Verified!' });
         setStep(3); // Skip to success
       } else {
-        // If failed, move to Step 2 (The Switch)
+        // If not verified, move to Step 2 (The Switch) with referral link
         setStep(2);
+        if (data.referral_link) {
+          // Store referral link for Step 2
+          (window as any).apexReferralLink = data.referral_link;
+        }
       }
     } catch (error) {
-      console.error(error);
+      console.error('Verification error:', error);
+      setResult({ success: false, message: 'Connection error. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -72,21 +89,32 @@ export default function SmartSwitchWizard({ defaultExchange = 'binance' }: Smart
 
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/verify-account`, {
+      const token = document.cookie.split('; ').find(row => row.startsWith('sb-access-token='))?.split('=')[1]
+        || localStorage.getItem('apex_token');
+
+      if (!token) {
+        setResult({ success: false, message: 'Please log in to verify your account' });
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/v1/user/verify-account', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          user_id: 'public-check',
           exchange,
           user_uid: subUid
         }),
       });
       const data = await response.json();
 
-      if (data.verified) {
-        setResult({ success: true, message: 'Sub-account Verified!' });
+      if (data.success && data.verified) {
+        setResult({ success: true, message: data.message || 'Sub-account Verified!' });
       } else {
-        setResult({ success: false, message: 'Verification failed. Please check UID.' });
+        setResult({ success: false, message: data.message || 'Verification failed. Please check UID.' });
       }
     } catch (error) {
       setResult({ success: false, message: 'Connection error.' });
@@ -187,7 +215,7 @@ export default function SmartSwitchWizard({ defaultExchange = 'binance' }: Smart
 
               <div className="text-center">
                 <a
-                  href={referralLinks[exchange] || '#'}
+                  href={(window as any).apexReferralLink || referralLinks[exchange] || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-white text-black font-bold py-3 px-6 rounded-full hover:scale-105 transition-transform"
