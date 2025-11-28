@@ -1,0 +1,63 @@
+Execute Week 2 Brain Build Sprint from GEMINI_TASK_WEEK2_BRAIN_BUILD.md
+
+This is a 7-day implementation task for AI trading infrastructure.
+
+**CRITICAL**: Zero technical debt policy. Production-grade code required.
+
+**PHASES** (Execute IN ORDER):
+
+**Phase 1 (Days 1-2): Data Pipeline**
+- Enhance Binance API client (rate limiting, retry, error handling)
+- Build data collection agent (Python)
+- Backfill 90 days historical data (BTC, ETH, BNB)
+- Setup real-time incremental collection
+- Create database schema (market_data_ohlcv, materialized views)
+- TESTS: >90% coverage
+
+**Phase 2 (Days 3-4): ML Model**
+- Feature engineering (RSI, MACD, Bollinger Bands, Volume, etc.)
+- Train OpportunityDetector model (XGBoost)
+- Target: >60% accuracy on test set
+- Explainability: SHAP values, feature importance
+- Model versioning and persistence
+- TESTS: Validate predictions, check feature quality
+
+**Phase 3 (Days 5-6): Signal Execution**
+- Signal generator service (TypeScript)
+- Convert ML predictions to actionable signals
+- Paper trading executor
+- Risk management (stop loss, take profit)
+- Database schema (ai_signals table)
+- TESTS: End-to-end signal generation
+
+**Phase 4 (Day 7): Frontend**
+- AISignals React component
+- Real-time updates via Supabase Realtime
+- Signal cards with confidence scores
+- TESTS: Component rendering, real-time updates
+
+**SECURITY REQUIREMENTS**:
+☑ API keys in env vars only
+☑ Rate limiting on external APIs
+☑ RLS policies on ai_signals table
+☑ Paper trading default
+☑ Input validation
+
+**DELIVERABLES**:
+- 7 code files (client, agent, features, model, generator, executor, component)
+- 2 database migrations
+- 3 test suites (>90% coverage)
+- 4 documentation files
+
+**SUCCESS METRICS**:
+- 90 days historical data collected
+- ML model >60% accuracy
+- 10+ signals/day generated
+- Frontend dashboard live
+- Zero production errors
+
+Read GEMINI_TASK_WEEK2_BRAIN_BUILD.md for complete implementation details.
+
+Execute Phase 1 first. Report completion before Phase 2.
+
+**兵貴神速** - Speed with quality. GO!

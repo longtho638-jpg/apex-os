@@ -1,0 +1,23 @@
+Read and execute all tasks in GEMINI_TASK.md
+
+Execute all 9 phases sequentially:
+✅ Phase 1: Database Verification (tables, indexes, foreign keys)
+✅ Phase 2: Code Structure (files exist, syntax correct)
+✅ Phase 3: Business Logic (TIERS config, commission calculator)
+✅ Phase 4: Environment & Config (Supabase connection)
+✅ Phase 5: Testing & Quality (npm test, TypeScript check)
+✅ Phase 6: Integration Readiness (imports, API structure)
+✅ Phase 7: Deployment Status (git status, vercel config)
+✅ Phase 8: Seed Test Data (optional - insert sample data)
+✅ Phase 9: Final Report (generate VERIFICATION_REPORT_2025-11-27.md)
+
+Requirements:
+- Work sequentially through each phase
+- Report results for each task (✅/❌)
+- Auto-fix minor issues if possible
+- Generate comprehensive markdown report
+- Overall status: PASS/FAIL with score
+
+NO PERMISSION NEEDED - JUST EXECUTE!
+
+START NOW! 🚀💎⚔️

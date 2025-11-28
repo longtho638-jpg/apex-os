@@ -1,0 +1,275 @@
+# CLI TASK: UI UNIFICATION - AUTOMATED UPDATES
+
+## OBJECTIVE
+Update ALL pages to use consistent UI patterns from `ui-constants.ts`.
+Make the UI ĐỒNG BỘ (synchronized) across entire application.
+
+---
+
+## CONTEXT
+
+We have 3 types of UI inconsistencies:
+1. **Component inconsistency**: Mix of <Card> and <GlassCard>
+2. **Color inconsistency**: bg-black, bg-gray-900, bg-[#030303] all used
+3. **Spacing inconsistency**: p-8, p-6, p-4 randomly used
+
+**Goal**: Make EVERYTHING use ui-constants.ts patterns!
+
+---
+
+## FILES TO SCAN & UPDATE
+
+**Scan these directories**:
+```
+src/app/[locale]/dashboard/**/*.tsx
+src/app/[locale]/admin/**/*.tsx
+src/app/[locale]/trading/**/*.tsx
+src/app/[locale]/*.tsx (top-level pages)
+```
+
+**Exclude**:
+- landing/page.tsx (custom marketing design)
+- blog/**/*.tsx (blog design)
+- pricing/page.tsx (custom pricing design)
+- login/page.tsx (auth standalone)
+- signup/page.tsx (auth standalone)  
+- reset-password/page.tsx (auth standalone)
+
+---
+
+## TRANSFORMATION RULES
+
+### RULE 1: Replace All <Card> with <GlassCard>
+
+**Find**:
+```typescript
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+<Card className="...">
+  <CardContent>
+    ...
+  </CardContent>
+</Card>
+```
+
+**Replace with**:
+```typescript
+import { GlassCard } from '@/components/ui/glass-card';
+<GlassCard className="p-6">
+  ...
+</GlassCard>
+```
+
+**Note**: GlassCard doesn't need CardContent wrapper - content goes directly inside!
+
+### RULE 2: Standardize Background Colors
+
+**Find & Replace**:
+```typescript
+// OLD (find these)
+className="bg-black"
+className="bg-gray-900"
+className="bg-zinc-900"
+className="bg-slate-900"
+
+// NEW (replace with)
+className="bg-[#030303]"
+```
+
+**Also check container divs**:
+```typescript
+// OLD
+<div className="flex h-screen bg-black text-white">
+
+// NEW
+<div className="flex h-screen w-full bg-[#030303] text-white font-sans overflow-hidden">
+```
+
+### RULE 3: Standardize Spacing
+
+**Pattern**: All pages should use `p-6` and `gap-6`
+
+**Find & Replace**:
+```typescript
+// Card padding
+className="p-8"  → className="p-6"
+className="p-4"  → className="p-6"
+
+// Page padding
+className="p-8"  → className="p-6"
+
+// Grid gaps
+className="gap-4"  → className="gap-6"
+className="gap-8"  → className="gap-6"
+
+// Space between
+className="space-y-4"  → className="space-y-6"
+className="space-y-8"  → className="space-y-6"
+```
+
+### RULE 4: Standardize Typography
+
+**Headers**:
+```typescript
+// Page title
+className="text-3xl font-bold"  → className="text-2xl font-bold"
+className="text-xl font-bold"   → className="text-2xl font-bold"
+
+// Section title
+className="text-xl font-bold"   → className="text-lg font-bold"
+
+// Card title
+className="text-lg font-bold"   → className="text-base font-bold"
+```
+
+**Body text**:
+```typescript
+// Secondary text
+className="text-gray-400"  → className="text-zinc-400"
+className="text-gray-500"  → className="text-zinc-500"
+
+// Body
+className="text-base"  → className="text-sm"
+```
+
+### RULE 5: Add AuroraBackground (if missing)
+
+**Check if page has**:
+```typescript
+import { AuroraBackground } from '@/components/ui/aurora-background';
+```
+
+**If NOT, add it inside <main>**:
+```typescript
+<main className="flex-1 relative overflow-hidden">
+  <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
+    <div />
+  </AuroraBackground>
+  
+  <div className="relative z-10 h-full flex flex-col overflow-y-auto">
+    {/* existing content */}
+  </div>
+</main>
+```
+
+### RULE 6: Ensure Sidebar Present (app pages only)
+
+**All authenticated pages MUST have**:
+```typescript
+import { Sidebar } from '@/components/os/sidebar';
+
+// In component
+<div className="flex h-screen w-full bg-[#030303] text-white font-sans overflow-hidden">
+  <Sidebar />
+  <main className="flex-1 relative overflow-hidden">
+    ...
+  </main>
+</div>
+```
+
+### RULE 7: Standardize Header Pattern
+
+**Replace old headers with this pattern**:
+```typescript
+<header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-4">
+      <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+        <Icon className="h-7 w-7 text-emerald-400" />
+      </div>
+      <div>
+        <h1 className="text-2xl font-bold">[Page Title]</h1>
+        <p className="text-sm text-zinc-400">[Subtitle]</p>
+      </div>
+    </div>
+  </div>
+</header>
+```
+
+---
+
+## PAGE-BY-PAGE CHECKLIST
+
+For EACH page, verify:
+- [ ] Uses `bg-[#030303]` (not bg-black, bg-gray-900)
+- [ ] Uses `<GlassCard>` (not `<Card>`)
+- [ ] Uses `p-6` for cards/pages (consistent)
+- [ ] Uses `gap-6` for grids (consistent)
+- [ ] Uses `text-2xl font-bold` for page titles
+- [ ] Uses `text-zinc-400` for secondary text
+- [ ] Has `<AuroraBackground>` (unless not needed)
+- [ ] Has `<Sidebar />` (for app pages)
+- [ ] Header follows sticky pattern
+- [ ] No TypeScript errors after changes
+
+---
+
+## IMPORTANT NOTES
+
+**DO NOT BREAK**:
+- Existing functionality (forms, buttons, API calls)
+- Component logic (state, effects, handlers)
+- Navigation (routing, links)
+- Authentication checks
+
+**PRESERVE**:
+- All business logic
+- All data fetching
+- All event handlers
+- All conditional rendering
+
+**ONLY CHANGE**:
+- Visual styling (colors, spacing, typography)
+- Component swaps (Card → GlassCard)
+- Layout structure (add Aurora, ensure Sidebar)
+
+---
+
+## VERIFICATION STEPS
+
+After updating ALL pages:
+
+1. **Build Test**:
+```bash
+npm run build
+```
+- Must complete with 0 errors
+- No TypeScript errors
+
+2. **Visual Check** (spot check 5 pages):
+- Admin Dashboard
+- Trading
+- Dashboard Overview
+- Rebates
+- Settings
+
+3. **Functionality Check**:
+- Navigation works
+- Forms submit
+- Data loads
+- No console errors
+
+---
+
+## SUCCESS CRITERIA
+
+✅ All pages use bg-[#030303]  
+✅ All pages use GlassCard (0 Card components)  
+✅ All spacing is p-6/gap-6  
+✅ All typography follows hierarchy  
+✅ All pages have AuroraBackground (where appropriate)  
+✅ All app pages have Sidebar  
+✅ Build succeeds with 0 errors  
+✅ UI feels ĐỒNG BỘ (synchronized)  
+
+---
+
+## START EXECUTION
+
+**Begin with**: `/app/[locale]/dashboard/**/*.tsx`  
+**Then**: `/app/[locale]/admin/**/*.tsx`  
+**Then**: `/app/[locale]/trading/**/*.tsx`  
+**Finally**: Other app pages
+
+**Work systematically, one page at a time!**
+
+兵貴神速 - Speed with precision! 🚀⚔️

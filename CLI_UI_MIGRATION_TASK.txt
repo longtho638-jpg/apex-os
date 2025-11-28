@@ -1,0 +1,53 @@
+═══════════════════════════════════════════════════════════════════
+URGENT TASK: Migrate 10 Pages to New UI Design System
+Priority: CRITICAL - User requested immediate synchronization
+═══════════════════════════════════════════════════════════════════
+
+CONTEXT:
+User wants ALL old pages migrated to new UI design (with Sidebar + modern styling).
+Currently 11 pages have new UI (rebates, wolf-pack, pnl, etc.)
+10 pages still use old UI and MUST be updated NOW.
+
+PAGES NEEDING MIGRATION:
+1. admin - Currently redirects, needs full UI
+2. billing - Placeholder, needs full billing UI
+3. copy-trading - Old UI, needs Sidebar
+4. finance - Has components but no Sidebar
+5. login - Auth page, needs modern design
+6. payment - Old UI, needs Sidebar
+7. reset-password - Auth page, needs modern design
+8. signals - Simple container, needs Sidebar
+9. signup - Auth page, needs modern design
+10. test-price-stream - Dev page, needs Sidebar
+
+REFERENCE TEMPLATE (Copy from rebates/wolf-pack pages):
+- Import { Sidebar } from '@/components/os/sidebar'
+- Use AuroraBackground for ambient effect
+- Use GlassCard for content blocks
+- Consistent header with icon + title
+- Responsive layout with flex h-screen
+- Dark theme (#030303 background)
+
+IMPLEMENTATION STRATEGY:
+
+For each page:
+1. Add Sidebar import and component
+2. Wrap in flex h-screen layout
+3. Add header with icon
+4. Use glass-card styling
+5. Preserve existing functionality
+6. Ensure mobile responsive
+
+DO NOT:
+- Remove existing functionality
+- Break API calls or data flows
+- Remove important components
+- Change routing
+
+DO:
+- Add Sidebar to every page
+- Update styling to match rebates/wolf-pack
+- Keep all existing features working
+- Ensure consistent UI across all pages
+
+EXECUTE IMMEDIATELY! Update all 10 pages in ONE batch!

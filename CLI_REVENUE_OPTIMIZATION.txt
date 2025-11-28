@@ -1,0 +1,540 @@
+# CLI TASK: REVENUE OPTIMIZATION - PHASE 1 (4 TASKS)
+
+## CONTEXT
+Strategic pivot from UI polish to revenue generation.
+Goal: $1M revenue by 2026 (13 months) = ~$77k/month needed
+Strategy: 避實擊虛 (Attack weakness) + 兵貴神速 (Speed) + NO TECHNICAL DEBT
+
+---
+
+## CRITICAL REQUIREMENTS (EVERY TASK)
+
+### Code Quality (NO TECHNICAL DEBT):
+- TypeScript strict mode (no `any` types)
+- No duplicate code (DRY principle)
+- Functions <50 lines, Files <500 lines
+- Proper error handling (not string errors)
+- Security: Input validation, XSS prevention
+- Performance: Page loads <3s
+- All existing tests must pass
+- Build succeeds with 0 errors
+
+### File Organization:
+- New components in src/components/
+- New utils in src/lib/
+- Types in src/types/
+- Follow existing patterns (don't reinvent)
+
+---
+
+## TASK 1: LANDING PAGE CONVERSION OPTIMIZATION
+
+### Objective
+Increase signup conversion rate from landing page
+
+### Current File
+`src/app/[locale]/landing/page.tsx`
+
+### Changes Required
+
+#### 1.1 Add Social Proof Section
+**Create**: `src/components/landing/SocialProofSection.tsx`
+
+```typescript
+'use client';
+
+import { GlassCard } from '@/components/ui/glass-card';
+import { Users, TrendingUp, DollarSign, Shield } from 'lucide-react';
+
+interface Stat {
+  icon: typeof Users;
+  label: string;
+  value: string;
+  color: string;
+}
+
+export function SocialProofSection() {
+  const stats: Stat[] = [
+    {
+      icon: Users,
+      label: 'Active Traders',
+      value: '1,000+',
+      color: 'text-blue-400',
+    },
+    {
+      icon: TrendingUp,
+      label: 'AI Signals Generated',
+      value: '247',
+      color: 'text-emerald-400',
+    },
+    {
+      icon: DollarSign,
+      label: 'Total Volume Traded',
+      value: '$2.8M',
+      color: 'text-purple-400',
+    },
+    {
+      icon: Shield,
+      label: 'Uptime',
+      value: '99.9%',
+      color: 'text-yellow-400',
+    },
+  ];
+
+  return (
+    <section className="py-16 px-6">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-12">
+          Trusted by Traders Worldwide
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <GlassCard key={idx} className="p-6 text-center hover:scale-105 transition-transform">
+                <Icon className={`w-12 h-12 mx-auto mb-4 ${stat.color}`} />
+                <div className="text-3xl font-bold mb-2">{stat.value}</div>
+                <div className="text-sm text-zinc-400">{stat.label}</div>
+              </GlassCard>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+**Integration**: Add `<SocialProofSection />` in landing page after hero section
+
+#### 1.2 Add Conversion Tracking
+**Create**: `src/lib/analytics.ts`
+
+```typescript
+// Simple analytics wrapper (start with console.log, then add GA4)
+
+type EventName = 
+  | 'landing_page_view'
+  | 'view_pricing_click'
+  | 'start_trial_click'
+  | 'signup_started'
+  | 'signup_completed';
+
+export const analytics = {
+  track: (event: EventName, properties?: Record<string, any>) => {
+    // For now: console.log (TODO: Add GA4 later)
+    console.log('[Analytics]', event, properties);
+    
+    // Future: window.gtag('event', event, properties);
+  },
+  
+  identify: (userId: string, traits?: Record<string, any>) => {
+    console.log('[Analytics] Identify:', userId, traits);
+  },
+};
+```
+
+**Integration**: Add tracking calls to landing page CTAs:
+- Hero "Start Free Trial" button → `analytics.track('start_trial_click')`
+- "View Pricing" button → `analytics.track('view_pricing_click')`
+
+#### 1.3 Optimize Hero Section
+**Modify**: Update hero section in landing page
+
+Requirements:
+- Add urgency message: "Join 1,000+ traders making smarter decisions"
+- CTA button must be visible without scrolling (above fold)
+- Mobile responsive (test viewport <768px)
+- Loading state on CTA button
+
+**Acceptance Criteria**:
+- [ ] SocialProofSection component created & renders correctly
+- [ ] Analytics wrapper created (type-safe)
+- [ ] Hero section has clear value prop above fold
+- [ ] All CTAs tracked
+- [ ] Mobile responsive (<768px tested)
+- [ ] Build succeeds, no TypeScript errors
+
+---
+
+## TASK 2: PRICING A/B TESTING
+
+### Objective
+Test 3 pricing variants to maximize revenue
+
+### Changes Required
+
+#### 2.1 Create Pricing Config
+**Create**: `src/lib/pricing-config.ts`
+
+```typescript
+export const PRICING_VARIANTS = {
+  control: {
+    id: 'control',
+    monthly: 67,
+    annual: 670,
+    name: 'Pro',
+    features: [
+      'Unlimited AI signals',
+      'Real-time alerts',
+      'Portfolio tracking',
+      'Premium support',
+    ],
+  },
+  variant_a: {
+    id: 'variant_a',
+    monthly: 49,
+    annual: 490,
+    name: 'Pro',
+    features: [
+      'Unlimited AI signals',
+      'Real-time alerts',
+      'Portfolio tracking',
+      'Email support',
+    ],
+  },
+  variant_b: {
+    id: 'variant_b',
+    monthly: 99,
+    annual: 990,
+    name: 'Premium',
+    features: [
+      'Unlimited AI signals',
+      'Real-time alerts',
+      'Portfolio tracking',
+      'Priority support',
+      'Advanced analytics',
+      'API access',
+    ],
+  },
+} as const;
+
+export type PricingVariant = keyof typeof PRICING_VARIANTS;
+```
+
+#### 2.2 Simple A/B Assignment
+**Create**: `src/lib/ab-testing.ts`
+
+```typescript
+import { PRICING_VARIANTS, PricingVariant } from './pricing-config';
+
+// Simple hash-based A/B assignment (deterministic)
+export function getPricingVariant(userId?: string): PricingVariant {
+  if (!userId) {
+    // No user ID yet, default to control
+    return 'control';
+  }
+  
+  // Simple hash: sum char codes mod 3
+  const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const variants: PricingVariant[] = ['control', 'variant_a', 'variant_b'];
+  
+  return variants[hash % 3];
+}
+
+export function getPricingForVariant(variant: PricingVariant) {
+  return PRICING_VARIANTS[variant];
+}
+```
+
+#### 2.3 Update Pricing Page
+**Modify**: `src/app/[locale]/pricing/page.tsx`
+
+Add:
+```typescript
+'use client';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { getPricingVariant, getPricingForVariant } from '@/lib/ab-testing';
+import { analytics } from '@/lib/analytics';
+
+export default function PricingPage() {
+  const { user } = useAuth();
+  const variant = getPricingVariant(user?.id);
+  const pricing = getPricingForVariant(variant);
+  
+  useEffect(() => {
+    analytics.track('pricing_page_view', { variant });
+  }, [variant]);
+  
+  // Display pricing.monthly, pricing.annual, pricing.features
+  // ...
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Pricing variants config created
+- [ ] A/B assignment function implemented (deterministic)
+- [ ] Pricing page uses variant system
+- [ ] Analytics tracks variant shown
+- [ ] Build succeeds, no errors
+
+---
+
+## TASK 3: SIGNUP FRICTION REDUCTION
+
+### Objective  
+Reduce signup from 5 steps to 3 steps (email/password → verify → done)
+
+### Changes Required
+
+#### 3.1 Simplified Signup Form
+**Modify**: `src/app/[locale]/signup/page.tsx`
+
+Combine email + password into single step:
+```typescript
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { analytics } from '@/lib/analytics';
+
+export default function SignupPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
+  
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    
+    try {
+      analytics.track('signup_started', { email });
+      
+      // Call signup API
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+      
+      analytics.track('signup_completed', { userId: data.userId });
+      
+      // Redirect to email verification page
+      router.push('/verify-email?email=' + encodeURIComponent(email));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <GlassCard className="w-full max-w-md p-8">
+        <h1 className="text-2xl font-bold mb-6">Start Free Trial</h1>
+        <form onSubmit={handleSignup} className="space-y-4">
+          <div>
+            <label className="block text-sm mb-2">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl"
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-2">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl"
+            />
+          </div>
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold disabled:opacity-50"
+          >
+            {loading ? 'Creating account...' : 'Start Free Trial'}
+          </button>
+        </form>
+        <p className="text-xs text-zinc-500 mt-4 text-center">
+          7-day free trial. No credit card required.
+        </p>
+      </GlassCard>
+    </div>
+  );
+}
+```
+
+#### 3.2 Free Trial Logic
+**Database**: Add column to users table (if not exists):
+```sql
+ALTER TABLE users ADD COLUMN trial_ends_at TIMESTAMP;
+```
+
+**Signup API**: Set trial_ends_at = now() + 7 days when creating user
+
+**Dashboard**: Show trial banner if trial_ends_at > now()
+
+**Acceptance Criteria**:
+- [ ] Signup form: email + password single page
+- [ ] Trial ends_at set on signup
+- [ ] Dashboard shows trial status
+- [ ] No payment required for signup
+- [ ] Build succeeds, security maintained
+
+---
+
+## TASK 4: ANALYTICS SETUP
+
+### Objective
+Track full funnel: landing → signup → payment
+
+### Changes Required
+
+#### 4.1 Enhance Analytics Wrapper
+**Modify**: `src/lib/analytics.ts` (upgrade from console.log)
+
+Option 1: Add Google Analytics 4
+Option 2: Add Mixpanel
+Option 3: Simple internal tracking (Supabase table)
+
+**Recommendation**: Start with internal tracking (simplest, no dependencies)
+
+```typescript
+// Enhanced analytics.ts
+
+export type AnalyticsEvent = 
+  | 'landing_page_view'
+  | 'view_pricing_click'
+  | 'start_trial_click'
+  | 'pricing_page_view'
+  | 'signup_started'
+  | 'signup_completed'
+  | 'email_verified'
+  | 'payment_started'
+  | 'payment_completed';
+
+interface EventProperties {
+  userId?: string;
+  email?: string;
+  variant?: string;
+  amount?: number;
+  [key: string]: any;
+}
+
+export const analytics = {
+  track: async (event: AnalyticsEvent, properties?: EventProperties) => {
+    console.log('[Analytics]', event, properties);
+    
+    // Save to database (optional but recommended)
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event, properties, timestamp: new Date() }),
+      });
+    } catch (err) {
+      // Don't block user experience on analytics failure
+      console.error('Analytics error:', err);
+    }
+  },
+  
+  identify: (userId: string, traits?: Record<string, any>) => {
+    console.log('[Analytics] Identify:', userId, traits);
+  },
+};
+```
+
+#### 4.2 Create Analytics API Endpoint
+**Create**: `src/app/api/analytics/track/route.ts`
+
+```typescript
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function POST(request: Request) {
+  try {
+    const { event, properties, timestamp } = await request.json();
+    
+    const supabase = createClient();
+    
+    // Store in analytics_events table
+    await supabase
+      .from('analytics_events')
+      .insert({
+        event_name: event,
+        properties,
+        created_at: timestamp,
+      });
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Analytics API error:', error);
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+  }
+}
+```
+
+#### 4.3 Create Analytics Events Table
+**Migration**: Create table for storing events
+
+```sql
+CREATE TABLE analytics_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_name TEXT NOT NULL,
+  properties JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at);
+CREATE INDEX idx_analytics_events_name ON analytics_events(event_name);
+```
+
+**Acceptance Criteria**:
+- [ ] Analytics wrapper type-safe
+- [ ] Events stored in database
+- [ ] API endpoint handles errors gracefully
+- [ ] Database table created
+- [ ] No performance impact on user pages
+
+---
+
+## VERIFICATION CHECKLIST
+
+After completing all 4 tasks:
+
+- [ ] `npm run build` succeeds with 0 errors
+- [ ] TypeScript strict mode passes
+- [ ] All existing tests pass
+- [ ] Landing page loads <3s
+- [ ] Pricing page loads <3s
+- [ ] Signup flow works end-to-end
+- [ ] Analytics events being tracked
+- [ ] Mobile responsive (test <768px)
+- [ ] No console errors in browser
+- [ ] No security vulnerabilities introduced
+
+---
+
+## EXECUTION ORDER
+
+1. Task 4 first (analytics foundation needed)
+2. Task 1 (landing page - track events)
+3. Task 2 (pricing - track variants)
+4. Task 3 (signup - track completion)
+
+Execute systematically. Test each task before moving to next.
+
+兵貴神速 - Execute with speed!
+NO TECHNICAL DEBT - Quality code only!

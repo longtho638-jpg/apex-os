@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: apex-backend
+    env: python
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SUPABASE_URL
+        value: https://ryvpqbuftmlsynmajecx.supabase.co
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: VAULT_KEY
+        sync: false
+
+  - type: web
+    name: apex-frontend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.9.0

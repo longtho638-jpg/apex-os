@@ -1,0 +1,188 @@
+═══════════════════════════════════════════════════════════════════
+RECOVERY TASK: Restore & Integrate All Existing Dashboard Components
+Priority: URGENT - User reported missing UI components
+═══════════════════════════════════════════════════════════════════
+
+SITUATION:
+All dashboard components EXIST but are NOT integrated into new dashboard routes created today. Components are sitting unused while new placeholder pages show "coming soon".
+
+EXISTING COMPONENTS (100% Complete - DO NOT RECREATE):
+✅ src/components/dashboard/ConnectExchange.tsx (11,605 bytes)
+✅ src/components/dashboard/RealtimeWallet.tsx (4,871 bytes)
+✅ src/components/dashboard/SmartSwitchWizard.tsx (15,227 bytes)
+✅ src/components/dashboard/ZenWidget.tsx (22,198 bytes)
+✅ src/components/dashboard/UpgradeBanner.tsx (4,137 bytes)
+✅ src/components/dashboard/LockedFeature.tsx (2,684 bytes)
+✅ src/components/dashboard/AlphaDashboard.tsx (9,228 bytes)
+
+NEW PLACEHOLDER PAGES (Need integration):
+❌ src/app/[locale]/dashboard/trading/page.tsx - Empty placeholder
+❌ src/app/[locale]/dashboard/wallet/page.tsx - Empty placeholder  
+❌ src/app/[locale]/dashboard/referrals/page.tsx - Empty placeholder
+❌ src/app/[locale]/dashboard/rewards/page.tsx - Empty placeholder
+❌ src/app/[locale]/dashboard/settings/page.tsx - Empty placeholder
+
+MISSION: Integrate existing components into placeholder pages
+
+═══════════════════════════════════════════════════════════════════
+TASK BREAKDOWN
+═══════════════════════════════════════════════════════════════════
+
+STEP 1: Analyze Existing Components
+─────────────────────────────────────
+Before touching any code, VIEW each existing component to understand:
+1. What props it expects
+2. What data it needs (Supabase, APIs, etc.)
+3. What UI it provides
+4. Dependencies
+
+Commands to run:
+- View ConnectExchange.tsx
+- View RealtimeWallet.tsx  
+- View SmartSwitchWizard.tsx
+- View ZenWidget.tsx
+- View UpgradeBanner.tsx
+- View LockedFeature.tsx
+
+STEP 2: Update Dashboard Pages with Real Components
+────────────────────────────────────────────────────
+
+2.1 WALLET PAGE
+File: src/app/[locale]/dashboard/wallet/page.tsx
+Replace placeholder with:
+- RealtimeWallet component (main wallet display)
+- Transaction history
+- Withdraw/deposit actions
+- Balance charts
+
+2.2 TRADING PAGE  
+File: src/app/[locale]/dashboard/trading/page.tsx
+Replace placeholder with:
+- SmartSwitchWizard (for setting up trading)
+- ConnectExchange component
+- ZenWidget (trading automation)
+- Active positions table
+
+2.3 REFERRALS PAGE
+File: src/app/[locale]/dashboard/referrals/page.tsx
+Use existing referral logic from:
+- Check if there's ReferralDashboard component
+- If not, create using viral-economics lib
+- Show referral link, stats, commission tree
+- Integrate commission-calculator.ts
+
+2.4 REWARDS PAGE
+File: src/app/[locale]/dashboard/rewards/page.tsx
+- Show user tier (Bronze/Silver/Gold/Platinum)
+- Monthly volume progress
+- Commission earned
+- Use tier-manager.ts from viral-economics
+
+2.5 SETTINGS PAGE
+File: src/app/[locale]/dashboard/settings/page.tsx
+- API key management
+- Notification preferences
+- Security settings
+- Account details
+
+STEP 3: Update Overview Page
+─────────────────────────────
+File: src/app/[locale]/dashboard/overview/page.tsx  
+Currently has mock data. Integrate:
+- Real metrics from Supabase
+- UpgradeBanner if user is on free tier
+- Quick links to wallet, trading, referrals
+
+═══════════════════════════════════════════════════════════════════
+IMPLEMENTATION GUIDELINES
+═══════════════════════════════════════════════════════════════════
+
+DO:
+✅ Import and USE existing components
+✅ Preserve all existing component props and functionality
+✅ Add proper TypeScript types
+✅ Handle loading states (Suspense)
+✅ Handle error states
+✅ Use Supabase for real data where needed
+✅ Keep existing styling consistent
+✅ Ensure mobile responsive
+
+DON'T:
+❌ Recreate components that already exist
+❌ Delete any existing components
+❌ Change component APIs without checking usage
+❌ Use mock data where real data source exists
+❌ Skip error handling
+
+═══════════════════════════════════════════════════════════════════
+EXAMPLE: Wallet Page Integration
+═══════════════════════════════════════════════════════════════════
+
+```typescript
+'use client';
+
+import { Suspense } from 'react';
+import { RealtimeWallet } from '@/components/dashboard/RealtimeWallet';
+import { LockedFeature } from '@/components/dashboard/LockedFeature';
+import { useUser } from '@/hooks/useUser'; // or appropriate auth hook
+
+export default function WalletPage() {
+  const { user, tier } = useUser();
+  
+  if (tier === 'FREE') {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Wallet</h1>
+        <LockedFeature 
+          feature="wallet"
+          requiredTier="BASIC"
+          upgradeUrl="/en/pricing"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Wallet</h1>
+      <Suspense fallback={<WalletSkeleton />}>
+        <RealtimeWallet userId={user.id} />
+      </Suspense>
+    </div>
+  );
+}
+
+function WalletSkeleton() {
+  return <div className="animate-pulse">Loading...</div>;
+}
+```
+
+═══════════════════════════════════════════════════════════════════
+SUCCESS CRITERIA
+═══════════════════════════════════════════════════════════════════
+
+Task complete when:
+✓ All 5 placeholder dashboard pages use real components
+✓ No "coming soon" placeholders remain
+✓ All existing components are integrated
+✓ Pages compile without TypeScript errors
+✓ Mobile responsive maintained
+✓ Loading states implemented
+✓ Error states handled
+
+═══════════════════════════════════════════════════════════════════
+PRIORITY ORDER
+═══════════════════════════════════════════════════════════════════
+
+1. WALLET (highest priority - user checking balance)
+2. TRADING (second - core feature)
+3. REFERRALS (third - revenue feature)
+4. REWARDS (fourth - gamification)
+5. SETTINGS (fifth - admin)
+
+═══════════════════════════════════════════════════════════════════
+
+START NOW! View existing components first, then integrate systematically.
+DO NOT recreate what already exists - INTEGRATE!
+
+兵貴神速 - Speed with preservation!

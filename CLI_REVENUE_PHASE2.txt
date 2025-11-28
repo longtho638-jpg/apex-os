@@ -1,0 +1,683 @@
+# CLI TASK: REVENUE PHASE 2 - GROWTH ACCELERATION
+
+## CONTEXT
+Phase 1 deployed successfully (analytics, landing, pricing, signup).
+Now: Build conversion engines + traffic drivers for $1M revenue 2026.
+
+**Current**: 0 MRR  
+**Target**: Month 1: $500-1K, Month 3: $5K, Month 13: $1M
+
+---
+
+## 🔥 HEAVY TASK 1: ADMIN ANALYTICS DASHBOARD
+
+### Objective
+Internal dashboard to monitor conversion funnel in real-time
+
+### Requirements
+
+**Page**: `src/app/[locale]/admin/analytics-dashboard/page.tsx`
+
+**Metrics to Display**:
+1. **Funnel Conversion Rates**:
+   - Landing → Signup (target: +20%)
+   - Signup → Email Verified (target: 80%)
+   - Free Trial → Paid (target: 10%)
+
+2. **Revenue Metrics**:
+   - MRR (Monthly Recurring Revenue)
+   - ARR (Annual Recurring Revenue)
+   - ARPU (Average Revenue Per User)
+   - Churn rate
+
+3. **User Growth**:
+   - Daily signups
+   - Total active users
+   - Trial vs Paid split
+
+4. **A/B Testing Results**:
+   - Pricing variant distribution
+   - Conversion rate by variant
+   - Revenue per variant
+
+5. **Top Events (Last 7 Days)**:
+   - Most common events
+   - Event counts
+   - Trend graphs
+
+**Implementation**:
+
+#### 1.1 Create API Endpoints
+
+**File**: `src/app/api/admin/analytics/funnel/route.ts`
+```typescript
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function GET(request: Request) {
+  const supabase = createClient();
+  
+  // Check admin auth
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  // Funnel metrics (last 30 days)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  // Count events by type
+  const { data: events } = await supabase
+    .from('analytics_events')
+    .select('event_name, created_at')
+    .gte('created_at', thirtyDaysAgo.toISOString());
+  
+  const eventCounts = events?.reduce((acc, e) => {
+    acc[e.event_name] = (acc[e.event_name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>) || {};
+  
+  // Calculate conversion rates
+  const landingViews = eventCounts['landing_page_view'] || 0;
+  const signupStarted = eventCounts['signup_started'] || 0;
+  const signupCompleted = eventCounts['signup_completed'] || 0;
+  const paymentCompleted = eventCounts['payment_completed'] || 0;
+  
+  const landingToSignup = landingViews > 0 
+    ? ((signupStarted / landingViews) * 100).toFixed(2)
+    : '0.00';
+  
+  const signupCompletion = signupStarted > 0
+    ? ((signupCompleted / signupStarted) * 100).toFixed(2)
+    : '0.00';
+  
+  const trialToPaid = signupCompleted > 0
+    ? ((paymentCompleted / signupCompleted) * 100).toFixed(2)
+    : '0.00';
+  
+  return NextResponse.json({
+    funnel: {
+      landingViews,
+      signupStarted,
+      signupCompleted,
+      paymentCompleted,
+    },
+    conversionRates: {
+      landingToSignup: parseFloat(landingToSignup),
+      signupCompletion: parseFloat(signupCompletion),
+      trialToPaid: parseFloat(trialToPaid),
+    },
+  });
+}
+```
+
+**File**: `src/app/api/admin/analytics/revenue/route.ts`
+```typescript
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+export async function GET() {
+  const supabase = createClient();
+  
+  // Get all paid users with their subscription info
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, subscription_tier, subscription_price, created_at')
+    .not('subscription_tier', 'is', null);
+  
+  const totalUsers = users?.length || 0;
+  
+  // Calculate MRR (sum of all monthly subscriptions)
+  const mrr = users?.reduce((sum, user) => {
+    // Assuming annual = monthly * 10 (20% discount implied)
+    const price = user.subscription_price || 0;
+    return sum + price;
+  }, 0) || 0;
+  
+  const arr = mrr * 12;
+  const arpu = totalUsers > 0 ? mrr / totalUsers : 0;
+  
+  return NextResponse.json({
+    mrr: mrr.toFixed(2),
+    arr: arr.toFixed(2),
+    arpu: arpu.toFixed(2),
+    paidUsers: totalUsers,
+  });
+}
+```
+
+#### 1.2 Create Dashboard Page
+
+**File**: `src/app/[locale]/admin/analytics-dashboard/page.tsx`
+```typescript
+'use client';
+
+import { useEffect, useState } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Sidebar } from '@/components/os/sidebar';
+import { AuroraBackground } from '@/components/ui/aurora-background';
+import { TrendingUp, Users, DollarSign, Target } from 'lucide-react';
+
+export default function AnalyticsDashboard() {
+  const [funnel, setFunnel] = useState<any>(null);
+  const [revenue, setRevenue] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const [funnelRes, revenueRes] = await Promise.all([
+        fetch('/api/admin/analytics/funnel'),
+        fetch('/api/admin/analytics/revenue'),
+      ]);
+      
+      setFunnel(await funnelRes.json());
+      setRevenue(await revenueRes.json());
+      setLoading(false);
+    };
+    
+    fetchData();
+    const interval = setInterval(fetchData, 60000); // Refresh every minute
+    return () => clearInterval(interval);
+  }, []);
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  return (
+    <div className="flex h-screen w-full bg-[#030303] text-white">
+      <Sidebar />
+      <main className="flex-1 relative overflow-hidden">
+        <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
+          <div />
+        </AuroraBackground>
+        
+        <div className="relative z-10 h-full overflow-y-auto">
+          <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
+            <h1 className="text-2xl font-bold">Revenue Analytics</h1>
+            <p className="text-sm text-zinc-400">Real-time conversion & revenue metrics</p>
+          </header>
+          
+          <div className="p-6 space-y-6">
+            {/* Revenue KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <GlassCard className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-zinc-400">MRR</span>
+                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="text-3xl font-bold">${revenue?.mrr || 0}</div>
+                <div className="text-xs text-zinc-500 mt-1">Monthly Recurring Revenue</div>
+              </GlassCard>
+              
+              <GlassCard className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-zinc-400">ARR</span>
+                  <TrendingUp className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="text-3xl font-bold">${revenue?.arr || 0}</div>
+                <div className="text-xs text-zinc-500 mt-1">Annual Recurring Revenue</div>
+              </GlassCard>
+              
+              <GlassCard className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-zinc-400">ARPU</span>
+                  <Users className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-3xl font-bold">${revenue?.arpu || 0}</div>
+                <div className="text-xs text-zinc-500 mt-1">Average Revenue Per User</div>
+              </GlassCard>
+              
+              <GlassCard className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-zinc-400">Paid Users</span>
+                  <Target className="w-5 h-5 text-yellow-400" />
+                </div>
+                <div className="text-3xl font-bold">{revenue?.paidUsers || 0}</div>
+                <div className="text-xs text-zinc-500 mt-1">Paying customers</div>
+              </GlassCard>
+            </div>
+            
+            {/* Conversion Funnel */}
+            <GlassCard className="p-6">
+              <h2 className="text-lg font-bold mb-4">Conversion Funnel (Last 30 Days)</h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span>Landing Views → Signup Started</span>
+                    <span className="font-bold">{funnel?.conversionRates.landingToSignup}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-emerald-500"
+                      style={{ width: `${funnel?.conversionRates.landingToSignup}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-zinc-500 mt-1">
+                    {funnel?.funnel.landingViews} views → {funnel?.funnel.signupStarted} started
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span>Signup Started → Completed</span>
+                    <span className="font-bold">{funnel?.conversionRates.signupCompletion}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-500"
+                      style={{ width: `${funnel?.conversionRates.signupCompletion}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-zinc-500 mt-1">
+                    {funnel?.funnel.signupStarted} started → {funnel?.funnel.signupCompleted} completed
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span>Free Trial → Paid</span>
+                    <span className="font-bold text-emerald-400">{funnel?.conversionRates.trialToPaid}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-purple-500"
+                      style={{ width: `${funnel?.conversionRates.trialToPaid}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-zinc-500 mt-1">
+                    {funnel?.funnel.signupCompleted} trials → {funnel?.funnel.paymentCompleted} paid
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Dashboard shows real-time metrics (auto-refresh 60s)
+- [ ] Funnel visualized with progress bars
+- [ ] Revenue metrics (MRR, ARR, ARPU) calculated correctly
+- [ ] Admin-only access (auth check in API)
+- [ ] Mobile responsive
+- [ ] Build succeeds, 0 errors
+
+---
+
+## 🔥 HEAVY TASK 2: EMAIL DRIP CAMPAIGN SYSTEM
+
+### Objective
+Convert free trial users to paid subscribers via automated emails
+
+### Requirements
+
+**Email Sequence** (7-day trial):
+- Day 0: Welcome email (immediate after signup)
+- Day 2: Feature highlight (AI signals value)
+- Day 4: Success story (social proof)
+- Day 6: Trial ending reminder (urgency)
+- Day 7: Last chance (payment CTA)
+
+**Implementation**:
+
+#### 2.1 Email Templates
+
+**Create**: `src/lib/email-templates.ts`
+```typescript
+export const emailTemplates = {
+  welcome: {
+    subject: '🎉 Welcome to ApexOS - Your AI Trading Journey Starts Now',
+    html: (name: string) => `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #10b981;">Welcome to ApexOS, ${name}!</h1>
+        <p>You've just unlocked access to AI-powered trading signals trusted by 1,000+ traders.</p>
+        <h2>What's Next?</h2>
+        <ul>
+          <li>✅ Explore 247+ active AI signals</li>
+          <li>✅ Set up your first trade alert</li>
+          <li>✅ Join our community Discord</li>
+        </ul>
+        <a href="https://apex-os.vercel.app/dashboard" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0;">
+          Get Started →
+        </a>
+        <p style="color: #888; font-size: 14px;">Your 7-day free trial is active. No credit card required.</p>
+      </div>
+    `,
+  },
+  
+  featureHighlight: {
+    subject: '💡 You're Missing Out on These ApexOS Features',
+    html: (name: string) => `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1>Hey ${name},</h1>
+        <p>You've had ApexOS for 2 days. Here's what you might have missed:</p>
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <h3 style="color: #10b981;">🤖 AI Signal Accuracy: 68% Win Rate</h3>
+          <p>Our AI models analyze 1,000+ data points per second to generate high-probability trades.</p>
+        </div>
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <h3 style="color: #3b82f6;">📊 Real-Time Portfolio Tracking</h3>
+          <p>See your P&L update in real-time. Make data-driven decisions instantly.</p>
+        </div>
+        <a href="https://apex-os.vercel.app/signals" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px;">
+          Explore Signals →
+        </a>
+      </div>
+    `,
+  },
+  
+  trialEnding: {
+    subject: '⏰ Your ApexOS Trial Ends in 24 Hours',
+    html: (name: string) => `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #f59e0b;">⏰ Don't Lose Access, ${name}!</h1>
+        <p>Your 7-day free trial ends in <strong>24 hours</strong>.</p>
+        <p>To keep your AI trading edge:</p>
+        <div style="background: #fef3c7; padding: 20px; border-left: 4px solid #f59e0b; margin: 20px 0;">
+          <h3 style="margin: 0 0 10px 0;">⚡ Upgrade Now & Save 20%</h3>
+          <p style="margin: 0;">Use code <strong>TRIAL20</strong> for 20% off your first month.</p>
+        </div>
+        <a href="https://apex-os.vercel.app/pricing" style="display: inline-block; padding: 12px 24px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; margin: 10px 0;">
+          Upgrade Now →
+        </a>
+        <p style="font-size: 12px; color: #888;">What you'll lose: AI signals, portfolio tracking, premium support</p>
+      </div>
+    `,
+  },
+};
+```
+
+#### 2.2 Email Service Integration
+
+**File**: `src/lib/email-service.ts`
+```typescript
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+}) {
+  try {
+    const data = await resend.emails.send({
+      from: 'ApexOS <hello@apex-os.com>',
+      to,
+      subject,
+      html,
+    });
+    
+    return { success: true, id: data.id };
+  } catch (error) {
+    console.error('Email send error:', error);
+    return { success: false, error };
+  }
+}
+```
+
+#### 2.3 Drip Campaign Scheduler
+
+**File**: `src/app/api/cron/drip-campaign/route.ts`
+```typescript
+// Vercel Cron Job - runs daily
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { sendEmail } from '@/lib/email-service';
+import { emailTemplates } from '@/lib/email-templates';
+
+export async function GET(request: Request) {
+  // Verify cron secret
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  const supabase = createClient();
+  
+  // Get users in trial (trial_ends_at > now)
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, email, name, created_at, trial_ends_at')
+    .not('trial_ends_at', 'is', null)
+    .gte('trial_ends_at', new Date().toISOString());
+  
+  const now = new Date();
+  let emailsSent = 0;
+  
+  for (const user of users || []) {
+    const signupDate = new Date(user.created_at);
+    const daysActive = Math.floor((now.getTime() - signupDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    let emailData null;
+    
+    // Day 2: Feature highlight
+    if (daysActive === 2) {
+      emailData = {
+        to: user.email,
+        subject: emailTemplates.featureHighlight.subject,
+        html: emailTemplates.featureHighlight.html(user.name || 'there'),
+      };
+    }
+    
+    // Day 6: Trial ending
+    else if (daysActive === 6) {
+      emailData = {
+        to: user.email,
+        subject: emailTemplates.trialEnding.subject,
+        html: emailTemplates.trialEnding.html(user.name || 'there'),
+      };
+    }
+    
+    if (emailData) {
+      await sendEmail(emailData);
+      emailsSent++;
+    }
+  }
+  
+  return NextResponse.json({ 
+    success: true,
+    emailsSent,
+    usersProcessed: users?.length || 0,
+  });
+}
+```
+
+**Setup Vercel Cron** (in `vercel.json`):
+```json
+{
+  "crons": [{
+    "path": "/api/cron/drip-campaign",
+    "schedule": "0 10 * * *"
+  }]
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Email templates created (3 minimum: welcome, feature, trial ending)
+- [ ] Resend integration working
+- [ ] Cron job scheduled (runs daily 10am)
+- [ ] Emails sent based on user signup date
+- [ ] No duplicate emails (track sent emails in DB)
+- [ ] Build succeeds, 0 errors
+
+---
+
+## 🔥 HEAVY TASK 3: SEO OPTIMIZATION
+
+### Objective
+Organic traffic from Google for "crypto trading signals", "AI trading bot", etc.
+
+### Requirements
+
+#### 3.1 Meta Tags (All Public Pages)
+
+**Files to update**:
+- `src/app/[locale]/landing/page.tsx`
+- `src/app/[locale]/pricing/page.tsx`
+- `src/app/[locale]/blog/page.tsx` (if exists)
+
+**Add to each page**:
+```typescript
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'ApexOS - AI-Powered Crypto Trading Signals | 68% Win Rate',
+  description: 'Join 1,000+ traders using AI-powered signals. Real-time alerts, portfolio tracking, and proven 68% win rate. Start your free 7-day trial today.',
+  keywords: 'crypto trading signals, AI trading bot, trading signals, portfolio tracking, crypto alerts',
+  openGraph: {
+    title: 'ApexOS - AI-Powered Crypto Trading Signals',
+    description: 'Join 1,000+ traders using AI signals with 68% win rate',
+    url: 'https://apex-os.com',
+    siteName: 'ApexOS',
+    images: [
+      {
+        url: 'https://apex-os.com/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ApexOS - AI-Powered Crypto Trading Signals',
+    description: 'Join 1,000+ traders using AI signals with 68% win rate',
+    images: ['https://apex-os.com/og-image.png'],
+  },
+};
+```
+
+#### 3.2 Sitemap Generation
+
+**File**: `src/app/sitemap.ts`
+```typescript
+import { MetadataRoute } from 'next';
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = 'https://apex-os.com';
+  
+  return [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/pricing`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/dashboard`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+  ];
+}
+```
+
+#### 3.3 Robots.txt
+
+**File**: `public/robots.txt`
+```
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://apex-os.com/sitemap.xml
+```
+
+#### 3.4 Blog Post Template (SEO-Optimized)
+
+**File**: `src/app/[locale]/blog/[slug]/page.tsx`
+```typescript
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  // Fetch blog post data
+  const post = await getBlogPost(params.slug);
+  
+  return {
+    title: `${post.title} | ApexOS Blog`,
+    description: post.excerpt,
+    keywords: post.tags.join(', '),
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: 'article',
+      publishedTime: post.publishedAt,
+      authors: [post.author],
+    },
+  };
+}
+
+export default function BlogPost({ params }: { params: { slug: string } }) {
+  // Blog post content
+  return (
+    <article>
+      <h1>{/* Title */}</h1>
+      {/* Content */}
+    </article>
+  );
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Meta tags on all public pages
+- [ ] Sitemap generated (`/sitemap.xml`)
+- [ ] Robots.txt configured
+- [ ] Blog structure SEO-optimized
+- [ ] Open Graph images created
+- [ ] Google Search Console verified
+- [ ] Build succeeds, 0 errors
+
+---
+
+## EXECUTION PARAMETERS
+
+**Quality Requirements** (NO TECHNICAL DEBT):
+- [ ] TypeScript strict mode
+- [ ] Error handling (no uncaught errors)
+- [ ] Performance: APIs < 500ms response
+- [ ] Security: Admin routes protected
+- [ ] Mobile responsive
+- [ ] Build: 0 errors, 0 warnings
+
+**Deliverables**:
+1. Admin Analytics Dashboard (fully functional)
+2. Email Drip Campaign (automated, scheduled)
+3. SEO Optimization (meta tags, sitemap, robots.txt)
+
+**Estimated Time**: 2-3 hours (CLI execution)
+
+**Impact**:
+- Analytics: Visibility into conversion (week 1+)
+- Email Drip: +20-30% trial→paid conversion
+- SEO: Long-term organic traffic growth
+
+---
+
+**兵貴神速** - Execute with speed!  
+**Ready for deployment!** 🚀💎⚔️

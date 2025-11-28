@@ -1,0 +1,52 @@
+Read and execute this task from GEMINI_TASK_REALTIME_PAYOUT.md
+
+This is a critical 4-week implementation task for realtime commission + auto anonymous payout system.
+
+PHASES TO EXECUTE (in order):
+
+Phase 1 (Week 1): Database Foundation
+- Create supabase/migrations/20251127_realtime_wallet_system.sql
+- Add tables: user_wallets, commission_events, withdrawal_requests, withdrawal_audit_log
+- Add functions: credit_user_balance_realtime(), reserve_balance_for_withdrawal()
+- Add RLS policies
+- TEST: supabase db push works
+
+Phase 2 (Week 1-2): Realtime Commission
+- Create src/lib/viral-economics/realtime-commission.ts
+- Hook trade events → instant balance credit
+- Calculate L1-L4 commissions instantly
+- Emit realtime events
+- TEST: Trade → balance <1s
+
+Phase 3 (Week 2): Withdrawal + Agent
+- Create src/app/api/v1/wallet/withdraw/route.ts
+- Create src/lib/agents/withdrawal-agent.ts
+- Implement checksums, fraud detection, AML
+- TEST: Withdrawal → agent approves/rejects
+
+Phase 4 (Week 3): NOWPayments Integration
+- Sign up https://nowpayments.io SANDBOX
+- Create src/lib/payments/nowpayments-client.ts
+- Create src/lib/agents/execution-agent.ts
+- Admin approval → auto-execute
+- TEST: Full flow → tx_hash returned
+
+Phase 5 (Week 3-4): Realtime Dashboard
+- Create src/components/dashboard/RealtimeWallet.tsx
+- Subscribe Supabase Realtime
+- Show balance + events realtime
+- TEST: User sees <1s updates
+
+SECURITY REQUIRED:
+☑ Checksums on withdrawals
+☑ RLS policies
+☑ Immutable audit log
+☑ Admin 2FA
+☑ Separation of duties
+☑ >90% test coverage
+
+Read GEMINI_TASK_REALTIME_PAYOUT.md for complete details.
+
+Execute Phase 1 first, report back before Phase 2.
+
+GO!

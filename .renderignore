@@ -1,0 +1,9 @@
+# Render: Ignore Next.js, deploy Python backend only
+# This file tells Render to NOT auto-detect the Next.js app
+ignored_build_filter:
+  paths:
+    - src/**
+    - public/**
+    - next.config.ts
+    - package.json
+    - tsconfig.json

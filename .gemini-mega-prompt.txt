@@ -1,0 +1,45 @@
+Execute GEMINI_MEGA_TASK.md - Complete Week 1 + Prepare Week 2
+
+This is a HEAVY DUTY mission to maximize your 2000 request quota.
+
+## OBJECTIVES:
+✅ Complete ENTIRE Week 1 "Safety Net" Sprint (100%)
+✅ Prepare Week 2 "Brain Build" foundation (40%)
+✅ Implement, test, document EVERYTHING
+✅ Zero technical debt maintained
+
+## SCOPE:
+- Part 1: Week 1 Implementation (Sentry, Redis, UptimeRobot, RLS, Seed Data)
+- Part 2: Week 2 Preparation (Binance API, Paper Trading, ML Architecture)
+- Part 3: Code Quality (Tests, TypeScript audit)
+- Part 4: Documentation (Progress tracker, diagrams)
+- Part 5: Security (Audit, fixes)
+
+## DELIVERABLES:
+- ~25 code files (implementations, not just plans)
+- ~20 documentation files
+- 10+ new tests
+- Test coverage: 48% → 70%+
+- Week 1: 30% → 100%
+- Week 2: 0% → 40%
+- Overall: 22% → 35%
+
+## REQUIREMENTS:
+- Work sequentially through all 5 parts
+- Prioritize P0 tasks first
+- AUTO-IMPLEMENT (don't just document)
+- Test everything you build
+- Commit after each major section
+- No questions, no breaks - just execute
+- Use full 2000 request quota
+
+## QUALITY STANDARDS:
+- All TypeScript checks pass
+- All tests pass (100%)
+- All new code has tests
+- All docs complete
+- Zero technical debt
+
+READ FULL DETAILS: @GEMINI_MEGA_TASK.md
+
+START NOW! 🚀💎⚔️

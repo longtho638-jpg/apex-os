@@ -1,0 +1,19 @@
+═══════════════════════════════════════════════════════════════════
+MEGA TASK: APEX OS - FRONTEND WOW TRANSFORMATION 
+Target: Convert visitors to PAYING customers with jaw-dropping UX
+Complexity Level: ULTRA PRO (2000 request capacity utilization)
+Estimated Scope: 12-15 components, 2000+ lines TypeScript/React
+═══════════════════════════════════════════════════════════════════
+
+STRATEGIC CONTEXT:
+We have WORLD-CLASS AI backend (Multi-Model Ensemble, Autonomous Agents, 1,627 lines production code) but WEAK frontend presentation. Users cannot SEE the AI power. Mission: Build Ferrari-grade frontend to match Ferrari-grade backend.
+
+Current State Analysis:
+- Backend: 9.5/10 (Multi-signal AI, Real-time, Production-ready)
+- Frontend: 6/10 (Good structure but missing WOW factor)
+- Conversion Risk: Users won't pay for invisible power
+- Competitor Gap: They have flashy demos, we have better tech
+
+Goal: Create visceral "I NEED THIS" reaction in <30 seconds of homepage visit.
+
+[REST OF THE 5000+ TOKEN MEGA PROMPT FROM PREVIOUS MESSAGE - TRUNCATED HERE FOR BREVITY BUT INCLUDE FULL CONTENT IN ACTUAL FILE]

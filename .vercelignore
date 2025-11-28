@@ -1,0 +1,57 @@
+# Backend - Deploy separately on Railway/Fly.io
+backend/
+**/backend/**
+
+# Python virtual environments
+venv/
+venv_new/
+.venv/
+env/
+ENV/
+
+# Python bytecode
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+*.so
+
+# Large binary files
+*.dylib
+*.pyd
+*.dll
+
+# ML models (too large)
+*.pkl
+*.joblib
+*.h5
+*.pb
+
+# Test files
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+
+# Documentation (not needed in production)
+docs/
+*.md
+!README.md
+
+# Development files  
+.git/
+.github/
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Temporary files
+.DS_Store
+*.swp
+*.swo
+*~
+backend/
+src/app/api/v1/trading/
