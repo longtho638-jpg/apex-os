@@ -1,15 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClientSide } from '@/lib/supabase';
 import { ArrowUp, Clock, CheckCircle, XCircle } from 'lucide-react';
-
-// Initialize Supabase client
-// Note: In a real app, use createClientComponentClient from @supabase/auth-helpers-nextjs
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 interface CommissionEvent {
   id: string;
@@ -27,6 +20,9 @@ export function RealtimeWallet({ userId }: { userId: string }) {
   const [wallet, setWallet] = useState<WalletData>({ balance_usd: 0, total_earned: 0 });
   const [recentCommissions, setRecentCommissions] = useState<CommissionEvent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Use singleton client
+  const supabase = getSupabaseClientSide();
 
   useEffect(() => {
     if (!userId) return;

@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { jwtVerify } from 'jose';
-
-const JWT_SECRET = new TextEncoder().encode(
-    process.env.SUPABASE_JWT_SECRET || 'your-secret-key-change-in-production'
-);
 
 export async function GET(request: NextRequest) {
     try {
-        // 1. Verify Auth
+        // 1. Extract Token
         const authHeader = request.headers.get('authorization');
         let token: string | undefined;
 
@@ -22,22 +17,25 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         }
 
-        let userId: string;
+        // 2. Verify Auth using Supabase Auth (more robust than manual JWT verification)
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+        const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
 
-        try {
-            const verified = await jwtVerify(token, JWT_SECRET);
-            userId = verified.payload.sub as string;
-        } catch (err) {
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+
+        if (authError || !user) {
             return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 401 });
         }
 
-        // 2. Fetch Admin Profile
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        // Use Service Role Key to bypass RLS since we verified the JWT manually
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
+        const userId = user.id;
 
-        const { data, error } = await supabase
+        // 3. Fetch Admin Profile
+        // Use Service Role Key to bypass RLS since we verified the user
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+        const { data, error } = await supabaseAdmin
             .from('admin_users')
             .select('*')
             .eq('id', userId)
@@ -64,3 +62,4 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }
+
