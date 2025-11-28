@@ -1,0 +1,725 @@
+# CLI TASK: COMPLETE PAYMENT INTEGRATION (REVISED)
+## ⚠️ CRITICAL: NO BINANCE PAY - Use Polar + NOWPayments Only
+
+**Context**: You've already completed Steps 1-5. Now finish the remaining implementation.
+
+**Payment Providers**:
+- ✅ **Polar**: Card payments (Visa, Mastercard, Amex) - fiat
+- ✅ **NOWPayments**: Crypto payments (BTC, ETH, USDT) - no KYB required
+- ❌ **Binance Pay**: REMOVED (KYB issues) - DO NOT IMPLEMENT
+
+**Current State**:
+✅ Dependencies installed (@polar-sh/sdk, zod)
+✅ Database migration created (20251126_payment_system.sql)
+✅ Config created (payment-tiers.ts)
+✅ Polar client implemented (polar-client.ts)
+✅ NOWPayments client exists (nowpayments-client.ts)
+
+**Remaining Tasks**: Complete webhook, Checkout API, and UI components.
+
+---
+
+## STEP 6: Polar Webhook Handler ✅
+
+**File**: `src/app/api/webhooks/polar/route.ts`
+
+**Requirements**:
+- Verify webhook signature (security critical)
+- Handle events: `checkout.created`, `checkout.completed`, `subscription.created`, `subscription.updated`, `subscription.canceled`
+- Update Supabase tables: `transactions`, `subscriptions`, `users`
+- Send confirmation emails via Resend
+- Error handling & logging
+
+**Implementation**:
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { Polar } from '@polar-sh/sdk';
+import { getSupabaseClient } from '@/lib/supabase';
+import { sendEmail } from '@/lib/email-service';
+import { emailTemplates } from '@/lib/email-templates';
+import crypto from 'crypto';
+
+const polar = new Polar({
+  accessToken: process.env.POLAR_ACCESS_TOKEN!,
+});
+
+export async function POST(req: NextRequest) {
+  try {
+    // 1. Verify webhook signature
+    const signature = req.headers.get('polar-signature');
+    const body = await req.text();
+    
+    if (!signature || !verifySignature(body, signature, process.env.POLAR_WEBHOOK_SECRET!)) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    const event = JSON.parse(body);
+    const supabase = getSupabaseClient();
+
+    // 2. Handle different event types
+    switch (event.type) {
+      case 'checkout.completed':
+        const checkout = event.data;
+        
+        // Create transaction record
+        const { error: txError } = await supabase.from('transactions').insert({
+          user_id: checkout.customer_id || checkout.metadata?.userId,
+          amount: checkout.amount / 100, // Convert from cents
+          currency: checkout.currency || 'USD',
+          status: 'completed',
+          provider: 'polar',
+          provider_transaction_id: checkout.id,
+          metadata: checkout,
+          created_at: new Date().toISOString(),
+        });
+
+        if (txError) {
+          console.error('Transaction insert error:', txError);
+        }
+
+        // Get tier from product metadata
+        const tier = checkout.product?.metadata?.tier || checkout.metadata?.tier || 'pro';
+
+        // Update user subscription
+        const { error: userError } = await supabase.from('users').update({
+          subscription_tier: tier,
+          subscription_status: 'active',
+          subscription_price: checkout.amount / 100,
+          subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }).eq('id', checkout.customer_id || checkout.metadata?.userId);
+
+        if (userError) {
+          console.error('User update error:', userError);
+        }
+
+        // Send confirmation email
+        if (checkout.customer_email) {
+          await sendEmail({
+            to: checkout.customer_email,
+            subject: '🎉 Payment Successful - Welcome to ApexOS!',
+            html: `
+              <h1>Thank you for your purchase!</h1>
+              <p>Your ${tier.toUpperCase()} subscription is now active.</p>
+              <p>Amount: $${(checkout.amount / 100).toFixed(2)}</p>
+              <p>Start using ApexOS: <a href="https://apexrebate.com/dashboard">Dashboard</a></p>
+            `,
+          });
+        }
+        break;
+
+      case 'subscription.created':
+      case 'subscription.updated':
+        const sub = event.data;
+        
+        await supabase.from('subscriptions').upsert({
+          id: sub.id,
+          user_id: sub.customer_id || sub.metadata?.userId,
+          tier: sub.product?.metadata?.tier || 'pro',
+          status: sub.status,
+          current_period_start: sub.current_period_start,
+          current_period_end: sub.current_period_end,
+          cancel_at_period_end: sub.cancel_at_period_end || false,
+        });
+        break;
+
+      case 'subscription.canceled':
+        await supabase.from('subscriptions').update({
+          status: 'canceled',
+          canceled_at: new Date().toISOString(),
+        }).eq('id', event.data.id);
+
+        // Update user status
+        await supabase.from('users').update({
+          subscription_status: 'canceled',
+        }).eq('id', event.data.customer_id || event.data.metadata?.userId);
+        break;
+    }
+
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error('Polar webhook error:', error);
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
+  }
+}
+
+function verifySignature(body: string, signature: string, secret: string): boolean {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(body)
+    .digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+```
+
+---
+
+## STEP 7: NOWPayments Webhook Handler ✅
+
+**File**: `src/app/api/webhooks/nowpayments/route.ts`
+
+**Requirements**:
+- Verify IPN signature
+- Handle payment status updates
+- Update database on payment completion
+- Send confirmation emails
+
+**Implementation**:
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/lib/supabase';
+import { sendEmail } from '@/lib/email-service';
+import crypto from 'crypto';
+
+export async function POST(req: NextRequest) {
+  try {
+    // 1. Verify IPN signature
+    const signature = req.headers.get('x-nowpayments-sig');
+    const body = await req.text();
+    const event = JSON.parse(body);
+
+    // NOWPayments HMAC verification
+    const expectedSignature = crypto
+      .createHmac('sha512', process.env.NOWPAYMENTS_IPN_SECRET!)
+      .update(JSON.stringify(event))
+      .digest('hex');
+
+    if (signature !== expectedSignature) {
+      console.error('Invalid NOWPayments signature');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    const supabase = getSupabaseClient();
+
+    // 2. Handle payment status
+    if (event.payment_status === 'finished') {
+      // Extract user_id from order_id (format: userId_tier_timestamp)
+      const [userId, tier] = event.order_id.split('_');
+
+      // Create transaction record
+      await supabase.from('transactions').insert({
+        user_id: userId,
+        amount: parseFloat(event.price_amount),
+        currency: event.price_currency,
+        status: 'completed',
+        provider: 'nowpayments',
+        provider_transaction_id: event.payment_id,
+        metadata: {
+          crypto_amount: event.pay_amount,
+          crypto_currency: event.pay_currency,
+          actually_paid: event.actually_paid,
+        },
+        created_at: new Date().toISOString(),
+      });
+
+      // Update user subscription
+      await supabase.from('users').update({
+        subscription_tier: tier,
+        subscription_status: 'active',
+        subscription_price: parseFloat(event.price_amount),
+        subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      }).eq('id', userId);
+
+      // Get user email
+      const { data: user } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      // Send confirmation email
+      if (user?.email) {
+        await sendEmail({
+          to: user.email,
+          subject: '🎉 Crypto Payment Received - Welcome to ApexOS!',
+          html: `
+            <h1>Payment Confirmed!</h1>
+            <p>Your ${tier.toUpperCase()} subscription is now active.</p>
+            <p>Amount paid: ${event.pay_amount} ${event.pay_currency}</p>
+            <p>Transaction ID: ${event.payment_id}</p>
+            <p>Start using ApexOS: <a href="https://apexrebate.com/dashboard">Dashboard</a></p>
+          `,
+        });
+      }
+    } else if (event.payment_status === 'failed' || event.payment_status === 'expired') {
+      // Log failed payment
+      console.error('Payment failed:', event);
+      
+      // Optional: Notify user
+      const [userId] = event.order_id.split('_');
+      const { data: user } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      if (user?.email) {
+        await sendEmail({
+          to: user.email,
+          subject: '❌ Payment Failed - ApexOS',
+          html: `
+            <h1>Payment Failed</h1>
+            <p>Your payment could not be processed.</p>
+            <p>Status: ${event.payment_status}</p>
+            <p>Please try again: <a href="https://apexrebate.com/pricing">Pricing Page</a></p>
+          `,
+        });
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('NOWPayments webhook error:', error);
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
+  }
+}
+```
+
+---
+
+## STEP 8: Unified Checkout API ✅
+
+**File**: `src/app/api/checkout/route.ts`
+
+**Requirements**:
+- Accept tier selection + payment method (card or crypto)
+- Create checkout session (Polar or NOWPayments)
+- Return checkout URL
+- Track checkout event in analytics
+
+**Implementation**:
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { Polar } from '@polar-sh/sdk';
+import { getSupabaseClient } from '@/lib/supabase';
+import { trackEvent } from '@/lib/analytics';
+
+const polar = new Polar({ accessToken: process.env.POLAR_ACCESS_TOKEN! });
+
+// Tier pricing configuration
+const TIER_PRICES = {
+  pro: { usd: 29, name: 'Pro' },
+  trader: { usd: 97, name: 'Trader' },
+  elite: { usd: 297, name: 'Elite' },
+};
+
+export async function POST(req: NextRequest) {
+  try {
+    const { tier, paymentMethod, userId } = await req.json();
+    const supabase = getSupabaseClient();
+
+    // Validate inputs
+    if (!tier || !paymentMethod || !userId) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Validate user
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('email, id')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Get tier pricing
+    const selectedTier = TIER_PRICES[tier as keyof typeof TIER_PRICES];
+    if (!selectedTier) {
+      return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+    }
+
+    let checkoutUrl = '';
+
+    if (paymentMethod === 'card') {
+      // ✅ Use Polar for card payments
+      const productPriceId = process.env[`POLAR_${tier.toUpperCase()}_PRICE_ID`];
+      if (!productPriceId) {
+        return NextResponse.json({ error: 'Product price not configured' }, { status: 500 });
+      }
+
+      const checkout = await polar.checkouts.create({
+        productPriceId,
+        customerEmail: user.email,
+        successUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success`,
+        metadata: { userId: user.id, tier },
+      });
+      
+      checkoutUrl = checkout.url;
+
+    } else if (paymentMethod === 'crypto') {
+      // ✅ Use NOWPayments for crypto
+      const orderId = `${user.id}_${tier}_${Date.now()}`;
+      
+      const nowPaymentsResponse = await fetch('https://api.nowpayments.io/v1/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.NOWPAYMENTS_API_KEY!,
+        },
+        body: JSON.stringify({
+          price_amount: selectedTier.usd,
+          price_currency: 'usd',
+          pay_currency: 'btc', // User can choose on their end
+          order_id: orderId,
+          order_description: `ApexOS ${selectedTier.name} Subscription`,
+          ipn_callback_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhooks/nowpayments`,
+          success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success`,
+          cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pricing`,
+        }),
+      });
+
+      const nowPaymentsData = await nowPaymentsResponse.json();
+      checkoutUrl = nowPaymentsData.invoice_url;
+
+    } else {
+      return NextResponse.json({ error: 'Invalid payment method' }, { status: 400 });
+    }
+
+    // Track checkout event
+    await trackEvent({
+      event_name: 'checkout_started',
+      user_id: userId,
+      metadata: { tier, paymentMethod, amount: selectedTier.usd },
+    });
+
+    return NextResponse.json({ checkoutUrl });
+  } catch (error) {
+    console.error('Checkout API error:', error);
+    return NextResponse.json({ 
+      error: 'Checkout failed', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 });
+  }
+}
+```
+
+---
+
+## STEP 9: UI Components ✅
+
+**File**: `src/components/checkout/PaymentMethodSelector.tsx`
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { CreditCard, Coins } from 'lucide-react';
+
+interface PaymentMethodSelectorProps {
+  onSelect: (method: 'card' | 'crypto') => void;
+}
+
+export function PaymentMethodSelector({ onSelect }: PaymentMethodSelectorProps) {
+  const [selected, setSelected] = useState<'card' | 'crypto' | null>(null);
+
+  const handleSelect = (method: 'card' | 'crypto') => {
+    setSelected(method);
+    onSelect(method);
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <GlassCard
+        className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+          selected === 'card' ? 'ring-2 ring-emerald-400 bg-emerald-400/10' : ''
+        }`}
+        onClick={() => handleSelect('card')}
+      >
+        <div className="flex flex-col items-center text-center">
+          <CreditCard className="w-12 h-12 mb-3 text-emerald-400" />
+          <h3 className="font-bold text-lg mb-1">Card Payment</h3>
+          <p className="text-sm text-zinc-400">Visa, Mastercard, Amex</p>
+          <p className="text-xs text-zinc-500 mt-2">via Polar</p>
+        </div>
+      </GlassCard>
+
+      <GlassCard
+        className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+          selected === 'crypto' ? 'ring-2 ring-blue-400 bg-blue-400/10' : ''
+        }`}
+        onClick={() => handleSelect('crypto')}
+      >
+        <div className="flex flex-col items-center text-center">
+          <Coins className="w-12 h-12 mb-3 text-blue-400" />
+          <h3 className="font-bold text-lg mb-1">Crypto Payment</h3>
+          <p className="text-sm text-zinc-400">BTC, ETH, USDT</p>
+          <p className="text-xs text-zinc-500 mt-2">via NOWPayments</p>
+        </div>
+      </GlassCard>
+    </div>
+  );
+}
+```
+
+**File**: `src/components/checkout/CheckoutModal.tsx`
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+import { PaymentMethodSelector } from './PaymentMethodSelector';
+import { Button } from '@/components/ui/button';
+import { X, Loader2 } from 'lucide-react';
+
+interface CheckoutModalProps {
+  tier: 'pro' | 'trader' | 'elite';
+  userId: string;
+  onClose: () => void;
+  isOpen: boolean;
+}
+
+const TIER_DETAILS = {
+  pro: { price: 29, name: 'Pro' },
+  trader: { price: 97, name: 'Trader' },
+  elite: { price: 297, name: 'Elite' },
+};
+
+export function CheckoutModal({ tier, userId, onClose, isOpen }: CheckoutModalProps) {
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto' | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!isOpen) return null;
+
+  const tierDetails = TIER_DETAILS[tier];
+
+  const handleCheckout = async () => {
+    if (!paymentMethod) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier, paymentMethod, userId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Checkout failed');
+      }
+
+      const { checkoutUrl } = await response.json();
+      
+      if (!checkoutUrl) {
+        throw new Error('No checkout URL received');
+      }
+
+      // Redirect to payment page
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setError(err instanceof Error ? err.message : 'Checkout failed. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-[#0a0a0a] border border-white/10 rounded-lg max-w-md w-full p-8 relative">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-zinc-400 hover:text-white transition"
+          disabled={loading}
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Header */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-2">Upgrade to {tierDetails.name}</h2>
+          <p className="text-3xl font-bold text-emerald-400">${tierDetails.price}<span className="text-lg text-zinc-400">/month</span></p>
+        </div>
+
+        {/* Payment method selector */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-zinc-400 mb-3">Choose Payment Method</h3>
+          <PaymentMethodSelector onSelect={setPaymentMethod} />
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex gap-3">
+          <Button
+            onClick={onClose}
+            variant="outline"
+            disabled={loading}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCheckout}
+            disabled={!paymentMethod || loading}
+            className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Continue to Payment'
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## STEP 10: Environment Variables Setup ✅
+
+**Update**: `.env.local` with the following (remove all Binance Pay vars):
+
+```bash
+# ✅ Polar (Card Payments)
+POLAR_ACCESS_TOKEN=polar_xxx
+POLAR_WEBHOOK_SECRET=whsec_xxx
+POLAR_PRO_PRICE_ID=price_xxx
+POLAR_TRADER_PRICE_ID=price_xxx
+POLAR_ELITE_PRICE_ID=price_xxx
+
+# ✅ NOWPayments (Crypto Payments)
+NOWPAYMENTS_API_KEY=xxx
+NOWPAYMENTS_IPN_SECRET=xxx
+
+# Base URL
+NEXT_PUBLIC_BASE_URL=https://apexrebate.com
+
+# Existing
+RESEND_API_KEY=re_GW3i7AqG_LtSbqqJSEFqfZN4ZX2MdDuKe
+CRON_SECRET=Py4PUcB6x5c0623imVIEgqcxSEfFW+ApPnNYK9+C4FY=
+```
+
+**⚠️ IMPORTANT**: Add these to Vercel dashboard after deployment!
+
+---
+
+## STEP 11: Clean Up OLD Code ✅
+
+**DELETE these files** (Binance Pay remnants):
+
+```bash
+rm src/lib/payments/binance-pay-client.ts
+rm src/app/api/webhooks/binance-pay/route.ts  # if exists
+```
+
+**Verify removal**:
+```bash
+grep -r "binance" src/ --exclude-dir=node_modules
+# Should return: No results
+```
+
+---
+
+## STEP 12: Testing Checklist ✅
+
+**Manual Tests**:
+
+1. **Card payment flow (Polar)**: ✅
+   - Navigate to pricing page
+   - Click "Upgrade to Pro"
+   - Select "Card Payment"
+   - Redirected to Polar checkout
+   - Complete test payment (use Polar test mode)
+   - Verify: Transaction in DB, user.subscription_tier updated, email received
+
+2. **Crypto payment flow (NOWPayments)**: ✅
+   - Navigate to pricing page
+   - Click "Upgrade to Trader"
+   - Select "Crypto Payment"
+   - Redirected to NOWPayments invoice
+   - Complete test payment (use NOWPayments sandbox)
+   - Verify: Transaction in DB, user subscription updated, email received
+
+3. **Webhook verification**: ✅
+   - Use Polar CLI: `polar webhooks trigger checkout.completed`
+   - Use NOWPayments IPN simulator
+   - Verify: DB updates correctly, emails sent
+
+4. **Error handling**: ✅
+   - Invalid signature → 401
+   - Invalid tier → 400
+   - Network error → Proper error message to user
+
+---
+
+## FINAL VERIFICATION
+
+**Build**:
+```bash
+npm run build
+```
+Expected: ✅ 0 errors, 0 warnings
+
+**Deployment**:
+```bash
+# Commit changes
+git add .
+git commit -m "feat: payment integration polar + nowpayments"
+git push origin main
+
+# Or direct deploy
+vercel deploy --prod
+```
+
+**Post-Deploy Configuration**:
+
+1. **Vercel Environment Variables**: Add all env vars from Step 10
+
+2. **Polar Webhook Setup**:
+   - Go to Polar dashboard → Webhooks
+   - Add webhook URL: `https://apexrebate.com/api/webhooks/polar`
+   - Select events: `checkout.completed`, `subscription.*`
+   - Copy webhook secret → Update `POLAR_WEBHOOK_SECRET`
+
+3. **NOWPayments IPN Setup**:
+   - Go to NOWPayments dashboard → Settings → IPN
+   - Set IPN callback URL: `https://apexrebate.com/api/webhooks/nowpayments`
+   - Copy IPN secret → Update `NOWPAYMENTS_IPN_SECRET`
+
+4. **Test with Real Payment** (small amount):
+   - Card: $1 test payment via Polar
+   - Crypto: $1 USDT test payment via NOWPayments
+   - Verify entire flow end-to-end
+
+---
+
+## COMPLETION CRITERIA ✅
+
+- [x] Step 6: Polar webhook handler implemented
+- [x] Step 7: NOWPayments webhook handler implemented
+- [x] Step 8: Unified checkout API created (Polar + NOWPayments only)
+- [x] Step 9: UI components (PaymentMethodSelector, CheckoutModal)
+- [x] Step 10: Environment variables documented
+- [x] Step 11: Binance Pay code removed completely
+- [x] Step 12: Testing checklist completed
+- [x] Build succeeds with 0 errors
+- [x] Deployed to production
+- [x] Webhooks configured in both platforms
+
+---
+
+**Once complete, respond: "Payment integration complete (Polar + NOWPayments). Binance Pay removed. Ready for $1M Revenue Battleplan."**
+
+---
+
+**兵貴神速 - Execute with speed!** 🚀💳

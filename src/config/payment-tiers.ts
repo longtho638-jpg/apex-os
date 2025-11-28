@@ -9,7 +9,7 @@ export const PAYMENT_TIERS = {
       'Community support'
     ],
     polar: null,
-    binancePay: null
+    nowPayments: null
   },
   FOUNDERS: {
     name: 'Founders',
@@ -22,10 +22,11 @@ export const PAYMENT_TIERS = {
       'Advanced analytics'
     ],
     polar: {
-      productPriceId: process.env.POLAR_FOUNDERS_PRICE_ID || 'price_PLACEHOLDER_FOUNDERS',
+      productPriceId: 'price_xxxxx', // Replace with actual Polar price ID
     },
-    binancePay: {
-      amount: 49,
+    nowPayments: {
+      price_amount: 49,
+      price_currency: 'usd',
       cryptoDiscount: 10 // 10% discount for crypto
     }
   },
@@ -41,12 +42,28 @@ export const PAYMENT_TIERS = {
       'White-glove support'
     ],
     polar: {
-      productPriceId: process.env.POLAR_PREMIUM_PRICE_ID || 'price_PLACEHOLDER_PREMIUM',
+      productPriceId: 'price_yyyyy', // Replace with actual Polar price ID
     },
-    binancePay: {
-      amount: 99,
+    nowPayments: {
+      price_amount: 99,
+      price_currency: 'usd',
       cryptoDiscount: 15 // 15% discount for crypto
     }
+  },
+  PAY_PER_SIGNAL: {
+    name: 'Pay Per Signal',
+    price: 0, // No monthly fee
+    currency: 'USD',
+    pricePerSignal: 5,
+    features: [
+      'No monthly commitment',
+      'Pay only $5 per signal used',
+      'Access to all signal types',
+      'Cancel anytime',
+      'Perfect for casual traders'
+    ],
+    polar: null,
+    nowPayments: null
   }
 } as const;
 

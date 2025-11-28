@@ -1,5 +1,5 @@
 -- Payment Gateways Enum
-CREATE TYPE payment_gateway AS ENUM ('polar', 'binance_pay');
+CREATE TYPE payment_gateway AS ENUM ('polar', 'nowpayments');
 CREATE TYPE payment_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');
 CREATE TYPE subscription_status AS ENUM ('active', 'cancelled', 'past_due', 'trialing');
 
@@ -79,11 +79,11 @@ CREATE POLICY "Users can view own subscriptions"
 --   USING (auth.jwt() ->> 'role' = 'admin');
 
 -- Indexes
-CREATE INDEX IF NOT EXISTS idx_transactions_user ON payment_transactions(user_id);
-CREATE INDEX IF NOT EXISTS idx_transactions_gateway ON payment_transactions(gateway);
-CREATE INDEX IF NOT EXISTS idx_transactions_status ON payment_transactions(status);
-CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
-CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);
+CREATE INDEX idx_transactions_user ON payment_transactions(user_id);
+CREATE INDEX idx_transactions_gateway ON payment_transactions(gateway);
+CREATE INDEX idx_transactions_status ON payment_transactions(status);
+CREATE INDEX idx_subscriptions_user ON subscriptions(user_id);
+CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 
 -- Updated_at trigger
 CREATE OR REPLACE FUNCTION update_updated_at_column()

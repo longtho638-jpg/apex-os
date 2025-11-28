@@ -1,0 +1,584 @@
+# CLI TASK: PHASE 4 - PAYMENT OPTIMIZATION (1-CLICK REVOLUTION)
+## Strategic Context: 攻其不備 (Attack Where Unprepared)
+
+**Sun Tzu Principle**: "Attack where they are unprepared, appear where you are not expected"
+
+**Competitor Weakness**: Multi-step, complex payment flows (5+ clicks to upgrade)
+**Our Attack**: 1-click upgrade from trial + smart triggers
+
+**Objective**: 3x trial→paid conversion (10% → 30%)
+**Timeline**: Week 3 (2-3 days CLI execution)
+**Impact**: IMMEDIATE revenue boost on every new user
+
+---
+
+## TASK 9: 1-CLICK PAYMENT REVOLUTION
+
+### 9.1 Smart Upgrade Triggers ✅
+
+**File**: `src/lib/upgrade-triggers.ts` (NEW)
+
+**Requirements**:
+- Detect when user hits trial limits
+- Show upgrade modal at optimal moments
+- Track trigger effectiveness
+
+**Implementation**:
+```typescript
+import { trackEvent } from '@/lib/analytics';
+
+export type TriggerType = 'limit_reached' | 'win_achieved' | 'trial_ending';
+
+interface UpgradeTrigger {
+  type: TriggerType;
+  message: string;
+  urgency: 'low' | 'medium' | 'high';
+  discount?: string;
+}
+
+export const upgradeTriggers = {
+  // Trigger when user hits feature limit
+  limitReached: (feature: string, currentLimit: number): UpgradeTrigger => {
+    trackEvent({
+      event_name: 'upgrade_trigger_shown',
+      metadata: { trigger_type: 'limit_reached', feature },
+    });
+
+    return {
+      type: 'limit_reached',
+      message: `You've used ${currentLimit}/${currentLimit} free ${feature}. Upgrade to unlock unlimited!`,
+      urgency: 'high',
+    };
+  },
+
+  // Trigger when user has a winning trade
+  winAchieved: (profit: number): UpgradeTrigger => {
+    trackEvent({
+      event_name: 'upgrade_trigger_shown',
+      metadata: { trigger_type: 'win_achieved', profit },
+    });
+
+    return {
+      type: 'win_achieved',
+      message: `🎉 Your trade just made $${profit.toFixed(2)}! Upgrade to track more winning signals.`,
+      urgency: 'medium',
+      discount: 'FIRSTWIN20', // 20% off
+    };
+  },
+
+  // Trigger 2 days before trial ends
+  trialEnding: (daysLeft: number): UpgradeTrigger => {
+    trackEvent({
+      event_name: 'upgrade_trigger_shown',
+      metadata: { trigger_type: 'trial_ending', days_left: daysLeft },
+    });
+
+    return {
+      type: 'trial_ending',
+      message: `⏰ Your trial ends in ${daysLeft} days. Upgrade now with code TRIAL20 for 20% off!`,
+      urgency: 'high',
+      discount: 'TRIAL20',
+    };
+  },
+};
+
+// Hook to check triggers
+export function useUpgradeTriggers(userId: string) {
+  // Check user's trial status, feature usage, recent trades
+  // Return trigger if conditions met
+  
+  // Example: Check if trial ending
+  const trialEndsAt = new Date('2025-12-05'); // from user data
+  const daysLeft = Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  
+  if (daysLeft === 2) {
+    return upgradeTriggers.trialEnding(daysLeft);
+  }
+  
+  return null;
+}
+```
+
+---
+
+### 9.2 Discount Code Engine ✅
+
+**File**: `src/lib/discount-engine.ts` (NEW)
+
+**Database Migration**: `supabase/migrations/20251128_discount_codes.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS discount_codes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code TEXT UNIQUE NOT NULL,
+  discount_type TEXT NOT NULL, -- 'percentage' or 'fixed'
+  discount_value NUMERIC NOT NULL, -- 20 for 20%, or 10 for $10 off
+  valid_from TIMESTAMPTZ DEFAULT NOW(),
+  valid_until TIMESTAMPTZ,
+  max_uses INTEGER,
+  current_uses INTEGER DEFAULT 0,
+  applicable_tiers TEXT[], -- ['pro', 'trader'] or NULL for all
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS discount_redemptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  discount_code_id UUID REFERENCES discount_codes(id),
+  user_id UUID REFERENCES users(id),
+  original_price NUMERIC NOT NULL,
+  discounted_price NUMERIC NOT NULL,
+  redeemed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Seed initial codes
+INSERT INTO discount_codes (code, discount_type, discount_value, max_uses) VALUES
+('TRIAL20', 'percentage', 20, 1000),
+('ANNUAL30', 'percentage', 30, NULL), -- unlimited
+('WINBACK50', 'percentage', 50, 500),
+('FIRSTWIN20', 'percentage', 20, 500);
+```
+
+**Implementation**: `src/lib/discount-engine.ts`
+
+```typescript
+import { getSupabaseClient } from '@/lib/supabase';
+
+interface DiscountCode {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  max_uses: number | null;
+  current_uses: number;
+  applicable_tiers: string[] | null;
+}
+
+export async function validateDiscountCode(
+  code: string,
+  tier: string,
+  userId: string
+): Promise<{ valid: boolean; discount?: number; error?: string }> {
+  const supabase = getSupabaseClient();
+
+  // Fetch discount code
+  const { data: discountCode, error } = await supabase
+    .from('discount_codes')
+    .select('*')
+    .eq('code', code.toUpperCase())
+    .single();
+
+  if (error || !discountCode) {
+    return { valid: false, error: 'Invalid discount code' };
+  }
+
+  // Check if expired
+  if (discountCode.valid_until && new Date(discountCode.valid_until) < new Date()) {
+    return { valid: false, error: 'Discount code expired' };
+  }
+
+  // Check max uses
+  if (discountCode.max_uses && discountCode.current_uses >= discountCode.max_uses) {
+    return { valid: false, error: 'Discount code fully redeemed' };
+  }
+
+  // Check if applicable to tier
+  if (discountCode.applicable_tiers && !discountCode.applicable_tiers.includes(tier)) {
+    return { valid: false, error: 'Discount not applicable to this tier' };
+  }
+
+  // Check if user already used this code
+  const { data: existingRedemption } = await supabase
+    .from('discount_redemptions')
+    .select('id')
+    .eq('discount_code_id', discountCode.id)
+    .eq('user_id', userId)
+    .single();
+
+  if (existingRedemption) {
+    return { valid: false, error: 'You have already used this code' };
+  }
+
+  return { valid: true, discount: discountCode.discount_value };
+}
+
+export async function applyDiscount(
+  originalPrice: number,
+  discountCode: string,
+  tier: string,
+  userId: string
+): Promise<{ finalPrice: number; saved: number }> {
+  const validation = await validateDiscountCode(discountCode, tier, userId);
+
+  if (!validation.valid || !validation.discount) {
+    return { finalPrice: originalPrice, saved: 0 };
+  }
+
+  const supabase = getSupabaseClient();
+
+  // Calculate discount
+  const discount = validation.discount;
+  const saved = (originalPrice * discount) / 100;
+  const finalPrice = originalPrice - saved;
+
+  // Record redemption
+  const { data: code } = await supabase
+    .from('discount_codes')
+    .select('id')
+    .eq('code', discountCode.toUpperCase())
+    .single();
+
+  if (code) {
+    await supabase.from('discount_redemptions').insert({
+      discount_code_id: code.id,
+      user_id: userId,
+      original_price: originalPrice,
+      discounted_price: finalPrice,
+    });
+
+    // Increment usage count
+    await supabase
+      .from('discount_codes')
+      .update({ current_uses: supabase.raw('current_uses + 1') })
+      .eq('id', code.id);
+  }
+
+  return { finalPrice, saved };
+}
+```
+
+---
+
+### 9.3 Enhanced Checkout API (with Discounts) ✅
+
+**File**: `src/app/api/checkout/route.ts` (MODIFY)
+
+**Add discount code support**:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { Polar } from '@polar-sh/sdk';
+import { getSupabaseClient } from '@/lib/supabase';
+import { trackEvent } from '@/lib/analytics';
+import { applyDiscount } from '@/lib/discount-engine';
+
+const polar = new Polar({ accessToken: process.env.POLAR_ACCESS_TOKEN! });
+
+const TIER_PRICES = {
+  pro: { usd: 29, name: 'Pro' },
+  trader: { usd: 97, name: 'Trader' },
+  elite: { usd: 297, name: 'Elite' },
+};
+
+export async function POST(req: NextRequest) {
+  try {
+    const { tier, paymentMethod, userId, discountCode } = await req.json();
+    const supabase = getSupabaseClient();
+
+    // Validate user
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('email, id')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Get tier pricing
+    const selectedTier = TIER_PRICES[tier as keyof typeof TIER_PRICES];
+    if (!selectedTier) {
+      return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+    }
+
+    // Apply discount if provided
+    let finalPrice = selectedTier.usd;
+    let discountApplied = 0;
+
+    if (discountCode) {
+      const result = await applyDiscount(selectedTier.usd, discountCode, tier, userId);
+      finalPrice = result.finalPrice;
+      discountApplied = result.saved;
+    }
+
+    let checkoutUrl = '';
+
+    if (paymentMethod === 'card') {
+      // Create custom Polar checkout with discounted price
+      const checkout = await polar.checkouts.create({
+        productPriceId: process.env[`POLAR_${tier.toUpperCase()}_PRICE_ID`]!,
+        customerEmail: user.email,
+        successUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success`,
+        metadata: { 
+          userId: user.id, 
+          tier,
+          discountCode: discountCode || null,
+          originalPrice: selectedTier.usd,
+          finalPrice,
+        },
+        // Override price if discount applied
+        ...(discountApplied > 0 && { amount: Math.round(finalPrice * 100) }), // cents
+      });
+
+      checkoutUrl = checkout.url;
+    } else if (paymentMethod === 'crypto') {
+      // NOWPayments with discounted price
+      const orderId = `${user.id}_${tier}_${Date.now()}`;
+
+      const nowPaymentsResponse = await fetch('https://api.nowpayments.io/v1/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.NOWPAYMENTS_API_KEY!,
+        },
+        body: JSON.stringify({
+          price_amount: finalPrice,
+          price_currency: 'usd',
+          pay_currency: 'btc',
+          order_id: orderId,
+          order_description: `ApexOS ${selectedTier.name} - ${discountCode || 'No discount'}`,
+          ipn_callback_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhooks/nowpayments`,
+          success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success`,
+        }),
+      });
+
+      const nowPaymentsData = await nowPaymentsResponse.json();
+      checkoutUrl = nowPaymentsData.invoice_url;
+    } else {
+      return NextResponse.json({ error: 'Invalid payment method' }, { status: 400 });
+    }
+
+    // Track checkout with discount info
+    await trackEvent({
+      event_name: 'checkout_started',
+      user_id: userId,
+      metadata: {
+        tier,
+        paymentMethod,
+        originalAmount: selectedTier.usd,
+        finalAmount: finalPrice,
+        discountCode: discountCode || null,
+        discountSaved: discountApplied,
+      },
+    });
+
+    return NextResponse.json({ 
+      checkoutUrl,
+      originalPrice: selectedTier.usd,
+      finalPrice,
+      saved: discountApplied,
+    });
+  } catch (error) {
+    console.error('Checkout API error:', error);
+    return NextResponse.json({
+      error: 'Checkout failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    }, { status: 500 });
+  }
+}
+```
+
+---
+
+### 9.4 Upgrade Modal Component ✅
+
+**File**: `src/components/checkout/UpgradeModal.tsx` (NEW)
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+import { CheckoutModal } from './CheckoutModal';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import { X, Sparkles } from 'lucide-react';
+
+interface UpgradeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  trigger: {
+    type: 'limit_reached' | 'win_achieved' | 'trial_ending';
+    message: string;
+    urgency: 'low' | 'medium' | 'high';
+    discount?: string;
+  };
+  userId: string;
+  currentTier?: string;
+}
+
+export function UpgradeModal({
+  isOpen,
+  onClose,
+  trigger,
+  userId,
+  currentTier = 'free',
+}: UpgradeModalProps) {
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<'pro' | 'trader' | 'elite'>('pro');
+
+  if (!isOpen) return null;
+
+  const urgencyColors = {
+    low: 'border-blue-400/20 bg-blue-400/5',
+    medium: 'border-yellow-400/20 bg-yellow-400/5',
+    high: 'border-red-400/20 bg-red-400/5',
+  };
+
+  if (showCheckout) {
+    return (
+      <CheckoutModal
+        tier={selectedTier}
+        userId={userId}
+        onClose={() => {
+          setShowCheckout(false);
+          onClose();
+        }}
+        isOpen={true}
+        discountCode={trigger.discount}
+      />
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <GlassCard className={`max-w-lg w-full p-8 relative ${urgencyColors[trigger.urgency]}`}>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-zinc-400 hover:text-white transition"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Icon */}
+        <div className="flex justify-center mb-4">
+          <Sparkles className="w-16 h-16 text-emerald-400" />
+        </div>
+
+        {/* Trigger message */}
+        <h2 className="text-2xl font-bold text-center mb-2">
+          {trigger.type === 'limit_reached' && 'Unlock Unlimited Access'}
+          {trigger.type === 'win_achieved' && 'Celebrate Your Win!'}
+          {trigger.type === 'trial_ending' && 'Don\'t Lose Access'}
+        </h2>
+
+        <p className="text-center text-lg mb-6">{trigger.message}</p>
+
+        {/* Discount badge */}
+        {trigger.discount && (
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 mb-6 text-center">
+            <p className="text-emerald-400 font-bold">
+              🎁 Use code <span className="text-xl">{trigger.discount}</span> for 20% off!
+            </p>
+          </div>
+        )}
+
+        {/* Tier selection */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {['pro', 'trader', 'elite'].map((tier) => (
+            <button
+              key={tier}
+              onClick={() => setSelectedTier(tier as 'pro' | 'trader' | 'elite')}
+              className={`p-4 rounded-lg border-2 transition ${
+                selectedTier === tier
+                  ? 'border-emerald-400 bg-emerald-400/10'
+                  : 'border-white/10'
+              }`}
+            >
+              <p className="font-bold capitalize">{tier}</p>
+              <p className="text-sm text-zinc-400">
+                ${tier === 'pro' ? '29' : tier === 'trader' ? '97' : '297'}/mo
+              </p>
+            </button>
+          ))}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-3">
+          <Button onClick={onClose} variant="outline" className="flex-1">
+            Maybe Later
+          </Button>
+          <Button
+            onClick={() => setShowCheckout(true)}
+            className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+          >
+            Upgrade Now
+          </Button>
+        </div>
+      </GlassCard>
+    </div>
+  );
+}
+```
+
+---
+
+## DELIVERABLES CHECKLIST
+
+- [ ] **9.1 Smart Triggers**:
+  - [ ] `src/lib/upgrade-triggers.ts` created
+  - [ ] 3 trigger types (limit, win, trial ending)
+  - [ ] Analytics tracking for triggers
+
+- [ ] **9.2 Discount Engine**:
+  - [ ] Database migration (discount_codes table)
+  - [ ] `src/lib/discount-engine.ts` implemented
+  - [ ] 4 initial codes seeded (TRIAL20, ANNUAL30, etc.)
+
+- [ ] **9.3 Enhanced Checkout**:
+  - [ ] Checkout API updated with discount support
+  - [ ] Price calculation with discounts
+  - [ ] Tracking discount usage
+
+- [ ] **9.4 Upgrade Modal**:
+  - [ ] `src/components/checkout/UpgradeModal.tsx` created
+  - [ ] Trigger-based messaging
+  - [ ] Tier selection UI
+  - [ ] Discount code display
+
+- [ ] **Testing**:
+  - [ ] Test all 3 triggers
+  - [ ] Validate discount codes
+  - [ ] End-to-end checkout with discount
+  - [ ] Build: 0 errors
+
+---
+
+## SUCCESS CRITERIA
+
+**After Phase 4, we have**:
+1. ✅ 1-click upgrade (vs competitors' 5+ steps)
+2. ✅ Smart triggers (catch users at optimal moments)
+3. ✅ Discount codes (incentivize conversions)
+4. ✅ Automated invoice system
+
+**Expected Impact**:
+- Trial→Paid: 10% → 30% (3x improvement)
+- Average upgrade time: 5 minutes → 30 seconds
+- Discount redemption: 40%+ of conversions
+
+---
+
+## EXECUTION COMMAND
+
+```bash
+Execute PHASE 4: TASK 9 (1-Click Payment Revolution)
+
+Implement:
+1. Smart upgrade triggers (limit, win, trial ending)
+2. Discount code engine + DB migration
+3. Enhanced checkout API with discount support
+4. Upgrade modal component
+
+Quality:
+- TypeScript strict mode
+- 0 technical debt
+- Mobile responsive
+- Build: 0 errors
+
+Deploy: Production ready
+```
+
+---
+
+**攻其不備** - Attack competitor weakness! 💳⚡🎯

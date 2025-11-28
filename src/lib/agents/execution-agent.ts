@@ -61,8 +61,8 @@ export async function executeWithdrawal(withdrawalId: string) {
         await new Promise(r => setTimeout(r, 2000)); // Wait 2s
         const status = await nowPayments.getPayoutStatus(result.payout_id!);
         if (status.status === 'FINISHED' || status.tx_hash) {
-            txHash = status.tx_hash;
-            fee = status.fee;
+            txHash = status.tx_hash || '';
+            fee = status.fee || 0;
             break;
         }
     }

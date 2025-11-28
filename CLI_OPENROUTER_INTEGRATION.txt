@@ -1,0 +1,1447 @@
+# CLI TASK: OPENROUTER INTEGRATION - COMPLETE SYSTEM
+## Strategic Framework: Binh Pháp × Cost Optimization × Viral Growth
+
+**Objective**: Tích hợp OpenRouter với smart routing, fallback, tier management, và viral conversion
+**Impact**: 90% cost reduction + 3x conversion + Viral growth loop
+**Timeline**: Week 4 (3-4 days CLI execution)
+
+---
+
+## 🎯 BINH PHÁP ÁNH XẠ
+
+### 1. **集中兵力** (Concentrate Forces) → Smart Router
+- Dùng model rẻ (DeepSeek) cho câu ngắn
+- Dùng model xịn (Claude) cho câu phức tạp
+- Optimize cost tại từng request
+
+### 2. **先為不可勝** (Invincible Defense) → Fallback Logic
+- OpenRouter primary
+- Vertex AI secondary (nếu OpenRouter lỗi)
+- Never fail user requests
+
+### 3. **上兵伐謀** (Win Without Fighting) → Rate Limiting
+- Free users: 10 câu/ngày → Ép upgrade
+- Modal tự động xuất hiện khi hết quota
+- Không cần sales team, AI tự bán
+
+### 4. **致人而不致於人** (Make Them Come) → Auto Pricing Modal
+- 429 error → Modal xuất hiện
+- Marketing copy tối ưu conversion
+- 1-click crypto payment
+
+---
+
+## COMPONENT 1: SMART ROUTER WITH FALLBACK ✅
+
+### **File**: `src/lib/ai/smart-router.ts` (NEW)
+
+**Requirements**:
+- Phân tích độ phức tạp câu hỏi
+- Route tới model tối ưu (cost vs quality)
+- Fallback OpenRouter → Vertex AI
+- Track cost per request
+
+**Implementation**:
+
+```typescript
+import Anthropic from '@anthropic-ai/sdk';
+import { VertexAI } from '@google-cloud/vertexai';
+
+// OpenRouter client
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+
+// Vertex AI client (fallback)
+const vertexAI = new VertexAI({
+  project: process.env.GOOGLE_CLOUD_PROJECT!,
+  location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
+});
+
+// Model pricing (per 1M tokens)
+const MODEL_COSTS = {
+  'deepseek/deepseek-chat': 0.14,           // Ultra cheap for simple queries
+  'meta-llama/llama-3-8b-instruct': 0.06,   // Cheap for medium
+  'anthropic/claude-3-haiku': 0.25,         // Mid-tier
+  'anthropic/claude-3.5-sonnet': 3.0,       // Premium for complex
+  'google/gemini-pro': 0.5,                 // Vertex fallback
+};
+
+interface SmartRouterConfig {
+  userTier: 'free' | 'pro' | 'trader' | 'elite';
+  maxCostPerRequest?: number; // USD
+  preferredProvider?: 'openrouter' | 'vertex';
+}
+
+interface AIResponse {
+  content: string;
+  model: string;
+  provider: 'openrouter' | 'vertex';
+  tokens: number;
+  cost: number;
+}
+
+export class SmartRouter {
+  private config: SmartRouterConfig;
+
+  constructor(config: SmartRouterConfig) {
+    this.config = config;
+  }
+
+  /**
+   * Phân tích độ phức tạp câu hỏi
+   * 兵法: 知彼知己 (Know the task before picking weapon)
+   */
+  private analyzeComplexity(prompt: string): 'simple' | 'medium' | 'complex' {
+    const wordCount = prompt.split(' ').length;
+    const hasCode = /```|function|class|const|let|var/.test(prompt);
+    const hasLongContext = wordCount > 200;
+    const isQuestion = prompt.includes('?');
+
+    // Simple: Short questions, greetings
+    if (wordCount < 20 && !hasCode) {
+      return 'simple';
+    }
+
+    // Complex: Code analysis, long context, technical docs
+    if (hasCode || hasLongContext || prompt.includes('analyze') || prompt.includes('explain in detail')) {
+      return 'complex';
+    }
+
+    // Medium: Everything else
+    return 'medium';
+  }
+
+  /**
+   * Chọn model dựa trên complexity và tier
+   * 兵法: 集中兵力 (Use right force for right task)
+   */
+  private selectModel(complexity: 'simple' | 'medium' | 'complex'): string {
+    // Free users get cheapest models
+    if (this.config.userTier === 'free') {
+      return complexity === 'simple' 
+        ? 'deepseek/deepseek-chat'          // $0.14/1M
+        : 'meta-llama/llama-3-8b-instruct'; // $0.06/1M
+    }
+
+    // Pro+ users get better models
+    if (complexity === 'simple') {
+      return 'meta-llama/llama-3-8b-instruct'; // $0.06/1M
+    } else if (complexity === 'medium') {
+      return 'anthropic/claude-3-haiku'; // $0.25/1M
+    } else {
+      return 'anthropic/claude-3.5-sonnet'; // $3.0/1M
+    }
+  }
+
+  /**
+   * Call OpenRouter API
+   */
+  private async callOpenRouter(
+    model: string,
+    messages: any[]
+  ): Promise<AIResponse> {
+    const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://apexrebate.com',
+        'X-Title': 'ApexOS Trading Platform',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const tokens = data.usage.total_tokens;
+    const cost = (tokens / 1_000_000) * MODEL_COSTS[model];
+
+    return {
+      content: data.choices[0].message.content,
+      model,
+      provider: 'openrouter',
+      tokens,
+      cost,
+    };
+  }
+
+  /**
+   * Fallback to Vertex AI
+   * 兵法: 先為不可勝 (Prepare backup before attack)
+   */
+  private async callVertexAI(messages: any[]): Promise<AIResponse> {
+    const generativeModel = vertexAI.preview.getGenerativeModel({
+      model: 'gemini-pro',
+    });
+
+    const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+    const result = await generativeModel.generateContent(prompt);
+    const content = result.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Estimate tokens (rough)
+    const tokens = Math.ceil((prompt.length + content.length) / 4);
+    const cost = (tokens / 1_000_000) * MODEL_COSTS['google/gemini-pro'];
+
+    return {
+      content,
+      model: 'google/gemini-pro',
+      provider: 'vertex',
+      tokens,
+      cost,
+    };
+  }
+
+  /**
+   * Main routing logic with fallback
+   * 兵法: 攻守兼備 (Attack with defense)
+   */
+  async complete(messages: any[]): Promise<AIResponse> {
+    const userPrompt = messages[messages.length - 1].content;
+    const complexity = this.analyzeComplexity(userPrompt);
+    const model = this.selectModel(complexity);
+
+    try {
+      // Primary: OpenRouter
+      console.log(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
+      return await this.callOpenRouter(model, messages);
+
+    } catch (error) {
+      // Fallback: Vertex AI
+      console.error('[SmartRouter] OpenRouter failed, falling back to Vertex AI:', error);
+      console.log('[SmartRouter] Using Vertex AI - Google Gemini Pro');
+      return await this.callVertexAI(messages);
+    }
+  }
+}
+
+// Export singleton
+export function createSmartRouter(config: SmartRouterConfig) {
+  return new SmartRouter(config);
+}
+```
+
+---
+
+## COMPONENT 2: TIER-BASED RATE LIMITING ✅
+
+### **File**: `src/lib/ai/rate-limiter.ts` (NEW)
+
+**Requirements**:
+- Track số lượng requests per user per day
+- Free: 10 requests/day
+- Pro: 100 requests/day
+- Trader: 500 requests/day
+- Elite: Unlimited
+
+**Database Migration**: `supabase/migrations/20251128_ai_usage_tracking.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS ai_usage (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  request_date DATE NOT NULL,
+  request_count INTEGER DEFAULT 1,
+  total_tokens INTEGER DEFAULT 0,
+  total_cost NUMERIC DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  
+  UNIQUE(user_id, request_date)
+);
+
+CREATE INDEX idx_ai_usage_user_date ON ai_usage(user_id, request_date);
+
+-- Function to increment usage
+CREATE OR REPLACE FUNCTION increment_ai_usage(
+  p_user_id UUID,
+  p_tokens INTEGER,
+  p_cost NUMERIC
+) RETURNS INTEGER AS $$
+DECLARE
+  new_count INTEGER;
+BEGIN
+  INSERT INTO ai_usage (user_id, request_date, request_count, total_tokens, total_cost)
+  VALUES (p_user_id, CURRENT_DATE, 1, p_tokens, p_cost)
+  ON CONFLICT (user_id, request_date) 
+  DO UPDATE SET
+    request_count = ai_usage.request_count + 1,
+    total_tokens = ai_usage.total_tokens + p_tokens,
+    total_cost = ai_usage.total_cost + p_cost
+  RETURNING request_count INTO new_count;
+  
+  RETURN new_count;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+**Implementation**: `src/lib/ai/rate-limiter.ts`
+
+```typescript
+import { getSupabaseClient } from '@/lib/supabase';
+
+const TIER_LIMITS = {
+  free: 10,      // 10 requests per day
+  pro: 100,      // 100 requests per day
+  trader: 500,   // 500 requests per day
+  elite: 9999,   // Unlimited (high number)
+};
+
+export class RateLimiter {
+  /**
+   * Check if user has exceeded daily limit
+   * 兵法: 上兵伐謀 (Use limits to force upgrade)
+   */
+  static async checkLimit(userId: string, userTier: keyof typeof TIER_LIMITS): Promise<{
+    allowed: boolean;
+    remaining: number;
+    limit: number;
+  }> {
+    const supabase = getSupabaseClient();
+    
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data, error } = await supabase
+      .from('ai_usage')
+      .select('request_count')
+      .eq('user_id', userId)
+      .eq('request_date', today)
+      .single();
+
+    const currentCount = data?.request_count || 0;
+    const limit = TIER_LIMITS[userTier];
+    const remaining = Math.max(0, limit - currentCount);
+
+    return {
+      allowed: currentCount < limit,
+      remaining,
+      limit,
+    };
+  }
+
+  /**
+   * Increment usage counter
+   */
+  static async incrementUsage(
+    userId: string,
+    tokens: number,
+    cost: number
+  ): Promise<number> {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase.rpc('increment_ai_usage', {
+      p_user_id: userId,
+      p_tokens: tokens,
+      p_cost: cost,
+    });
+
+    if (error) {
+      console.error('[RateLimiter] Error incrementing usage:', error);
+      return 0;
+    }
+
+    return data as number;
+  }
+
+  /**
+   * Get usage stats for today
+   */
+  static async getUsageStats(userId: string) {
+    const supabase = getSupabaseClient();
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data } = await supabase
+      .from('ai_usage')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('request_date', today)
+      .single();
+
+    return {
+      requests: data?.request_count || 0,
+      tokens: data?.total_tokens || 0,
+      cost: parseFloat(data?.total_cost || '0'),
+    };
+  }
+}
+```
+
+---
+
+## COMPONENT 3: AI CHAT API WITH INTEGRATED ROUTING ✅
+
+### **File**: `src/app/api/ai/chat/route.ts` (NEW)
+
+**Requirements**:
+- Integrate SmartRouter + RateLimiter
+- Return 429 khi exceeded quota
+- Track all usage to database
+
+**Implementation**:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/lib/supabase';
+import { createSmartRouter } from '@/lib/ai/smart-router';
+import { RateLimiter } from '@/lib/ai/rate-limiter';
+import { trackEvent } from '@/lib/analytics';
+
+export async function POST(req: NextRequest) {
+  try {
+    const { messages, userId } = await req.json();
+
+    if (!userId || !messages || messages.length === 0) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const supabase = getSupabaseClient();
+
+    // Get user tier
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('subscription_tier')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const userTier = (user.subscription_tier || 'free') as 'free' | 'pro' | 'trader' | 'elite';
+
+    // Check rate limit
+    const limitCheck = await RateLimiter.checkLimit(userId, userTier);
+
+    if (!limitCheck.allowed) {
+      return NextResponse.json({
+        error: 'Rate limit exceeded',
+        code: 'RATE_LIMIT_EXCEEDED',
+        limit: limitCheck.limit,
+        remaining: 0,
+        upgradeRequired: true,
+      }, { status: 429 });
+    }
+
+    // Create smart router
+    const router = createSmartRouter({ userTier });
+
+    // Get AI response
+    const response = await router.complete(messages);
+
+    // Increment usage
+    await RateLimiter.incrementUsage(userId, response.tokens, response.cost);
+
+    // Track analytics
+    await trackEvent({
+      event_name: 'ai_request_completed',
+      user_id: userId,
+      metadata: {
+        model: response.model,
+        provider: response.provider,
+        tokens: response.tokens,
+        cost: response.cost,
+        tier: userTier,
+      },
+    });
+
+    // Return response with usage info
+    const stats = await RateLimiter.getUsageStats(userId);
+
+    return NextResponse.json({
+      content: response.content,
+      model: response.model,
+      provider: response.provider,
+      usage: {
+        requests_today: stats.requests,
+        limit: limitCheck.limit,
+        remaining: limitCheck.remaining - 1,
+      },
+    });
+
+  } catch (error) {
+    console.error('[AI Chat] Error:', error);
+    return NextResponse.json({
+      error: 'AI request failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    }, { status: 500 });
+  }
+}
+```
+
+---
+
+## COMPONENT 4: AUTO PRICING MODAL (429 TRIGGER) ✅
+
+### **File**: `src/components/ai/AIChat.tsx` (NEW)
+
+**Requirements**:
+- Chat interface với SmartRouter
+- Auto-show pricing modal khi 429
+- 1-click upgrade flow
+
+**Implementation**:
+
+```typescript
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import { Send, Sparkles } from 'lucide-react';
+import { PricingModal } from './PricingModal';
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface AIUsage {
+  requests_today: number;
+  limit: number;
+  remaining: number;
+}
+
+export function AIChat({ userId, userTier }: { userId: string; userTier: string }) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [usage, setUsage] = useState<AIUsage | null>(null);
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [rateLimitHit, setRateLimitHit] = useState(false);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          userId,
+        }),
+      });
+
+      if (response.status === 429) {
+        // Rate limit exceeded
+        const data = await response.json();
+        setRateLimitHit(true);
+        setShowPricingModal(true);
+        
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `⚠️ You've reached your daily limit of ${data.limit} AI requests. Upgrade to continue!`,
+        }]);
+        
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('AI request failed');
+      }
+
+      const data = await response.json();
+      
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.content,
+      }]);
+
+      setUsage(data.usage);
+
+    } catch (error) {
+      console.error('AI Chat error:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '❌ Sorry, something went wrong. Please try again.',
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <GlassCard className="flex-1 p-6 flex flex-col">
+        {/* Header with usage indicator */}
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-lg font-bold">AI Assistant</h2>
+          </div>
+          
+          {usage && (
+            <div className="text-sm text-zinc-400">
+              {usage.remaining}/{usage.limit} requests left today
+              {usage.remaining <= 3 && (
+                <span className="ml-2 text-yellow-400">⚠️ Low quota</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  msg.role === 'user'
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-zinc-800 text-zinc-100'
+                }`}
+              >
+                {msg.content}
+              </div>
+            </div>
+          ))}
+          
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-zinc-800 p-3 rounded-lg">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce delay-100" />
+                  <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce delay-200" />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Ask me anything..."
+            className="flex-1 bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-400"
+            disabled={loading || rateLimitHit}
+          />
+          <Button
+            onClick={handleSend}
+            disabled={loading || !input.trim() || rateLimitHit}
+            className="bg-emerald-500 hover:bg-emerald-600"
+          >
+            <Send className="w-5 h-5" />
+          </Button>
+        </div>
+      </GlassCard>
+
+      {/* Pricing Modal - Auto show on 429 */}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        userId={userId}
+        currentTier={userTier}
+        trigger="rate_limit"
+      />
+    </div>
+  );
+}
+```
+
+---
+
+## COMPONENT 5: PRICING MODAL WITH MARKETING COPY ✅
+
+### **File**: `src/components/ai/PricingModal.tsx` (NEW)
+
+**Requirements**:
+- Compelling marketing copy
+- Feature comparison table
+- 1-click crypto payment
+- Track modal views/conversions
+
+**Implementation**:
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Button } from '@/components/ui/button';
+import { X, Check, Zap, TrendingUp, Crown } from 'lucide-react';
+import { CheckoutModal } from '@/components/checkout/CheckoutModal';
+import { trackEvent } from '@/lib/analytics';
+
+interface PricingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+  currentTier: string;
+  trigger: 'rate_limit' | 'upgrade_button' | 'manual';
+}
+
+const TIER_FEATURES = {
+  free: {
+    name: 'Free',
+    price: 0,
+    icon: Zap,
+    color: 'zinc',
+    ai_requests: 10,
+    signals: 3,
+    features: [
+      '10 AI requests per day',
+      '3 trading signals per month',
+      'Basic technical analysis',
+      'Community support',
+    ],
+    limitations: [
+      'Limited AI access',
+      'No advanced features',
+      'Slow support',
+    ],
+  },
+  pro: {
+    name: 'Pro',
+    price: 29,
+    icon: TrendingUp,
+    color: 'emerald',
+    ai_requests: 100,
+    signals: 'Unlimited',
+    features: [
+      '🚀 100 AI requests per day',
+      '✨ Unlimited trading signals',
+      '📊 Advanced technical analysis',
+      '🔔 Real-time price alerts',
+      '📈 Portfolio tracking',
+      '💬 Priority support (24h response)',
+      '🎯 AI-powered trade recommendations',
+      '📱 Mobile app access',
+    ],
+    highlight: 'Most Popular',
+  },
+  trader: {
+    name: 'Trader',
+    price: 97,
+    icon: Crown,
+    color: 'blue',
+    ai_requests: 500,
+    signals: 'Unlimited',
+    features: [
+      '⚡ 500 AI requests per day',
+      '✨ Everything in Pro',
+      '🤖 AI-powered auto-trading',
+      '📊 Advanced portfolio analytics',
+      '🔥 Copy trading from top traders',
+      '💎 Exclusive trading strategies',
+      '🎓 1-on-1 trading coaching',
+      '⏰ Instant support (1h response)',
+    ],
+    highlight: 'Best Value',
+  },
+  elite: {
+    name: 'Elite',
+    price: 297,
+    icon: Crown,
+    color: 'purple',
+    ai_requests: 'Unlimited',
+    signals: 'Unlimited',
+    features: [
+      '♾️ Unlimited AI requests',
+      '✨ Everything in Trader',
+      '🏆 Dedicated account manager',
+      '🔐 Private trading signals',
+      '💰 Revenue share on referrals (30%)',
+      '🎯 Custom AI models trained on your data',
+      '📞 Direct phone support',
+      '🌟 VIP community access',
+    ],
+    highlight: 'Premium',
+  },
+};
+
+export function PricingModal({ isOpen, onClose, userId, currentTier, trigger }: PricingModalProps) {
+  const [selectedTier, setSelectedTier] = useState<'pro' | 'trader' | 'elite'>('pro');
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  if (!isOpen) return null;
+
+  // Track modal view
+  if (isOpen) {
+    trackEvent({
+      event_name: 'pricing_modal_viewed',
+      user_id: userId,
+      metadata: { trigger, current_tier: currentTier },
+    });
+  }
+
+  if (showCheckout) {
+    return (
+      <CheckoutModal
+        tier={selectedTier}
+        userId={userId}
+        onClose={() => {
+          setShowCheckout(false);
+          onClose();
+        }}
+        isOpen={true}
+      />
+    );
+  }
+
+  const urgencyMessage = trigger === 'rate_limit'
+    ? "⚠️ You've hit your daily limit!"
+    : "Unlock full potential of ApexOS";
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="max-w-6xl w-full my-8">
+        <GlassCard className="p-8 relative">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-zinc-400 hover:text-white transition"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2">{urgencyMessage}</h2>
+            <p className="text-zinc-400 text-lg">
+              Upgrade now and get <span className="text-emerald-400 font-bold">20% off</span> with code <span className="text-emerald-400 font-bold">TRIAL20</span>
+            </p>
+          </div>
+
+          {/* Pricing cards */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            {(['pro', 'trader', 'elite'] as const).map((tier) => {
+              const config = TIER_FEATURES[tier];
+              const Icon = config.icon;
+              const isSelected = selectedTier === tier;
+              const isCurrent = currentTier === tier;
+
+              return (
+                <div
+                  key={tier}
+                  onClick={() => !isCurrent && setSelectedTier(tier)}
+                  className={`relative border-2 rounded-lg p-6 transition-all cursor-pointer ${
+                    isSelected
+                      ? `border-${config.color}-400 bg-${config.color}-400/5`
+                      : 'border-white/10 hover:border-white/20'
+                  } ${isCurrent ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {config.highlight && (
+                    <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-${config.color}-500 rounded-full text-sm font-bold whitespace-nowrap`}>
+                      {config.highlight}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <Icon className={`w-8 h-8 text-${config.color}-400`} />
+                    <div>
+                      <h3 className="text-xl font-bold">{config.name}</h3>
+                      <p className="text-2xl font-bold text-${config.color}-400">
+                        ${config.price}<span className="text-sm text-zinc-400">/mo</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Key metrics */}
+                  <div className="bg-zinc-800/50 rounded-lg p-3 mb-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-zinc-400">AI Requests</span>
+                      <span className="font-bold">{config.ai_requests}/day</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-zinc-400">Signals</span>
+                      <span className="font-bold">{config.signals}</span>
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <ul className="space-y-2">
+                    {config.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {isCurrent && (
+                    <div className="mt-4 text-center text-sm text-zinc-500">
+                      Current Plan
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Comparison table */}
+          <div className="mb-8">
+            <h3 className="text-xl font-bold mb-4 text-center">Detailed Comparison</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left p-3">Feature</th>
+                    <th className="text-center p-3">Free</th>
+                    <th className="text-center p-3 bg-emerald-400/5">Pro</th>
+                    <th className="text-center p-3">Trader</th>
+                    <th className="text-center p-3">Elite</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-white/5">
+                    <td className="p-3">AI Chat Requests</td>
+                    <td className="text-center p-3">10/day</td>
+                    <td className="text-center p-3 bg-emerald-400/5 font-bold">100/day</td>
+                    <td className="text-center p-3">500/day</td>
+                    <td className="text-center p-3">Unlimited</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="p-3">Trading Signals</td>
+                    <td className="text-center p-3">3/month</td>
+                    <td className="text-center p-3 bg-emerald-400/5 font-bold">Unlimited</td>
+                    <td className="text-center p-3">Unlimited</td>
+                    <td className="text-center p-3">Unlimited</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="p-3">Auto-Trading</td>
+                    <td className="text-center p-3">❌</td>
+                    <td className="text-center p-3 bg-emerald-400/5">❌</td>
+                    <td className="text-center p-3">✅</td>
+                    <td className="text-center p-3">✅</td>
+                  </tr>
+                  <tr className="border-b border-white/5">
+                    <td className="p-3">Support Response Time</td>
+                    <td className="text-center p-3">3-5 days</td>
+                    <td className="text-center p-3 bg-emerald-400/5 font-bold">24 hours</td>
+                    <td className="text-center p-3">1 hour</td>
+                    <td className="text-center p-3">Instant</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">Referral Commission</td>
+                    <td className="text-center p-3">0%</td>
+                    <td className="text-center p-3 bg-emerald-400/5">20%</td>
+                    <td className="text-center p-3">25%</td>
+                    <td className="text-center p-3 font-bold">30%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="px-8 py-3"
+            >
+              Maybe Later
+            </Button>
+            <Button
+              onClick={() => {
+                trackEvent({
+                  event_name: 'pricing_modal_upgrade_clicked',
+                  user_id: userId,
+                  metadata: { selected_tier: selectedTier, trigger },
+                });
+                setShowCheckout(true);
+              }}
+              className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-lg font-bold"
+            >
+              Upgrade to {TIER_FEATURES[selectedTier].name} - ${TIER_FEATURES[selectedTier].price}/mo
+            </Button>
+          </div>
+
+          {/* Trust signals */}
+          <div className="mt-6 text-center text-sm text-zinc-400">
+            🔒 Secure payment • 💳 Crypto accepted • ⚡ Instant activation • 🔄 Cancel anytime
+          </div>
+        </GlassCard>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## COMPONENT 6: CRYPTO PAYMENT INTEGRATION ✅
+
+**Already implemented** in Phase 2.5: NOWPayments integration
+- File: `src/lib/payments/nowpayments-client.ts`
+- Webhook: `src/app/api/webhooks/nowpayments/route.ts`
+- Checkout API: `src/app/api/checkout/route.ts` (supports crypto)
+
+**Enhancement needed**: Add discount code to CheckoutModal
+
+**File**: `src/components/checkout/CheckoutModal.tsx` (MODIFY)
+
+Add discount code input:
+
+```typescript
+// Add to existing CheckoutModal.tsx
+const [discountCode, setDiscountCode] = useState('TRIAL20');
+const [discountApplied, setDiscountApplied] = useState(false);
+
+// In handleCheckout function, add discountCode to API call:
+const response = await fetch('/api/checkout', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ 
+    tier, 
+    paymentMethod, 
+    userId,
+    discountCode: discountCode || null, // Add this
+  }),
+});
+
+// Show discount UI
+<div className="mb-4">
+  <label className="block text-sm font-medium mb-2">Discount Code (Optional)</label>
+  <input
+    type="text"
+    value={discountCode}
+    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+    placeholder="TRIAL20"
+    className="w-full bg-zinc-800 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-400"
+  />
+  {discountApplied && (
+    <p className="text-emerald-400 text-sm mt-1">✅ 20% discount applied!</p>
+  )}
+</div>
+```
+
+---
+
+## COMPONENT 7: COMPLETE SQL SCHEMA ✅
+
+### **File**: `supabase/migrations/20251128_complete_payment_system.sql`
+
+**Requirements**:
+- subscriptions table (already exists from Phase 2)
+- payments audit log
+- discount_codes (from Phase 4)
+- ai_usage tracking
+- Full referential integrity
+
+**Implementation**:
+
+```sql
+-- ============================================================================
+-- COMPLETE PAYMENT & AI SYSTEM SCHEMA
+-- ============================================================================
+
+-- 1. Users table enhancements (if not exists)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT 'free';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'active';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_price NUMERIC;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS canceled_at TIMESTAMPTZ;
+
+-- 2. Subscriptions table
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  tier TEXT NOT NULL CHECK (tier IN ('pro', 'trader', 'elite')),
+  status TEXT NOT NULL CHECK (status IN ('active', 'canceled', 'past_due', 'unpaid')),
+  price NUMERIC NOT NULL,
+  currency TEXT DEFAULT 'USD',
+  billing_cycle TEXT DEFAULT 'monthly' CHECK (billing_cycle IN ('monthly', 'annual')),
+  current_period_start TIMESTAMPTZ NOT NULL,
+  current_period_end TIMESTAMPTZ NOT NULL,
+  cancel_at_period_end BOOLEAN DEFAULT FALSE,
+  canceled_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_subscriptions_user ON subscriptions(user_id);
+CREATE INDEX idx_subscriptions_status ON subscriptions(status);
+
+-- 3. Transactions table (audit log for all payments)
+CREATE TABLE IF NOT EXISTS transactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  subscription_id UUID REFERENCES subscriptions(id) ON DELETE SET NULL,
+  
+  -- Payment details
+  amount NUMERIC NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'USD',
+  status TEXT NOT NULL CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
+  
+  -- Provider details
+  provider TEXT NOT NULL CHECK (provider IN ('polar', 'nowpayments', 'stripe')),
+  provider_transaction_id TEXT UNIQUE,
+  provider_customer_id TEXT,
+  
+  -- Crypto-specific (for NOWPayments)
+  crypto_currency TEXT,
+  crypto_amount NUMERIC,
+  crypto_address TEXT,
+  crypto_tx_hash TEXT,
+  
+  -- Discount tracking
+  discount_code TEXT,
+  discount_amount NUMERIC DEFAULT 0,
+  original_amount NUMERIC,
+  
+  -- Metadata
+  metadata JSONB,
+  
+  -- Audit
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  refunded_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_transactions_user ON transactions(user_id);
+CREATE INDEX idx_transactions_status ON transactions(status);
+CREATE INDEX idx_transactions_provider ON transactions(provider, provider_transaction_id);
+CREATE INDEX idx_transactions_created ON transactions(created_at DESC);
+
+-- 4. Discount codes table
+CREATE TABLE IF NOT EXISTS discount_codes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code TEXT UNIQUE NOT NULL,
+  discount_type TEXT NOT NULL CHECK (discount_type IN ('percentage', 'fixed')),
+  discount_value NUMERIC NOT NULL,
+  
+  -- Validity
+  valid_from TIMESTAMPTZ DEFAULT NOW(),
+  valid_until TIMESTAMPTZ,
+  max_uses INTEGER,
+  current_uses INTEGER DEFAULT 0,
+  
+  -- Applicability
+  applicable_tiers TEXT[], -- ['pro', 'trader'] or NULL for all
+  minimum_purchase NUMERIC,
+  
+  -- Metadata
+  created_by UUID REFERENCES users(id),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_discount_codes_code ON discount_codes(code);
+
+-- 5. Discount redemptions (track who used what code)
+CREATE TABLE IF NOT EXISTS discount_redemptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  discount_code_id UUID REFERENCES discount_codes(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL,
+  
+  original_price NUMERIC NOT NULL,
+  discounted_price NUMERIC NOT NULL,
+  saved_amount NUMERIC NOT NULL,
+  
+  redeemed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_discount_redemptions_code ON discount_redemptions(discount_code_id);
+CREATE INDEX idx_discount_redemptions_user ON discount_redemptions(user_id);
+
+-- 6. AI Usage tracking
+CREATE TABLE IF NOT EXISTS ai_usage (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  request_date DATE NOT NULL,
+  
+  -- Counters
+  request_count INTEGER DEFAULT 1,
+  total_tokens INTEGER DEFAULT 0,
+  total_cost NUMERIC DEFAULT 0,
+  
+  -- Model breakdown
+  openrouter_requests INTEGER DEFAULT 0,
+  vertex_requests INTEGER DEFAULT 0,
+  model_usage JSONB, -- {"claude-3.5-sonnet": 10, "llama-3-8b": 5}
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  
+  UNIQUE(user_id, request_date)
+);
+
+CREATE INDEX idx_ai_usage_user_date ON ai_usage(user_id, request_date);
+
+-- 7. AI Request logs (detailed per-request tracking)
+CREATE TABLE IF NOT EXISTS ai_request_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  
+  -- Request details
+  prompt_length INTEGER,
+  completion_length INTEGER,
+  complexity TEXT CHECK (complexity IN ('simple', 'medium', 'complex')),
+  
+  -- Routing
+  model_used TEXT NOT NULL,
+  provider TEXT NOT NULL CHECK (provider IN ('openrouter', 'vertex')),
+  fallback_used BOOLEAN DEFAULT FALSE,
+  
+  -- Cost
+  tokens_used INTEGER NOT NULL,
+  cost NUMERIC NOT NULL,
+  
+  -- Performance
+  response_time_ms INTEGER,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_ai_request_logs_user ON ai_request_logs(user_id);
+CREATE INDEX idx_ai_request_logs_created ON ai_request_logs(created_at DESC);
+
+-- 8. Email logs (track all automated emails)
+CREATE TABLE IF NOT EXISTS email_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  
+  email_type TEXT NOT NULL CHECK (email_type IN ('welcome', 'trial_ending', 'winback', 'payment_success', 'payment_failed')),
+  subject TEXT,
+  
+  status TEXT CHECK (status IN ('sent', 'failed', 'bounced')),
+  provider_message_id TEXT,
+  
+  sent_at TIMESTAMPTZ DEFAULT NOW(),
+  opened_at TIMESTAMPTZ,
+  clicked_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_email_logs_user ON email_logs(user_id);
+CREATE INDEX idx_email_logs_type ON email_logs(email_type);
+
+-- ============================================================================
+-- SEED INITIAL DATA
+-- ============================================================================
+
+-- Discount codes
+INSERT INTO discount_codes (code, discount_type, discount_value, max_uses, notes) VALUES
+('TRIAL20', 'percentage', 20, 1000, 'Trial users 20% off first month'),
+('ANNUAL30', 'percentage', 30, NULL, 'Annual billing 30% discount'),
+('WINBACK50', 'percentage', 50, 500, 'Win-back campaign for churned users'),
+('FIRSTWIN20', 'percentage', 20, 500, 'First winning trade celebration')
+ON CONFLICT (code) DO NOTHING;
+
+-- ============================================================================
+-- FUNCTIONS
+-- ============================================================================
+
+-- Increment AI usage
+CREATE OR REPLACE FUNCTION increment_ai_usage(
+  p_user_id UUID,
+  p_tokens INTEGER,
+  p_cost NUMERIC,
+  p_model TEXT,
+  p_provider TEXT
+) RETURNS INTEGER AS $$
+DECLARE
+  new_count INTEGER;
+  current_model_usage JSONB;
+BEGIN
+  INSERT INTO ai_usage (user_id, request_date, request_count, total_tokens, total_cost, model_usage)
+  VALUES (
+    p_user_id, 
+    CURRENT_DATE, 
+    1, 
+    p_tokens, 
+    p_cost,
+    jsonb_build_object(p_model, 1)
+  )
+  ON CONFLICT (user_id, request_date) 
+  DO UPDATE SET
+    request_count = ai_usage.request_count + 1,
+    total_tokens = ai_usage.total_tokens + p_tokens,
+    total_cost = ai_usage.total_cost + p_cost,
+    openrouter_requests = CASE WHEN p_provider = 'openrouter' THEN ai_usage.openrouter_requests + 1 ELSE ai_usage.openrouter_requests END,
+    vertex_requests = CASE WHEN p_provider = 'vertex' THEN ai_usage.vertex_requests + 1 ELSE ai_usage.vertex_requests END,
+    model_usage = COALESCE(ai_usage.model_usage, '{}'::jsonb) || jsonb_build_object(
+      p_model, 
+      COALESCE((ai_usage.model_usage->>p_model)::integer, 0) + 1
+    ),
+    updated_at = NOW()
+  RETURNING request_count INTO new_count;
+  
+  RETURN new_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Update subscription status
+CREATE OR REPLACE FUNCTION update_subscription_status()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE users
+  SET 
+    subscription_tier = NEW.tier,
+    subscription_status = NEW.status,
+    subscription_price = NEW.price,
+    subscription_expires_at = NEW.current_period_end
+  WHERE id = NEW.user_id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_user_subscription
+AFTER INSERT OR UPDATE ON subscriptions
+FOR EACH ROW
+EXECUTE FUNCTION update_subscription_status();
+
+-- ============================================================================
+-- ROW LEVEL SECURITY (RLS)
+-- ============================================================================
+
+ALTER TABLE ai_usage ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_request_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own data
+CREATE POLICY ai_usage_user_policy ON ai_usage
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY ai_request_logs_user_policy ON ai_request_logs
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY transactions_user_policy ON transactions
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY subscriptions_user_policy ON subscriptions
+  FOR SELECT USING (auth.uid() = user_id);
+```
+
+---
+
+## DELIVERABLES CHECKLIST  ✅
+
+- [ ] **Component 1: Smart Router**
+  - [ ] `src/lib/ai/smart-router.ts` created
+  - [ ] Complexity analysis (simple/medium/complex)
+  - [ ] Model selection logic
+  - [ ] OpenRouter + Vertex AI fallback
+  
+- [ ] **Component 2: Rate Limiter**
+  - [ ] `src/lib/ai/rate-limiter.ts` created
+  - [ ] Tier-based limits (free: 10, pro: 100, etc.)
+  - [ ] Database migration for ai_usage
+  - [ ] Usage increment function
+
+- [ ] **Component 3: AI Chat API**
+  - [ ] `/api/ai/chat` route created
+  - [ ] Integrated SmartRouter + RateLimiter
+  - [ ] 429 error on quota exceeded
+  - [ ] Usage stats in response
+
+- [ ] **Component 4: AI Chat UI**
+  - [ ] `AIChat.tsx` component
+  - [ ] Auto-show pricing modal on 429
+  - [ ] Usage indicator display
+  - [ ] Real-time message streaming
+
+- [ ] **Component 5: Pricing Modal**
+  - [ ] `PricingModal.tsx` with marketing copy
+  - [ ] Feature comparison table
+  - [ ] Tier selection UI
+  - [ ] Analytics tracking
+
+- [ ] **Component 6: Crypto Payment**
+  - [ ] Discount code input in CheckoutModal
+  - [ ] NOWPayments integration verified
+  - [ ] 1-click upgrade flow
+
+- [ ] **Component 7: SQL Schema**
+  - [ ] Complete migration script
+  - [ ] All tables created
+  - [ ] Indexes optimized
+  - [ ] RLS policies enabled
+  - [ ] Seed data inserted
+
+- [ ] **Testing**:
+  - [ ] Test rate limiting for each tier
+  - [ ] Test fallback to Vertex AI
+  - [ ] Test pricing modal trigger
+  - [ ] Test crypto payment flow
+  - [ ] Build: 0 errors
+
+---
+
+## EXECUTION COMMAND
+
+```bash
+Execute OPENROUTER INTEGRATION (Complete System)
+
+Implement:
+1. Smart Router (complexity-based routing + fallback)
+2. Rate Limiter (tier-based quota enforcement)
+3. AI Chat API (integrated routing + limiting)
+4. AI Chat UI (auto pricing modal on 429)
+5. Pricing Modal (compelling copy + crypto payment)
+6. SQL Schema (complete audit logging)
+
+Quality:
+- TypeScript strict mode
+- 0 technical debt
+- Mobile responsive
+- Security: RLS enabled
+- Build: 0 errors
+
+Deploy: Production ready
+Test: All 7 components end-to-end
+```
+
+---
+
+## 🎯 EXPECTED RESULTS
+
+### **Cost Optimization** (集中兵力):
+- Simple queries: $0.14/1M tokens (DeepSeek)
+- Medium queries: $0.25/1M tokens (Claude Haiku)
+- Complex queries: $3.0/1M tokens (Claude Sonnet)
+- **Average cost reduction**: 90% vs OpenAI direct
+
+### **Conversion Funnel** (上兵伐謀):
+- Free user hits limit → Pricing modal shows
+- See Pro tier features → 1-click upgrade
+- Crypto payment → Instant activation
+- **Expected conversion**: 15% of free users (vs 2% baseline)
+
+### **Reliability** (先為不可勝):
+- OpenRouter uptime: 99.5%
+- Fallback to Vertex: 99.99%
+- **Combined uptime**: 99.999% (Five nines!)
+
+### **Viral Growth** (致人而不致於人):
+- Pro users get referral commission (20%)
+- AI-generated share content (Phase 5)
+- **Viral coefficient**: 1.5+ (self-sustaining growth)
+
+---
+
+**集中兵力 + 先為不可勝 + 上兵伐謀 = Cost-Optimized Viral Growth Engine** 🚀⚔️💰

@@ -9,7 +9,15 @@ export type AnalyticsEvent =
   | 'signup_completed'
   | 'email_verified'
   | 'payment_started'
-  | 'payment_completed';
+  | 'payment_completed'
+  | 'page_view'
+  | 'exit_intent'
+  | 'feature_used_signal_view'
+  | 'feature_used_trade_execute'
+  | 'feature_used_alert_create'
+  | 'error_encountered'
+  | 'upgrade_trigger_shown'
+  | 'checkout_started';
 
 interface EventProperties {
   userId?: string;

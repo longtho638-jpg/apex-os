@@ -1,0 +1,433 @@
+# CLI TASK: PHASE 3 - ADVANCED ANALYTICS & USER INTELLIGENCE
+## Strategic Context: 知彼知己，百戰不殆 (Know Enemy, Know Self)
+
+**Sun Tzu Principle**: "If you know the enemy and know yourself, you need not fear the result of a hundred battles"
+
+**Objective**: Deep visibility into user behavior to 2x conversion rates
+**Timeline**: This week (Week 3)
+**Impact**: Data-driven optimization → +100% conversion improvement
+
+**Why This Phase**: Cannot optimize what we cannot measure. Before attacking friction points, we must understand WHERE users drop off and WHY.
+
+---
+
+## 📊 CURRENT STATE ANALYSIS
+
+**What We Have**:
+✅ Basic analytics (`analytics_events` table)
+✅ Event tracking wrapper (`src/lib/analytics.ts`)
+✅ Admin dashboard (Phase 2)
+
+**What We Need**:
+❌ User journey visualization (where do users get stuck?)
+❌ Cohort analysis (retention by signup week)
+❌ Feature usage tracking (which features drive retention?)
+❌ Competitor intelligence (pricing, features, traffic)
+
+---
+
+## TASK 8: ADVANCED ANALYTICS SYSTEM
+
+### 8.1 Enhanced User Journey Tracking ✅
+
+**File**: `src/lib/analytics-advanced.ts` (NEW)
+
+**Requirements**:
+- Track 20+ user events across entire journey
+- Session tracking (time spent, pages viewed)
+- Feature usage tracking (which features users actually use)
+- Error/frustration tracking (where users fail)
+- Exit intent detection
+
+**Implementation**:
+```typescript
+import { trackEvent } from '@/lib/analytics';
+
+// Session tracking
+export const sessionTracking = {
+  startSession: () => {
+    const sessionStart = Date.now();
+    sessionStorage.setItem('session_start', sessionStart.toString());
+  },
+
+  trackPageView: (page: string) => {
+    const sessionStart = parseInt(sessionStorage.getItem('session_start') || '0');
+    const timeOnPage = Date.now() - sessionStart;
+    
+    trackEvent({
+      event_name: 'page_view',
+      metadata: {
+        page,
+        time_on_page_ms: timeOnPage,
+        session_id: sessionStorage.getItem('session_id') || generateSessionId(),
+      },
+    });
+  },
+
+  trackExit: (page: string) => {
+    trackEvent({
+      event_name: 'exit_intent',
+      metadata: {
+        page,
+        time_on_site: Date.now() - parseInt(sessionStorage.getItem('session_start') || '0'),
+      },
+    });
+  },
+};
+
+// Feature usage tracking
+export const featureTracking = {
+  signalViewed: (signalId: string) => {
+    trackEvent({
+      event_name: 'feature_used_signal_view',
+      metadata: { signal_id: signalId },
+    });
+  },
+
+  tradeExecuted: (amount: number, symbol: string) => {
+    trackEvent({
+      event_name: 'feature_used_trade_execute',
+      metadata: { amount, symbol },
+    });
+  },
+
+  alertCreated: (type: string) => {
+    trackEvent({
+      event_name: 'feature_used_alert_create',
+      metadata: { alert_type: type },
+    });
+  },
+};
+
+// Error tracking
+export const errorTracking = {
+  apiError: (endpoint: string, errorCode: number) => {
+    trackEvent({
+      event_name: 'error_encountered',
+      metadata: {
+        error_type: 'api_error',
+        endpoint,
+        error_code: errorCode,
+        severity: errorCode >= 500 ? 'high' : 'medium',
+      },
+    });
+  },
+
+  paymentFailed: (reason: string) => {
+    trackEvent({
+      event_name: 'error_encountered',
+      metadata: {
+        error_type: 'payment_failed',
+        reason,
+        severity: 'high',
+      },
+    });
+  },
+};
+
+function generateSessionId() {
+  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  sessionStorage.setItem('session_id', sessionId);
+  return sessionId;
+}
+```
+
+---
+
+### 8.2 Cohort Analysis Dashboard ✅
+
+**File**: `src/app/[locale]/admin/cohorts/page.tsx` (NEW)
+
+**Requirements**:
+- Group users by signup week
+- Show retention curves (Day 1, 7, 30, 90)
+- Revenue by cohort
+- Feature adoption by cohort
+
+**Implementation**:
+```typescript
+'use client';
+
+import { useEffect, useState } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Sidebar } from '@/components/os/sidebar';
+import { AuroraBackground } from '@/components/ui/aurora-background';
+
+interface CohortData {
+  week: string;
+  signups: number;
+  day1_retention: number;
+  day7_retention: number;
+  day30_retention: number;
+  revenue: number;
+}
+
+export default function CohortsPage() {
+  const [cohorts, setCohorts] = useState<CohortData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/analytics/cohorts')
+      .then(res => res.json())
+      .then(data => {
+        setCohorts(data.cohorts);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div className="flex h-screen w-full bg-[#030303] text-white">
+      <Sidebar />
+      <main className="flex-1 relative overflow-hidden">
+        <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
+          <div />
+        </AuroraBackground>
+
+        <div className="relative z-10 h-full overflow-y-auto">
+          <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
+            <h1 className="text-2xl font-bold">Cohort Analysis</h1>
+            <p className="text-sm text-zinc-400">User retention by signup week</p>
+          </header>
+
+          <div className="p-6">
+            <GlassCard className="p-6">
+              <h2 className="text-lg font-bold mb-4">Retention Cohorts</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left p-3">Week</th>
+                      <th className="text-right p-3">Signups</th>
+                      <th className="text-right p-3">Day 1</th>
+                      <th className="text-right p-3">Day 7</th>
+                      <th className="text-right p-3">Day 30</th>
+                      <th className="text-right p-3">Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cohorts.map(cohort => (
+                      <tr key={cohort.week} className="border-b border-white/5">
+                        <td className="p-3">{cohort.week}</td>
+                        <td className="text-right p-3">{cohort.signups}</td>
+                        <td className="text-right p-3">{cohort.day1_retention}%</td>
+                        <td className="text-right p-3">{cohort.day7_retention}%</td>
+                        <td className="text-right p-3">{cohort.day30_retention}%</td>
+                        <td className="text-right p-3 text-emerald-400">${cohort.revenue}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </GlassCard>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+```
+
+**API**: `src/app/api/admin/analytics/cohorts/route.ts` (NEW)
+
+```typescript
+import { NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/lib/supabase';
+
+export async function GET() {
+  const supabase = getSupabaseClient();
+
+  // Get all users with signup date
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, created_at, subscription_tier, subscription_price')
+    .order('created_at', { ascending: false });
+
+  // Group by week
+  const cohorts = new Map<string, CohortData>();
+
+  users?.forEach(user => {
+    const signupDate = new Date(user.created_at);
+    const weekStart = getWeekStart(signupDate);
+    const weekKey = weekStart.toISOString().split('T')[0];
+
+    if (!cohorts.has(weekKey)) {
+      cohorts.set(weekKey, {
+        week: weekKey,
+        signups: 0,
+        day1_active: 0,
+        day7_active: 0,
+        day30_active: 0,
+        revenue: 0,
+      });
+    }
+
+    const cohort = cohorts.get(weekKey)!;
+    cohort.signups++;
+    if (user.subscription_price) {
+      cohort.revenue += parseFloat(user.subscription_price.toString());
+    }
+
+    // TODO: Calculate retention from analytics_events table
+  });
+
+  // Calculate retention percentages
+  const cohortArray = Array.from(cohorts.values()).map(c => ({
+    ...c,
+    day1_retention: ((c.day1_active / c.signups) * 100).toFixed(1),
+    day7_retention: ((c.day7_active / c.signups) * 100).toFixed(1),
+    day30_retention: ((c.day30_active / c.signups) * 100).toFixed(1),
+  }));
+
+  return NextResponse.json({ cohorts: cohortArray });
+}
+
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day;
+  return new Date(d.setDate(diff));
+}
+```
+
+---
+
+### 8.3 Competitor Intelligence API ✅
+
+**File**: `src/app/api/admin/competitors/route.ts` (NEW)
+
+**Requirements**:
+- Track competitor pricing (3Commas, Binance, etc.)
+- Monitor feature updates
+- Estimate traffic (via public data)
+
+**Implementation**:
+```typescript
+import { NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/lib/supabase';
+
+// Competitor data structure
+const COMPETITORS = [
+  {
+    name: '3Commas',
+    url: 'https://3commas.io',
+    pricing: {
+      starter: 29,
+      advanced: 49,
+      pro: 99,
+    },
+    features: ['Smart Trading', 'DCA Bot', 'Grid Bot'],
+  },
+  {
+    name: 'Binance Futures',
+    url: 'https://www.binance.com/en/futures',
+    pricing: {
+      free: 0, // Commission-based
+    },
+    features: ['Advanced Charts', 'API Trading', 'Auto-Invest'],
+  },
+];
+
+export async function GET() {
+  const supabase = getSupabaseClient();
+
+  // Store competitor snapshot
+  const timestamp = new Date().toISOString();
+  
+  for (const comp of COMPETITORS) {
+    await supabase.from('competitor_snapshots').insert({
+      competitor_name: comp.name,
+      pricing: comp.pricing,
+      features: comp.features,
+      snapshot_date: timestamp,
+    });
+  }
+
+  return NextResponse.json({
+    competitors: COMPETITORS,
+    updated_at: timestamp,
+  });
+}
+```
+
+**Database Migration**: Add `competitor_snapshots` table
+
+```sql
+-- supabase/migrations/20251128_competitor_tracking.sql
+CREATE TABLE IF NOT EXISTS competitor_snapshots (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  competitor_name TEXT NOT NULL,
+  pricing JSONB,
+  features JSONB,
+  snapshot_date TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_competitor_snapshots_date ON competitor_snapshots(snapshot_date DESC);
+```
+
+---
+
+## DELIVERABLES CHECKLIST
+
+- [ ] **8.1 Enhanced Tracking**:
+  - [ ] `src/lib/analytics-advanced.ts` created
+  - [ ] Session tracking implemented
+  - [ ] Feature usage tracking (10+ events)
+  - [ ] Error tracking
+  
+- [ ] **8.2 Cohort Analysis**:
+  - [ ] `/admin/cohorts` page created
+  - [ ] `/api/admin/analytics/cohorts` endpoint
+  - [ ] Retention calculations (Day 1, 7, 30)
+  - [ ] Revenue by cohort
+
+- [ ] **8.3 Competitor Intelligence**:
+  - [ ] `/api/admin/competitors` endpoint
+  - [ ] Database migration for snapshots
+  - [ ] Competitor data seeded
+
+- [ ] **Testing**:
+  - [ ] All tracking events fire correctly
+  - [ ] Cohort page loads with data
+  - [ ] Build: 0 errors
+
+---
+
+## SUCCESS CRITERIA
+
+**After Phase 3, we will know**:
+1. ✅ Exact drop-off points in user journey
+2. ✅ Which features drive retention (and which don't)
+3. ✅ Cohort-specific retention patterns
+4. ✅ Where we're priced vs competitors
+5. ✅ Most common user errors/frustrations
+
+**This enables**:
+- Phase 4: Surgical fixes to high-impact friction points
+- Phase 5: Content targeting competitor weaknesses
+- Phase 6: Referral incentives based on user behavior
+
+---
+
+## EXECUTION COMMAND
+
+```bash
+Execute PHASE 3: TASK 8 (Advanced Analytics & User Intelligence).
+
+Implement:
+1. Enhanced user journey tracking (analytics-advanced.ts)
+2. Cohort analysis dashboard (/admin/cohorts + API)
+3. Competitor intelligence system (tracking API + DB)
+
+Quality:
+- TypeScript strict mode
+- 0 technical debt
+- Mobile responsive
+- Build: 0 errors
+
+Deploy: Production ready
+```
+
+---
+
+**知彼知己，百戰不殆** - Know thy user, win every optimization! 📊🎯

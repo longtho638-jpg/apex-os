@@ -58,4 +58,35 @@ export const emailTemplates = {
       </div>
     `,
   },
+
+  winBack: (userName: string, daysSinceCancellation: number, profitMissed?: number) => ({
+    subject: '🎁 We Miss You! Come Back with 50% Off',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #10b981;">We miss you, ${userName}! 💚</h1>
+        
+        <p>It's been ${daysSinceCancellation} days since you left ApexOS.</p>
+        
+        ${profitMissed ? `
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e;">
+              <strong>Did you know?</strong> Our signals would have generated <strong>$${profitMissed.toFixed(2)}</strong> 
+              in profit since you left. 📈
+            </p>
+          </div>
+        ` : ''}
+        
+        <h2>🎁 Special Offer Just for You</h2>
+        <p>Use code <strong style="font-size: 24px; color: #10b981;">WINBACK50</strong> for <strong>50% off</strong> your first month back!</p>
+        
+        <a href="https://apexrebate.com/pricing?code=WINBACK50" 
+           style="display: inline-block; background: #10b981; color: white; padding: 16px 32px; 
+                  text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
+          Reactivate My Account
+        </a>
+        
+        <p style="color: #6b7280; font-size: 14px;">This offer expires in 7 days.</p>
+      </div>
+    `,
+  }),
 };

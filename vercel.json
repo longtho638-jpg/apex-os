@@ -1,6 +1,10 @@
 {
-  "crons": [{
-    "path": "/api/cron/drip-campaign",
-    "schedule": "0 10 * * *"
-  }]
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "crons": [
+    {
+      "path": "/api/cron/drip-campaign",
+      "schedule": "0 10 * * *"
+    }
+  ]
 }
