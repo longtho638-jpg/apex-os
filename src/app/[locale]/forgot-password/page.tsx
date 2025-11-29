@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+
 import { Terminal, ChevronRight, Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRouter, useParams } from 'next/navigation';
@@ -20,24 +20,26 @@ export default function ForgotPasswordPage() {
         setLoading(true);
         setError('');
 
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        // Use Custom API to send branded email
+        try {
+            const res = await fetch('/api/auth/recover', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
 
-        // Construct the redirect URL to the reset-password page
-        const redirectUrl = `${window.location.origin}/${locale}/reset-password`;
+            const data = await res.json();
 
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: redirectUrl,
-        });
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to send recovery email');
+            }
 
-        if (error) {
-            setError(error.message);
-        } else {
             setSuccess(true);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
