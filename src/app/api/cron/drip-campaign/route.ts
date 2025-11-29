@@ -24,11 +24,11 @@ export async function GET(req: NextRequest) {
     // Calculate target date range for this stage
     // e.g. for Day 2, find users created between 48h and 72h ago? 
     // Simplified: Find users created exactly 'day' days ago (ignoring time for simplicity, or use range)
-    
+
     const targetDateStart = new Date();
     targetDateStart.setDate(today.getDate() - stage.day);
     targetDateStart.setHours(0, 0, 0, 0);
-    
+
     const targetDateEnd = new Date();
     targetDateEnd.setDate(today.getDate() - stage.day);
     targetDateEnd.setHours(23, 59, 59, 999);
@@ -55,17 +55,19 @@ export async function GET(req: NextRequest) {
           // Day 0: Welcome (handled usually on signup, but cron adds redundancy or welcome series part 2)
           // Day 2: Khoe lãi (Feature Highlight in existing templates)
           // Day 6: Trial Ending (Existing template)
-          
+
           // Note: emailTemplates structure in src/lib/email-templates.ts matches these types
           // But Day 2 needs to be specific "Did you see this?" logic if not already.
           // We'll use existing 'featureHighlight' for Day 2 as a proxy for "Did you see this/Win showcase".
-          
+
           const template = stage.template; // This is an object { subject, html: (name) => ... }
-          
+
+          const actionUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
+
           await sendEmail({
             to: user.email,
             subject: template.subject,
-            html: template.html(user.name || 'Trader'),
+            html: template.html(user.name || 'Trader', actionUrl),
           });
 
           // Log
@@ -74,7 +76,7 @@ export async function GET(req: NextRequest) {
             email_type: stage.type,
             sent_at: new Date().toISOString()
           });
-          
+
           emailsSent++;
         }
       }
