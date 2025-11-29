@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { getSupabaseClient } from '@/lib/supabase';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_missing_key_dev_mode');
+const resend = new Resend((process.env.RESEND_API_KEY || 're_missing_key_dev_mode').trim());
 
 export interface EmailOptions {
   to: string;

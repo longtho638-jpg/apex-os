@@ -87,7 +87,7 @@ export async function middleware(request: NextRequest) {
         token = authHeader.substring(7);
       } else {
         if (request.nextUrl.pathname.startsWith('/api/')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
         const url = request.nextUrl.clone();
         url.pathname = '/en/login';
@@ -104,30 +104,18 @@ export async function middleware(request: NextRequest) {
       // Check for admin role in app_metadata (Supabase standard)
       const appMetadata = (payload as any).app_metadata || {};
       const userRole = appMetadata.role || (payload as any).role;
-      
+
       // STRICT CHECK: If the route is /admin, the user MUST have 'admin' or 'service_role' claim.
-      // If your system uses a separate 'admin_users' table and NOT Supabase Custom Claims,
-      // you CANNOT verify this in Middleware without DB access.
-      // However, to pass the security test and be safe by default, we should REJECT
-      // if we are unsure, OR rely on the API route to check.
-      
-      // If the test expects 401/403, it means the API route didn't block it.
-      // I will implement a basic check here: if role is NOT 'service_role' (and not explicitly 'admin'),
-      // we assume they are a normal user and BLOCK them from /admin routes.
-      // This forces you to use proper Admin Claims or Service Key for admin tasks.
-      
-      // If your app relies on `admin_users` table, you MUST implement Custom Claims hook in Supabase
-      // to inject `role: 'admin'` into the JWT.
-      // For now, to secure the app, I will block 'authenticated' users from /admin.
-      
-      const isSuperAdmin = userRole === 'service_role' || userRole === 'admin';
-      
+      const isSuperAdmin = userRole === 'service_role' || userRole === 'admin' || userRole === 'super_admin';
+
       if (!isSuperAdmin) {
-         // Fallback: If we allow 'authenticated' users to pass, the API route MUST check.
-         // But the current finding is that it returns 200.
-         // So I will block here to be safe.
-         console.warn(`[Middleware] Blocked non-admin user ${userId} from ${request.nextUrl.pathname}`);
-         return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
+        console.warn(`[Middleware] Blocked non-admin user ${userId} from ${request.nextUrl.pathname}`);
+        if (request.nextUrl.pathname.startsWith('/api/')) {
+          return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
+        }
+        const url = request.nextUrl.clone();
+        url.pathname = '/en/login';
+        return NextResponse.redirect(url);
       }
 
       const requestHeaders = new Headers(request.headers);
@@ -248,6 +236,8 @@ export async function middleware(request: NextRequest) {
       '/api/v1/auth/login',
       '/api/v1/auth/signup',
       '/api/v1/auth/callback',
+      '/api/auth', // Whitelist all NextAuth/Custom Auth routes (recover, callback, etc)
+      '/api/debug', // Whitelist debug routes
       '/api/v1/public',
       '/api/webhooks' // Webhooks usually have their own signature verification
     ];
