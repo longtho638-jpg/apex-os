@@ -97,5 +97,25 @@ export const emailTemplates = {
       <a href="${actionUrl}" class="btn">Reactivate Account</a>
     `, 'Return to Apex'),
   },
+
+  winningStreak: {
+    subject: '🔥 You Are On Fire • ApexOS',
+    html: (name: string, actionUrl: string) => emailTemplates.base(`
+      <p>System analysis detects a <strong>Winning Streak</strong>.</p>
+      <p>You have executed 3 profitable trades in a row. Your market synchronization is peaking.</p>
+      <p>Do not cap your potential. Upgrade to <strong>Apex Pro</strong> to unlock unlimited signals and leverage this momentum.</p>
+      <a href="${actionUrl}" class="btn">Scale Up Now</a>
+    `, 'Momentum Detected'),
+  },
+
+  stopLossGuide: {
+    subject: '🛡️ Tactical Pause Recommended • ApexOS',
+    html: (name: string, actionUrl: string) => emailTemplates.base(`
+      <p>Market turbulence detected in your recent performance.</p>
+      <p>Even the best traders take tactical pauses. We have unlocked a premium guide on <strong>Risk Management & Stop Loss Strategy</strong> for you.</p>
+      <p>Regroup. Re-arm. Re-enter.</p>
+      <a href="${actionUrl}" class="btn">Read Strategy Guide</a>
+    `, 'Risk Alert'),
+  },
 };
 

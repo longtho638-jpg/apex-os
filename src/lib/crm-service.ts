@@ -93,6 +93,35 @@ export class CRMService {
             console.error('[CRM] Failed to update score:', error);
         }
     }
+    /**
+     * Update pipeline metadata (e.g. Ghost Profit)
+     */
+    async updatePipelineMetadata(userId: string, metadata: any) {
+        const supabase = getSupabaseClient();
+
+        // First get existing metadata
+        const { data: existing, error: fetchError } = await supabase
+            .from('crm_pipelines')
+            .select('metadata')
+            .eq('user_id', userId)
+            .single();
+
+        if (fetchError) {
+            console.error('Error fetching pipeline metadata:', fetchError);
+            return;
+        }
+
+        const newMetadata = { ...existing?.metadata, ...metadata };
+
+        const { error } = await supabase
+            .from('crm_pipelines')
+            .update({ metadata: newMetadata })
+            .eq('user_id', userId);
+
+        if (error) {
+            console.error('Error updating pipeline metadata:', error);
+        }
+    }
 }
 
-export const crm = CRMService.getInstance();
+export const crmService = CRMService.getInstance();
