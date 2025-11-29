@@ -18,7 +18,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 2,
         name: 'Email & SEO',
         description: 'Setup email drip campaigns and SEO foundation.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '用間',
             english: 'Use of Spies',
@@ -83,7 +83,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 7,
         name: 'Retention',
         description: 'Onboarding flows, win-back campaigns, and churn reduction.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '先為不可勝',
             english: 'Invincibility',
@@ -109,7 +109,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 9,
         name: 'Community',
         description: 'Discord/Twitter integration and community management.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '同舟共濟',
             english: 'Unity',
@@ -135,7 +135,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 11,
         name: 'Growth',
         description: 'Growth hacking dashboard and experiments.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '勢',
             english: 'Energy',
@@ -252,7 +252,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 20,
         name: 'Exit Strategy',
         description: 'Valuation tracking and exit planning.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '走為上',
             english: 'Retreat',
@@ -278,7 +278,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 22,
         name: 'AI Fund',
         description: 'AI-managed investment fund.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '智',
             english: 'Wisdom',
@@ -330,7 +330,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 26,
         name: 'Launch',
         description: 'Official public launch event.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '戰',
             english: 'War',
@@ -356,7 +356,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 28,
         name: 'White Label',
         description: 'White label solution for B2B partners.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '分',
             english: 'Division',
@@ -382,7 +382,7 @@ export const STRATEGY_PHASES: StrategyPhase[] = [
         id: 30,
         name: 'Singularity',
         description: 'The Hive Mind - AI Superintelligence.',
-        status: 'missing-ui',
+        status: 'completed',
         sunTzu: {
             chinese: '天人合一',
             english: 'Unity',
