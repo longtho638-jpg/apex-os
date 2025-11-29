@@ -96,7 +96,11 @@ export function WithdrawalForm({ balance, paymentMethods, onSuccess }: Withdrawa
                 className="w-full bg-emerald-600 hover:bg-emerald-700"
                 disabled={isSubmitting || !amount || !methodId || parseFloat(amount) > balance}
             >
-                {isSubmitting ? 'Processing...' : 'Request Withdrawal'}
+                {isSubmitting ? (
+                    <span aria-live="polite">Processing...</span>
+                ) : (
+                    'Request Withdrawal'
+                )}
             </Button>
         </form>
     );

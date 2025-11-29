@@ -1,0 +1,12 @@
+
+# APScheduler for background job scheduling
+apscheduler==3.10.4
+
+# CCXT for exchange API integration
+ccxt>=4.2.0
+
+# Python Supabase client
+supabase>=2.3.0
+
+# Async support
+aiohttp==3.9.1

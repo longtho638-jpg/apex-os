@@ -14,14 +14,16 @@ if (!JWT_SECRET_ENV) {
     console.warn('⚠️ WARNING: SUPABASE_JWT_SECRET is not defined. Using insecure default for development.');
 }
 
+import { ROLES, UserRole } from '@/lib/constants/roles';
+
 const JWT_SECRET = JWT_SECRET_ENV || 'your-secret-key-change-in-production';
-const SESSION_EXPIRY = '7d'; // 7 days
+const SESSION_EXPIRY = '1h'; // Reduced from 7d for security. TODO: Implement Refresh Token flow.
 const TEMP_TOKEN_EXPIRY = '5m'; // 5 minutes for MFA step
 
 export interface SessionTokenPayload {
     email: string;
     type: 'session';
-    role: 'admin' | 'super_admin';
+    role: UserRole;
     sub: string;
 }
 
@@ -33,7 +35,7 @@ export interface TempTokenPayload {
 /**
  * Generate session token (after successful login + MFA)
  */
-export function generateSessionToken(email: string, role: 'admin' | 'super_admin' = 'admin', userId: string): string {
+export function generateSessionToken(email: string, role: UserRole = ROLES.USER, userId: string): string {
     const payload: SessionTokenPayload & { sub: string } = {
         email,
         type: 'session',

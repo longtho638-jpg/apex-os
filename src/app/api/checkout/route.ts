@@ -2,109 +2,130 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createPolarCheckout } from '@/lib/payments/polar-client';
 import { createNOWPaymentsInvoice } from '@/lib/payments/nowpayments-client';
 import { applyDiscount } from '@/lib/discount-engine';
-import { PAYMENT_TIERS, PaymentTier } from '@/config/payment-tiers';
+import { PAYMENT_TIERS, PaymentTier, getTierPrice, TierId } from '@/config/payment-tiers';
 import { z } from 'zod';
+import { redis } from '@/lib/redis';
 
 const checkoutSchema = z.object({
-  tier: z.enum(['FOUNDERS', 'PREMIUM']),
-  gateway: z.enum(['polar', 'nowpayments']),
+  tier: z.enum(['FREE', 'PRO', 'TRADER', 'ELITE']),
+  gateway: z.enum(['polar', 'nowpayments', 'wallet']),
   userEmail: z.string().email(),
-  discountCode: z.string().optional().nullable()
+  discountCode: z.string().optional().nullable(),
+  billingPeriod: z.enum(['monthly', 'annual']).optional().default('monthly')
 });
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const result = checkoutSchema.safeParse(body);
-    
-    if (!result.success) {
-        return NextResponse.json({ error: 'Invalid input', details: result.error }, { status: 400 });
+    // 1. Idempotency Check
+    const idempotencyKey = request.headers.get('idempotency-key');
+    if (!idempotencyKey) {
+      return NextResponse.json({ error: 'Idempotency-Key header is required' }, { status: 400 });
     }
 
-    const { tier, gateway, userEmail, discountCode } = result.data;
-    
+    const cachedResponse = await redis.get(`idempotency:${idempotencyKey}`);
+    if (cachedResponse) {
+      console.log(`[Idempotency] Returning cached response for key: ${idempotencyKey}`);
+      return NextResponse.json(JSON.parse(cachedResponse));
+    }
+
+    const body = await request.json();
+    const result = checkoutSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json({ error: 'Invalid input', details: result.error }, { status: 400 });
+    }
+
+    const { tier, gateway, userEmail, discountCode, billingPeriod } = result.data;
+
     // Get userId from session (implement proper auth in real app)
-    const userId = request.headers.get('x-user-id') || 'user_123'; 
-    
+    const userId = request.headers.get('x-user-id') || 'user_123';
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get base price
-    const tierConfig = PAYMENT_TIERS[tier as PaymentTier];
-    let originalPrice = tierConfig.price;
-    
+    // Get base price based on billing period
+    let originalPrice = getTierPrice(tier as TierId, billingPeriod);
+
     // Apply discount if provided
     let finalPrice = originalPrice;
     let savedAmount = 0;
 
     if (discountCode) {
-        const discountResult = await applyDiscount(originalPrice, discountCode, tier, userId);
-        finalPrice = discountResult.finalPrice as any;
-        savedAmount = discountResult.saved;
+      const discountResult = await applyDiscount(originalPrice, discountCode, tier, userId);
+      finalPrice = discountResult.finalPrice as any;
+      savedAmount = discountResult.saved;
     }
 
-    // Note: For Polar and NOWPayments, we need to check if they support dynamic price overriding 
-    // or if we need to create specific price IDs for discounted amounts.
-    // For this implementation, we'll assume we can pass an amount override or the integration 
-    // supports it. If not, we'd typically create a one-off invoice/checkout with the calculated amount.
-    
-    // IMPORTANT: The current client implementations (polar-client.ts, nowpayments-client.ts) 
-    // might need updates to accept a specific 'amount' if they rely solely on pre-defined product IDs.
-    // For NOWPayments, it's easier as we create an invoice with amount.
-    // For Polar, we might need to use a custom checkout or create a product price on the fly if the SDK allows,
-    // OR pass the discount info if Polar supports it natively.
-    // Assuming we updated the clients or they are flexible enough (NOWPayments is).
+    let responseData: any;
 
-    if (gateway === 'polar') {
-      // Polar usually relies on Product Price IDs. 
-      // If we have a discount, we might need to apply a discount code ON Polar side
-      // OR create a custom checkout with a custom amount.
-      // For simplicity in this CLI task, we'll proceed with the standard call but pass metadata.
-      // In a real prod scenario, ensure Polar config matches or use their discount feature.
-      
+    if (gateway === 'wallet') {
+      // Call RPC to pay with wallet
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+
+      const { data, error } = await supabase.rpc('pay_with_wallet', {
+        p_user_id: userId,
+        p_amount: finalPrice,
+        p_tier: tier,
+        p_billing_period: billingPeriod
+      });
+
+      if (error) {
+        console.error('Wallet payment error:', error);
+        return NextResponse.json({ error: 'Wallet payment failed' }, { status: 500 });
+      }
+
+      const result = data as any;
+
+      if (!result || !result.success) {
+        return NextResponse.json({ error: result?.message || 'Insufficient balance or payment failed' }, { status: 400 });
+      }
+
+      responseData = {
+        success: true,
+        finalPrice,
+        saved: savedAmount,
+        message: 'Payment successful'
+      };
+
+    } else if (gateway === 'polar') {
       const checkout = await createPolarCheckout({
         userId,
         userEmail,
         tier: tier as PaymentTier
       });
-      
-      return NextResponse.json({
+
+      responseData = {
         checkoutUrl: checkout.url,
         checkoutId: checkout.id,
         finalPrice,
         saved: savedAmount
-      });
+      };
+
     } else {
-      // NOWPayments supports amount override natively in our client function
-      // We need to update createNOWPaymentsInvoice to accept an amount override
-      // or handle it here. The client fetches price from config.
-      // Let's update the client to allow amount override or just pass the discounted price 
-      // if we refactor the client.
-      
-      // For now, let's stick to the interface. The client calculates discount based on config.
-      // We might need to refactor `createNOWPaymentsInvoice` to accept `finalPrice`.
-      
-      // Refactoring NOWPayments client call to assume it can take an amount if we modified it, 
-      // but since we didn't modify the client signature yet, let's do that in the next step if needed.
-      // Actually, let's pass the discount code logic to the client or modify the client now.
-      
-      // Let's assume for this step we proceed with standard invoice but we SHOULD pass the discounted amount.
-      // I will modify the client in the next step to support explicit amount.
-      
       const invoice = await createNOWPaymentsInvoice({
         userId,
         tier: tier as PaymentTier,
-        amountOverride: finalPrice 
+        amountOverride: finalPrice
       });
-      
-      return NextResponse.json({
+
+      responseData = {
         checkoutUrl: invoice.invoice_url,
         orderId: invoice.order_id,
         finalPrice,
         saved: savedAmount
-      });
+      };
     }
+
+    // Cache success response
+    await redis.set(`idempotency:${idempotencyKey}`, JSON.stringify(responseData), 'EX', 86400); // 24 hours
+
+    return NextResponse.json(responseData);
+
   } catch (error) {
     console.error('Checkout error:', error);
     return NextResponse.json(

@@ -12,7 +12,8 @@ import {
     Settings,
     LogOut,
     Zap,
-    Network
+    Network,
+    Map as MapIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/contexts/I18nContext';
@@ -30,6 +31,8 @@ export function AdminSidebar() {
         { name: t('risk'), href: '/admin/risk', icon: ShieldAlert },
         { name: t('trading'), href: '/admin/trading', icon: Activity },
         { name: t('users'), href: '/admin/users', icon: Users },
+        { name: t('strategy'), href: '/admin/strategy', icon: MapIcon }, // Added Strategy link
+        { name: t('system'), href: '/admin/system', icon: Settings }, // Added System link
         {
             name: t('security'),
             href: '/admin/security',
@@ -42,7 +45,25 @@ export function AdminSidebar() {
                 { name: t('agent_status'), href: '/admin/agents', icon: Activity },
             ]
         },
-        { name: t('exchanges'), href: '/admin/exchange-config', icon: Network }, // Added Exchanges link
+        { name: t('exchanges'), href: '/admin/exchange-config', icon: Network },
+        {
+            name: t('analytics'),
+            href: '/admin/analytics',
+            icon: Activity,
+            children: [
+                { name: t('dashboard'), href: '/admin/analytics-dashboard', icon: LayoutDashboard },
+                { name: t('ab_tests'), href: '/admin/ab-tests', icon: Activity },
+            ]
+        },
+        {
+            name: t('growth'),
+            href: '/admin/growth-hub',
+            icon: Users,
+            children: [
+                { name: t('viral'), href: '/admin/viral-economics', icon: Users },
+            ]
+        },
+        { name: t('liquidity'), href: '/admin/providers', icon: DollarSign },
     ];
 
     const toggleSubmenu = (name: string) => {
@@ -150,6 +171,11 @@ export function AdminSidebar() {
                         <div className="bg-blue-500 h-full w-[45%]" />
                     </div>
                 </div>
+
+                <Link href="/dashboard" className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors w-full px-2 py-2 mb-2">
+                    <LogOut className="w-4 h-4 rotate-180" />
+                    <span className="text-sm">{t('back_to_app')}</span>
+                </Link>
 
                 <button className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors w-full px-2 py-2">
                     <LogOut className="w-4 h-4" />

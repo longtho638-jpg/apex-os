@@ -6,6 +6,8 @@ import { ArrowUpRight, ArrowDownRight, Activity, Zap, BarChart2, Download } from
 import { formatDistanceToNow } from 'date-fns';
 import { FilterState } from '@/components/dashboard/SignalFilters';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
 
 interface Signal {
   id: string;
@@ -26,6 +28,8 @@ interface Props {
 export default function AlphaDashboard({ filters }: Props) {
   const [signals, setSignals] = useState<Signal[]>([]);
   const supabase = createClientComponentClient();
+  const t = useTranslations('AISignals');
+
 
   // Mock data generation for demo if DB empty
   const generateMockSignals = (): Signal[] => {
@@ -83,7 +87,7 @@ export default function AlphaDashboard({ filters }: Props) {
       headers.join(','),
       ...filteredSignals.map(s => [s.symbol, s.prediction, s.confidence, s.entry_price, s.timestamp].join(','))
     ].join('\n');
-    
+
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -94,16 +98,18 @@ export default function AlphaDashboard({ filters }: Props) {
 
   return (
     <div className="p-6 space-y-6 bg-[#030303] min-h-screen text-white">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-          Alpha Intelligence
+      {/* Page Header */}
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          <Activity className="w-8 h-8 text-emerald-500" />
+          {t('title')}
         </h1>
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={handleExport}
             className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-white transition-colors"
           >
-            <Download size={14} /> Export CSV
+            <Download size={14} /> {t('export_csv')}
           </button>
           <div className="flex items-center gap-2 text-xs font-mono text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 animate-pulse">
             <div className="w-2 h-2 bg-emerald-500 rounded-full" />
@@ -116,12 +122,12 @@ export default function AlphaDashboard({ filters }: Props) {
         {/* Signal Feed */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-400" /> Active Signals
+            <Zap className="w-5 h-5 text-yellow-400" /> {t('active_signals')}
           </h2>
-          
+
           <div className="space-y-3">
             {filteredSignals.map(signal => (
-              <Link 
+              <Link
                 href={`/en/dashboard/signals/${signal.id}`}
                 key={signal.id}
                 className="block bg-white/5 border border-white/10 rounded-xl p-4 hover:border-emerald-500/30 hover:bg-white/10 transition-all group cursor-pointer"
@@ -133,50 +139,50 @@ export default function AlphaDashboard({ filters }: Props) {
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">{signal.symbol}</h3>
-                      <p className="text-xs text-zinc-400">Entry: ${signal.entry_price?.toFixed(2)}</p>
+                      <p className="text-xs text-zinc-400">{t('entry')}: ${signal.entry_price?.toFixed(2)}</p>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     <div className="text-2xl font-bold font-mono">
                       {(signal.confidence * 100).toFixed(0)}%
                     </div>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Confidence</div>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-wider">{t('confidence')}</div>
                   </div>
                 </div>
 
                 {/* Explainability Bar */}
                 <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-3 gap-2 text-xs">
                   <div>
-                    <span className="text-zinc-500 block mb-1">Price AI</span>
+                    <span className="text-zinc-500 block mb-1">{t('price_ai')}</span>
                     <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-500" style={{ width: `${signal.price_contrib * 100}%` }} />
                     </div>
                   </div>
                   <div>
-                    <span className="text-zinc-500 block mb-1">Sentiment</span>
+                    <span className="text-zinc-500 block mb-1">{t('sentiment')}</span>
                     <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                       <div className="h-full bg-purple-500" style={{ width: `${signal.sentiment_contrib * 100}%` }} />
                     </div>
                   </div>
                   <div>
-                    <span className="text-zinc-500 block mb-1">Vol/Whale</span>
+                    <span className="text-zinc-500 block mb-1">{t('vol_whale')}</span>
                     <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                       <div className="h-full bg-orange-500" style={{ width: `${signal.volume_contrib * 100}%` }} />
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-3 text-[10px] text-zinc-600 flex items-center gap-1">
                   <Activity size={10} />
-                  Generated {formatDistanceToNow(new Date(signal.timestamp))} ago
+                  {t('generated')} {formatDistanceToNow(new Date(signal.timestamp))} {t('ago')}
                 </div>
               </Link>
             ))}
-            
+
             {filteredSignals.length === 0 && (
               <div className="text-center py-12 text-zinc-500 bg-white/5 rounded-xl border border-white/5 border-dashed">
-                Waiting for high-confidence signals...
+                {t('no_signals_message')}
               </div>
             )}
           </div>
@@ -186,26 +192,26 @@ export default function AlphaDashboard({ filters }: Props) {
         <div className="space-y-6">
           <div className="bg-white/5 border border-white/10 rounded-xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2">
-              <BarChart2 className="w-4 h-4 text-purple-400" /> Performance
+              <BarChart2 className="w-4 h-4 text-purple-400" /> {t('performance')}
             </h3>
             <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                    <span className="text-sm text-zinc-400">Win Rate (24h)</span>
-                    <span className="text-emerald-400 font-bold">78%</span>
-                </div>
-                <div className="w-full bg-zinc-800 rounded-full h-2">
-                    <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '78%' }} />
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                    <span className="text-sm text-zinc-400">Total Profit</span>
-                    <span className="text-white font-mono">+$1,240</span>
-                </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-zinc-400">{t('win_rate')} (24h)</span>
+                <span className="text-emerald-400 font-bold">78%</span>
+              </div>
+              <div className="w-full bg-zinc-800 rounded-full h-2">
+                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '78%' }} />
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                <span className="text-sm text-zinc-400">{t('total_profit')}</span>
+                <span className="text-white font-mono">+$1,240</span>
+              </div>
             </div>
           </div>
 
           <div className="bg-white/5 border border-white/10 rounded-xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-blue-400" /> Market Context
+              <Activity className="w-4 h-4 text-blue-400" /> {t('market_context')}
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {['BTC', 'ETH', 'BNB', 'SOL'].map(sym => (

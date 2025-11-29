@@ -3,12 +3,13 @@
 /**
  * Authentication context for React
  * Manages user login state and JWT tokens
+ * Refactored for security: Uses HttpOnly cookies (via API) instead of client-side storage.
  */
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { getApiUrl } from '@/lib/api/config';
-import Cookies from 'js-cookie';
+
+// --- Types ---
 
 interface User {
     id: string;
@@ -18,66 +19,56 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    token: string | null;
+    token: string | null; // Kept for type compatibility, but will be null or dummy
     login: (email: string, password: string) => Promise<boolean>;
     signup: (email: string, password: string, fullName?: string) => Promise<boolean>;
-    logout: () => void;
+    logout: () => Promise<void>;
     isAuthenticated: boolean;
     loading: boolean;
 }
 
+// --- Context ---
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// --- Provider ---
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Load user from API on mount
+    // --- Side Effects ---
+
+    // Load user from API on mount (verifies HttpOnly cookie)
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // Check for token in localStorage or cookies
-                const storedToken = localStorage.getItem('apex_token') || Cookies.get('sb-access-token');
-                
-                if (!storedToken) {
-                    setLoading(false);
-                    return;
-                }
-
                 const baseUrl = getApiUrl();
+                // Call API to verify session (browser sends HttpOnly cookie automatically)
                 const res = await fetch(`${baseUrl}/admin/me`, {
+                    method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${storedToken}`
+                        'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success) {
                         setUser({
                             id: data.admin.id,
                             email: data.admin.email,
-                            full_name: 'Admin' // Placeholder as admin_users might not have full_name
+                            full_name: 'Admin' // Placeholder
                         });
-                        // Sync token state if it wasn't set (e.g. page refresh)
-                        setToken(storedToken);
                     } else {
-                        // Token invalid
-                        localStorage.removeItem('apex_token');
-                        localStorage.removeItem('apex_user');
-                        Cookies.remove('sb-access-token');
+                        setUser(null);
                     }
                 } else {
-                    // Token invalid or server error
-                     if (res.status === 401) {
-                        localStorage.removeItem('apex_token');
-                        localStorage.removeItem('apex_user');
-                        Cookies.remove('sb-access-token');
-                    }
+                    setUser(null);
                 }
             } catch (err) {
                 console.error('Auth check failed', err);
+                setUser(null);
             } finally {
                 setLoading(false);
             }
@@ -85,9 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         checkAuth();
     }, []);
 
-    // ...
+    // --- Actions ---
 
-    const login = async (email: string, password: string): Promise<boolean> => {
+    const login = useCallback(async (email: string, password: string): Promise<boolean> => {
         try {
             const baseUrl = getApiUrl();
             const response = await fetch(`${baseUrl}/auth/login`, {
@@ -98,28 +89,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             const data = await response.json();
 
-
             if (data.success) {
-                // Check if MFA is required for this user (returned from API)
+                // MFA Flow
                 if (data.mfaRequired) {
-                    // Store temporary state for MFA verification step
-                    sessionStorage.setItem('mfaTempToken', data.token);
+                    sessionStorage.setItem('mfaTempToken', data.token); // Keep MFA temp token in session storage (short lived)
                     sessionStorage.setItem('mfaEmail', email);
                     sessionStorage.setItem('mfaUserId', data.user.id);
 
-                    // Redirect to MFA verification page (don't set auth token yet)
                     if (typeof window !== 'undefined') {
                         window.location.href = '/admin/login/mfa';
                     }
                     return true;
                 }
 
-                // Normal login flow (no MFA required)
-                setToken(data.token);
+                // Standard Flow
+                // Backend sets HttpOnly cookie. We just update state.
                 setUser(data.user);
-                localStorage.setItem('apex_token', data.token);
-                localStorage.setItem('apex_user', JSON.stringify(data.user));
-
+                console.log('✅ Login successful (HttpOnly cookie set by backend).');
                 return true;
             }
 
@@ -128,9 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Login error:', error);
             return false;
         }
-    };
+    }, []);
 
-    const signup = async (email: string, password: string, fullName?: string): Promise<boolean> => {
+    const signup = useCallback(async (email: string, password: string, fullName?: string): Promise<boolean> => {
         try {
             const baseUrl = getApiUrl();
             const response = await fetch(`${baseUrl}/auth/signup`, {
@@ -142,12 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const data = await response.json();
 
             if (data.success) {
-                setToken(data.token);
+                // Backend sets HttpOnly cookie
                 setUser(data.user);
-                localStorage.setItem('apex_token', data.token);
-                localStorage.setItem('apex_user', JSON.stringify(data.user));
-                Cookies.set('sb-access-token', data.token, { expires: 7, path: '/' });
-                console.log('🍪 Cookie set! Current cookies:', document.cookie);
                 return true;
             }
 
@@ -156,38 +138,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Signup error:', error);
             return false;
         }
-    };
+    }, []);
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         try {
             const baseUrl = getApiUrl();
             await fetch(`${baseUrl}/auth/logout`, { method: 'POST' });
         } catch (e) {
             console.error('Logout API call failed', e);
+        } finally {
+            setUser(null);
+            // Optional: Clear any application specific state
         }
+    }, []);
 
-        setToken(null);
-        setUser(null);
-        localStorage.removeItem('apex_token');
-        localStorage.removeItem('apex_user');
-        Cookies.remove('sb-access-token');
-        Cookies.remove('apex_session');
-    };
+    // --- Memoized Context Value ---
+
+    const contextValue = useMemo(() => ({
+        user,
+        token: null, // Token is no longer exposed to client
+        login,
+        signup,
+        logout,
+        isAuthenticated: !!user,
+        loading
+    }), [user, login, signup, logout, loading]);
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            token,
-            login,
-            signup,
-            logout,
-            isAuthenticated: !!token,
-            loading
-        }}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );
 }
+
+// --- Hook ---
 
 export function useAuth() {
     const context = useContext(AuthContext);

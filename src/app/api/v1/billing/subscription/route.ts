@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
     // Mock data for Subscription Info
     return NextResponse.json({
-        current_tier: "premium",
+        current_tier: "PRO",
         plan_name: "Pro Trader",
         price: 29.00,
         billing_cycle: "monthly",

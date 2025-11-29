@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { agentCheckWithdrawal } from '@/lib/agents/withdrawal-agent';
+import { z } from 'zod';
 
 // Helper to validate Tron address (Basic regex check)
 // Starts with T, 34 chars long, base58 characters
@@ -10,43 +12,73 @@ function isValidTronAddress(address: string): boolean {
 
 export async function POST(req: Request) {
   try {
-    // 1. Authenticate User
-    // In a real Next.js App Router with Supabase Auth helper:
-    // const supabase = createRouteHandlerClient({ cookies });
-    // const { data: { session } } = await supabase.auth.getSession();
-    
-    // For this implementation, we'll assume we extract the user ID from a trusted header or session mock
-    // Since we can't use the full auth helper stack easily in this CLI context without more setup,
-    // we'll instantiate a standard client and assume the ID is passed securely or retrieved via standard means.
-    // CRITICAL: In production, use strict session validation.
-    
-    // Mock Auth for MVP flow (Replace with real auth middleware)
+    // 1. Authenticate User & Enforce RLS
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    
-    // We'll instantiate Supabase with Service Role for admin actions (like checking balance for update)
-    // BUT for RLS we should use the user's context. 
-    // Let's assume we use the service role to orchestrate the sensitive checksum logic safely on server.
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+
+    // Initialize Supabase with USER TOKEN
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      }
     );
 
+    // Verify Token & Get User ID
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Invalid Token' }, { status: 401 });
+    }
+
+    const user_id = user.id; // STRICTLY use ID from token
+
+    // 2. Compliance Check: KYC Verification
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('kyc_status')
+      .eq('id', user_id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+    }
+
+    if (profile.kyc_status !== 'verified') {
+      return NextResponse.json({
+        error: 'KYC Verification Required',
+        message: 'Please complete identity verification to withdraw funds.',
+        current_status: profile.kyc_status
+      }, { status: 403 });
+    }
+
     const body = await req.json();
-    const { user_id, amount, crypto_address } = body; // In prod, get user_id from session
 
-    // 2. Validate Inputs
-    if (!user_id || !amount || !crypto_address) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    // Zod Schema Validation
+    const withdrawSchema = z.object({
+      amount: z.number().positive('Amount must be positive').min(10, 'Minimum withdrawal is $10'),
+      crypto_address: z.string().regex(/^T[a-zA-Z0-9]{33}$/, 'Invalid USDT TRC20 address'),
+    });
+
+    const validation = withdrawSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json({
+        error: 'Validation Error',
+        details: validation.error.flatten().fieldErrors
+      }, { status: 400 });
     }
 
-    if (amount < 10) {
-      return NextResponse.json({ error: 'Minimum withdrawal is $10' }, { status: 400 });
-    }
-
-    if (!isValidTronAddress(crypto_address)) {
-      return NextResponse.json({ error: 'Invalid USDT TRC20 address' }, { status: 400 });
-    }
+    const { amount, crypto_address } = validation.data;
 
     // 3. Create Checksum (CRITICAL for Fraud Prevention)
     // We bind the request data to a hash. If database is tampered, this hash won't match.
@@ -54,7 +86,7 @@ export async function POST(req: Request) {
     // Actually, we let the DB set the timestamp, but we need a unique verifiable string.
     // Let's use a nonce or just hash the intent.
     const nonce = crypto.randomBytes(16).toString('hex');
-    
+
     // Hash: sha256(user_id + amount + address + nonce + SECRET)
     // Using a server-side secret salt makes it impossible for DB admins to forge without code access
     const checksum = crypto
@@ -96,20 +128,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 });
     }
 
-    // 6. Trigger Agent Check (Async)
-    // In production, push to Queue. Here we can fire-and-forget or call function.
-    // We'll call the agent logic directly for MVP simplicity via an internal API or function call.
-    // Let's assume we have an endpoint or import the agent function.
-    // To keep this route clean, we'll just return success and let the background worker pick it up
-    // OR trigger it explicitly if we want instant feedback for testing.
-    
-    // See Phase 3 Step 2 for agent implementation. We'll implement it next.
+    // 6. Trigger Agent Check (AI Eye 1)
+    // We await this for MVP to ensure immediate feedback, but in high-scale prod this should be a background job.
+    const agentResult = await agentCheckWithdrawal(request.id);
 
     return NextResponse.json({
       success: true,
       request_id: request.id,
-      status: 'pending_review',
-      message: 'Withdrawal submitted for agent review'
+      status: agentResult.approved ? 'agent_approved' : 'flagged',
+      risk_score: agentResult.risk_score,
+      message: agentResult.approved
+        ? 'Passed AI check. Waiting for Admin approval.'
+        : 'Flagged for manual review.'
     });
 
   } catch (error: any) {

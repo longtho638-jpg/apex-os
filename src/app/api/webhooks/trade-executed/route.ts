@@ -3,8 +3,12 @@ import { processTradeCommission } from '@/lib/viral-economics/realtime-commissio
 
 export async function POST(req: Request) {
   try {
-    // Verify secret if needed (TODO: Add webhook signature verification)
-    
+    // Verify secret
+    const signature = req.headers.get('x-webhook-secret');
+    if (signature !== process.env.WEBHOOK_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const { user_id, volume, fee, exchange, symbol, trade_id } = body;
 

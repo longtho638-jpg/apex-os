@@ -39,7 +39,37 @@ export class NotificationService {
             console.log(JSON.stringify(logEntry));
         }
 
-        // TODO: Integrate with external notification providers (Email, Slack, PagerDuty)
-        // if (process.env.SLACK_WEBHOOK_URL) { ... }
+        // 2. Slack Integration
+        if (process.env.SLACK_WEBHOOK_URL && (level === 'error' || level === 'critical')) {
+            try {
+                await fetch(process.env.SLACK_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: `🚨 *${level.toUpperCase()}: ${title}*\n${message}\nSource: ${source || 'system'}`,
+                        blocks: [
+                            {
+                                type: "section",
+                                text: {
+                                    type: "mrkdwn",
+                                    text: `🚨 *${level.toUpperCase()}: ${title}*\n${message}`
+                                }
+                            },
+                            {
+                                type: "context",
+                                elements: [
+                                    {
+                                        type: "mrkdwn",
+                                        text: `Source: ${source || 'system'} | Time: ${new Date().toISOString()}`
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to send Slack alert:', err);
+            }
+        }
     }
 }

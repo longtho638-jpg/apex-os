@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get('userId');
-  
+
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
   }
 
-  const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from('user_onboarding')
     .select('*')
@@ -17,17 +21,11 @@ export async function GET(req: NextRequest) {
 
   if (error) {
     // Initialize if not exists
-    // Note: In a real app, this might be done on user signup trigger
-    const { data: newData, error: insertError } = await supabase
+    const { data: newData } = await supabase
       .from('user_onboarding')
       .insert({ user_id: userId })
       .select()
       .single();
-    
-    if (insertError) {
-        console.error("Error creating onboarding record", insertError);
-        return NextResponse.json({});
-    }
 
     return NextResponse.json(newData || {});
   }
@@ -37,7 +35,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const { userId, step } = await req.json();
-  const supabase = getSupabaseClient();
 
   const updateData: any = {};
   updateData[`step_${step}`] = true;

@@ -16,18 +16,29 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value: [
-              "default-src 'self' * data: blob: 'unsafe-inline' 'unsafe-eval'",
-              "script-src 'self' * data: blob: 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' * data: blob: 'unsafe-inline'",
-              "img-src 'self' * data: blob:",
-              "font-src 'self' * data: blob:",
-              "connect-src 'self' * data: blob:",
-              "frame-src 'self' * data: blob:",
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' https://telegram.org https://*.telegram.org https://vercel.live https://*.vercel.app",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://*.supabase.co https://telegram.org https://*.telegram.org",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co https://*.vercel.app https://vercel.live wss://*.vercel.live",
+              "frame-src 'self' https://telegram.org https://*.telegram.org",
               "object-src 'none'",
-              "base-uri 'self'"
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'self' https://telegram.org https://*.telegram.org"
             ].join('; ')
           }
         ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: '/admin',
+        destination: '/en/admin/dashboard',
+        permanent: true,
       },
     ];
   },

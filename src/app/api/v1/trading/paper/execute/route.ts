@@ -1,25 +1,127 @@
-import { NextResponse } from 'next/server';
-import { PaperTradingEngine } from '@/lib/trading/paper-trading';
-// Actually, better to use standard auth check pattern if I can, but for speed I'll assume user ID is passed or mock it if auth not fully set up in this context
-// But wait, I need real auth for user ID.
-// I'll use a mocked user ID extraction for now if headers are not present, or basic Supabase auth.
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/lib/supabase';
+import { broadcastSignal } from '@/lib/trading/broadcaster';
 
-const engine = new PaperTradingEngine();
+export async function POST(req: NextRequest) {
+    const supabase = getSupabaseClient();
+    const { userId, symbol, side, size, leverage, action, positionId } = await req.json();
 
-export async function POST(req: Request) {
+    const MAX_LEVERAGE = 125;
+    if (leverage && (leverage < 1 || leverage > MAX_LEVERAGE)) {
+        return NextResponse.json({ error: `Leverage must be between 1 and ${MAX_LEVERAGE}` }, { status: 400 });
+    }
+
+
+    if (!userId || !action) {
+        return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
     try {
-        const body = await req.json();
-        const { userId, symbol, side, quantity, price } = body;
-        // In production, get userId from session/token
-        
-        if (!userId || !symbol || !side || !quantity || !price) {
-            return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+        // 1. Get Current Price (Mock for demo)
+        const currentPrice = symbol === 'BTC/USDT' ? 64250.00 : 3450.00;
+
+        if (action === 'OPEN') {
+            if (!symbol || !size) return NextResponse.json({ error: 'Missing trade params' }, { status: 400 });
+
+            // Check Balance
+            const { data: wallet } = await supabase
+                .from('virtual_wallets')
+                .select('balance')
+                .eq('user_id', userId)
+                .single();
+
+            const marginRequired = size / (leverage || 1);
+
+            if (!wallet || wallet.balance < marginRequired) {
+                return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 });
+            }
+
+            // Deduct Balance (Margin Lock)
+            // Note: In a real system we'd move to 'locked_balance', here we simplify.
+            await supabase
+                .from('virtual_wallets')
+                .update({ balance: wallet.balance - marginRequired })
+                .eq('user_id', userId);
+
+            // Create Position
+            const { data: position, error } = await supabase
+                .from('virtual_positions')
+                .insert({
+                    user_id: userId,
+                    symbol,
+                    side,
+                    entry_price: currentPrice,
+                    size,
+                    leverage: leverage || 1,
+                    status: 'OPEN',
+                    opened_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            // Broadcast to Followers (Async - fire and forget)
+            broadcastSignal(userId, position).catch(err => console.error('Broadcast Error:', err));
+
+            return NextResponse.json({ success: true, position });
+
+        } else if (action === 'CLOSE') {
+            if (!positionId) return NextResponse.json({ error: 'Position ID required' }, { status: 400 });
+
+            // Get Position
+            const { data: position } = await supabase
+                .from('virtual_positions')
+                .select('id, symbol, side, size, leverage, entry_price, status, opened_at')
+                .eq('id', positionId)
+                .single();
+
+            if (!position || position.status !== 'OPEN') {
+                return NextResponse.json({ error: 'Position not found or closed' }, { status: 404 });
+            }
+
+            // Calculate PnL
+            // Long: (Exit - Entry) * Size / Entry * Leverage? Or simply (Exit - Entry) * Quantity?
+            // Assuming 'size' is Margin Amount:
+            // PnL = (Exit - Entry) / Entry * Margin * Leverage
+
+            const exitPrice = currentPrice; // Mock exit at current market
+            const priceDiff = position.side === 'LONG'
+                ? exitPrice - position.entry_price
+                : position.entry_price - exitPrice;
+
+            const pnlPercent = priceDiff / position.entry_price;
+            const pnl = pnlPercent * position.size * position.leverage;
+
+            // Return Margin + PnL to Wallet
+            const returnAmount = position.size + pnl; // size here was margin used
+
+            // Update Wallet
+            const { data: wallet } = await supabase.from('virtual_wallets').select('balance').eq('user_id', userId).single();
+            await supabase
+                .from('virtual_wallets')
+                .update({ balance: (wallet?.balance || 0) + returnAmount })
+                .eq('user_id', userId);
+
+            // Close Position
+            const { error } = await supabase
+                .from('virtual_positions')
+                .update({
+                    status: 'CLOSED',
+                    closed_at: new Date().toISOString(),
+                    pnl: pnl
+                })
+                .eq('id', positionId);
+
+            if (error) throw error;
+
+            return NextResponse.json({ success: true, pnl });
         }
 
-        const result = await engine.executeTrade(userId, symbol, side, quantity, price);
-        
-        return NextResponse.json(result);
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+
     } catch (error: any) {
+        console.error('Trade Execution Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/os/sidebar';
-import { Coins, RefreshCw, Download, Calculator, ArrowDownToLine, TrendingUp, Wallet } from 'lucide-react';
+import { Coins, RefreshCw, ArrowDownToLine, TrendingUp, Wallet, Calculator } from 'lucide-react';
 import { useRebates } from '@/hooks/useRebates';
 import { calculateEstimatedRebate } from '@/lib/api/rebates';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ import { WithdrawalModal } from '@/app/[locale]/finance/components/WithdrawalMod
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslations } from '@/contexts/I18nContext';
+import { ActiveFarmingTerminal } from '@/components/dashboard/ActiveFarmingTerminal';
 
 // Mock payment methods for demo (in real app, fetch these)
 const MOCK_PAYMENT_METHODS = [
@@ -21,7 +22,7 @@ const MOCK_PAYMENT_METHODS = [
 
 export default function RebatesPage() {
     const t = useTranslations('Rebates');
-    const { data, loading, error, refetch } = useRebates(60000);
+    const { data, loading, refetch } = useRebates(60000);
     const [calcVolume, setCalcVolume] = useState<string>('');
     const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -224,6 +225,11 @@ export default function RebatesPage() {
                             </div>
                         </GlassCard>
 
+                        {/* Active Farming Terminal */}
+                        <div className="h-[300px]">
+                            <ActiveFarmingTerminal />
+                        </div>
+
                         {/* Recent History */}
                         <GlassCard className="p-6">
                             <div className="flex justify-between items-center mb-6">
@@ -269,9 +275,7 @@ export default function RebatesPage() {
                 balance={walletBalance}
                 paymentMethods={paymentMethods}
                 onSuccess={() => {
-                    // Refresh data after successful withdrawal
                     refetch();
-                    // Also refetch wallet balance
                     const token = localStorage.getItem('token');
                     if (token) {
                         fetch('/api/v1/user/finance/wallet', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -285,4 +289,3 @@ export default function RebatesPage() {
         </div>
     );
 }
-

@@ -1,3 +1,4 @@
+import 'server-only';
 import { getSupabaseClient } from '@/lib/supabase';
 
 interface DiscountCode {

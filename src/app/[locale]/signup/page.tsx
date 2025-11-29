@@ -22,8 +22,16 @@ export default function SignupPage() {
     const locale = params.locale as string;
     const t = useTranslations('Signup');
 
+    const [turnstileToken, setTurnstileToken] = useState('');
+
     useEffect(() => {
         setSessionId(Math.random().toString(36).substring(7).toUpperCase());
+
+        // Define global callback for Turnstile
+        // @ts-ignore
+        window.onTurnstileSuccess = (token: string) => {
+            setTurnstileToken(token);
+        };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +52,11 @@ export default function SignupPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({
+                    email,
+                    password,
+                    cf_turnstile_response: turnstileToken
+                }),
             });
 
             const data = await response.json();
@@ -162,6 +174,15 @@ export default function SignupPage() {
                             </div>
                         </div>
 
+                        <div className="flex justify-center my-4">
+                            <div
+                                className="cf-turnstile"
+                                data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                                data-callback="onTurnstileSuccess"
+                                data-theme="dark"
+                            ></div>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -177,6 +198,7 @@ export default function SignupPage() {
                             )}
                         </button>
                     </form>
+                    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
                     <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center justify-center gap-4 text-[10px] text-gray-500 font-mono">
                         <div className="flex items-center gap-1.5 w-full justify-between">

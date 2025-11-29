@@ -81,6 +81,23 @@ export async function POST(
                     .replace('{partner_uuid}', provider.partner_uuid || 'TEST')
                     .replace('{locale}', 'en');
 
+                // CRITICAL SECURITY FIX: SSRF Protection
+                // 1. Parse URL
+                const url = new URL(testLink);
+
+                // 2. Allow only HTTPS
+                if (url.protocol !== 'https:') {
+                    throw new Error('Only HTTPS allowed');
+                }
+
+                // 3. Block localhost/private IPs (Basic check)
+                // Note: For robust protection, use a library like 'ssrf-req-filter' or resolve DNS.
+                // Here we block common local hostnames.
+                const hostname = url.hostname.toLowerCase();
+                if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
+                    throw new Error('Internal network access denied');
+                }
+
                 const linkResponse = await fetch(testLink, {
                     method: 'HEAD',
                     redirect: 'follow'

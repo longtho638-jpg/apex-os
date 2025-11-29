@@ -15,10 +15,10 @@ export async function applyRateLimit(request: NextRequest) {
         return null;
     }
 
-    const ip = request.headers.get('x-forwarded-for') || 
-               request.headers.get('x-real-ip') || 
-               'unknown';
-    
+    const ip = request.headers.get('x-forwarded-for') ||
+        request.headers.get('x-real-ip') ||
+        'unknown';
+
     const path = request.nextUrl.pathname;
 
     // Determine Limit Config
@@ -31,12 +31,12 @@ export async function applyRateLimit(request: NextRequest) {
     }
 
     // Use GLOBAL limits for general API endpoints
-    const limitResult = checkRateLimit(`${keyPrefix}:${ip}`, config);
+    const limitResult = await checkRateLimit(`${keyPrefix}:${ip}`, config);
 
     if (!limitResult.success) {
         return NextResponse.json(
             { success: false, message: 'Too many requests' },
-            { 
+            {
                 status: 429,
                 headers: {
                     'X-RateLimit-Limit': limitResult.limit.toString(),

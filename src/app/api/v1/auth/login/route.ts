@@ -16,12 +16,12 @@ export async function POST(request: NextRequest) {
     try {
         // 1. Security: Rate Limiting
         const ip = request.headers.get('x-forwarded-for') || 'unknown';
-        const limitResult = checkRateLimit(`login:${ip}`, LIMITS.AUTH_SENSITIVE);
+        const limitResult = await checkRateLimit(`login:${ip}`, LIMITS.AUTH_SENSITIVE);
 
         if (!limitResult.success) {
             return NextResponse.json(
                 { success: false, message: 'Too many login attempts. Please try again later.' },
-                { 
+                {
                     status: 429,
                     headers: {
                         'X-RateLimit-Limit': limitResult.limit.toString(),

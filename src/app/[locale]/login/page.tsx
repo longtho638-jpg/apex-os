@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Terminal, ChevronRight, Lock, ShieldCheck, Globe } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/I18nContext';
@@ -91,7 +92,15 @@ export default function LoginPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('password_placeholder')}</label>
+                            <div className="flex justify-between items-center">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('password_placeholder')}</label>
+                                <Link
+                                    href={`/${locale}/forgot-password`}
+                                    className="text-xs text-[#00FF94] hover:text-[#00CC76] transition-colors"
+                                >
+                                    Forgot Password?
+                                </Link>
+                            </div>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-gray-500 group-focus-within:text-[#8B5CF6] transition-colors" />

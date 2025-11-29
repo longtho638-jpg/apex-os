@@ -44,7 +44,7 @@ const MOCK_REPORTS = [
 ];
 
 export default function ReportsPage() {
-    const { isFree, isFounders, loading: tierLoading } = useUserTier();
+    const { isFree, isPro, loading: tierLoading } = useUserTier();
     const [generatingReport, setGeneratingReport] = useState(false);
     const t = useTranslations('Reports');
 
@@ -83,7 +83,7 @@ export default function ReportsPage() {
                             <p className="text-xs text-gray-500">Manage and export your trading data</p>
                         </div>
                     </div>
-                    {isFounders && (
+                    {isPro && (
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handleGenerateReport('Performance')}
@@ -151,8 +151,8 @@ export default function ReportsPage() {
                             </motion.div>
                         )}
 
-                        {/* Quick Generate - Founders Only */}
-                        {isFounders && (
+                        {/* Quick Generate - Pro Only */}
+                        {isPro && (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <QuickReportCard
                                     title={t('quick_performance_title')}

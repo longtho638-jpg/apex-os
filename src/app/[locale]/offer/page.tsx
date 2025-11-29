@@ -14,13 +14,13 @@ export default function OfferPage() {
     const t = useTranslations('Offer');
 
     const features = [
-        { name: 'AI Auditor Agent', free: false, founders: true },
-        { name: 'Wolf Pack Swarm', free: false, founders: true },
-        { name: 'Risk Guardian', free: false, founders: true },
-        { name: 'Exchange Auto-Sync', free: true, founders: true },
-        { name: 'Real-time Data', free: true, founders: true },
-        { name: 'Priority Support', free: false, founders: true },
-        { name: 'Referral Bonus', free: '5%', founders: '15%' },
+        { name: 'AI Auditor Agent', free: false, pro: true },
+        { name: 'Wolf Pack Swarm', free: false, pro: true },
+        { name: 'Risk Guardian', free: false, pro: true },
+        { name: 'Exchange Auto-Sync', free: true, pro: true },
+        { name: 'Real-time Data', free: true, pro: true },
+        { name: 'Priority Support', free: false, pro: true },
+        { name: 'Referral Bonus', free: '5%', pro: '15%' },
     ];
 
     return (
@@ -50,7 +50,7 @@ export default function OfferPage() {
                             transition={{ delay: 0.1 }}
                             className="text-5xl md:text-6xl font-bold tracking-tight mb-6"
                         >
-                            {t('title')} <span className="text-gradient-primary">Founders</span>
+                            {t('title')} <span className="text-gradient-primary">Pro</span>
                         </motion.h1>
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
@@ -93,7 +93,7 @@ export default function OfferPage() {
                             </div>
                         </motion.div>
 
-                        {/* Founders Tier */}
+                        {/* Pro Tier */}
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -104,12 +104,12 @@ export default function OfferPage() {
                             <div className="absolute -right-20 -top-20 w-60 h-60 bg-[#00FF94]/10 rounded-full blur-3xl group-hover:bg-[#00FF94]/20 transition-all duration-500" />
 
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-2xl font-bold">Founders</h3>
+                                <h3 className="text-2xl font-bold">Pro</h3>
                                 <div className="px-3 py-1 rounded-full bg-[#00FF94] text-black text-xs font-bold">
                                     MOST POPULAR
                                 </div>
                             </div>
-                            <div className="text-4xl font-bold mb-6">$49<span className="text-lg text-zinc-500 font-normal">/mo</span></div>
+                            <div className="text-4xl font-bold mb-6">$29<span className="text-lg text-zinc-500 font-normal">/mo</span></div>
                             <p className="text-gray-300 mb-8">Full power of ApexOS AI swarm.</p>
 
                             <button
@@ -123,8 +123,8 @@ export default function OfferPage() {
                                 {features.map((f, i) => (
                                     <div key={i} className="flex items-center justify-between text-sm">
                                         <span className="text-white font-medium">{f.name}</span>
-                                        {f.founders === true ? <Check className="h-5 w-5 text-[#00FF94]" /> :
-                                            <span className="text-[#00FF94] font-bold">{f.founders}</span>}
+                                        {f.pro === true ? <Check className="h-5 w-5 text-[#00FF94]" /> :
+                                            <span className="text-[#00FF94] font-bold">{f.pro}</span>}
                                     </div>
                                 ))}
                             </div>

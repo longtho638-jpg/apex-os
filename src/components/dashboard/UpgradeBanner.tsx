@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Zap, ArrowRight, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface UpgradeBannerProps {
     message?: string;
@@ -11,10 +12,11 @@ interface UpgradeBannerProps {
 }
 
 export default function UpgradeBanner({
-    message = "Unlock Wolf Pack automation & lifetime data for $99",
-    ctaText = "Upgrade to Founders",
+    message,
+    ctaText,
     variant = 'default'
 }: UpgradeBannerProps) {
+    const t = useTranslations('DashboardComponents.UpgradeBanner');
     const router = useRouter();
 
     if (variant === 'compact') {
@@ -23,13 +25,13 @@ export default function UpgradeBanner({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Zap className="text-yellow-500" size={18} />
-                        <span className="text-sm font-medium text-zinc-200">{message}</span>
+                        <span className="text-sm font-medium text-zinc-200">{message || t('message')}</span>
                     </div>
                     <button
                         onClick={() => router.push('/offer')}
                         className="text-xs font-bold text-black bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-lg transition-colors flex items-center gap-1"
                     >
-                        {ctaText} <ArrowRight size={14} />
+                        {ctaText || t('cta')} <ArrowRight size={14} />
                     </button>
                 </div>
             </div>
@@ -46,27 +48,27 @@ export default function UpgradeBanner({
                         <div className="flex items-center gap-2 mb-2">
                             <Sparkles className="text-yellow-500" size={20} />
                             <span className="text-xs font-bold uppercase tracking-wider text-yellow-500">
-                                Limited Offer
+                                {t('limited_offer')}
                             </span>
-                            <span className="text-xs text-zinc-400">13/100 spots left</span>
+                            <span className="text-xs text-zinc-400">{t('spots_left')}</span>
                         </div>
 
                         <h3 className="text-xl font-bold text-zinc-100 mb-2">
-                            {message}
+                            {message || t('message')}
                         </h3>
 
                         <div className="flex flex-wrap gap-3 text-sm text-zinc-300 mb-4">
                             <span className="flex items-center gap-1">
-                                ✅ Real-time auto-sync
+                                ✅ {t('feature_sync')}
                             </span>
                             <span className="flex items-center gap-1">
-                                ✅ AI Fee Auditor
+                                ✅ {t('feature_auditor')}
                             </span>
                             <span className="flex items-center gap-1">
-                                ✅ 24/7 Risk Guardian
+                                ✅ {t('feature_guardian')}
                             </span>
                             <span className="flex items-center gap-1">
-                                ✅ 20% referral income
+                                ✅ {t('feature_ref')}
                             </span>
                         </div>
                     </div>
@@ -75,16 +77,16 @@ export default function UpgradeBanner({
                         onClick={() => router.push('/offer')}
                         className="ml-4 px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl transition-all hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
                     >
-                        {ctaText} <ArrowRight size={18} />
+                        {ctaText || t('cta')} <ArrowRight size={18} />
                     </button>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs text-zinc-500 mt-4 pt-4 border-t border-yellow-500/20">
-                    <span>💰 $99 one-time (lifetime access)</span>
+                    <span>💰 {t('price')}</span>
                     <span>|</span>
-                    <span>🔒 30-day money-back guarantee</span>
+                    <span>🔒 {t('guarantee')}</span>
                     <span>|</span>
-                    <span>⚡ Instant activation</span>
+                    <span>⚡ {t('activation')}</span>
                 </div>
             </div>
         </div>

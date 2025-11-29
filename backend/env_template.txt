@@ -1,0 +1,14 @@
+# ApexOS Backend Environment Variables
+# Rename this to .env and fill in the values
+
+# Database (Supabase)
+SUPABASE_URL=
+SUPABASE_SERVICE_KEY=
+
+# Exchange APIs
+BINANCE_API_KEY=
+BINANCE_API_SECRET=
+
+# Security
+SECRET_KEY=production_secret_key_here
+ENVIRONMENT=production

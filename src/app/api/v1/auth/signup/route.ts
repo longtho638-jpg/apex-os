@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { generateSessionToken } from '@/lib/jwt';
+import { getSupabaseClient } from '@/lib/supabase'; // Admin client
+import { auditService } from '@/lib/audit';
 
 // JWT Configuration - must match middleware and login endpoint
 const JWT_SECRET = new TextEncoder().encode(
@@ -12,6 +14,41 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { email, password, full_name } = body;
+
+        // 0. Anti-Fraud: Check IP Reputation
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+            request.headers.get('x-real-ip') ||
+            'unknown';
+
+        // 0.1 Anti-Fraud: Disposable Email
+        const { isDisposableEmail } = await import('@/lib/security/disposable-email');
+        if (isDisposableEmail(email)) {
+            return NextResponse.json(
+                { success: false, message: 'Disposable email addresses are not allowed. Please use a valid email provider.' },
+                { status: 400 }
+            );
+        }
+
+        if (ip !== 'unknown' && ip !== '127.0.0.1' && ip !== '::1') {
+            const supabaseAdmin = getSupabaseClient();
+            const yesterday = new Date();
+            yesterday.setHours(yesterday.getHours() - 24);
+
+            const { count, error: countError } = await supabaseAdmin
+                .from('audit_logs')
+                .select('id', { count: 'exact', head: true })
+                .eq('action', 'SIGNUP')
+                .eq('ip_address', ip)
+                .gte('created_at', yesterday.toISOString());
+
+            if (!countError && count !== null && count >= 3) {
+                console.warn(`[Anti-Fraud] Blocked signup from IP ${ip} (Count: ${count})`);
+                return NextResponse.json(
+                    { success: false, message: 'Too many accounts created from this IP. Please try again later.' },
+                    { status: 429 }
+                );
+            }
+        }
 
         // Validation
         if (!email || !password) {
@@ -55,10 +92,14 @@ export async function POST(request: NextRequest) {
         if (authError) {
             // Handle specific error cases
             if (authError.message.includes('already registered')) {
-                return NextResponse.json(
-                    { success: false, message: 'Email already exists' },
-                    { status: 409 }
-                );
+                // CRITICAL SECURITY FIX: Prevent User Enumeration
+                // Return success even if email exists.
+                return NextResponse.json({
+                    success: true,
+                    message: 'Account created. Please check your email to confirm.',
+                    require_confirmation: true,
+                    // Do not return user object if it was a duplicate to avoid leaking data
+                });
             }
 
             return NextResponse.json(
@@ -74,24 +115,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create user entry in public.users table
-        try {
-            const { error: dbError } = await supabase.from('users').insert({
-                id: authData.user.id,
-                email: authData.user.email,
-                full_name: full_name || authData.user.email?.split('@')[0] || 'User',
-                subscription_tier: 'free', // Default tier
-                created_at: new Date().toISOString(),
-            });
+        // 3. User Creation in public.users
+        // Handled by Database Trigger (supabase/migrations/20251129_user_creation_trigger.sql)
+        // We no longer manually insert here to avoid Dual Write issues.
 
-            // If user already exists in table, that's okay (might have been created by trigger)
-            if (dbError && !dbError.message.includes('duplicate')) {
-                console.error('Error creating user in database:', dbError);
-            }
-        } catch (dbError) {
-            console.error('Database error:', dbError);
-            // Continue anyway - user is created in Auth
-        }
+        // 4. Log Signup Event (Anti-Fraud)
+        await auditService.log({
+            userId: authData.user.id,
+            action: 'SIGNUP',
+            resourceType: 'USER',
+            resourceId: authData.user.id,
+            ipAddress: ip,
+            userAgent: request.headers.get('user-agent') || undefined
+        });
 
         // If email confirmation is enabled, session will be null
         if (!authData.session) {
@@ -108,7 +144,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Generate JWT token for immediate login (only if session exists)
-        const token = generateSessionToken(authData.user.email!, 'admin', authData.user.id);
+        // CRITICAL SECURITY FIX: Changed default role from 'admin' to 'user'
+        const token = generateSessionToken(authData.user.email!, 'user', authData.user.id);
 
         const cookieStore = await cookies();
         cookieStore.set('apex_session', token, {

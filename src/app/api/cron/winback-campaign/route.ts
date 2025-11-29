@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-// import { sendEmail } from '@/lib/email-service'; // Mocking this for now as service not fully setup
+import { sendEmail } from '@/lib/email-service'; // Now uses Resend
 import { emailTemplates } from '@/lib/email-templates';
 
-// Mock email sender
-async function sendEmail(params: any) {
-    if (process.env.NODE_ENV === 'development') {
-        console.log('[Mock Email Sent]', params);
-    }
-    // In prod, this would call Resend/SendGrid
-}
+// Remove mock email sender
+// async function sendEmail(params: any) { ... }
 
 export async function GET(req: NextRequest) {
   // Verify cron secret

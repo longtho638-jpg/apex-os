@@ -4,149 +4,135 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { TrendingUp, Users, DollarSign, Target } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { DollarSign, Users, Activity, TrendingUp } from 'lucide-react';
+
+interface RevenueMetrics {
+  mrr: number;
+  arr: number;
+  churnRate: number;
+  ltv: number;
+  activeSubscribers: number;
+}
+
+interface FunnelStep {
+  name: string;
+  value: number;
+  fill: string;
+}
 
 export default function AnalyticsDashboard() {
-  const [funnel, setFunnel] = useState<any>(null);
-  const [revenue, setRevenue] = useState<any>(null);
+  const [metrics, setMetrics] = useState<RevenueMetrics | null>(null);
+  const [funnel, setFunnel] = useState<FunnelStep[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [funnelRes, revenueRes] = await Promise.all([
-            fetch('/api/admin/analytics/funnel'),
-            fetch('/api/admin/analytics/revenue'),
+        const [revRes, funnelRes] = await Promise.all([
+          fetch('/api/admin/analytics/revenue'),
+          fetch('/api/admin/analytics/funnel')
         ]);
         
-        if (funnelRes.ok) setFunnel(await funnelRes.json());
-        if (revenueRes.ok) setRevenue(await revenueRes.json());
-      } catch (e) {
-        console.error("Failed to fetch analytics", e);
+        const revData = await revRes.json();
+        const funnelData = await funnelRes.json();
+
+        setMetrics(revData);
+        setFunnel(funnelData.funnel);
+      } catch (error) {
+        console.error('Failed to fetch analytics', error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchData();
-    const interval = setInterval(fetchData, 60000); // Refresh every minute
-    return () => clearInterval(interval);
   }, []);
-  
+
+  if (loading) return <div className="p-10 text-white">Loading God View...</div>;
+
   return (
-    <div className="flex h-screen w-full bg-[#030303] text-white font-sans overflow-hidden">
+    <div className="flex h-screen w-full bg-[#030303] text-white font-sans">
       <Sidebar />
       <main className="flex-1 relative overflow-hidden">
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
         </AuroraBackground>
-        
-        <div className="relative z-10 h-full flex flex-col overflow-y-auto">
-          <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
-            <h1 className="text-2xl font-bold">Revenue Analytics</h1>
-            <p className="text-sm text-zinc-400">Real-time conversion & revenue metrics</p>
+
+        <div className="relative z-10 h-full overflow-y-auto p-8">
+          <header className="mb-8">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+              God View Analytics
+            </h1>
+            <p className="text-zinc-400">Real-time revenue and conversion tracking</p>
           </header>
-          
-          <div className="p-6 space-y-6">
-            {loading ? (
-                <div className="text-zinc-500 animate-pulse">Loading analytics data...</div>
-            ) : (
-                <>
-                    {/* Revenue KPIs */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <GlassCard className="p-6">
-                        <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-zinc-400">MRR</span>
-                        <DollarSign className="w-5 h-5 text-emerald-400" />
-                        </div>
-                        <div className="text-3xl font-bold">${revenue?.mrr || 0}</div>
-                        <div className="text-xs text-zinc-500 mt-1">Monthly Recurring Revenue</div>
-                    </GlassCard>
-                    
-                    <GlassCard className="p-6">
-                        <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-zinc-400">ARR</span>
-                        <TrendingUp className="w-5 h-5 text-blue-400" />
-                        </div>
-                        <div className="text-3xl font-bold">${revenue?.arr || 0}</div>
-                        <div className="text-xs text-zinc-500 mt-1">Annual Recurring Revenue</div>
-                    </GlassCard>
-                    
-                    <GlassCard className="p-6">
-                        <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-zinc-400">ARPU</span>
-                        <Users className="w-5 h-5 text-purple-400" />
-                        </div>
-                        <div className="text-3xl font-bold">${revenue?.arpu || 0}</div>
-                        <div className="text-xs text-zinc-500 mt-1">Average Revenue Per User</div>
-                    </GlassCard>
-                    
-                    <GlassCard className="p-6">
-                        <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-zinc-400">Paid Users</span>
-                        <Target className="w-5 h-5 text-yellow-400" />
-                        </div>
-                        <div className="text-3xl font-bold">{revenue?.paidUsers || 0}</div>
-                        <div className="text-xs text-zinc-500 mt-1">Paying customers</div>
-                    </GlassCard>
-                    </div>
-                    
-                    {/* Conversion Funnel */}
-                    <GlassCard className="p-6">
-                    <h2 className="text-lg font-bold mb-4">Conversion Funnel (Last 30 Days)</h2>
-                    <div className="space-y-4">
-                        <div>
-                        <div className="flex justify-between mb-2">
-                            <span>Landing Views → Signup Started</span>
-                            <span className="font-bold">{funnel?.conversionRates?.landingToSignup || 0}%</span>
-                        </div>
-                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                            className="h-full bg-emerald-500"
-                            style={{ width: `${funnel?.conversionRates?.landingToSignup || 0}%` }}
-                            />
-                        </div>
-                        <div className="text-xs text-zinc-500 mt-1">
-                            {funnel?.funnel?.landingViews || 0} views → {funnel?.funnel?.signupStarted || 0} started
-                        </div>
-                        </div>
-                        
-                        <div>
-                        <div className="flex justify-between mb-2">
-                            <span>Signup Started → Completed</span>
-                            <span className="font-bold">{funnel?.conversionRates?.signupCompletion || 0}%</span>
-                        </div>
-                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                            className="h-full bg-blue-500"
-                            style={{ width: `${funnel?.conversionRates?.signupCompletion || 0}%` }}
-                            />
-                        </div>
-                        <div className="text-xs text-zinc-500 mt-1">
-                            {funnel?.funnel?.signupStarted || 0} started → {funnel?.funnel?.signupCompleted || 0} completed
-                        </div>
-                        </div>
-                        
-                        <div>
-                        <div className="flex justify-between mb-2">
-                            <span>Free Trial → Paid</span>
-                            <span className="font-bold text-emerald-400">{funnel?.conversionRates?.trialToPaid || 0}%</span>
-                        </div>
-                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                            className="h-full bg-purple-500"
-                            style={{ width: `${funnel?.conversionRates?.trialToPaid || 0}%` }}
-                            />
-                        </div>
-                        <div className="text-xs text-zinc-500 mt-1">
-                            {funnel?.funnel?.signupCompleted || 0} trials → {funnel?.funnel?.paymentCompleted || 0} paid
-                        </div>
-                        </div>
-                    </div>
-                    </GlassCard>
-                </>
-            )}
+
+          {/* Revenue Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <GlassCard className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-zinc-400 text-sm">MRR</p>
+                  <h3 className="text-2xl font-bold text-emerald-400">${metrics?.mrr.toLocaleString()}</h3>
+                </div>
+                <DollarSign className="w-6 h-6 text-emerald-500" />
+              </div>
+              <p className="text-xs text-zinc-500">Monthly Recurring Revenue</p>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-zinc-400 text-sm">ARR</p>
+                  <h3 className="text-2xl font-bold text-blue-400">${metrics?.arr.toLocaleString()}</h3>
+                </div>
+                <TrendingUp className="w-6 h-6 text-blue-500" />
+              </div>
+              <p className="text-xs text-zinc-500">Annual Run Rate</p>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-zinc-400 text-sm">Churn Rate</p>
+                  <h3 className="text-2xl font-bold text-red-400">{metrics?.churnRate.toFixed(1)}%</h3>
+                </div>
+                <Activity className="w-6 h-6 text-red-500" />
+              </div>
+              <p className="text-xs text-zinc-500">Last 30 Days</p>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-zinc-400 text-sm">LTV</p>
+                  <h3 className="text-2xl font-bold text-purple-400">${metrics?.ltv.toFixed(0)}</h3>
+                </div>
+                <Users className="w-6 h-6 text-purple-500" />
+              </div>
+              <p className="text-xs text-zinc-500">Lifetime Value</p>
+            </GlassCard>
           </div>
+
+          {/* Funnel Chart */}
+          <GlassCard className="p-8 h-[500px]">
+            <h3 className="text-xl font-bold mb-6 text-white">Conversion Funnel</h3>
+            <ResponsiveContainer width="100%" height="90%">
+              <BarChart data={funnel} layout="vertical" margin={{ left: 20 }}>
+                <XAxis type="number" stroke="#52525b" />
+                <YAxis dataKey="name" type="category" stroke="#a1a1aa" width={100} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={40}>
+                  {funnel.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </GlassCard>
         </div>
       </main>
     </div>

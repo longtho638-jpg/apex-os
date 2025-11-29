@@ -11,6 +11,7 @@ import { Check, X } from 'lucide-react';
 import { Button3D } from '@/components/marketing/Button3D';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { UNIFIED_TIERS } from '@/config/unified-tiers';
 import { motion } from 'framer-motion';
 import { AnimatedNumber } from '@/components/marketing/AnimatedNumber';
 
@@ -22,8 +23,8 @@ export default function PaymentPage() {
     const TIERS = [
         {
             name: t('tiers.free.name'),
-            monthlyPrice: 0,
-            annualPrice: 0,
+            monthlyPrice: UNIFIED_TIERS.FREE.monthlyPrice,
+            annualPrice: UNIFIED_TIERS.FREE.annualPrice,
             description: 'For beginners tracking their first rebates.',
             features: t('tiers.free.features', { returnObjects: true }) as string[],
             limitations: ['No Export', 'No API Access'],
@@ -32,27 +33,39 @@ export default function PaymentPage() {
             period: t('tiers.free.period')
         },
         {
-            name: t('tiers.trader.name'),
-            monthlyPrice: 97,
-            annualPrice: 970,
-            description: 'Maximize profits with advanced tools.',
-            features: t('tiers.trader.features', { returnObjects: true }) as string[],
-            limitations: [],
-            cta: 'Upgrade',
-            popular: true,
-            badge: t('tiers.trader.badge'),
-            period: t('tiers.trader.period')
-        },
-        {
             name: t('tiers.pro.name'),
-            monthlyPrice: 297,
-            annualPrice: 2970,
-            description: 'For algo traders and high volume pros.',
+            monthlyPrice: UNIFIED_TIERS.PRO.monthlyPrice,
+            annualPrice: UNIFIED_TIERS.PRO.annualPrice,
+            description: 'Maximize profits with advanced tools.',
             features: t('tiers.pro.features', { returnObjects: true }) as string[],
             limitations: [],
             cta: 'Upgrade',
-            popular: false,
+            popular: true,
+            badge: t('tiers.pro.badge'),
             period: t('tiers.pro.period')
+        },
+        {
+            name: t('tiers.trader.name'),
+            monthlyPrice: UNIFIED_TIERS.TRADER.monthlyPrice,
+            annualPrice: UNIFIED_TIERS.TRADER.annualPrice,
+            description: 'For algo traders and high volume pros.',
+            features: t('tiers.trader.features', { returnObjects: true }) as string[],
+            limitations: [],
+            cta: 'Upgrade',
+            popular: false,
+            period: t('tiers.trader.period')
+        },
+        {
+            name: t('tiers.elite.name'),
+            monthlyPrice: UNIFIED_TIERS.ELITE.monthlyPrice,
+            annualPrice: UNIFIED_TIERS.ELITE.annualPrice,
+            description: 'Elite tier with unlimited everything.',
+            features: t('tiers.elite.features', { returnObjects: true }) as string[],
+            limitations: [],
+            cta: 'Upgrade',
+            popular: false,
+            badge: t('tiers.elite.badge'),
+            period: t('tiers.elite.period')
         }
     ];
 
@@ -81,11 +94,11 @@ export default function PaymentPage() {
                             <span className={`text-sm font-medium ${!isAnnual ? 'text-white' : 'text-zinc-400'}`}>Monthly</span>
                             <Switch checked={isAnnual} onCheckedChange={setIsAnnual} className="data-[state=checked]:bg-emerald-600" />
                             <span className={`text-sm font-medium ${isAnnual ? 'text-white' : 'text-zinc-400'}`}>
-                                Annual <span className="text-emerald-400 text-xs ml-1 font-bold tracking-wide uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Save 20%</span>
+                                Annual <span className="text-emerald-400 text-xs ml-1 font-bold tracking-wide uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Save 17%</span>
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {TIERS.map((tier, index) => (
                                 <motion.div
                                     key={tier.name}
@@ -112,9 +125,9 @@ export default function PaymentPage() {
                                         <div className="mb-8">
                                             <div className="flex items-baseline gap-1">
                                                 <span className="text-4xl font-black text-white tracking-tight">
-                                                    $<AnimatedNumber value={isAnnual ? Math.round(tier.annualPrice / 12) : tier.monthlyPrice} />
+                                                    $<AnimatedNumber value={isAnnual ? tier.annualPrice : tier.monthlyPrice} />
                                                 </span>
-                                                <span className="text-zinc-500 text-sm font-medium">/mo</span>
+                                                <span className="text-zinc-500 text-sm font-medium">{isAnnual ? '/yr' : '/mo'}</span>
                                             </div>
                                         </div>
 

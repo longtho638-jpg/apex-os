@@ -13,6 +13,10 @@ import {
     Target,
     Award
 } from 'lucide-react';
+import { AgentActivityLog } from '@/components/dashboard/AgentActivityLog';
+import { WhaleWatcherWidget } from '@/components/dashboard/WhaleWatcherWidget';
+import { ArbitrageScannerWidget } from '@/components/dashboard/ArbitrageScannerWidget';
+import { SystemHealthMesh } from '@/components/dashboard/SystemHealthMesh';
 
 export default function DashboardOverviewPage() {
     const [metrics, setMetrics] = useState({
@@ -63,50 +67,38 @@ export default function DashboardOverviewPage() {
                     />
                 </div>
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <QuickActionCard
-                        title="AI Trading Signals"
-                        description="View real-time AI-powered trading signals"
-                        icon={<Zap className="w-8 h-8" />}
-                        link="/en/dashboard/signals"
-                        color="emerald"
-                    />
-                    <QuickActionCard
-                        title="Referral Program"
-                        description="Earn commissions by referring traders"
-                        icon={<Users className="w-8 h-8" />}
-                        link="/en/dashboard/referrals"
-                        color="blue"
-                    />
+                {/* Live Market Intelligence Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 h-[400px]">
+                    <WhaleWatcherWidget />
+                    <ArbitrageScannerWidget />
                 </div>
 
-                {/* Recent Activity */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-emerald-400" />
-                        Recent Activity
-                    </h2>
-                    <div className="space-y-4">
-                        <ActivityItem
-                            type="signal"
-                            message="New BUY signal for BTC at $43,250"
-                            time="2 minutes ago"
-                            positive
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div className="lg:col-span-1">
+                        <SystemHealthMesh />
+                    </div>
+                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <QuickActionCard
+                            title="AI Trading Signals"
+                            description="View real-time AI-powered trading signals"
+                            icon={<Zap className="w-8 h-8" />}
+                            link="/en/dashboard/signals"
+                            color="emerald"
                         />
-                        <ActivityItem
-                            type="referral"
-                            message="New referral signup: user_8472"
-                            time="1 hour ago"
-                            neutral
-                        />
-                        <ActivityItem
-                            type="earning"
-                            message="Commission earned: $24.50"
-                            time="3 hours ago"
-                            positive
+                        <QuickActionCard
+                            title="Referral Program"
+                            description="Earn commissions by referring traders"
+                            icon={<Users className="w-8 h-8" />}
+                            link="/en/dashboard/referrals"
+                            color="blue"
                         />
                     </div>
+                </div>
+
+                {/* Agent Activity Log (Live System Status) */}
+                <div className="h-[400px] mb-8">
+                    <AgentActivityLog />
                 </div>
             </div>
         </div>
@@ -178,37 +170,5 @@ function QuickActionCard({
                 <p className="text-zinc-400 text-sm">{description}</p>
             </motion.div>
         </Link>
-    );
-}
-
-function ActivityItem({
-    type,
-    message,
-    time,
-    positive,
-    neutral
-}: {
-    type: 'signal' | 'referral' | 'earning';
-    message: string;
-    time: string;
-    positive?: boolean;
-    neutral?: boolean;
-}) {
-    const icons = {
-        signal: <Zap className="w-5 h-5" />,
-        referral: <Users className="w-5 h-5" />,
-        earning: <DollarSign className="w-5 h-5" />
-    };
-
-    return (
-        <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
-            <div className={`p-2 rounded-lg ${positive ? 'bg-emerald-500/10 text-emerald-400' : neutral ? 'bg-blue-500/10 text-blue-400' : 'bg-zinc-500/10 text-zinc-400'}`}>
-                {icons[type]}
-            </div>
-            <div className="flex-1">
-                <p className="text-sm">{message}</p>
-                <p className="text-xs text-zinc-500">{time}</p>
-            </div>
-        </div>
     );
 }

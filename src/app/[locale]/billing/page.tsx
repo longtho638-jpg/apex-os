@@ -37,7 +37,7 @@ export default function BillingPage() {
                                     <p className="text-sm text-gray-400">PRO - Monthly</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-3xl font-bold text-blue-400">$99</p>
+                                    <p className="text-3xl font-bold text-blue-400">$97</p>
                                     <p className="text-xs text-gray-500">/month</p>
                                 </div>
                             </div>

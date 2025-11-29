@@ -9,6 +9,7 @@ import { useTranslations } from '@/contexts/I18nContext';
 import { Sidebar } from '@/components/os/sidebar';
 import TradingChart from '@/components/TradingChart';
 import IndicatorPanel, { DEFAULT_INDICATORS, IndicatorSettings } from '@/components/IndicatorPanel';
+import DeepSeekInsight from '@/components/trading/DeepSeekInsight';
 import { TOP_COINS } from '@/constants/trading';
 import { cn } from '@/lib/utils';
 
@@ -182,39 +183,35 @@ export default function TradePage() {
                         </div>
                     </div>
 
-                    {/* Trade History */}
-                    <div className="col-span-3 glass-panel rounded-xl overflow-hidden flex flex-col">
-                        <div className="p-4 border-b border-white/5">
-                            <h3 className="font-bold text-sm">{t('history_title')}</h3>
+                    {/* Right Column: DeepSeek & History */}
+                    <div className="col-span-3 flex flex-col gap-4 h-full overflow-hidden">
+                        {/* DeepSeek Insight Panel */}
+                        <div className="flex-1 min-h-[400px]">
+                            <DeepSeekInsight
+                                symbol={selectedPair.symbol}
+                                onExecute={(strategy) => console.log('Execute:', strategy)}
+                            />
                         </div>
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
-                            <table className="w-full text-xs">
-                                <thead className="text-zinc-500 sticky top-0 bg-[#030303]/80 backdrop-blur-sm">
-                                    <tr>
-                                        <th className="pb-3 pl-2 text-left">{t('col_price')}</th>
-                                        <th className="pb-3 text-right">{t('col_amount')}</th>
-                                        <th className="pb-3 pr-2 text-right">{t('col_time')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="font-mono">
-                                    {trades.map((trade, i) => (
-                                        <tr key={i} className="hover:bg-white/5">
-                                            <td className={cn("py-2 pl-2", trade.side === 'buy' ? 'text-[#00FF94]' : 'text-red-500')}>
-                                                {trade.price.toFixed(2)}
-                                            </td>
-                                            <td className="py-2 text-right text-gray-300">{trade.quantity}</td>
-                                            <td className="py-2 pr-2 text-right text-zinc-500 text-[10px]">
-                                                {new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {trades.length === 0 && (
-                                        <tr>
-                                            <td colSpan={3} className="py-12 text-center text-gray-600 italic">{t('no_trades')}</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+
+                        {/* Trade History (Collapsed/Smaller) */}
+                        <div className="h-1/3 glass-panel rounded-xl overflow-hidden flex flex-col">
+                            <div className="p-3 border-b border-white/5 flex justify-between items-center">
+                                <h3 className="font-bold text-xs text-zinc-400">{t('history_title')}</h3>
+                            </div>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+                                <table className="w-full text-xs">
+                                    <tbody className="font-mono">
+                                        {trades.slice(0, 5).map((trade, i) => ( // Show fewer trades
+                                            <tr key={i} className="hover:bg-white/5">
+                                                <td className={cn("py-1 pl-2", trade.side === 'buy' ? 'text-[#00FF94]' : 'text-red-500')}>
+                                                    {trade.price.toFixed(2)}
+                                                </td>
+                                                <td className="py-1 text-right text-gray-300">{trade.quantity}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

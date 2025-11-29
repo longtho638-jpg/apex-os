@@ -15,12 +15,22 @@ import {
     X
 } from 'lucide-react';
 import { useState } from 'react';
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
+import { WinStreakPopup } from '@/components/upsell/WinStreakPopup';
+import { SupportChat } from '@/components/support/SupportChat';
+import { MobileNav } from '@/components/layout/MobileNav';
+import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 
 const menuItems = [
     { href: '/en/dashboard/overview', icon: LayoutDashboard, label: 'Overview' },
     { href: '/en/dashboard/signals', icon: Zap, label: 'AI Signals' },
     { href: '/en/dashboard/trading', icon: TrendingUp, label: 'Trading' },
     { href: '/en/dashboard/wallet', icon: Wallet, label: 'Wallet' },
+    { href: '/en/wolf-pack', icon: Users, label: 'Wolf Pack' },
+    { href: '/en/studio', icon: Settings, label: 'Algo Studio' },
+    { href: '/en/launchpad', icon: Zap, label: 'Launchpad' },
+    { href: '/en/dao', icon: Award, label: 'DAO Governance' },
+    { href: '/en/affiliate', icon: Users, label: 'Partner Program' },
     { href: '/en/dashboard/referrals', icon: Users, label: 'Referrals' },
     { href: '/en/dashboard/rewards', icon: Award, label: 'Rewards' },
     { href: '/en/dashboard/settings', icon: Settings, label: 'Settings' },
@@ -49,7 +59,7 @@ export default function DashboardLayout({
                 className={`
           fixed top-0 left-0 h-full w-64 bg-[#0A0A0A] border-r border-white/10 z-40 transition-transform
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0
+          lg:translate-x-0 lg:block hidden
         `}
             >
                 <div className="p-6">
@@ -103,7 +113,7 @@ export default function DashboardLayout({
             </aside>
 
             {/* Main content */}
-            <main className="lg:ml-64 min-h-screen">
+            <main className="lg:ml-64 min-h-screen pb-20 lg:pb-0">
                 {/* Top bar */}
                 <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-4">
                     <div className="flex items-center justify-between">
@@ -130,6 +140,23 @@ export default function DashboardLayout({
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
+
+            {/* Mobile Bottom Nav */}
+            <MobileNav />
+
+            {/* PWA Install Prompt */}
+            <InstallPrompt />
+
+            {/* Interactive Onboarding Checklist */}
+            {/* Note: OnboardingChecklist expects userId prop, we might need to fetch it or pass from context */}
+            {/* For now, passing dummy or retrieving from context if available. Let's assume layout can access user session or child pages do. */}
+            {/* Since this is a layout and we don't have user context readily available in this file without async/await or provider, */}
+            {/* we will place placeholders. In a real app, wrap with SessionProvider. */}
+            {/* <OnboardingChecklist userId="current-user-id" />  <-- This needs to be passed correctly */}
+
+            {/* Global Components */}
+            <WinStreakPopup />
+            <SupportChat />
         </div>
     );
 }

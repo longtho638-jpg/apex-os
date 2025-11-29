@@ -7,8 +7,10 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import DOMPurify from 'isomorphic-dompurify';
 import { Exchange, EXCHANGES, VerificationResult } from '@/types/exchange';
+import { useTranslations } from 'next-intl';
 
 export default function ConnectExchange() {
+    const t = useTranslations('DashboardComponents.ConnectExchange');
     const { token } = useAuth();
     const [selectedExchange, setSelectedExchange] = useState<Exchange | null>(null);
     const [uid, setUid] = useState('');
@@ -25,7 +27,7 @@ export default function ConnectExchange() {
         // Validate UID format (Alphanumeric only)
         if (!/^[a-zA-Z0-9]+$/.test(sanitizedUid)) {
             setStatus('error');
-            setMessage('Invalid UID format. Alphanumeric only.');
+            setMessage(t('error_format'));
             return;
         }
 
@@ -59,7 +61,7 @@ export default function ConnectExchange() {
             }
         } catch (err) {
             setStatus('error');
-            setMessage("Connection failed. Please check your network.");
+            setMessage(t('error_network'));
         }
     };
 
@@ -84,13 +86,13 @@ export default function ConnectExchange() {
                             <Wallet className="h-5 w-5 text-[#00FF00]" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold font-mono text-white">EXCHANGE_UPLINK</h3>
-                            <p className="text-[10px] text-[#00FF00]/70 font-mono tracking-wider">SECURE_CONNECTION_PROTOCOL</p>
+                            <h3 className="text-lg font-bold font-mono text-white">{t('uplink')}</h3>
+                            <p className="text-[10px] text-[#00FF00]/70 font-mono tracking-wider">{t('protocol')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
                         <div className="w-2 h-2 rounded-full bg-[#00FF00] animate-pulse" />
-                        SYSTEM ONLINE
+                        {t('system_online')}
                     </div>
                 </div>
 
@@ -135,8 +137,8 @@ export default function ConnectExchange() {
                                     <div className="w-12 h-12 rounded-full bg-[#00FF00]/10 border border-[#00FF00]/30 flex items-center justify-center mx-auto mb-3">
                                         <RefreshCw className={cn("h-6 w-6 text-[#00FF00]", status === 'verifying' && "animate-spin")} />
                                     </div>
-                                    <h3 className="text-xl font-bold text-white font-mono">LINK {selectedExchange.toUpperCase()}</h3>
-                                    <p className="text-xs text-gray-400 font-mono mt-1">Enter your UID to enable rebates</p>
+                                    <h3 className="text-xl font-bold text-white font-mono">{t('link_exchange', { exchange: selectedExchange.toUpperCase() })}</h3>
+                                    <p className="text-xs text-gray-400 font-mono mt-1">{t('enter_uid')}</p>
                                 </div>
 
                                 {status === 'success' ? (
@@ -144,11 +146,11 @@ export default function ConnectExchange() {
                                         <div className="p-4 bg-[#00FF00]/10 border border-[#00FF00]/20 rounded-lg">
                                             <p className="text-[#00FF00] font-bold flex items-center justify-center gap-2">
                                                 <Check className="h-4 w-4" />
-                                                VERIFIED & LINKED
+                                                {t('verified')}
                                             </p>
                                             {resultData?.metadata?.tier && (
                                                 <p className="text-xs text-[#00FF00]/70 mt-1 font-mono">
-                                                    TIER: {resultData.metadata.tier}
+                                                    {t('tier')} {resultData.metadata.tier}
                                                 </p>
                                             )}
                                         </div>
@@ -156,13 +158,13 @@ export default function ConnectExchange() {
                                             onClick={closeModal}
                                             className="w-full bg-[#00FF00] text-black font-bold font-mono py-3 rounded-lg hover:bg-[#00FF00]/90 transition-colors"
                                         >
-                                            CLOSE
+                                            {t('close')}
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="text-xs text-gray-500 font-mono mb-1 block">USER UID</label>
+                                            <label className="text-xs text-gray-500 font-mono mb-1 block">{t('user_uid')}</label>
                                             <input
                                                 type="text"
                                                 value={uid}
@@ -197,7 +199,7 @@ export default function ConnectExchange() {
                                             disabled={!uid || status === 'verifying'}
                                             className="w-full bg-[#00FF00] text-black font-bold font-mono py-3 rounded-lg hover:bg-[#00FF00]/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {status === 'verifying' ? 'VERIFYING...' : 'VERIFY & LINK'}
+                                            {status === 'verifying' ? t('verifying') : t('verify_link')}
                                             {!status && <ChevronRight className="h-4 w-4" />}
                                         </button>
                                     </div>

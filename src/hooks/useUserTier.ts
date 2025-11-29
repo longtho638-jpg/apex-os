@@ -1,28 +1,24 @@
 /**
- * useUserTier - Feature gate hook for Free/Founders/Admin tiers
+ * useUserTier - Feature gate hook for Unified Tiers
  */
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getApiUrl } from '@/lib/api/config';
+import { TierId, UNIFIED_TIERS, TIER_ORDER } from '@/config/unified-tiers';
 
-export type UserTier = 'free' | 'founders' | 'admin';
 export type MenuId = 'overview' | 'trade' | 'pnl' | 'wolfpack' | 'rebates' | 'risk' | 'referrals' | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
 
 interface TierInfo {
-    tier: UserTier;
-    slot: number | null;
+    tier: TierId | 'ADMIN'; // Admin is special case, not in UNIFIED_TIERS
     joinedAt: string | null;
-    totalFounders: number;
 }
 
 export function useUserTier() {
     const { user, isAuthenticated, token } = useAuth();
     const [tierInfo, setTierInfo] = useState<TierInfo>({
-        tier: 'free',
-        slot: null,
+        tier: 'FREE',
         joinedAt: null,
-        totalFounders: 87 // Default fallback (13 spots left)
     });
     const [loading, setLoading] = useState(true);
 
@@ -39,16 +35,20 @@ export function useUserTier() {
             headers: {
                 'Authorization': `Bearer ${token}`
             },
-            cache: 'no-store' // Disable caching to ensure fresh tier data
+            cache: 'no-store'
         })
             .then(res => res.json())
             .then(data => {
-                console.log('User Tier API Response:', data); // Debug log
+                // Normalize tier to uppercase to match TierId
+                let tier = (data.tier || 'FREE').toUpperCase();
+
+                // Map legacy values if backend returns them
+                if (tier === 'FOUNDERS') tier = 'PRO';
+                if (tier === 'PREMIUM') tier = 'TRADER';
+
                 setTierInfo({
-                    tier: data.tier || 'free',
-                    slot: data.slot_number || null,
+                    tier: tier,
                     joinedAt: data.joined_at || null,
-                    totalFounders: data.total_founders ?? 87 // Use API data or fallback
                 });
                 setLoading(false);
             })
@@ -59,41 +59,49 @@ export function useUserTier() {
     }, [isAuthenticated, user, token]);
 
     const canViewMenu = (menuId: MenuId): boolean => {
-        const menuAccess: Record<MenuId, UserTier[]> = {
-            overview: ['free', 'founders', 'admin'],
-            trade: ['free', 'founders', 'admin'],
-            pnl: ['free', 'founders', 'admin'],
-            wolfpack: ['founders', 'admin'], // Hidden from free
-            rebates: ['free', 'founders', 'admin'], // All users
-            risk: ['founders', 'admin'], // Founders only
-            referrals: ['free', 'founders', 'admin'], // All (teaser for free)
-            reports: ['free', 'founders', 'admin'],
-            billing: ['free', 'founders', 'admin'], // Payment page for all
-            resources: ['free', 'founders', 'admin'],
-            settings: ['free', 'founders', 'admin'],
-            admin: ['admin'] // Admin only
+        // Define minimum tier required for each menu
+        const minTierForMenu: Record<MenuId, TierId> = {
+            overview: 'FREE',
+            trade: 'FREE',
+            pnl: 'FREE',
+            wolfpack: 'PRO', // Was Founders
+            rebates: 'FREE',
+            risk: 'PRO', // Was Founders
+            referrals: 'FREE',
+            reports: 'FREE',
+            billing: 'FREE',
+            resources: 'FREE',
+            settings: 'FREE',
+            admin: 'ELITE' // Admin only (handled separately usually)
         };
 
-        return menuAccess[menuId]?.includes(tierInfo.tier) ?? false;
-    };
+        if (tierInfo.tier === 'ADMIN') return true;
 
-    const MAX_FOUNDERS = 100;
-    const foundersSlotsLeft = Math.max(0, MAX_FOUNDERS - tierInfo.totalFounders);
+        const requiredTier = minTierForMenu[menuId];
+        if (!requiredTier) return true;
+
+        // Check if current tier index >= required tier index
+        const currentIndex = TIER_ORDER.indexOf(tierInfo.tier as TierId);
+        const requiredIndex = TIER_ORDER.indexOf(requiredTier);
+
+        return currentIndex >= requiredIndex;
+    };
 
     return {
         ...tierInfo,
         loading,
-        isFounders: tierInfo.tier === 'founders',
-        isAdmin: tierInfo.tier === 'admin',
-        isFree: tierInfo.tier === 'free',
-        foundersSlotsLeft,
+        isAdmin: tierInfo.tier === 'ADMIN',
+        isFree: tierInfo.tier === 'FREE',
+        isPro: tierInfo.tier === 'PRO',
+        isTrader: tierInfo.tier === 'TRADER',
+        isElite: tierInfo.tier === 'ELITE',
         canViewMenu,
 
         // Feature access helpers
-        canUseAgent: () => tierInfo.tier !== 'free',
-        canViewLifetimeData: () => tierInfo.tier !== 'free',
-        canExportPDF: () => tierInfo.tier !== 'free',
-        canEarnReferrals: () => tierInfo.tier !== 'free',
-        maxTradeHistory: tierInfo.tier === 'free' ? 30 : -1, // -1 = unlimited
+        canUseAgent: () => tierInfo.tier !== 'FREE',
+        canViewLifetimeData: () => tierInfo.tier !== 'FREE',
+        canExportPDF: () => tierInfo.tier !== 'FREE',
+        canEarnReferrals: () => tierInfo.tier !== 'FREE', // Or maybe FREE can earn L1? Check unified-tiers.ts (Free has 0%)
+        maxTradeHistory: tierInfo.tier === 'FREE' ? 30 : -1,
     };
 }

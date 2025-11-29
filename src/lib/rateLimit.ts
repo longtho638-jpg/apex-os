@@ -1,17 +1,17 @@
 /**
- * In-Memory Rate Limiter for Apex-OS
+ * Database-Backed Rate Limiter for Apex-OS
  * 
- * TODO: For production with multiple replicas (Vercel/AWS), migrate to Redis/Upstash.
- * Current implementation uses process-memory, which works for single-instance or sticky sessions.
+ * Uses Supabase (PostgreSQL) to store rate limit counters.
+ * This ensures rate limits work across multiple serverless function instances (Stateless).
  */
 
-type RateLimitRecord = {
-    count: number;
-    startTime: number;
-};
+import { createClient } from '@supabase/supabase-js';
 
-// Store limits in memory
-const rateLimitStore = new Map<string, RateLimitRecord>();
+// Use Service Role Key to bypass RLS and ensure we can write to rate_limits table
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 interface RateLimitConfig {
     limit: number;
@@ -20,78 +20,121 @@ interface RateLimitConfig {
 
 // Default configurations
 export const LIMITS = {
-    AUTH_SENSITIVE: { limit: 5, windowMs: 15 * 60 * 1000 }, // 5 attempts per 15 mins (Login)
-    AUTH_GLOBAL: { limit: 100, windowMs: 60 * 60 * 1000 }, // 100 auth requests per hour
+    AUTH_SENSITIVE: { limit: 5, windowMs: 15 * 60 * 1000 }, // 5 attempts per 15 mins
+    AUTH_GLOBAL: { limit: 100, windowMs: 60 * 60 * 1000 }, // 100 requests per hour
     API_STANDARD: { limit: 60, windowMs: 60 * 1000 }, // 60 requests per minute
 };
 
 /**
- * Check if the request is within the rate limit
- * @param key - Unique identifier (e.g., "ip:login", "user:123")
- * @param config - Rate limit configuration (limit and windowMs)
+ * Check if the request is within the rate limit (Async)
  */
-export function checkRateLimit(key: string, config: RateLimitConfig = LIMITS.API_STANDARD): { 
-    success: boolean; 
-    limit: number; 
-    remaining: number; 
-    reset: number 
-} {
+export async function checkRateLimit(key: string, config: RateLimitConfig = LIMITS.API_STANDARD): Promise<{
+    success: boolean;
+    limit: number;
+    remaining: number;
+    reset: number
+}> {
     const now = Date.now();
-    const record = rateLimitStore.get(key);
+    const windowStart = now - config.windowMs;
 
-    // Cleanup: Periodically clear very old entries (simple random cleanup)
-    if (Math.random() < 0.01) { 
-        cleanupStore();
-    }
+    try {
+        // 1. Clean up old records for this key (Lazy cleanup)
+        // In a real prod env, use a separate cron job or pg_cron for cleanup
 
-    // If no record, create one
-    if (!record) {
-        rateLimitStore.set(key, { count: 1, startTime: now });
-        return {
-            success: true,
-            limit: config.limit,
-            remaining: config.limit - 1,
-            reset: now + config.windowMs
-        };
-    }
+        // 2. Upsert Logic
+        // We try to fetch the record first
+        const { data: record, error } = await supabase
+            .from('rate_limits')
+            .select('*')
+            .eq('key', key)
+            .single();
 
-    // If window has passed, reset
-    if (now - record.startTime > config.windowMs) {
-        rateLimitStore.set(key, { count: 1, startTime: now });
-        return {
-            success: true,
-            limit: config.limit,
-            remaining: config.limit - 1,
-            reset: now + config.windowMs
-        };
-    }
-
-    // Check limit
-    if (record.count >= config.limit) {
-        return {
-            success: false,
-            limit: config.limit,
-            remaining: 0,
-            reset: record.startTime + config.windowMs
-        };
-    }
-
-    // Increment
-    record.count++;
-    return {
-        success: true,
-        limit: config.limit,
-        remaining: config.limit - record.count,
-        reset: record.startTime + config.windowMs
-    };
-}
-
-function cleanupStore() {
-    const now = Date.now();
-    for (const [key, value] of rateLimitStore.entries()) {
-        // If entry is older than 1 hour (safeguard), remove it
-        if (now - value.startTime > 3600000) {
-            rateLimitStore.delete(key);
+        if (error && error.code !== 'PGRST116') {
+            console.error('Rate Limit Fetch Error:', error);
+            // Fail open (allow request) if DB is down, to prevent blocking legit users during outage
+            return { success: true, limit: config.limit, remaining: 1, reset: now };
         }
+
+        if (!record) {
+            // New record
+            await supabase.from('rate_limits').insert({
+                key,
+                count: 1,
+                window_start: now
+            });
+            return {
+                success: true,
+                limit: config.limit,
+                remaining: config.limit - 1,
+                reset: now + config.windowMs
+            };
+        }
+
+        // Check if window expired
+        if (record.window_start < windowStart) {
+            // Reset window
+            await supabase
+                .from('rate_limits')
+                .update({ count: 1, window_start: now })
+                .eq('key', key);
+
+            return {
+                success: true,
+                limit: config.limit,
+                remaining: config.limit - 1,
+                reset: now + config.windowMs
+            };
+        }
+
+        // Check limit
+        if (record.count >= config.limit) {
+            return {
+                success: false,
+                limit: config.limit,
+                remaining: 0,
+                reset: record.window_start + config.windowMs
+            };
+        }
+
+        // Use atomic Postgres function - NO race condition
+        const { data, error: rpcError } = await supabase.rpc('increment_rate_limit', {
+            p_identifier: key,
+            p_window_start: new Date(windowStart).toISOString(),
+            p_window_seconds: Math.floor(config.windowMs / 1000)
+        });
+
+        if (rpcError) {
+            console.error('[Rate Limit] Atomic increment failed:', rpcError);
+            // Fail open (allow request) rather than fail closed on error
+            return {
+                success: true,
+                limit: config.limit,
+                remaining: config.limit - 1,
+                reset: now + config.windowMs
+            };
+        }
+
+        const result = Array.isArray(data) ? data[0] : data;
+
+        if (result.is_blocked) {
+            return {
+                success: false,
+                limit: config.limit,
+                remaining: 0,
+                reset: windowStart + config.windowMs
+            };
+        }
+
+        return {
+            success: true,
+            limit: config.limit,
+            remaining: config.limit - (record.count + 1),
+            reset: record.window_start + config.windowMs
+        };
+
+    } catch (err) {
+        console.error('Rate Limit System Error:', err);
+        return { success: true, limit: config.limit, remaining: 1, reset: now };
     }
 }
+

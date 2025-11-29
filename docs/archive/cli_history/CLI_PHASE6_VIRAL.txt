@@ -1,0 +1,291 @@
+# CLI TASK: PHASE 6 - VIRAL REFERRALS (以戰養戰)
+
+## BINH PHÁP PRINCIPLE: 以戰養戰 (Make War Feed War)
+**Translation**: "Use the enemy's resources to sustain your army"
+**Application**: Users recruit users → Self-sustaining growth (no marketing spend)
+
+---
+
+## OBJECTIVE: Viral Coefficient > 1.5 (Each user brings 1.5 more users)
+
+**Target**:
+- Month 1: 30 users → 45 referrals (1.5x)
+- Month 3: 200 users → 300 referrals (exponential)
+- Month 6: 1,000 users → 1,500 referrals (compounding virality)
+
+**Strategy**: 20-30% commission + AI-generated shareable content = Viral Loop
+
+---
+
+## TASK 1: Referral System
+
+### 1.1 Referral Code Generation
+**File**: `src/app/api/user/referrals/route.ts`
+
+```typescript
+import { UNIFIED_TIERS, getCommissionRate } from '@/config/unified-tiers';
+
+export async function POST(req: Request) {
+  const user = await getUser(req);
+  
+  // Generate unique code (6 chars, alphanumeric)
+  const code = nanoid(6).toUpperCase();
+  
+  // Commission rate is dynamic based on User Tier (L1-L4)
+  // We don't store a static rate anymore. It's calculated at runtime via unified-tiers.ts
+  
+  await supabase.from('referral_codes').insert({
+    user_id: user.id,
+    code,
+    // commission_rate: REMOVED (Dynamic now)
+    expires_at: null, // Never expires
+  });
+  
+  return { code, referral_link: `https://apexrebate.com/r/${code}` };
+}
+```
+
+**Database Migration**: `supabase/migrations/20251128_referral_system.sql`
+```sql
+CREATE TABLE referral_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) UNIQUE,
+  code TEXT UNIQUE NOT NULL,
+  -- commission_rate REMOVED (Dynamic L1-L4 logic)
+  total_referrals INTEGER DEFAULT 0,
+  total_earnings NUMERIC DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ
+);
+
+CREATE TABLE referral_conversions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  referrer_id UUID REFERENCES users(id),
+  referred_user_id UUID REFERENCES users(id),
+  referral_code TEXT,
+  
+  -- Earnings tracking
+  subscription_revenue NUMERIC, 
+  commission_amount NUMERIC, -- Calculated based on Referrer's Tier (L1-L4)
+  commission_paid BOOLEAN DEFAULT FALSE,
+  
+  converted_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_referral_codes_code ON referral_codes(code);
+CREATE INDEX idx_referral_conversions_referrer ON referral_conversions(referrer_id);
+```
+
+### 1.2 Referral Landing Page
+**File**: `src/app/[locale]/r/[code]/page.tsx`
+
+**Flow**:
+1. User clicks referral link (`/r/ABC123`)
+2. Store code in cookie (`referral_code=ABC123`)
+3. Redirect to signup page with pre-filled referrer info
+4. After signup, credit referrer in `referral_conversions` table
+
+**UI**:
+- Show referrer's name (optional)
+- "Join [Friend's Name] on Apex Rebate"
+- Trust indicator: "🎁 You both get rewards"
+
+---
+
+## TASK 2: Commission Tracking & Payout
+
+### 2.1 Commission Calculator (Dynamic L1-L4)
+**File**: `src/lib/referral-commission.ts`
+
+```typescript
+import { UNIFIED_TIERS, getCommissionRate, TierId } from '@/config/unified-tiers';
+
+export async function calculateCommission(
+  referredUserId: string,
+  subscriptionAmount: number
+) {
+  // 1. Find direct referrer
+  const { data: conversion } = await supabase
+    .from('referral_conversions')
+    .select('*, referrer:users(subscription_tier)') // Need referrer's tier
+    .eq('referred_user_id', referredUserId)
+    .single();
+  
+  if (!conversion) return null;
+  
+  const referrerTier = conversion.referrer.subscription_tier as TierId;
+  
+  // 2. Calculate L1 Commission (Direct)
+  // Use getCommissionRate(tier, level) from unified-tiers.ts
+  const rateL1 = getCommissionRate(referrerTier, 1); 
+  const commissionAmount = subscriptionAmount * rateL1;
+  
+  // 3. Update conversion record
+  if (commissionAmount > 0) {
+      await supabase
+        .from('referral_conversions')
+        .update({
+          subscription_revenue: subscriptionAmount,
+          commission_amount: commissionAmount,
+        })
+        .eq('id', conversion.id);
+        
+      // Credit Wallet (Realtime)
+      await supabase.rpc('credit_user_balance_realtime', {
+          p_user_id: conversion.referrer_id,
+          p_amount: commissionAmount,
+          p_source: 'referral_l1',
+          p_metadata: { referred_user: referredUserId }
+      });
+  }
+  
+  // TODO: Implement L2-L4 recursion here if needed (Viral Loop)
+  
+  return { referrerId: conversion.referrer_id, commissionAmount };
+}
+```
+
+**Trigger**: When subscription payment succeeds (NOWPayments/Polar webhook)
+
+### 2.2 Referral Dashboard
+**File**: `src/app/[locale]/dashboard/referrals/page.tsx`
+
+**Features**:
+- Referral link + QR code
+- Total referrals count
+- Total earnings (pending + paid)
+- Conversion rate (clicks → signups)
+- Leaderboard (top 10 referrers)
+
+**CTA**: "Share on Twitter", "Copy Link", "Generate QR"
+
+---
+
+## TASK 3: AI-Generated Shareable Content
+
+### 3.1 Win Screenshot Generator
+**File**: `src/components/referrals/WinShareCard.tsx`
+
+**Functionality**:
+When user has a profitable trade:
+1. Auto-generate image card (Canvas API):
+   - "🚀 Just made +15% on BTC/USDT with Apex Rebate AI"
+   - Chart snapshot (if available)
+   - Referral link at bottom
+2. One-click share to Twitter/Telegram
+
+**Design**: Premium, glassmorphic, branded
+
+### 3.2 AI-Generated Testimonial
+**File**: `src/lib/ai/testimonial-generator.ts`
+
+**Logic**:
+1. User clicks "Share my experience"
+2. AI generates personalized testimonial based on:
+   - Account age
+   - Profit/loss (if public)
+   - Favorite features
+3. User edits if needed
+4. Post to socials with referral link
+
+**Example Output**:
+> "Been using Apex Rebate for 3 months. The AI signals are 🔥! Already +42% ROI. If you trade, you need this. Use my link: apexrebate.com/r/ABC123 🚀"
+
+---
+
+## TASK 4: Referral Incentives
+
+### 4.1 Two-Sided Reward
+**Both parties get benefits**:
+- Referrer: **Dynamic Commission (up to 30%)** based on Tier
+- Referred user: **20% discount** on first month (code: `REFERRAL20`)
+
+**Database**:
+- Auto-create `REFERRAL20` code in `discount_codes` table
+- Apply at checkout if user signed up via referral link
+
+### 4.2 Leaderboard Rewards
+**File**: `src/app/[locale]/leaderboard/page.tsx`
+
+**Monthly prizes**:
+- Top 1 referrer: Free **ELITE** tier (1 month)
+- Top 2-5: Free **TRADER** tier (1 month)
+- Hall of Fame (all-time top 10)
+
+**Public display** (gamification):
+- Rank, username (anonymized), total referrals, earnings (hidden)
+
+---
+
+## TASK 5: Viral Loop Automation
+
+### 5.1 Auto-Invite Email
+**File**: `src/lib/email-templates.ts` (ADD)
+
+```typescript
+export const referralInvite = (referrerName: string, referralLink: string) => `
+<h1>🎁 ${referrerName} invited you to Apex Rebate!</h1>
+
+<p>Your friend ${referrerName} is already earning with our AI trading signals.</p>
+
+<p><strong>Get 20% OFF your first month</strong> when you sign up:</p>
+
+<a href="${referralLink}" style="...">Claim Your Discount</a>
+
+<p>Why traders love us:</p>
+<ul>
+  <li>✅ AI-powered trading signals</li>
+  <li>✅ 1-click crypto payments</li>
+  <li>✅ 24/7 automated alerts</li>
+</ul>
+`;
+```
+
+**Trigger**: User manually invites friends via email (optional feature)
+
+### 5.2 Share Reminder Cron
+**File**: `src/app/api/cron/referral-reminder/route.ts`
+
+**Logic**:
+- Target: Users with 0 referrals after 7 days
+- Email subject: "Earn up to 30% commission - Share Apex Rebate"
+- Content: Explain commission structure + easy share buttons
+
+**Frequency**: Weekly on Sundays
+
+---
+
+## DELIVERABLES (Week 4 Day 3-4)
+
+1. ✅ Referral code system (generate + track)
+2. ✅ Commission calculation (L1-L4 Dynamic)
+3. ✅ Referral dashboard + leaderboard
+4. ✅ AI-generated shareable content (win cards)
+5. ✅ Two-sided reward structure
+6. ✅ Viral automation (emails, reminders)
+
+---
+
+## EXPECTED IMPACT
+
+**Month 1**: 30 users → 15 referrals (0.5x, warming up)
+**Month 3**: 200 users → 120 referrals (0.6x)
+**Month 6**: 1,000 users → 1,500 referrals (1.5x = **Viral!**)
+
+**Cost**: $0 (self-sustaining)
+
+**兵法映射**:
+- 以戰養戰: Users recruit users (growth feeds itself)
+- 不戰而屈人之兵: Virality wins without ad spending
+
+---
+
+## BUILD REQUIREMENTS
+
+- TypeScript strict mode ✅
+- 0 technical debt ✅
+- Commission tracking accurate (financial sensitive) ✅
+- Mobile responsive ✅
+- Build: 0 errors ✅
+
+**EXECUTE NOW VIA GEMINI CLI**

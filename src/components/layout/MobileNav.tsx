@@ -2,34 +2,36 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Activity, BarChart2, User } from 'lucide-react';
+import { Home, Zap, TrendingUp, Wallet, Menu } from 'lucide-react';
 
 export function MobileNav() {
   const pathname = usePathname();
-  
-  const NAV_ITEMS = [
-    { icon: Home, label: 'Home', path: '/en/landing' },
-    { icon: Activity, label: 'Signals', path: '/en/dashboard/signals' },
-    { icon: BarChart2, label: 'Dashboard', path: '/en/dashboard/overview' },
-    { icon: User, label: 'Profile', path: '/en/settings' },
+
+  const navItems = [
+    { href: '/dashboard/overview', icon: Home, label: 'Home' },
+    { href: '/dashboard/signals', icon: Zap, label: 'Signals' },
+    { href: '/dashboard/trading', icon: TrendingUp, label: 'Trade' },
+    { href: '/dashboard/wallet', icon: Wallet, label: 'Wallet' },
+    { href: '/dashboard/settings', icon: Menu, label: 'Menu' },
   ];
 
-  // Hide on desktop
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/90 backdrop-blur-xl border-t border-white/10 z-50 pb-safe">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-xl border-t border-white/10 pb-safe md:hidden">
       <div className="flex justify-around items-center h-16">
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname?.includes(item.path);
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname?.includes(item.href); // Simple active check
+
           return (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
                 isActive ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon className={`w-6 h-6 ${isActive ? 'stroke-2' : 'stroke-1'}`} />
+              <span className="text-[10px] mt-1 font-medium">{item.label}</span>
             </Link>
           );
         })}

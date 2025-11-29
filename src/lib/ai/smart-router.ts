@@ -1,15 +1,9 @@
-import { VertexAI } from '@google-cloud/vertexai';
-
 // OpenRouter client
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
 // Vertex AI client (fallback)
-// Note: VertexAI requires Google Cloud credentials to be set in environment
-const vertexAI = new VertexAI({
-  project: process.env.GOOGLE_CLOUD_PROJECT || 'apex-os-ai', // Fallback project ID
-  location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
-});
+// Note: VertexAI is now lazy-loaded in callVertexAI to improve cold start time
 
 // Model pricing (per 1M tokens)
 const MODEL_COSTS: Record<string, number> = {
@@ -72,7 +66,7 @@ export class SmartRouter {
   private selectModel(complexity: 'simple' | 'medium' | 'complex'): string {
     // Free users get cheapest models
     if (this.config.userTier === 'free') {
-      return complexity === 'simple' 
+      return complexity === 'simple'
         ? 'deepseek/deepseek-chat'          // $0.14/1M
         : 'meta-llama/llama-3-8b-instruct'; // $0.06/1M
     }
@@ -130,7 +124,19 @@ export class SmartRouter {
    * Fallback to Vertex AI
    * 兵法: 先為不可勝 (Prepare backup before attack)
    */
+  /**
+   * Fallback to Vertex AI
+   * 兵法: 先為不可勝 (Prepare backup before attack)
+   */
   private async callVertexAI(messages: any[]): Promise<AIResponse> {
+    // Lazy load VertexAI to prevent cold start latency
+    const { VertexAI } = await import('@google-cloud/vertexai');
+
+    const vertexAI = new VertexAI({
+      project: process.env.GOOGLE_CLOUD_PROJECT || 'apex-os-ai',
+      location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
+    });
+
     const generativeModel = vertexAI.preview.getGenerativeModel({
       model: 'gemini-pro',
     });
@@ -164,7 +170,7 @@ export class SmartRouter {
     try {
       // Primary: OpenRouter
       if (process.env.NODE_ENV === 'development') {
-          console.log(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
+        console.log(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
       }
       return await this.callOpenRouter(model, messages);
 

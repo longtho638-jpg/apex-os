@@ -1,22 +1,46 @@
-FROM python:3.9-slim
+# Stage 1: Builder
+FROM python:3.11-slim-bookworm as builder
 
 WORKDIR /app
 
-# Install system dependencies
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies to a temporary location
 COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# Stage 2: Runner
+FROM python:3.11-slim-bookworm
+
+WORKDIR /app
+
+# Install runtime dependencies (curl for healthcheck)
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
 
 # Copy application code
-COPY backend ./backend
+COPY --chown=appuser:appuser backend ./backend
 
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+
+# Switch to non-root user
+USER appuser
+
+# Health Check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Run the trader agent
 CMD ["python", "-m", "backend.agents.trader"]

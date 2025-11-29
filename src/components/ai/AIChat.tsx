@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Send, Sparkles } from 'lucide-react';
-import { PricingModal } from './PricingModal';
+import { PricingModal } from '@/components/pricing/PricingModal';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -24,7 +24,7 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
   const [usage, setUsage] = useState<AIUsage | null>(null);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [rateLimitHit, setRateLimitHit] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -58,12 +58,12 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
         const data = await response.json();
         setRateLimitHit(true);
         setShowPricingModal(true);
-        
+
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: `⚠️ You've reached your daily limit of ${data.limit} AI requests. Upgrade to continue!`,
         }]);
-        
+
         return;
       }
 
@@ -72,7 +72,7 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
       }
 
       const data = await response.json();
-      
+
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: data.content,
@@ -100,7 +100,7 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
             <Sparkles className="w-5 h-5 text-emerald-400" />
             <h2 className="text-lg font-bold">AI Assistant</h2>
           </div>
-          
+
           {usage && (
             <div className="text-sm text-zinc-400">
               {usage.remaining}/{usage.limit} requests left today
@@ -114,9 +114,9 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-4 mb-4 min-h-[300px]">
           {messages.length === 0 && (
-              <div className="flex items-center justify-center h-full text-zinc-500">
-                  Ask me anything about crypto, trading, or market analysis...
-              </div>
+            <div className="flex items-center justify-center h-full text-zinc-500">
+              Ask me anything about crypto, trading, or market analysis...
+            </div>
           )}
           {messages.map((msg, idx) => (
             <div
@@ -124,17 +124,16 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] p-3 rounded-lg ${
-                  msg.role === 'user'
+                className={`max-w-[80%] p-3 rounded-lg ${msg.role === 'user'
                     ? 'bg-emerald-500 text-white'
                     : 'bg-zinc-800 text-zinc-100'
-                }`}
+                  }`}
               >
                 {msg.content}
               </div>
             </div>
           ))}
-          
+
           {loading && (
             <div className="flex justify-start">
               <div className="bg-zinc-800 p-3 rounded-lg">
@@ -146,7 +145,7 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 

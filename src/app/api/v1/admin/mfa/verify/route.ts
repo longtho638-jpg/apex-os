@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     try {
         // Rate limiting check (5 attempts per 15 minutes)
         const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        const rateLimit = checkRateLimit(`mfa_verify_${ip}`);
+        const rateLimit = await checkRateLimit(`mfa_verify_${ip}`);
 
         if (!rateLimit.success) {
             return NextResponse.json(

@@ -1,185 +1,215 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { CheckCircle2, Circle, Gift } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2, Circle, Trophy, ArrowRight, Wallet, LineChart, PlayCircle, MessageCircle, Gift } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
-interface OnboardingStep {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  cta: string;
-  ctaLink: string;
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+interface OnboardingState {
+  step_connect_wallet: boolean;
+  step_view_signal: boolean;
+  step_run_backtest: boolean;
+  step_join_telegram: boolean;
+  step_refer_friend: boolean;
+  reward_claimed: boolean;
 }
 
-export function OnboardingChecklist({ userId }: { userId: string }) {
-  const [steps, setSteps] = useState<OnboardingStep[]>([]);
-  const [totalCompleted, setTotalCompleted] = useState(0);
-  const [showReward, setShowReward] = useState(false);
+export function OnboardingChecklist() {
+  const [state, setState] = useState<OnboardingState>({
+    step_connect_wallet: false,
+    step_view_signal: false,
+    step_run_backtest: false,
+    step_join_telegram: false,
+    step_refer_friend: false,
+    reward_claimed: false
+  });
+  const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(true);
 
   useEffect(() => {
-    fetchProgress();
-  }, [userId]);
+    fetchOnboardingStatus();
+  }, []);
 
-  async function fetchProgress() {
+  const fetchOnboardingStatus = async () => {
     try {
-      const response = await fetch(`/api/user/onboarding?userId=${userId}`);
-      if (!response.ok) return;
-      
-      const data = await response.json();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-      const stepsData: OnboardingStep[] = [
-        {
-          id: 'connect_exchange',
-          title: 'Connect Exchange',
-          description: 'Link your Binance account for live trading',
-          completed: data.step_connect_exchange || false,
-          cta: 'Connect Now',
-          ctaLink: '/settings#api-keys',
-        },
-        {
-          id: 'view_signal',
-          title: 'View a Signal',
-          description: 'Check out trading signals from our AI',
-          completed: data.step_view_signal || false,
-          cta: 'View Signals',
-          ctaLink: '/signals',
-        },
-        {
-          id: 'execute_trade',
-          title: 'Execute Your First Trade',
-          description: 'Try paper trading or go live',
-          completed: data.step_execute_trade || false,
-          cta: 'Start Trading',
-          ctaLink: '/trade',
-        },
-        {
-          id: 'set_alerts',
-          title: 'Set Up Alerts',
-          description: 'Get notified of important market movements',
-          completed: data.step_set_alerts || false,
-          cta: 'Create Alert',
-          ctaLink: '/alerts',
-        },
-        {
-          id: 'refer_friend',
-          title: 'Refer a Friend',
-          description: 'Share your referral link and earn 20% commission',
-          completed: data.step_refer_friend || false,
-          cta: 'Get Link',
-          ctaLink: '/referrals',
-        },
-      ];
+      const { data, error } = await supabase
+        .from('user_onboarding')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-      setSteps(stepsData);
-      const completed = stepsData.filter((s) => s.completed).length;
-      setTotalCompleted(completed);
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching onboarding:', error);
+        return;
+      }
 
-      if (completed === 5 && !data.completed_at) {
-        setShowReward(true);
-        markAllCompleted();
+      if (data) {
+        setState(data);
+        if (data.reward_claimed) setIsOpen(false);
+      } else {
+        // Initialize if not exists
+        await supabase.from('user_onboarding').insert({ user_id: user.id });
       }
     } catch (error) {
-      console.error("Failed to fetch onboarding progress", error);
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  async function markAllCompleted() {
+  const updateStep = async (step: keyof OnboardingState) => {
     try {
-      await fetch('/api/user/onboarding/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('user_onboarding')
+        .update({ [step]: true })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setState(prev => ({ ...prev, [step]: true }));
+      toast.success('Task Completed!');
+
+      // Check if all steps completed
+      const newState = { ...state, [step]: true };
+      const allCompleted = Object.keys(newState)
+        .filter(k => k.startsWith('step_'))
+        .every(k => newState[k as keyof OnboardingState]);
+
+      if (allCompleted && !newState.reward_claimed) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
     } catch (error) {
-      console.error("Failed to mark onboarding complete", error);
+      toast.error('Failed to update progress');
     }
-  }
+  };
 
-  const progress = (totalCompleted / 5) * 100;
+  const claimReward = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  if (steps.length === 0) return null;
+      const { error } = await supabase
+        .from('user_onboarding')
+        .update({ reward_claimed: true })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setState(prev => ({ ...prev, reward_claimed: true }));
+      toast.success('Reward Claimed! 24h Elite Trial Activated.');
+      setIsOpen(false);
+    } catch (error) {
+      toast.error('Failed to claim reward');
+    }
+  };
+
+  const steps = [
+    { key: 'step_connect_wallet', label: 'Connect Wallet', icon: Wallet, action: () => updateStep('step_connect_wallet') }, // In real app, this would be triggered by actual wallet connection
+    { key: 'step_view_signal', label: 'View a Signal', icon: LineChart, action: () => updateStep('step_view_signal') },
+    { key: 'step_run_backtest', label: 'Run Backtest', icon: PlayCircle, action: () => updateStep('step_run_backtest') },
+    { key: 'step_join_telegram', label: 'Join Telegram', icon: MessageCircle, action: () => { window.open('https://t.me/apex_os', '_blank'); updateStep('step_join_telegram'); } },
+  ];
+
+  const completedCount = steps.filter(s => state[s.key as keyof OnboardingState]).length;
+  const progress = (completedCount / steps.length) * 100;
+  const allCompleted = completedCount === steps.length;
+
+  if (loading || state.reward_claimed || !isOpen) return null;
 
   return (
-    <GlassCard className="p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-bold">Get Started Checklist</h3>
-          <p className="text-sm text-zinc-400">
-            Complete all steps to unlock advanced features
-          </p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed bottom-6 right-6 z-50 w-80 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+    >
+      {/* Header */}
+      <div className="p-4 bg-gradient-to-r from-emerald-900/50 to-black border-b border-white/10 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          <span className="font-bold text-white">Setup Guide</span>
         </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-emerald-400">
-            {totalCompleted}/5
-          </p>
-          <p className="text-xs text-zinc-500">completed</p>
-        </div>
+        <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white">×</button>
       </div>
 
-      {/* Progress bar */}
-      <div className="w-full bg-zinc-800 rounded-full h-2 mb-4">
-        <div
-          className="bg-emerald-400 h-2 rounded-full transition-all duration-500"
-          style={{ width: `${progress}%` }}
-        />
+      {/* Progress */}
+      <div className="px-4 pt-4">
+        <div className="flex justify-between text-xs text-zinc-400 mb-1">
+          <span>{completedCount}/{steps.length} Completed</span>
+          <span>{Math.round(progress)}%</span>
+        </div>
+        <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-emerald-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
 
       {/* Steps */}
-      <div className="space-y-3">
-        {steps.map((step) => (
-          <div
-            key={step.id}
-            className={`flex items-center gap-3 p-3 rounded-lg border transition ${
-              step.completed
-                ? 'border-emerald-400/20 bg-emerald-400/5'
-                : 'border-white/10'
-            }`}
-          >
-            {step.completed ? (
-              <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-            ) : (
-              <Circle className="w-6 h-6 text-zinc-600 flex-shrink-0" />
-            )}
-            
-            <div className="flex-1">
-              <p className={`font-medium ${step.completed ? 'line-through text-zinc-500' : ''}`}>
-                {step.title}
-              </p>
-              <p className="text-sm text-zinc-400">{step.description}</p>
+      <div className="p-4 space-y-3">
+        {steps.map((step) => {
+          const isCompleted = state[step.key as keyof OnboardingState];
+          const Icon = step.icon;
+          return (
+            <div
+              key={step.key}
+              onClick={!isCompleted ? step.action : undefined}
+              className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${isCompleted ? 'opacity-50 cursor-default' : 'hover:bg-white/5 cursor-pointer'}`}
+            >
+              {isCompleted ? (
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+              ) : (
+                <Circle className="h-5 w-5 text-zinc-600 shrink-0" />
+              )}
+              <div className="flex-1">
+                <div className={`text-sm font-medium ${isCompleted ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>
+                  {step.label}
+                </div>
+              </div>
+              {!isCompleted && <ArrowRight className="h-4 w-4 text-zinc-600" />}
             </div>
-
-            {!step.completed && (
-              <a
-                href={step.ctaLink}
-                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-sm font-medium transition"
-              >
-                {step.cta}
-              </a>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Reward modal */}
-      {showReward && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <GlassCard className="max-w-md p-8 text-center relative">
-            <Gift className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Congratulations! 🎉</h2>
-            <p className="text-zinc-400 mb-6">
-              You&apos;ve completed all onboarding steps! Advanced features unlocked.
-            </p>
+      {/* Reward Action */}
+      <AnimatePresence>
+        {allCompleted && !state.reward_claimed && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            className="bg-emerald-500/10 border-t border-emerald-500/20 p-4"
+          >
             <button
-              onClick={() => setShowReward(false)}
-              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-medium"
+              onClick={claimReward}
+              className="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
-              Awesome!
+              <Gift className="h-4 w-4" />
+              Claim 24h Elite Trial
             </button>
-          </GlassCard>
-        </div>
-      )}
-    </GlassCard>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

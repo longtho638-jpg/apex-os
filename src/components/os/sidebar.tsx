@@ -9,9 +9,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserTier, type MenuId } from '@/hooks/useUserTier';
-import { useUpgradeTier } from '@/hooks/useUpgradeTier';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/I18nContext';
+import { TierId } from '@/config/unified-tiers';
 
 // Menu configuration with tier requirements
 const NAV_ITEMS: Array<{
@@ -19,15 +19,15 @@ const NAV_ITEMS: Array<{
     name: string;
     icon: any;
     path: string;
-    requiresFounders?: boolean;
+    minTier?: TierId;
     requiresAdmin?: boolean;
 }> = [
         { id: 'overview', name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { id: 'trade', name: 'Trade', icon: Activity, path: '/trade' },
         { id: 'pnl', name: 'PnL Tracker', icon: LineChart, path: '/pnl' },
-        { id: 'wolfpack', name: 'Wolf Pack', icon: Bot, path: '/wolf-pack', requiresFounders: true },
+        { id: 'wolfpack', name: 'Wolf Pack', icon: Bot, path: '/wolf-pack', minTier: 'PRO' },
         { id: 'rebates', name: 'Rebates', icon: Search, path: '/rebates' },
-        { id: 'risk', name: 'Risk Guardian', icon: Shield, path: '/risk', requiresFounders: true },
+        { id: 'risk', name: 'Risk Guardian', icon: Shield, path: '/risk', minTier: 'PRO' },
         { id: 'referrals', name: 'Referrals', icon: Users, path: '/referral' },
         { id: 'reports', name: 'Reports', icon: FileText, path: '/reports' },
         { id: 'billing', name: 'Payment', icon: CreditCard, path: '/payment' },
@@ -42,8 +42,7 @@ export function Sidebar() {
     const pathname = useNextPathname();
     const router = useNextRouter();
     const { user } = useAuth();
-    const { tier, slot, canViewMenu, isFree, isFounders, loading, foundersSlotsLeft } = useUserTier();
-    const { upgradeToFounders, isLoading: isUpgrading, error: upgradeError, success: upgradeSuccess } = useUpgradeTier();
+    const { tier, canViewMenu, isFree, loading } = useUserTier();
     const t = useTranslations('Sidebar');
 
     // Filter menu items based on tier
@@ -88,13 +87,13 @@ export function Sidebar() {
                             // Remove locale prefix from pathname for comparison
                             const pathnameWithoutLocale = pathname?.replace(`/${locale}`, '') || '';
                             const isActive = pathnameWithoutLocale === item.path;
+                            const isLocked = item.minTier && isFree; // Simple lock check for UI indication
 
                             return (
                                 <Link
                                     key={item.path + item.name}
                                     href={`/${locale}${item.path}`}
                                     data-testid={`nav-${item.id}`}
-                                    data-founders-only={item.requiresFounders ? 'true' : 'false'}
                                     className={cn(
                                         "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group relative overflow-hidden",
                                         isActive
@@ -107,7 +106,7 @@ export function Sidebar() {
                                     )}
                                     <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-[#00FF94]" : "text-gray-500 group-hover:text-white")} />
                                     <span className="relative z-10">{t(getTranslationKey(item.id))}</span>
-                                    {item.requiresFounders && isFree && (
+                                    {isLocked && (
                                         <Crown className="h-3 w-3 text-yellow-500 ml-auto animate-pulse" />
                                     )}
                                 </Link>
@@ -126,53 +125,16 @@ export function Sidebar() {
             {/* Upgrade CTA for Free Users */}
             {isFree && !loading && (
                 <div className="px-4 pb-4">
-                    {foundersSlotsLeft > 0 ? (
-                        <>
-                            <button
-                                onClick={async () => {
-                                    if (!user?.id) return;
-                                    const result = await upgradeToFounders(user.id);
-                                    if (result) {
-                                        setTimeout(() => window.location.reload(), 1500);
-                                    }
-                                }}
-                                disabled={isUpgrading || upgradeSuccess}
-                                className={cn(
-                                    "w-full font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg relative overflow-hidden group",
-                                    upgradeSuccess
-                                        ? "bg-emerald-500 text-white cursor-default"
-                                        : "bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 text-black hover:shadow-[0_0_20px_rgba(234,179,8,0.4)]"
-                                )}
-                            >
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                                {isUpgrading ? (
-                                    <Activity className="h-5 w-5 animate-spin relative z-10" />
-                                ) : upgradeSuccess ? (
-                                    <Crown className="h-5 w-5 relative z-10" />
-                                ) : (
-                                    <Zap size={18} className="relative z-10 fill-black" />
-                                )}
-                                <span className="text-sm relative z-10">
-                                    {isUpgrading ? t('processing') : upgradeSuccess ? t('welcome_founder') : t('upgrade_to_founders')}
-                                </span>
-                            </button>
-                            {upgradeError && (
-                                <div className="text-center mt-2 text-xs text-red-500 font-medium">
-                                    {upgradeError}
-                                </div>
-                            )}
-                            {!upgradeSuccess && !upgradeError && (
-                                <div className="text-center mt-3 text-xs text-zinc-500 font-mono">
-                                    {t('spots_left').replace('13', String(foundersSlotsLeft))}
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <div className="w-full font-bold py-4 px-4 rounded-xl bg-zinc-800 text-zinc-500 flex items-center justify-center gap-2 cursor-not-allowed border border-zinc-700">
-                            <Lock size={18} />
-                            <span className="text-sm">Founders Sold Out</span>
-                        </div>
-                    )}
+                    <Link
+                        href={`/${locale}/payment`}
+                        className="w-full font-bold py-4 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg relative overflow-hidden group bg-gradient-to-r from-[#00FF94] to-[#06B6D4] text-black hover:shadow-[0_0_20px_rgba(0,255,148,0.4)]"
+                    >
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                        <Zap size={18} className="relative z-10 fill-black" />
+                        <span className="text-sm relative z-10">
+                            Upgrade to Pro
+                        </span>
+                    </Link>
                 </div>
             )}
 
@@ -181,7 +143,7 @@ export function Sidebar() {
                 <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 mb-2 border border-white/5">
                     <div className={cn(
                         "h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold text-black shadow-lg",
-                        isFounders
+                        !isFree
                             ? "bg-gradient-to-br from-[#00FF94] to-[#06B6D4]"
                             : "bg-gradient-to-br from-gray-400 to-gray-600"
                     )}>
@@ -190,10 +152,10 @@ export function Sidebar() {
                     <div className="flex-1 min-w-0">
                         <div className="text-sm font-bold text-white truncate flex items-center gap-1">
                             {user?.email?.split('@')[0] || 'User'}
-                            {isFounders && <Crown className="h-3 w-3 text-[#00FF94]" />}
+                            {!isFree && <Crown className="h-3 w-3 text-[#00FF94]" />}
                         </div>
                         <div className="text-[10px] text-gray-400 truncate uppercase tracking-wider">
-                            {isFounders ? t('tier_founder').replace('#{slot}', String(slot)) : tier === 'admin' ? t('tier_admin') : t('tier_free')}
+                            {tier}
                         </div>
                     </div>
                 </div>

@@ -14,7 +14,7 @@ function verifyPolarWebhook(payload: string, signature: string): boolean {
   // Prevent timing attacks
   const signatureBuffer = Buffer.from(signature.startsWith('whsec_') ? signature.substring(6) : signature);
   const digestBuffer = Buffer.from(digest);
-  
+
   // In case lengths are different (shouldn't happen with correct sigs but good for safety)
   if (signatureBuffer.length !== digestBuffer.length) {
     return false;
@@ -26,19 +26,24 @@ function verifyPolarWebhook(payload: string, signature: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.text();
-    const signature = request.headers.get('polar-webhook-signature'); 
+    const signature = request.headers.get('polar-webhook-signature');
     // Note: Check actual header name from Polar docs, sometimes it's 'Polar-Webhook-Signature'
 
     if (!signature) {
-         return NextResponse.json(
+      return NextResponse.json(
         { error: 'No signature provided' },
         { status: 401 }
       );
     }
 
-    // Note: In a real scenario, strictly verify signature. 
-    // For this implementation, we assume the verify function works as intended.
-    // if (!verifyPolarWebhook(payload, signature)) { ... }
+    // CRITICAL SECURITY FIX: Strictly verify signature
+    if (!verifyPolarWebhook(payload, signature)) {
+      console.error('Polar signature mismatch');
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      );
+    }
 
     const event = JSON.parse(payload);
 
@@ -46,19 +51,19 @@ export async function POST(request: NextRequest) {
       case 'checkout.created':
         // Optional: Log checkout creation
         break;
-      
+
       case 'checkout.completed':
         await handleCheckoutCompleted(event.data);
         break;
-      
+
       case 'subscription.created':
         await handleSubscriptionCreated(event.data);
         break;
-      
+
       case 'subscription.updated':
         await handleSubscriptionUpdated(event.data);
         break;
-      
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -75,7 +80,7 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutCompleted(data: any) {
   const { id, customer_email, metadata, amount, currency } = data;
-  
+
   // Create transaction record
   const { error: txError } = await supabase.from('payment_transactions').insert({
     user_id: metadata.userId,
@@ -103,14 +108,21 @@ async function handleCheckoutCompleted(data: any) {
   }, { onConflict: 'user_id, status' }); // Note: Check your unique constraints
 
   if (subError) console.error('Error updating subscription:', subError);
+
+  // Auto-claim any pending missed commissions (Grace Period Reward)
+  const { error: claimError } = await supabase.rpc('claim_pending_vault_funds', {
+    p_user_id: metadata.userId
+  });
+
+  if (claimError) console.error('Error claiming pending funds:', claimError);
 }
 
 async function handleSubscriptionCreated(data: any) {
-   // Logic to handle new subscription creation if different from checkout.completed
+  // Logic to handle new subscription creation if different from checkout.completed
 }
 
 async function handleSubscriptionUpdated(data: any) {
-    // Logic to handle renewals or cancellations
+  // Logic to handle renewals or cancellations
 }
 
 function getNextBillingDate(): string {

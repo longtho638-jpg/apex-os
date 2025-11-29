@@ -1,11 +1,48 @@
 import React from 'react';
+import { redirect } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { getSupabaseClient } from '@/lib/supabase';
 
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const supabase = getSupabaseClient();
+
+    // 1. Check Authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        redirect('/en/login');
+    }
+
+    // 2. Check Admin Role
+    // Check by ID first
+    let { data: adminUser } = await supabase
+        .from('admin_users')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+    // Fallback: Check by email if ID check failed (for legacy/manual inserts)
+    if (!adminUser && user.email) {
+        const { data: adminByEmail } = await supabase
+            .from('admin_users')
+            .select('id')
+            .eq('email', user.email)
+            .single();
+
+        if (adminByEmail) {
+            adminUser = adminByEmail;
+        }
+    }
+
+    if (!adminUser) {
+        // Not an admin, redirect to dashboard
+        redirect('/en/dashboard');
+    }
+
     return (
         <div className="flex h-screen w-full bg-black text-white font-mono overflow-hidden">
             <AdminSidebar />

@@ -29,7 +29,7 @@ export async function createNOWPaymentsInvoice({
   amountOverride
 }: CreateInvoiceParams): Promise<NOWPaymentsInvoiceResponse> {
   const tierConfig = PAYMENT_TIERS[tier];
-  
+
   if (!tierConfig.nowPayments) {
     throw new Error(`Tier ${tier} does not support NOWPayments`);
   }
@@ -41,7 +41,7 @@ export async function createNOWPaymentsInvoice({
 
   // Apply discount or use override
   let discountedPrice: number;
-  
+
   if (amountOverride !== undefined) {
     discountedPrice = amountOverride;
   } else {
@@ -102,69 +102,69 @@ async function createPayout(params: CreatePayoutParams): Promise<PayoutResult> {
   const apiKey = process.env.NOWPAYMENTS_API_KEY;
   if (!apiKey) return { success: false, error: 'Missing API Key' };
 
-  // Placeholder for Payout API - Needs Email/Password or specialized Token usually
-  // But assuming standard API key for this context or JWT
-  // Note: NOWPayments Payouts often require a separate auth mechanism (JWT)
-  // For this implementation, we will use the standard API key headers if allowed, 
-  // OR assume the user has configured a specific PAYOUT_KEY.
-  // Let's assume standard x-api-key works for this simulation or return a mock success if env is test.
-
-  if (process.env.NODE_ENV === 'development' && !process.env.NOWPAYMENTS_API_KEY) {
-       return { success: true, payout_id: 'mock_payout_' + Date.now() };
+  // PRODUCTION SAFETY: Always require API key - fail fast if missing
+  // No mock mode to prevent accidental exposure in production
+  if (!apiKey) {
+    throw new Error(
+      'NOWPAYMENTS_API_KEY is required for payout operations. ' +
+      'Set this environment variable in production.'
+    );
   }
 
   try {
-      const response = await fetch('https://api.nowpayments.io/v1/payout', {
-        method: 'POST',
-        headers: {
-            'x-api-key': apiKey,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            withdrawals: [{
-                address: params.address,
-                currency: params.currency,
-                amount: params.amount,
-                ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments-payout` // Different webhook?
-            }]
-        })
-      });
+    const response = await fetch('https://api.nowpayments.io/v1/payout', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        withdrawals: [{
+          address: params.address,
+          currency: params.currency,
+          amount: params.amount,
+          ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments-payout` // Different webhook?
+        }]
+      })
+    });
 
-      if (!response.ok) {
-          const err = await response.text();
-          return { success: false, error: `API Error: ${err}` };
-      }
+    if (!response.ok) {
+      const err = await response.text();
+      return { success: false, error: `API Error: ${err}` };
+    }
 
-      const data = await response.json();
-      // NOWPayments returns an id for the batch, or list of withdrawals
-      return { success: true, payout_id: data.id };
+    const data = await response.json();
+    // NOWPayments returns an id for the batch, or list of withdrawals
+    return { success: true, payout_id: data.id };
   } catch (e: any) {
-      return { success: false, error: e.message };
+    return { success: false, error: e.message };
   }
 }
 
 async function getPayoutStatus(payoutId: string): Promise<PayoutStatus> {
-    const apiKey = process.env.NOWPAYMENTS_API_KEY;
-    if (!apiKey) throw new Error('Missing API Key');
+  const apiKey = process.env.NOWPAYMENTS_API_KEY;
+  if (!apiKey) throw new Error('Missing API Key');
 
-    if (payoutId.startsWith('mock_')) {
-        return { status: 'FINISHED', tx_hash: '0x_mock_hash_' + payoutId, fee: 0.5 };
-    }
+  // No mock mode - all payouts must be real
+  // Fail fast if API key missing
+  if (!apiKey) {
+    throw new Error('NOWPAYMENTS_API_KEY is required for payout status check');
+  }
 
-    const response = await fetch(`https://api.nowpayments.io/v1/payout/${payoutId}`, {
-        headers: { 'x-api-key': apiKey }
-    });
-    
-    const data = await response.json();
-    // Transform data to match interface
-    return {
-        status: data.status,
-        tx_hash: data.hash, // check actual field name
-        fee: data.fee
-    };
+  const response = await fetch(`https://api.nowpayments.io/v1/payout/${payoutId}`, {
+    headers: { 'x-api-key': apiKey }
+  });
+
+  const data = await response.json();
+  // Transform data to match interface
+  return {
+    status: data.status,
+    tx_hash: data.hash, // check actual field name
+    fee: data.fee
+  };
 }
 
 export const nowPayments = {
-    createPayout,
-    getPayoutStatus
+  createPayout,
+  getPayoutStatus
 };

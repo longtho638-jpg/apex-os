@@ -36,33 +36,47 @@ export async function GET(request: NextRequest) {
     try {
         console.log('[Trading Orders API] GET request received');
 
-        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        // 1. Auth & Credentials
+        const authHeader = request.headers.get('authorization');
+        if (!authHeader) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        const token = authHeader.replace('Bearer ', '');
 
-        if (!url || !key) {
-            console.error('[Trading Orders API] Missing Supabase credentials');
-            return NextResponse.json({
-                success: true,
-                orders: [], // Return empty array instead of error for missing credentials
-                message: 'Database not configured'
-            });
-        }
+        // CRITICAL SECURITY FIX: Use user token instead of Service Role Key to enforce RLS
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                global: {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            }
+        );
+        // 2. Params
+        // CRITICAL SECURITY FIX: Ignore 'userId' param to prevent IDOR.
+        // Always use the authenticated user's ID from the token.
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        const userId = user.id;
 
-        const supabase = createClient(url, key);
-        const userId = request.nextUrl.searchParams.get('userId');
         const status = request.nextUrl.searchParams.get('status');
+        const page = parseInt(request.nextUrl.searchParams.get('page') || '1');
+        const limit = Math.min(parseInt(request.nextUrl.searchParams.get('limit') || '20'), 100); // Max 100
+        const offset = (page - 1) * limit;
 
-        console.log('[Trading Orders API] Fetching orders with filters:', { userId, status });
+        console.log('[Trading Orders API] Fetching orders for user:', userId, { status, page, limit });
 
         let query = supabase
             .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('id, symbol, side, type, quantity, price, status, created_at', { count: 'exact' })
+            .eq('user_id', userId) // Enforce RLS/Owner check
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
 
-        if (userId) query = query.eq('user_id', userId);
         if (status) query = query.eq('status', status);
 
-        const { data: orders, error } = await query.limit(100);
+        const { data: orders, error, count } = await query;
 
         if (error) {
             console.error('[Trading Orders API] Supabase fetch error:', error);

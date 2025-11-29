@@ -5,13 +5,14 @@ import { CheckoutModal } from '@/components/payments/CheckoutModal';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { X, Sparkles } from 'lucide-react';
+import { TierId } from '@/config/unified-tiers';
 import { PaymentTier } from '@/config/payment-tiers';
 
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   trigger: {
-    type: 'limit_reached' | 'win_achieved' | 'trial_ending';
+    type: 'limit_reached' | 'win_achieved' | 'trial_ending' | 'missed_money';
     message: string;
     urgency: 'low' | 'medium' | 'high';
     discount?: string;
@@ -28,7 +29,7 @@ export function UpgradeModal({
   currentTier = 'free',
 }: UpgradeModalProps) {
   const [showCheckout, setShowCheckout] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<PaymentTier>('FOUNDERS');
+  const [selectedTier, setSelectedTier] = useState<TierId>('PRO');
 
   if (!isOpen) return null;
 
@@ -41,16 +42,15 @@ export function UpgradeModal({
   if (showCheckout) {
     return (
       <CheckoutModal
-        tier={selectedTier}
+        tier={selectedTier as unknown as PaymentTier | TierId}
         userEmail="" // Ideally fetch or pass this
         onClose={() => {
           setShowCheckout(false);
           onClose();
         }}
         // isOpen={true} // Handled by conditional rendering
-        // discountCode={trigger.discount} // We need to update CheckoutModal to accept initial discount
-        // For now, user has to enter it or we update CheckoutModal again. 
-        // Let's rely on the text "Use code X" for now as per design or quick fix.
+        // isOpen={true} // Handled by conditional rendering
+        initialDiscountCode={trigger.discount}
       />
     );
   }
@@ -76,6 +76,7 @@ export function UpgradeModal({
           {trigger.type === 'limit_reached' && 'Unlock Unlimited Access'}
           {trigger.type === 'win_achieved' && 'Celebrate Your Win!'}
           {trigger.type === 'trial_ending' && 'Don\'t Lose Access'}
+          {trigger.type === 'missed_money' && 'Claim Pending Funds'}
         </h2>
 
         <p className="text-center text-lg mb-6">{trigger.message}</p>
@@ -91,19 +92,18 @@ export function UpgradeModal({
 
         {/* Tier selection */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          {(['FOUNDERS', 'PREMIUM'] as PaymentTier[]).map((tier) => (
+          {(['PRO', 'TRADER'] as TierId[]).map((tier) => (
             <button
               key={tier}
               onClick={() => setSelectedTier(tier)}
-              className={`p-4 rounded-lg border-2 transition ${
-                selectedTier === tier
-                  ? 'border-emerald-400 bg-emerald-400/10'
-                  : 'border-white/10 hover:border-white/20'
-              }`}
+              className={`p-4 rounded-lg border-2 transition ${selectedTier === tier
+                ? 'border-emerald-400 bg-emerald-400/10'
+                : 'border-white/10 hover:border-white/20'
+                }`}
             >
               <p className="font-bold capitalize">{tier}</p>
               <p className="text-sm text-zinc-400">
-                ${tier === 'FOUNDERS' ? '49' : '99'}/mo
+                ${tier === 'PRO' ? '29' : '97'}/mo
               </p>
             </button>
           ))}

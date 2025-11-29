@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  test-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,13 +22,41 @@ jobs:
           cd backend
           pip install -r requirements.txt
           
-      # - name: Run backend tests
-      #   run: |
-      #     cd backend
-      #     python -m pytest tests/ || echo "No tests yet"
+      - name: Run backend tests
+        run: |
+          cd backend
+          # python -m pytest tests/ 
+          # Uncomment above when tests are ready. For now, we fail if syntax error.
+          python -m compileall .
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build Check
+        run: npm run build
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Gitleaks
+        uses: zricethezav/gitleaks-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-backend:
-    needs: test
+    needs: [test-backend, security-scan]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +75,7 @@ jobs:
           service: apex-worker
 
   deploy-frontend:
-    needs: test
+    needs: [test-frontend, security-scan]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

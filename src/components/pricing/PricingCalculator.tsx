@@ -26,7 +26,7 @@ export function PricingCalculator() {
         <div>
           <div className="flex justify-between text-sm mb-4">
             <span className="text-zinc-400">Monthly Trading Volume</span>
-            <span className="font-mono text-white font-bold">${volume.toLocaleString()}</span>
+            <span className="font-mono text-white font-bold">${volume.toLocaleString('en-US')}</span>
           </div>
           <input
             type="range"

@@ -29,7 +29,7 @@ export default function AdminDashboardPage() {
 
     return (
         <div className="flex h-screen w-full bg-[#030303] text-white font-sans overflow-hidden">
-            <Sidebar />
+
 
             <main className="flex-1 relative overflow-hidden">
                 <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">

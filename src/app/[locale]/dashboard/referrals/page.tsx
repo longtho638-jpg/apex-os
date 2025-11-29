@@ -1,133 +1,87 @@
 'use client';
 
-import { useState } from 'react';
-import { Copy, Check, Users, DollarSign, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { Copy, QrCode, Twitter, Trophy } from 'lucide-react';
 
-export default function ReferralsPage() {
-    const [copied, setCopied] = useState(false);
-    const referralLink = 'https://apexrebate.com/r/ABC123';
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(referralLink);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    return (
-        <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6">Referral Program</h1>
-
-            {/* Referral Link Card */}
-            <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/20 rounded-2xl p-6 mb-6">
-                <p className="text-sm text-zinc-400 mb-2">Your Referral Link</p>
-                <div className="flex items-center gap-3">
-                    <input
-                        type="text"
-                        value={referralLink}
-                        readOnly
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-mono text-sm"
-                    />
-                    <button
-                        onClick={handleCopy}
-                        className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-medium transition-colors flex items-center gap-2"
-                    >
-                        {copied ? <Check size={20} /> : <Copy size={20} />}
-                        {copied ? 'Copied!' : 'Copy'}
-                    </button>
-                </div>
-                <p className="text-xs text-zinc-500 mt-2">
-                    Earn up to 100% commission on L1 referrals, 50% on L2, 25% on L3, 12.5% on L4
-                </p>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <StatCard
-                    icon={<Users className="w-6 h-6" />}
-                    label="Total Referrals"
-                    value="12"
-                    subtext="Active users"
-                />
-                <StatCard
-                    icon={<DollarSign className="w-6 h-6" />}
-                    label="Total Earned"
-                    value="$847.32"
-                    subtext="All time"
-                />
-                <StatCard
-                    icon={<TrendingUp className="w-6 h-6" />}
-                    label="This Month"
-                    value="$124.50"
-                    subtext="+18% vs last month"
-                />
-            </div>
-
-            {/* Referral Tree */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h2 className="text-lg font-bold mb-4">Your Network</h2>
-                <div className="space-y-3">
-                    <NetworkLevel level="L1" count={3} commission="100%" color="emerald" />
-                    <NetworkLevel level="L2" count={5} commission="50%" color="blue" />
-                    <NetworkLevel level="L3" count={3} commission="25%" color="purple" />
-                    <NetworkLevel level="L4" count={1} commission="12.5%" color="orange" />
-                </div>
-            </div>
-        </div>
-    );
+interface ReferralStats {
+  code: string;
+  total_referrals: number;
+  total_earnings: number;
 }
 
-function StatCard({
-    icon,
-    label,
-    value,
-    subtext
-}: {
-    icon: React.ReactNode;
-    label: string;
-    value: string;
-    subtext: string;
-}) {
-    return (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
-                    {icon}
-                </div>
-                <p className="text-sm text-zinc-400">{label}</p>
-            </div>
-            <p className="text-2xl font-bold mb-1">{value}</p>
-            <p className="text-xs text-zinc-500">{subtext}</p>
-        </div>
-    );
-}
+export default function ReferralDashboard({ userId }: { userId: string }) {
+  const [stats, setStats] = useState<ReferralStats | null>(null);
+  const [copied, setCopied] = useState(false);
 
-function NetworkLevel({
-    level,
-    count,
-    commission,
-    color
-}: {
-    level: string;
-    count: number;
-    commission: string;
-    color: string;
-}) {
-    const colorClasses = {
-        emerald: 'bg-emerald-500/10 text-emerald-400',
-        blue: 'bg-blue-500/10 text-blue-400',
-        purple: 'bg-purple-500/10 text-purple-400',
-        orange: 'bg-orange-500/10 text-orange-400'
-    };
+  useEffect(() => {
+    // Fetch referral stats
+    fetch(`/api/user/referrals?userId=${userId}`)
+      .then(res => res.json())
+      .then(data => setStats(data));
+  }, [userId]);
 
-    return (
-        <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
-            <div className="flex items-center gap-3">
-                <div className={`px-3 py-1 rounded-lg font-mono text-sm ${colorClasses[color as keyof typeof colorClasses]}`}>
-                    {level}
-                </div>
-                <span className="text-white font-medium">{count} referrals</span>
-            </div>
-            <span className="text-zinc-400 text-sm">{commission} commission</span>
+  const referralLink = stats ? `https://apexrebate.com/r/${stats.code}` : '';
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <GlassCard className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Referral Program</h2>
+        <p className="text-zinc-400 mb-6">
+          Invite friends and earn up to 30% commission on their subscriptions forever.
+        </p>
+
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5">
+            <p className="text-sm text-zinc-400">Total Referrals</p>
+            <p className="text-2xl font-bold text-white">{stats?.total_referrals || 0}</p>
+          </div>
+          <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5">
+            <p className="text-sm text-zinc-400">Total Earnings</p>
+            <p className="text-2xl font-bold text-emerald-400">${stats?.total_earnings.toFixed(2) || '0.00'}</p>
+          </div>
+          <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5">
+            <p className="text-sm text-zinc-400">Your Tier Rate</p>
+            <p className="text-2xl font-bold text-blue-400">20%</p> 
+            {/* Dynamic tier rate logic would go here */}
+          </div>
         </div>
-    );
+
+        <div className="bg-black/30 p-4 rounded-xl border border-white/10 flex items-center gap-4">
+          <input 
+            readOnly 
+            value={referralLink || 'Loading...'} 
+            className="bg-transparent flex-1 text-zinc-300 focus:outline-none"
+          />
+          <button onClick={copyToClipboard} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+            <Copy className={`w-5 h-5 ${copied ? 'text-emerald-400' : 'text-zinc-400'}`} />
+          </button>
+        </div>
+
+        <div className="flex gap-4 mt-4">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#1DA1F2]/20 text-[#1DA1F2] rounded-lg hover:bg-[#1DA1F2]/30 transition">
+            <Twitter className="w-4 h-4" /> Share on Twitter
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition">
+            <QrCode className="w-4 h-4" /> QR Code
+          </button>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6">
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-yellow-400" /> Leaderboard
+        </h3>
+        <div className="text-center py-8 text-zinc-500">
+          Leaderboard coming soon! Be the first to top the charts.
+        </div>
+      </GlassCard>
+    </div>
+  );
 }
