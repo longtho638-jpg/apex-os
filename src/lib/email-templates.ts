@@ -54,12 +54,14 @@ export const emailTemplates = {
   },
 
   resetPassword: {
-    subject: 'Reset Credentials • ApexOS',
+    subject: 'Reset Your Password • ApexOS',
     html: (name: string, actionUrl: string) => emailTemplates.base(`
-      <p>A request to reset your credentials has been received.</p>
-      <p>Click the button below to establish a new secure access key.</p>
+      <p>We received a request to reset your password.</p>
+      <p>Click the button below to set a new password:</p>
       <a href="${actionUrl}" class="btn">Reset Password</a>
-    `, 'Security Alert'),
+      <p style="margin-top: 24px; font-size: 12px; color: #666;">If you did not request this, you can safely ignore this email.</p>
+      <p style="margin-top: 12px; font-size: 12px; color: #444;">Link not working? Copy this URL into your browser:<br/>${actionUrl}</p>
+    `, 'Reset Password'),
   },
 
   featureHighlight: {
