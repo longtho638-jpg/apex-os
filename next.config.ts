@@ -42,6 +42,18 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:locale/auth/v1/:path*',
+        destination: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/:path*`,
+      },
+      {
+        source: '/auth/v1/:path*',
+        destination: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/:path*`,
+      },
+    ];
+  },
 };
 
 // Wrap with Sentry for error tracking
