@@ -63,19 +63,33 @@ export async function POST(request: NextRequest) {
 
         let subject = '';
         let html = '';
+        let templateId = '';
 
         if (type === 'recovery') {
+            templateId = 'resetPassword';
             subject = emailTemplates.resetPassword.subject;
             html = emailTemplates.resetPassword.html(email.split('@')[0], actionLink);
         } else {
+            templateId = 'verification';
             subject = emailTemplates.verification.subject;
             html = emailTemplates.verification.html(email.split('@')[0], actionLink);
         }
+
+        // Fetch user ID for CRM logging
+        const { data: userData } = await supabase.from('auth.users').select('id').eq('email', email).single();
+        // Note: Direct access to auth.users might be restricted depending on RLS/Service Role. 
+        // Since we use getSupabaseClient() which uses Service Role, we can use admin.listUsers or similar.
+        // Better: use admin api
+        const { data: userList } = await supabase.auth.admin.listUsers();
+        const user = userList.users.find(u => u.email === email);
+        const userId = user?.id;
 
         const { success, error: emailError } = await sendEmail({
             to: email,
             subject: subject,
             html: html,
+            userId: userId,
+            templateId: templateId
         });
 
         if (!success) {

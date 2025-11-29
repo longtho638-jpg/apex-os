@@ -13,7 +13,8 @@ import {
     LogOut,
     Zap,
     Network,
-    Map as MapIcon
+    Map as MapIcon,
+    Hexagon // For Beehive/CRM
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/contexts/I18nContext';
@@ -32,6 +33,7 @@ export function AdminSidebar() {
         { name: t('trading'), href: '/admin/trading', icon: Activity },
         { name: t('users'), href: '/admin/users', icon: Users },
         { name: t('strategy'), href: '/admin/strategy', icon: MapIcon }, // Added Strategy link
+        { name: 'The Beehive (CRM)', href: '/admin/crm', icon: Hexagon }, // Added CRM
         { name: t('system'), href: '/admin/system', icon: Settings }, // Added System link
         {
             name: t('security'),
