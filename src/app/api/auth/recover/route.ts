@@ -58,7 +58,14 @@ export async function POST(request: NextRequest) {
         }
 
         // 3. Send Custom Email via Resend
-        const actionLink = data.properties.action_link;
+        // Parse the action_link to extract the token
+        const supabaseLink = new URL(data.properties.action_link);
+        const token = supabaseLink.searchParams.get('token');
+
+        // Construct custom link to hide Supabase domain
+        // Point to our own /auth/verify page which will handle the verification
+        const actionLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}&type=recovery&next=/dashboard/settings/security`;
+
         const template = emailTemplates.resetPassword;
 
         // Fetch user ID for CRM logging
