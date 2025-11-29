@@ -13,13 +13,20 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Rate Limiting (Prevent Abuse)
-        const RATE_LIMIT_KEY = `recover_limit:${email}`;
-        const attempts = await redis.incr(RATE_LIMIT_KEY);
-        if (attempts === 1) {
-            await redis.expire(RATE_LIMIT_KEY, 3600); // 1 hour
-        }
-        if (attempts > 3) {
-            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        // 1. Rate Limiting (Prevent Abuse)
+        try {
+            if (process.env.REDIS_URL) {
+                const RATE_LIMIT_KEY = `recover_limit:${email}`;
+                const attempts = await redis.incr(RATE_LIMIT_KEY);
+                if (attempts === 1) {
+                    await redis.expire(RATE_LIMIT_KEY, 3600); // 1 hour
+                }
+                if (attempts > 3) {
+                    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+                }
+            }
+        } catch (redisError) {
+            console.warn('[Auth] Redis Rate Limit failed, proceeding without it:', redisError);
         }
 
         // 2. Generate Recovery Link (Admin)
