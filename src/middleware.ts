@@ -236,6 +236,7 @@ export async function middleware(request: NextRequest) {
       '/api/v1/auth/login',
       '/api/v1/auth/signup',
       '/api/v1/auth/callback',
+      '/api/v1/auth/me', // Whitelist generic auth check
       '/api/auth', // Whitelist all NextAuth/Custom Auth routes (recover, callback, etc)
       '/api/debug', // Whitelist debug routes
       '/api/v1/public',

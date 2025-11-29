@@ -45,7 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 const baseUrl = getApiUrl();
                 // Call API to verify session (browser sends HttpOnly cookie automatically)
-                const res = await fetch(`${baseUrl}/admin/me`, {
+                // Use generic /auth/me to avoid 401s for non-admins
+                const res = await fetch(`${baseUrl}/auth/me`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -54,11 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.success) {
+                    if (data.success && data.user) {
                         setUser({
-                            id: data.admin.id,
-                            email: data.admin.email,
-                            full_name: 'Admin' // Placeholder
+                            id: data.user.id,
+                            email: data.user.email,
+                            full_name: 'User' // Placeholder
                         });
                     } else {
                         setUser(null);
