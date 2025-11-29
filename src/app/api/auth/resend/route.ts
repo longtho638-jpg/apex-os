@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+
 import { redis } from '@/lib/redis';
+import { getSupabaseClient } from '@/lib/supabase';
+import { sendEmail } from '@/lib/email-service';
+import { emailTemplates } from '@/lib/email-templates';
 
 export async function POST(request: NextRequest) {
     try {
@@ -39,25 +42,48 @@ export async function POST(request: NextRequest) {
         // Set Cooldown
         await redis.set(COOLDOWN_KEY, '1', 'EX', 60);
 
-        // 2. Call Supabase Resend
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        // 2. Generate Verification Link (Admin)
+        const supabase = getSupabaseClient(); // Uses Service Role Key
 
-        const { error } = await supabase.auth.resend({
+        const { data, error: linkError } = await supabase.auth.admin.generateLink({
             type: type || 'signup',
             email: email,
+            options: {
+                redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
+            }
         });
 
-        if (error) {
-            console.error('Supabase Resend Error:', error);
-            // Don't reveal exact error to prevent user enumeration if possible, 
-            // but Supabase usually handles this.
-            return NextResponse.json({ error: error.message }, { status: 400 });
+        if (linkError || !data.properties?.action_link) {
+            console.error('Supabase Generate Link Error:', linkError);
+            return NextResponse.json({ error: 'Failed to generate verification link' }, { status: 400 });
         }
 
-        return NextResponse.json({ success: true, message: 'Email sent' });
+        // 3. Send Custom Email via Resend
+        const actionLink = data.properties.action_link;
+
+        let subject = '';
+        let html = '';
+
+        if (type === 'recovery') {
+            subject = emailTemplates.resetPassword.subject;
+            html = emailTemplates.resetPassword.html(email.split('@')[0], actionLink);
+        } else {
+            subject = emailTemplates.verification.subject;
+            html = emailTemplates.verification.html(email.split('@')[0], actionLink);
+        }
+
+        const { success, error: emailError } = await sendEmail({
+            to: email,
+            subject: subject,
+            html: html,
+        });
+
+        if (!success) {
+            console.error('Resend Email Error:', emailError);
+            return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true, message: 'Custom email sent successfully' });
 
     } catch (error) {
         console.error('Resend API Error:', error);
