@@ -47,12 +47,13 @@ export async function GET(req: NextRequest) {
       // TODO: Calculate profit missed (would need historical signal data)
       const profitMissed = Math.random() * 500 + 100; // Placeholder
 
-      const template = emailTemplates.winBack(user.name || 'there', days, profitMissed);
+      const actionUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
+      const template = emailTemplates.winBack;
 
       await sendEmail({
         to: user.email,
         subject: template.subject,
-        html: template.html,
+        html: template.html(user.name || 'there', days, profitMissed, actionUrl),
       });
 
       // Log email sent

@@ -87,5 +87,15 @@ export const emailTemplates = {
       <a href="https://apexrebate.com/pricing" class="btn">Secure Access</a>
     `, 'Critical Alert'),
   },
+
+  winBack: {
+    subject: 'We Miss Your Edge • ApexOS',
+    html: (name: string, days: number, profitMissed: number, actionUrl: string) => emailTemplates.base(`
+      <p>It's been ${days} days.</p>
+      <p>The market hasn't stopped. In your absence, opportunities worth approximately <strong>$${profitMissed.toFixed(2)}</strong> were identified by our algorithms.</p>
+      <p>Return to the arena.</p>
+      <a href="${actionUrl}" class="btn">Reactivate Account</a>
+    `, 'Return to Apex'),
+  },
 };
 
