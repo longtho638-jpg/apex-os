@@ -113,22 +113,26 @@ export default function CRMDashboard() {
                                     <th className="p-3">User ID</th>
                                     <th className="p-3">Stage</th>
                                     <th className="p-3">Score</th>
+                                    <th className="p-3">Ghost Profit</th>
+                                    <th className="p-3">Sentiment</th>
                                     <th className="p-3">Last Active</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={4} className="p-4 text-center">Scanning Hive...</td></tr>
+                                    <tr><td colSpan={6} className="p-4 text-center">Scanning Hive...</td></tr>
                                 ) : pipelines.map((p) => (
                                     <tr key={p.user_id} className="border-t border-gray-800 hover:bg-gray-900/50">
                                         <td className="p-3 font-mono text-xs text-gray-500">{p.user_id.slice(0, 8)}...</td>
                                         <td className={`p-3 font-bold ${getStageColor(p.stage)}`}>{p.stage}</td>
                                         <td className="p-3">{p.score}</td>
+                                        <td className="p-3">${(Math.random() * 1000).toFixed(0)}</td> {/* Mocked Ghost Profit */}
+                                        <td className="p-3 text-xs text-yellow-500">Risk Averse</td> {/* Mocked Sentiment */}
                                         <td className="p-3 text-gray-400">{new Date(p.last_interaction).toLocaleDateString()}</td>
                                     </tr>
                                 ))}
                                 {!loading && pipelines.length === 0 && (
-                                    <tr><td colSpan={4} className="p-4 text-center text-gray-500">No bees in the hive yet.</td></tr>
+                                    <tr><td colSpan={6} className="p-4 text-center text-gray-500">No bees in the hive yet.</td></tr>
                                 )}
                             </tbody>
                         </table>

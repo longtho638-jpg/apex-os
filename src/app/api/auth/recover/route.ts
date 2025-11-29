@@ -24,11 +24,19 @@ export async function POST(request: NextRequest) {
 
         // 2. Generate Recovery Link (Admin)
         const supabase = getSupabaseClient(); // Service Role
+
+        // Ensure the redirect URL is properly encoded
+        const redirectUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`);
+        redirectUrl.searchParams.set('next', '/dashboard/settings/security');
+
+        console.log('[Auth] Generating recovery link for:', email);
+        console.log('[Auth] Redirect URL:', redirectUrl.toString());
+
         const { data, error: linkError } = await supabase.auth.admin.generateLink({
             type: 'recovery',
             email: email,
             options: {
-                redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/dashboard/settings/security`
+                redirectTo: redirectUrl.toString()
             }
         });
 
