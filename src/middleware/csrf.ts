@@ -20,10 +20,10 @@ export function handleCsrf(request: NextRequest, response?: NextResponse) {
     if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
         return null;
     }
-    
+
     // Skip Login/Signup (initial entry points) - or strictly check Origin
-    if (path.startsWith('/api/v1/auth/')) {
-        return null; 
+    if (path.startsWith('/api/v1/auth/') || path.startsWith('/api/auth/')) {
+        return null;
     }
 
     // Verify CSRF Token
@@ -45,7 +45,7 @@ export function handleCsrf(request: NextRequest, response?: NextResponse) {
  */
 export function injectCsrfToken(request: NextRequest, response: NextResponse) {
     const currentToken = request.cookies.get('csrf_token')?.value;
-    
+
     if (!currentToken) {
         const newToken = uuidv4();
         response.cookies.set('csrf_token', newToken, {
