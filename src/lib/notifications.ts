@@ -1,11 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
-import { CONFIG } from '../../backend/config';
 
 export class NotificationService {
     private supabase;
 
     constructor() {
-        this.supabase = createClient(CONFIG.SUPABASE.URL!, CONFIG.SUPABASE.KEY!);
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+        if (!supabaseUrl || !supabaseKey) {
+            console.warn('NotificationService: Missing Supabase credentials');
+        }
+
+        this.supabase = createClient(supabaseUrl || '', supabaseKey || '');
     }
 
     async send(userId: string, title: string, message: string, type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'MONEY' = 'INFO', metadata: any = {}) {
