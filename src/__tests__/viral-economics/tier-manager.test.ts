@@ -33,31 +33,31 @@ describe('Tier Manager', () => {
     expect(tier).toBe('FREE');
   });
 
-  it('should upgrade to BASIC when requirements met', async () => {
+  it('should upgrade to TRADER when requirements met', async () => {
     mockSingle.mockResolvedValue({
       data: { 
-        active_referrals: TIERS.BASIC.requirements.referrals, 
-        monthly_volume: TIERS.BASIC.requirements.volume, 
+        active_referrals: TIERS.TRADER.requirements.referrals, 
+        monthly_volume: TIERS.TRADER.requirements.volume, 
         tier: 'FREE' 
       },
       error: null
     });
 
     const tier = await calculateUserTier('user-123');
-    expect(tier).toBe('BASIC');
+    expect(tier).toBe('TRADER');
   });
 
-  it('should upgrade to APEX when requirements met', async () => {
+  it('should upgrade to ELITE when requirements met', async () => {
     mockSingle.mockResolvedValue({
       data: { 
-        active_referrals: TIERS.APEX.requirements.referrals + 10, 
-        monthly_volume: TIERS.APEX.requirements.volume + 1000, 
-        tier: 'ELITE' 
+        active_referrals: TIERS.ELITE.requirements.referrals + 10, 
+        monthly_volume: TIERS.ELITE.requirements.volume + 1000, 
+        tier: 'TRADER' 
       },
       error: null
     });
 
     const tier = await calculateUserTier('user-123');
-    expect(tier).toBe('APEX');
+    expect(tier).toBe('ELITE');
   });
 });

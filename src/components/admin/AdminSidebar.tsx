@@ -17,12 +17,14 @@ import {
     Hexagon // For Beehive/CRM
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 
 
 
 export function AdminSidebar() {
     const pathname = usePathname();
+    // Strip locale (e.g. /en/admin... -> /admin...)
+    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}\//, '/');
     const t = useTranslations('AdminSidebar');
     const [openSubmenu, setOpenSubmenu] = React.useState<string | null>('security');
 
@@ -32,6 +34,8 @@ export function AdminSidebar() {
         { name: t('risk'), href: '/admin/risk', icon: ShieldAlert },
         { name: t('trading'), href: '/admin/trading', icon: Activity },
         { name: t('users'), href: '/admin/users', icon: Users },
+        { name: 'Finance', href: '/admin/finance', icon: DollarSign }, // Added Finance
+        { name: 'AI Signals', href: '/admin/signals', icon: Zap }, // Added Signals
         { name: t('strategy'), href: '/admin/strategy', icon: MapIcon }, // Added Strategy link
         { name: 'The Beehive (CRM)', href: '/admin/crm', icon: Hexagon }, // Added CRM
         { name: t('system'), href: '/admin/system', icon: Settings }, // Added System link
@@ -47,7 +51,7 @@ export function AdminSidebar() {
                 { name: t('agent_status'), href: '/admin/agents', icon: Activity },
             ]
         },
-        { name: t('exchanges'), href: '/admin/exchange-config', icon: Network },
+        { name: t('exchanges'), href: '/admin/exchanges', icon: Network },
         {
             name: t('analytics'),
             href: '/admin/analytics',
@@ -89,7 +93,9 @@ export function AdminSidebar() {
             {/* Navigation */}
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                 {navItems.map((item) => {
-                    const isActive = pathname === item.href || (item.children && pathname.startsWith(item.href));
+                    const isActive = pathWithoutLocale === item.href ||
+                        (item.children && pathWithoutLocale.startsWith(item.href)) ||
+                        pathname === item.href; // Fallback
                     const hasChildren = item.children && item.children.length > 0;
                     const isOpen = openSubmenu === item.name || isActive;
 

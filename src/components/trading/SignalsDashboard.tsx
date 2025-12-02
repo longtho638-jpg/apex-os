@@ -59,7 +59,7 @@ export function SignalsDashboard() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold">ML Trading Signals</h2>
+                    <h2 className="text-2xl font-bold">Predictive Signal Matrix</h2>
                     <p className="text-sm text-muted-foreground">
                         AI-generated signals based on RSI and MACD indicators
                     </p>
@@ -104,8 +104,8 @@ export function SignalsDashboard() {
                                     <div className="p-2 rounded-lg bg-muted/50">
                                         <p className="text-xs text-muted-foreground">RSI</p>
                                         <p className={`font-semibold ${signal.indicators.rsi < 30 ? 'text-green-500' :
-                                                signal.indicators.rsi > 70 ? 'text-red-500' :
-                                                    'text-muted-foreground'
+                                            signal.indicators.rsi > 70 ? 'text-red-500' :
+                                                'text-muted-foreground'
                                             }`}>
                                             {signal.indicators.rsi.toFixed(1)}
                                         </p>

@@ -4,7 +4,7 @@ import React from 'react';
 import PricingEngine from '@/components/admin/PricingEngine';
 import { DollarSign } from 'lucide-react';
 
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 
 export default function PricingPage() {
     const t = useTranslations('AdminPricing');

@@ -6,7 +6,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 let supabaseServerInstance: SupabaseClient | null = null;
-let supabaseClientInstance: SupabaseClient | null = null;
 
 /**
  * Get or create the singleton Supabase client instance for SERVER-SIDE operations
@@ -41,23 +40,9 @@ export function getSupabaseClientSide(): SupabaseClient {
         throw new Error('getSupabaseClientSide can only be called in browser context');
     }
 
-    if (!supabaseClientInstance) {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (!supabaseUrl || !supabaseKey) {
-            throw new Error('Missing Supabase client environment variables');
-        }
-
-        supabaseClientInstance = createClient(supabaseUrl, supabaseKey, {
-            auth: {
-                autoRefreshToken: true,
-                persistSession: true
-            }
-        });
-    }
-
-    return supabaseClientInstance;
+    // Delegate to the singleton implementation in client.ts which uses auth-helpers
+    const { createClient } = require('@/lib/supabase/client');
+    return createClient();
 }
 
 // Legacy named export - still lazy because it's a function call

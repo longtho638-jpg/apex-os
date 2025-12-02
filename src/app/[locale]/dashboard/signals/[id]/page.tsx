@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getSupabaseClientSide } from '@/lib/supabase';
 import { ArrowLeft, Activity, BarChart2, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -10,7 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 export default function SignalDetailPage({ params }: { params: { id: string } }) {
   const [signal, setSignal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseClientSide();
 
   useEffect(() => {
     async function fetchSignal() {
@@ -47,7 +47,7 @@ export default function SignalDetailPage({ params }: { params: { id: string } })
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-                    {signal.symbol} 
+                    {signal.symbol}
                     <span className={`px-3 py-1 rounded-lg text-lg ${signal.prediction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                       {signal.prediction}
                     </span>
@@ -78,9 +78,9 @@ export default function SignalDetailPage({ params }: { params: { id: string } })
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <p className="text-zinc-300 leading-relaxed">
-                    The ensemble model detected a strong {signal.prediction} opportunity based on a convergence of 
-                    Technical Price Action ({Math.round(signal.price_contrib * 100)}%), 
-                    Social Sentiment ({Math.round(signal.sentiment_contrib * 100)}%), and 
+                    The ensemble model detected a strong {signal.prediction} opportunity based on a convergence of
+                    Technical Price Action ({Math.round(signal.price_contrib * 100)}%),
+                    Social Sentiment ({Math.round(signal.sentiment_contrib * 100)}%), and
                     On-Chain Volume ({Math.round(signal.volume_contrib * 100)}%).
                   </p>
                 </div>

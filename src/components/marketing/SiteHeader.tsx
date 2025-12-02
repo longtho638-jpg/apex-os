@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { Button3D } from '@/components/marketing/Button3D';
 
@@ -22,8 +22,8 @@ export function SiteHeader() {
     const navigation = [
         { name: t('nav.features'), href: '/#features' }, // Absolute path to homepage features
         { name: t('nav.how_it_works'), href: '/#how-it-works' },
-        { name: t('nav.pricing'), href: '/payment' },
-        { name: t('nav.resources'), href: '/resources' },
+        { name: t('nav.pricing'), href: '/pricing' },
+        { name: t('nav.resources'), href: '/docs' },
     ];
 
     return (
@@ -84,7 +84,7 @@ export function SiteHeader() {
 
             {/* Mobile Menu Overlay */}
             {mobileMenuOpen && (
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-24 px-6 md:hidden"

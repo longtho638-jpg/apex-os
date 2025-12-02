@@ -60,11 +60,29 @@ export async function middleware(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
   }
 
-  // 2. Enterprise API Authentication
-  if (request.nextUrl.pathname.startsWith('/api/v1/signals') || request.nextUrl.pathname.startsWith('/api/v1/market')) {
-    const enterpriseCheck = await enterpriseAuthMiddleware(request);
-    if (!enterpriseCheck.authorized) {
-      return NextResponse.json({ error: enterpriseCheck.error }, { status: 401 });
+  // 2. Enterprise API Authentication (with Session Fallback for Dashboard)
+  if (request.nextUrl.pathname.startsWith('/api/v1/signals')) {
+
+    // Check for session cookie first (Internal Dashboard Access)
+    let token = request.cookies.get('apex_session')?.value ||
+      request.cookies.get('sb-access-token')?.value ||
+      request.cookies.get(`sb-${process.env.NEXT_PUBLIC_SUPABASE_REFERENCE_ID}-auth-token`)?.value;
+
+    let isSessionValid = false;
+    if (token) {
+      try {
+        await jwtVerify(token, JWT_SECRET);
+        isSessionValid = true;
+      } catch (e) {
+        // Token invalid, proceed to API Key check
+      }
+    }
+
+    if (!isSessionValid) {
+      const enterpriseCheck = await enterpriseAuthMiddleware(request);
+      if (!enterpriseCheck.authorized) {
+        return NextResponse.json({ error: enterpriseCheck.error }, { status: 401 });
+      }
     }
   }
 
@@ -127,7 +145,7 @@ export async function middleware(request: NextRequest) {
 
     } catch (err) {
       if (request.nextUrl.pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+        return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 }); // Changed 403 to 401 for Invalid Token
       }
       const url = request.nextUrl.clone();
       url.pathname = '/en/login';
@@ -217,7 +235,7 @@ export async function middleware(request: NextRequest) {
       else if (country === 'JP') locale = 'ja';
       else if (country === 'CN') locale = 'zh';
 
-      const newPath = `/${locale}${request.nextUrl.pathname}`;
+      const newPath = `/${locale}${request.nextUrl.pathname}${request.nextUrl.search}`;
       logger.debug('[i18n Debug] REDIRECTING TO:', { newPath });
       return NextResponse.redirect(new URL(newPath, request.url));
     }
@@ -240,12 +258,20 @@ export async function middleware(request: NextRequest) {
       '/api/auth', // Whitelist all NextAuth/Custom Auth routes (recover, callback, etc)
       '/api/debug', // Whitelist debug routes
       '/api/v1/public',
-      '/api/webhooks' // Webhooks usually have their own signature verification
+      '/api/webhooks', // Webhooks usually have their own signature verification
+      '/api/v1/market/analyze', // Public demo endpoint
+      '/api/v1/user/verify-account', // Public verification endpoint
+      '/api/v1/user/verify-account', // Public verification endpoint
+      '/api/marketplace', // Public marketplace endpoint
+      '/api/v1/referral/stats' // Handled by route handler (Custom Auth)
     ];
 
     const isPublicApi = publicApiRoutes.some(route => request.nextUrl.pathname.startsWith(route));
 
-    if (!isPublicApi) {
+    // Special case: Copy Trading Leaderboard is public (GET), but Actions are protected (POST/DELETE)
+    const isCopyTradingPublic = request.nextUrl.pathname === '/api/v1/trading/copy-trading' && request.method === 'GET';
+
+    if (!isPublicApi && !isCopyTradingPublic) {
       // Check for authentication
       let token = request.cookies.get('apex_session')?.value ||
         request.cookies.get('sb-access-token')?.value ||

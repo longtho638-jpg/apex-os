@@ -5,7 +5,10 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Key, Activity, AlertCircle, DollarSign } from 'lucide-react';
+import { Key, Activity, AlertCircle, DollarSign, Lock, Copy, Check } from 'lucide-react';
+import { useUserTier } from '@/hooks/useUserTier';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface UsageMetric {
   time: string;
@@ -17,6 +20,10 @@ interface UsageMetric {
 export default function EnterpriseDashboardPage() {
   const [usageData, setUsageData] = useState<UsageMetric[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isElite, isWhale, loading: tierLoading } = useUserTier();
+  const router = useRouter();
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     // Mock data for dashboard visualization (replace with real API call later)
@@ -29,6 +36,43 @@ export default function EnterpriseDashboardPage() {
     setUsageData(data);
     setLoading(false);
   }, []);
+
+  const generateKey = () => {
+    const key = 'sk_live_' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 36).toString(36)).join('');
+    setApiKey(key);
+    toast.success('New API Key Generated');
+  };
+
+  const copyKey = () => {
+    if (!apiKey) return;
+    navigator.clipboard.writeText(apiKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success('Copied to clipboard');
+  };
+
+  if (tierLoading) return null;
+
+  if (!isElite && !isWhale) {
+    return (
+      <div className="flex h-screen w-full bg-[#030303] text-white font-sans items-center justify-center relative overflow-hidden">
+        <AuroraBackground className="absolute inset-0 z-0 pointer-events-none"><div /></AuroraBackground>
+        <GlassCard className="p-12 max-w-lg text-center z-10 border-purple-500/30">
+          <Lock className="w-16 h-16 text-purple-500 mx-auto mb-6" />
+          <h1 className="text-3xl font-bold mb-4">Enterprise Access Required</h1>
+          <p className="text-zinc-400 mb-8">
+            The Developer API and White Label tools are available exclusively for Elite and Whale tiers.
+          </p>
+          <button
+            onClick={() => router.push('/en/billing')}
+            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-xl font-bold transition-all shadow-lg shadow-purple-500/20"
+          >
+            Upgrade to Elite
+          </button>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full bg-[#030303] text-white font-sans">
@@ -44,9 +88,21 @@ export default function EnterpriseDashboardPage() {
               <h1 className="text-3xl font-bold text-white">Enterprise Dashboard</h1>
               <p className="text-zinc-400">Monitor your API usage and billing.</p>
             </div>
-            <button className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-bold flex items-center gap-2">
+            {apiKey ? (
+              <div className="flex items-center gap-2 bg-zinc-900 border border-white/10 rounded-lg px-3 py-2">
+                <code className="text-sm font-mono text-emerald-400">{apiKey}</code>
+                <button onClick={copyKey} className="text-zinc-400 hover:text-white">
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={generateKey}
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-bold flex items-center gap-2"
+              >
                 <Key className="w-4 h-4" /> Generate New Key
-            </button>
+              </button>
+            )}
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -85,7 +141,7 @@ export default function EnterpriseDashboardPage() {
                 <BarChart data={usageData}>
                   <XAxis dataKey="time" stroke="#52525b" fontSize={12} />
                   <YAxis stroke="#52525b" fontSize={12} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a' }}
                     itemStyle={{ color: '#fff' }}
                   />
@@ -101,7 +157,7 @@ export default function EnterpriseDashboardPage() {
                   <XAxis dataKey="time" stroke="#52525b" fontSize={12} />
                   <YAxis yAxisId="left" stroke="#52525b" fontSize={12} />
                   <YAxis yAxisId="right" orientation="right" stroke="#52525b" fontSize={12} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a' }}
                     itemStyle={{ color: '#fff' }}
                   />

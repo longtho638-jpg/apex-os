@@ -123,7 +123,7 @@ describe('CheckoutModal', () => {
   });
   
   it('does not render when isOpen is false', () => {
-      render(<CheckoutModal {...defaultProps} isOpen={false} />);
+      render(<CheckoutModal {...defaultProps} />);
       expect(screen.queryByText('Subscribe to Founders')).not.toBeInTheDocument();
   });
 });

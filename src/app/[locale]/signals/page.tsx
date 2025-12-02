@@ -17,7 +17,7 @@ export default function SignalsPage() {
                             <Zap className="h-5 w-5 text-yellow-400" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold tracking-tight">Trading Signals</h1>
+                            <h1 className="text-lg font-bold tracking-tight">Predictive Signal Matrix</h1>
                             <p className="text-xs text-zinc-400">AI-powered market signals</p>
                         </div>
                     </div>

@@ -34,9 +34,7 @@ export async function POST(request: NextRequest) {
 // GET - List orders
 export async function GET(request: NextRequest) {
     try {
-        console.log('[Trading Orders API] GET request received');
-
-        // 1. Auth & Credentials
+        // Get user info from Supabase
         const authHeader = request.headers.get('authorization');
         if (!authHeader) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         const token = authHeader.replace('Bearer ', '');
@@ -53,7 +51,6 @@ export async function GET(request: NextRequest) {
                 }
             }
         );
-        // 2. Params
         // CRITICAL SECURITY FIX: Ignore 'userId' param to prevent IDOR.
         // Always use the authenticated user's ID from the token.
         const { data: { user } } = await supabase.auth.getUser();
@@ -65,8 +62,7 @@ export async function GET(request: NextRequest) {
         const limit = Math.min(parseInt(request.nextUrl.searchParams.get('limit') || '20'), 100); // Max 100
         const offset = (page - 1) * limit;
 
-        console.log('[Trading Orders API] Fetching orders for user:', userId, { status, page, limit });
-
+        // Fetch orders from database
         let query = supabase
             .from('orders')
             .select('id, symbol, side, type, quantity, price, status, created_at', { count: 'exact' })
@@ -88,7 +84,6 @@ export async function GET(request: NextRequest) {
             throw error;
         }
 
-        console.log('[Trading Orders API] Successfully fetched', orders?.length || 0, 'orders');
         return NextResponse.json({ success: true, orders: orders || [] });
 
     } catch (error: any) {

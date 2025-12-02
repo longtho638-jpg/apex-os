@@ -1,31 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
     try {
-        // 1. Extract Token
-        const authHeader = request.headers.get('authorization');
-        let token: string | undefined;
-
-        if (authHeader?.startsWith('Bearer ')) {
-            token = authHeader.substring(7);
-        } else {
-            token = request.cookies.get('apex_session')?.value;
-        }
-
-        if (!token) {
-            return NextResponse.json({ success: true, user: null });
-        }
-
-        // 2. Verify Auth
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-        const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
-
-        const { data: { user }, error } = await supabaseAuth.auth.getUser(token);
+        const supabase = await createClient();
+        
+        // getUser() automatically uses the cookies/token from the request context
+        const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error || !user) {
-            // Token invalid or expired - return null user, not 401 to avoid console errors
             return NextResponse.json({ success: true, user: null });
         }
 
@@ -34,7 +17,7 @@ export async function GET(request: NextRequest) {
             user: {
                 id: user.id,
                 email: user.email,
-                // Add other necessary fields
+                user_metadata: user.user_metadata
             }
         });
 

@@ -6,9 +6,12 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { LineChart, TrendingUp, Calendar, Download } from 'lucide-react';
 // import { PnlChart } from '@/components/trading/PnlChart'; // TODO: Create component
 // import { PnlBreakdown } from '@/components/trading/PnlBreakdown'; // TODO: Create component
+import { WowEmptyState } from '@/components/ui/WowEmptyState';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function PnlPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const userId = user?.id || '';
 
@@ -79,7 +82,15 @@ export default function PnlPage() {
             <GlassCard className="p-6">
               <h3 className="font-bold mb-6">Monthly Breakdown</h3>
               {/* <PnlBreakdown /> */}
-              <div className="text-center py-12 text-zinc-500">No data available for this period</div>
+              <WowEmptyState
+                title="No Trading Activity"
+                description="Your trading journal is empty. Start executing trades to populate your PnL analysis."
+                icon={LineChart}
+                action={{
+                  label: "Start Trading",
+                  onClick: () => router.push('/en/trade')
+                }}
+              />
             </GlassCard>
           </div>
         </div>

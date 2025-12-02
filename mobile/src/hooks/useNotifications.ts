@@ -13,12 +13,12 @@ export function useNotifications(userId: string) {
         // Note: We use the same API endpoint but need to ensure it handles Expo tokens
         // or create a specific mobile endpoint. For now, we reuse the structure.
         fetch('https://apexrebate.com/api/user/push/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                userId, 
-                subscription: { endpoint: token, keys: { auth: 'expo', p256dh: 'expo' } } 
-            }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            subscription: { endpoint: token, keys: { auth: 'expo', p256dh: 'expo' } }
+          }),
         }).catch(err => console.error('Failed to sync push token', err));
       }
     });
@@ -41,16 +41,16 @@ async function registerForPushNotificationsAsync() {
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
-  
+
   if (existingStatus !== 'granted') {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
-  
+
   if (finalStatus !== 'granted') {
     return;
   }
-  
+
   token = (await Notifications.getExpoPushTokenAsync({
     projectId: 'your-project-id' // Should be in app.json
   })).data;

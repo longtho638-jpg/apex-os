@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         }
       });
     }
-    
+
     // Handle /help
     else if (text.startsWith('/help')) {
       await sendMessage(chatId, {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
 async function sendMessage(chatId: number | string, payload: any) {
   if (!BOT_TOKEN) return;
-  
+
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -16,15 +16,15 @@ export async function sendEmail({ to, subject, html }: EmailOptions): Promise<{ 
 
   try {
     const data = await resend.emails.send({
-      from: 'ApexOS <onboarding@resend.dev>', // Use verified domain in prod
+      from: 'ApexOS <noreply@apexrebate.com>', // Verified domain
       to,
       subject,
       html,
     });
 
     if (data.error) {
-        console.error('[Email] Resend API Error:', data.error);
-        return { success: false, error: data.error.message };
+      console.error('[Email] Resend API Error:', data.error);
+      return { success: false, error: data.error.message };
     }
 
     return { success: true };

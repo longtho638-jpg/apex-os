@@ -4,7 +4,7 @@ import React from 'react';
 import RiskManagement from '@/components/admin/RiskManagement';
 import { ShieldAlert } from 'lucide-react';
 
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 
 export default function RiskPage() {
     const t = useTranslations('AdminRisk');

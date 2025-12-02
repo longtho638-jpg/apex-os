@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { TrendingUp, Activity, RefreshCw, ArrowUpRight, ChevronDown } from 'lucide-react';
 import { fetchTradeHistory, fetchMarketConditions, triggerSync } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTranslations } from '@/contexts/I18nContext';
+import { toast } from 'sonner';
 import { Sidebar } from '@/components/os/sidebar';
 import TradingChart from '@/components/TradingChart';
 import IndicatorPanel, { DEFAULT_INDICATORS, IndicatorSettings } from '@/components/IndicatorPanel';
 import DeepSeekInsight from '@/components/trading/DeepSeekInsight';
 import { TOP_COINS } from '@/constants/trading';
 import { cn } from '@/lib/utils';
+import { useUserTier } from '@/hooks/useUserTier';
+import { Crown } from 'lucide-react';
 
 export default function TradePage() {
     const { user, isAuthenticated } = useAuth();
@@ -22,6 +25,10 @@ export default function TradePage() {
     const [trades, setTrades] = useState<any[]>([]);
     const [syncing, setSyncing] = useState(false);
     const t = useTranslations('Trade');
+    const { tier } = useUserTier();
+
+    // Fee Calculation
+    const feeRate = tier === 'WHALE' ? 0 : tier === 'ELITE' ? 0.02 : tier === 'TRADER' ? 0.05 : 0.1;
 
     useEffect(() => {
         if (!isAuthenticated || !user) return;
@@ -128,6 +135,17 @@ export default function TradePage() {
                             <div className="h-1.5 w-1.5 rounded-full bg-[#00FF94] animate-pulse shadow-[0_0_10px_#00FF94]" />
                             <span className="text-[10px] font-medium text-gray-300 uppercase">BINANCE LIVE</span>
                         </div>
+
+                        {/* Fee Tier Indicator */}
+                        <div className={cn(
+                            "flex items-center gap-2 px-3 py-1.5 rounded-full border",
+                            tier === 'WHALE' ? "bg-purple-500/10 border-purple-500/30 text-purple-400" : "bg-white/5 border-white/10 text-zinc-400"
+                        )}>
+                            {tier === 'WHALE' && <Crown className="w-3 h-3" />}
+                            <span className="text-[10px] font-medium">
+                                Fee: {feeRate}% {tier === 'WHALE' ? '(VIP)' : ''}
+                            </span>
+                        </div>
                     </div>
                 </header>
 
@@ -189,7 +207,7 @@ export default function TradePage() {
                         <div className="flex-1 min-h-[400px]">
                             <DeepSeekInsight
                                 symbol={selectedPair.symbol}
-                                onExecute={(strategy) => console.log('Execute:', strategy)}
+                                onExecute={(strategy) => toast.success(`Executing ${strategy.signal} strategy`)}
                             />
                         </div>
 

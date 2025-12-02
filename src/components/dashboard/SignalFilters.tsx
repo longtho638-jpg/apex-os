@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Filter, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Filter, X, Wallet, TrendingUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export interface FilterState {
@@ -18,8 +17,11 @@ interface SignalFiltersProps {
 
 export function SignalFilters({ filters, onChange }: SignalFiltersProps) {
   const t = useTranslations('DashboardComponents.SignalFilters');
-  const SYMBOLS = ['BTC', 'ETH', 'SOL', 'BNB'];
-  const TIMEFRAMES = ['1m', '5m', '15m', '1h', '4h'];
+  const SYMBOLS = [
+    'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE',
+    'PEPE', 'WIF', 'SUI', 'NEAR', 'APT', 'FET'
+  ];
+  const TIMEFRAMES = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 
   const toggleSymbol = (sym: string) => {
     const newSymbols = filters.symbols.includes(sym)
@@ -29,66 +31,74 @@ export function SignalFilters({ filters, onChange }: SignalFiltersProps) {
   };
 
   return (
-    <div className="w-full lg:w-64 bg-[#0A0A0A] border-r border-white/5 p-6 flex flex-col gap-8 h-full">
-      <div>
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <Filter size={12} /> {t('assets')}
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {SYMBOLS.map(sym => (
-            <button
-              key={sym}
-              onClick={() => toggleSymbol(sym)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filters.symbols.includes(sym)
-                ? 'bg-emerald-500 text-black'
-                : 'bg-white/5 text-zinc-400 hover:bg-white/10'
-                }`}
-            >
-              {sym}
-            </button>
-          ))}
+    <div className="flex flex-col h-full">
+      {/* FILTERS (Compact Mode for 200px width) */}
+      <div className="flex-1 space-y-6 p-3">
+
+        {/* Assets */}
+        <div>
+          <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <Filter size={10} /> {t('assets')}
+          </h3>
+          <div className="grid grid-cols-3 gap-1.5">
+            {SYMBOLS.map(sym => (
+              <button
+                key={sym}
+                onClick={() => toggleSymbol(sym)}
+                className={`px-1 py-1 rounded text-[9px] font-bold transition-all border text-center ${filters.symbols.includes(sym)
+                  ? 'bg-emerald-500 text-black border-emerald-500'
+                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 border-white/5'
+                  }`}
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div>
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">{t('timeframe')}</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {TIMEFRAMES.map(tf => (
-            <button
-              key={tf}
-              onClick={() => onChange({ ...filters, timeframe: tf })}
-              className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${filters.timeframe === tf
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-white/5 text-zinc-400 hover:bg-white/10 border border-transparent'
-                }`}
-            >
-              {tf}
-            </button>
-          ))}
+        {/* Timeframe */}
+        <div>
+          <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">{t('timeframe')}</h3>
+          <div className="grid grid-cols-4 gap-1.5">
+            {TIMEFRAMES.map(tf => (
+              <button
+                key={tf}
+                onClick={() => onChange({ ...filters, timeframe: tf })}
+                className={`px-1 py-1 rounded text-[9px] font-medium transition-all border text-center ${filters.timeframe === tf
+                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 border-white/5'
+                  }`}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div>
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 flex justify-between">
-          {t('min_confidence')} <span className="text-white">{filters.minConfidence}%</span>
-        </h3>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={filters.minConfidence}
-          onChange={(e) => onChange({ ...filters, minConfidence: parseInt(e.target.value) })}
-          className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-        />
-      </div>
+        {/* Confidence */}
+        <div>
+          <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-3 flex justify-between">
+            {t('min_confidence')} <span className="text-emerald-400 font-mono">{filters.minConfidence}%</span>
+          </h3>
+          <input
+            type="range"
+            min="0"
+            max="90"
+            step="5"
+            value={filters.minConfidence}
+            onChange={(e) => onChange({ ...filters, minConfidence: parseInt(e.target.value) })}
+            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+          />
+        </div>
 
-      <div className="mt-auto pt-6 border-t border-white/5">
-        <button
-          onClick={() => onChange({ symbols: [], timeframe: '1h', minConfidence: 0 })}
-          className="w-full py-2 text-xs text-zinc-500 hover:text-white flex items-center justify-center gap-2 transition-colors"
-        >
-          <X size={12} /> {t('reset')}
-        </button>
+        <div className="pt-2 border-t border-white/5">
+          <button
+            onClick={() => onChange({ symbols: [], timeframe: '1m', minConfidence: 0 })}
+            className="w-full py-1.5 text-[10px] text-zinc-500 hover:text-white flex items-center justify-center gap-2 transition-colors hover:bg-white/5 rounded-lg"
+          >
+            <X size={10} /> {t('reset')}
+          </button>
+        </div>
       </div>
     </div>
   );

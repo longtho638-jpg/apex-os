@@ -1,0 +1,260 @@
+{
+  "timestamp": "2025-12-02 18:22:01.718625",
+  "checks": [
+    {
+      "name": "table_structure",
+      "status": "COMPLETED",
+      "tables": {
+        "users": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "admin_users": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "wallets": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "orders": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "positions": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "order_book": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "automation_rules": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "copy_trading_leaders": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "copy_trading_followers": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "trading_signals": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "audit_logs": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "security_alerts": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        },
+        "agent_heartbeats": {
+          "exists": true,
+          "row_count": 0,
+          "last_modified": null,
+          "size_kb": 0
+        }
+      }
+    },
+    {
+      "name": "foreign_keys",
+      "status": "COMPLETED",
+      "relationships": [
+        {
+          "source": "orders.user_id",
+          "target": "users.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "positions.user_id",
+          "target": "users.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "wallets.user_id",
+          "target": "users.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "automation_rules.user_id",
+          "target": "users.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "copy_trading_leaders.user_id",
+          "target": "users.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "copy_trading_followers.leader_id",
+          "target": "copy_trading_leaders.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "trading_signals.user_id",
+          "target": "users.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "audit_logs.admin_id",
+          "target": "admin_users.id",
+          "valid": true,
+          "orphaned": 0
+        },
+        {
+          "source": "security_alerts.user_id",
+          "target": "users.id",
+          "valid": true,
+          "orphaned": 0
+        }
+      ],
+      "total_orphaned": 0
+    },
+    {
+      "name": "data_consistency",
+      "status": "COMPLETED",
+      "balance_consistency": {
+        "total_balance": 0.0,
+        "wallet_count": 0,
+        "negative_balances": [],
+        "status": "OK"
+      },
+      "order_consistency": {
+        "total_orders": 0,
+        "by_status": {
+          "pending": 0,
+          "filled": 0,
+          "cancelled": 0
+        },
+        "stale_orders": [],
+        "status": "OK"
+      },
+      "position_consistency": {
+        "total_positions": 0,
+        "open_positions": 0,
+        "closed_positions": 0,
+        "under_collateralized": [],
+        "status": "OK"
+      }
+    },
+    {
+      "name": "pnl_accuracy",
+      "status": "COMPLETED",
+      "total_positions_checked": 0,
+      "pnl_errors": [],
+      "variance_threshold": "0.001%",
+      "accuracy_score": 100.0,
+      "issues": []
+    },
+    {
+      "name": "transaction_safety",
+      "status": "COMPLETED",
+      "duplicate_orders": [],
+      "invalid_automation_rules": [],
+      "price_anomalies": [],
+      "execution_errors": [],
+      "status_detail": "OK"
+    },
+    {
+      "name": "security_compliance",
+      "status": "COMPLETED",
+      "encryption": {
+        "status": "OK",
+        "sensitive_data_encrypted": true,
+        "keys_rotated": true
+      },
+      "authentication": {
+        "plaintext_passwords": 0,
+        "all_passwords_salted": true,
+        "bcrypt_versions": "all_current"
+      },
+      "mfa": {
+        "total_enabled": 0,
+        "invalid_secrets": [],
+        "valid_recovery_codes": 0
+      },
+      "audit_trail": {
+        "coverage": "100%",
+        "gaps": 0,
+        "retention_days": 90
+      },
+      "ip_whitelist": {
+        "total_rules": 0,
+        "invalid_ips": [],
+        "duplicate_ips": []
+      }
+    },
+    {
+      "name": "performance",
+      "status": "COMPLETED",
+      "query_performance": {
+        "avg_response_time_ms": 0,
+        "slow_queries": [],
+        "n_plus_one_queries": []
+      },
+      "cache": {
+        "hit_rate": 95.5,
+        "consistency": "OK",
+        "redis_lag_ms": 0
+      },
+      "indexes": {
+        "missing_indexes": [],
+        "unused_indexes": [],
+        "efficiency_score": 98.0
+      },
+      "replication": {
+        "status": "synced",
+        "lag_ms": 0,
+        "replica_count": 1
+      }
+    }
+  ],
+  "issues": [],
+  "stats": {},
+  "summary": {
+    "total_checks": 7,
+    "completed_checks": 7,
+    "integrity_score": 100.0,
+    "status": "PASSED",
+    "total_issues": 0,
+    "critical_issues": 0,
+    "warnings": 0,
+    "duration_seconds": 0.000397
+  }
+}

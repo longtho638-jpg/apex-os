@@ -8,8 +8,10 @@ import { ELEMENTS, MOCK_TRADER_DNA, TraderDNA, QuantMetrics, ViewMode } from '@/
 import { QuantView } from './zen/QuantView';
 import { ZenView } from './zen/ZenView';
 import { HiddenView } from './zen/HiddenView';
+import { useTranslations } from 'next-intl';
 
 export default function ApexIdentityEngine() {
+    const t = useTranslations('DashboardComponents.Zen');
     const [viewMode, setViewMode] = useState<ViewMode>('ZEN');
     const [zenMode, setZenMode] = useState(false);
     const [traderDNA] = useState<TraderDNA>(MOCK_TRADER_DNA);
@@ -21,9 +23,9 @@ export default function ApexIdentityEngine() {
         discipline: traderDNA.elementScores.METAL,
         riskAppetite: traderDNA.elementScores.FIRE,
         consistency: 100 - (Math.max(...Object.values(traderDNA.elementScores)) - Math.min(...Object.values(traderDNA.elementScores))),
-        behavioralBias: traderDNA.winRate < 50 ? 'Revenge Trading Detected' :
-            traderDNA.elementScores.FIRE > 70 ? 'Overtrading Risk' :
-                'Optimal'
+        behavioralBias: traderDNA.winRate < 50 ? t('revenge_trading') :
+            traderDNA.elementScores.FIRE > 70 ? t('overtrading_risk') :
+                t('optimal')
     };
 
     const currentHour = new Date().getHours();
@@ -59,10 +61,10 @@ export default function ApexIdentityEngine() {
                         </motion.div>
                         <div>
                             <h3 className="font-mono font-bold text-sm tracking-wider">
-                                APEX_IDENTITY_ENGINE
+                                {t('title')}
                             </h3>
                             <div className="text-[9px] text-gray-500 font-mono">
-                                {viewMode === 'QUANT' ? 'BEHAVIORAL_METRICS' : 'DIGITAL_FENG_SHUI'}
+                                {viewMode === 'QUANT' ? t('behavioral_metrics') : t('digital_feng_shui')}
                             </div>
                         </div>
                     </div>

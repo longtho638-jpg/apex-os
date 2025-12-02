@@ -1,75 +1,45 @@
-/**
- * Notification Service
- * Handles sending system alerts and notifications
- */
-
-export type AlertLevel = 'info' | 'warning' | 'error' | 'critical';
-
-export interface AlertOptions {
-    title: string;
-    message: string;
-    level: AlertLevel;
-    metadata?: Record<string, any>;
-    source?: string;
-}
+import { createClient } from '@supabase/supabase-js';
+import { CONFIG } from '../../backend/config';
 
 export class NotificationService {
-    /**
-     * Send a system alert
-     */
-    static async sendAlert(options: AlertOptions): Promise<void> {
-        const { title, message, level, metadata, source } = options;
+    private supabase;
 
-        // 1. Console Log (Structured)
-        const logEntry = {
-            timestamp: new Date().toISOString(),
-            type: 'ALERT',
-            level,
-            title,
-            message,
-            source: source || 'system',
-            metadata
-        };
+    constructor() {
+        this.supabase = createClient(CONFIG.SUPABASE.URL!, CONFIG.SUPABASE.KEY!);
+    }
 
-        if (level === 'error' || level === 'critical') {
-            console.error(JSON.stringify(logEntry));
-        } else if (level === 'warning') {
-            console.warn(JSON.stringify(logEntry));
-        } else {
-            console.log(JSON.stringify(logEntry));
-        }
-
-        // 2. Slack Integration
-        if (process.env.SLACK_WEBHOOK_URL && (level === 'error' || level === 'critical')) {
-            try {
-                await fetch(process.env.SLACK_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: `🚨 *${level.toUpperCase()}: ${title}*\n${message}\nSource: ${source || 'system'}`,
-                        blocks: [
-                            {
-                                type: "section",
-                                text: {
-                                    type: "mrkdwn",
-                                    text: `🚨 *${level.toUpperCase()}: ${title}*\n${message}`
-                                }
-                            },
-                            {
-                                type: "context",
-                                elements: [
-                                    {
-                                        type: "mrkdwn",
-                                        text: `Source: ${source || 'system'} | Time: ${new Date().toISOString()}`
-                                    }
-                                ]
-                            }
-                        ]
-                    })
+    async send(userId: string, title: string, message: string, type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'MONEY' = 'INFO', metadata: any = {}) {
+        try {
+            const { error } = await this.supabase
+                .from('notifications')
+                .insert({
+                    user_id: userId,
+                    title,
+                    message,
+                    type,
+                    metadata,
+                    read: false
                 });
-            } catch (err) {
-                console.error('Failed to send Slack alert:', err);
-            }
+
+            if (error) throw error;
+
+            // Optional: Trigger Realtime Event via Supabase Channels or Redis
+            // For now, Supabase Realtime on the table is sufficient for client subscription
+
+        } catch (error) {
+            console.error('Failed to send notification:', error);
         }
+    }
+
+    async markAsRead(notificationId: string) {
+        await this.supabase
+            .from('notifications')
+            .update({ read: true })
+            .eq('id', notificationId);
+    }
+
+    static async sendAlert(alert: { title: string; message: string; level: string; metadata?: any }) {
+        console.log(`[ALERT] ${alert.level.toUpperCase()}: ${alert.title} - ${alert.message}`, alert.metadata);
+        // TODO: Implement actual alert dispatch (e.g. to admin users or external service)
     }
 }

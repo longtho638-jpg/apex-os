@@ -11,7 +11,7 @@ const TARGET_LANGS = ['vi', 'ko', 'ja', 'zh'];
 
 async function translateContent(content: any, targetLang: string): Promise<any> {
   console.log(`Creating translation for: ${targetLang}...`);
-  
+
   const prompt = `
     You are a professional crypto translator.
     Translate the following JSON content from English to ${targetLang}.
@@ -42,7 +42,7 @@ async function translateContent(content: any, targetLang: string): Promise<any> 
     });
 
     if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+      throw new Error(`API Error: ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -65,7 +65,7 @@ async function main() {
   for (const lang of TARGET_LANGS) {
     const targetFile = path.join(process.cwd(), `messages/${lang}.json`);
     let existingContent = {};
-    
+
     try {
       existingContent = JSON.parse(await fs.readFile(targetFile, 'utf-8'));
     } catch (e) {
@@ -75,9 +75,9 @@ async function main() {
     // Deep merge or check missing keys logic here
     // For simplicity in this script, we re-translate everything to ensure consistency
     // In production, you'd diff keys to save tokens.
-    
+
     const translated = await translateContent(sourceContent, lang);
-    
+
     if (translated) {
       await fs.writeFile(targetFile, JSON.stringify(translated, null, 2));
       console.log(`✅ Saved messages/${lang}.json`);

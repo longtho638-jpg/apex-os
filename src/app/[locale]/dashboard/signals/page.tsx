@@ -2,27 +2,21 @@
 
 import { useState } from 'react';
 import AlphaDashboard from '@/components/dashboard/AlphaDashboard';
-import { SignalFilters, FilterState } from '@/components/dashboard/SignalFilters';
+import { FilterState } from '@/components/dashboard/SignalFilters';
 
 export default function SignalsPage() {
+  // Filter state is managed here but passed down. 
+  // AlphaDashboard now handles the entire layout including the filter sidebar.
   const [filters, setFilters] = useState<FilterState>({
     symbols: [],
-    timeframe: '1h',
+    timeframe: '1m',
     minConfidence: 60
   });
 
   return (
-    <div className="flex flex-col lg:flex-row h-full min-h-screen bg-[#030303]">
-      {/* Sidebar Filters */}
-      <aside className="hidden lg:block w-64 shrink-0">
-        <SignalFilters filters={filters} onChange={setFilters} />
-      </aside>
-
-      {/* Main Dashboard */}
-      <main className="flex-1 overflow-hidden">
-        {/* Pass filters to AlphaDashboard to handle client-side filtering */}
-        <AlphaDashboard filters={filters} />
-      </main>
+    <div className="h-full bg-[#030303] overflow-hidden">
+      {/* Main Dashboard takes full width/height. It has its own 3-column layout */}
+      <AlphaDashboard filters={filters} />
     </div>
   );
 }

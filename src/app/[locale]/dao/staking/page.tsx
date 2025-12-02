@@ -6,11 +6,58 @@ import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { ConnectWallet } from '@/components/dao/ConnectWallet';
 import { Lock, TrendingUp, Clock, Coins } from 'lucide-react';
+import { useWallet } from '@/hooks/useWallet';
+import { toast } from 'sonner';
 
 export default function StakingPage() {
   const [amount, setAmount] = useState('');
   const [lockPeriod, setLockPeriod] = useState(30);
+  const { available, refresh } = useWallet();
+  const [stakedBalance, setStakedBalance] = useState(0);
+  const [rewards, setRewards] = useState(0);
+
   const apy = lockPeriod === 30 ? 5 : lockPeriod === 90 ? 10 : 20;
+
+  const handleStake = async () => {
+    const val = parseFloat(amount);
+    if (!val || val <= 0) return toast.error('Invalid Amount');
+    if (val > available) return toast.error('Insufficient Funds');
+
+    toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), {
+      loading: 'Staking tokens...',
+      success: () => {
+        setStakedBalance(prev => prev + val);
+        setAmount('');
+        refresh(); // Update wallet balance
+        return `Successfully staked ${val} APEX!`;
+      },
+      error: 'Staking failed'
+    });
+  };
+
+  const handleClaim = async () => {
+    if (rewards <= 0) return toast.error('No rewards to claim');
+
+    toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
+      loading: 'Claiming rewards...',
+      success: () => {
+        setRewards(0);
+        refresh();
+        return 'Rewards claimed to wallet!';
+      },
+      error: 'Claim failed'
+    });
+  };
+
+  // Simulate rewards accumulation
+  useState(() => {
+    const interval = setInterval(() => {
+      if (stakedBalance > 0) {
+        setRewards(prev => prev + (stakedBalance * (apy / 100) / 365 / 24 / 60)); // Per minute
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  });
 
   return (
     <div className="flex h-screen w-full bg-[#030303] text-white font-sans">
@@ -37,13 +84,16 @@ export default function StakingPage() {
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Lock className="w-5 h-5 text-indigo-400" /> Stake Tokens
               </h3>
-              
+
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-2">Amount to Stake (APEX)</label>
+                  <div className="flex justify-between mb-2">
+                    <label className="block text-sm text-zinc-400">Amount to Stake (APEX)</label>
+                    <span className="text-xs text-zinc-500">Available: <span className="text-white font-mono">${available.toLocaleString()}</span></span>
+                  </div>
                   <div className="relative">
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       className="w-full bg-zinc-900 border border-white/10 rounded-lg px-4 py-3 pl-10 text-white focus:outline-none focus:border-indigo-500"
@@ -60,11 +110,10 @@ export default function StakingPage() {
                       <button
                         key={days}
                         onClick={() => setLockPeriod(days)}
-                        className={`py-3 rounded-lg border font-bold transition-all ${
-                          lockPeriod === days
+                        className={`py-3 rounded-lg border font-bold transition-all ${lockPeriod === days
                             ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400'
                             : 'bg-zinc-900 border-white/10 text-zinc-400 hover:border-white/20'
-                        }`}
+                          }`}
                       >
                         {days} Days
                         <span className="block text-xs font-normal mt-1">{days === 30 ? '5%' : days === 90 ? '10%' : '20%'} APY</span>
@@ -84,7 +133,10 @@ export default function StakingPage() {
                   </div>
                 </div>
 
-                <button className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20">
+                <button
+                  onClick={handleStake}
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20"
+                >
                   Stake Now
                 </button>
               </div>
@@ -97,7 +149,7 @@ export default function StakingPage() {
                   <h3 className="text-lg font-bold">Your Staked Balance</h3>
                   <Lock className="w-5 h-5 text-zinc-500" />
                 </div>
-                <p className="text-4xl font-bold text-white font-mono">0.00 <span className="text-sm text-zinc-500">APEX</span></p>
+                <p className="text-4xl font-bold text-white font-mono">{stakedBalance.toFixed(2)} <span className="text-sm text-zinc-500">APEX</span></p>
               </GlassCard>
 
               <GlassCard className="p-6">
@@ -105,8 +157,11 @@ export default function StakingPage() {
                   <h3 className="text-lg font-bold">Claimable Rewards</h3>
                   <TrendingUp className="w-5 h-5 text-emerald-400" />
                 </div>
-                <p className="text-4xl font-bold text-emerald-400 font-mono">0.00 <span className="text-sm text-zinc-500">APEX</span></p>
-                <button className="mt-4 w-full py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg font-bold hover:bg-emerald-500/20 transition">
+                <p className="text-4xl font-bold text-emerald-400 font-mono">{rewards.toFixed(6)} <span className="text-sm text-zinc-500">APEX</span></p>
+                <button
+                  onClick={handleClaim}
+                  className="mt-4 w-full py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg font-bold hover:bg-emerald-500/20 transition"
+                >
                   Claim Rewards
                 </button>
               </GlassCard>

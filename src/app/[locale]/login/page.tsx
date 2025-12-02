@@ -5,7 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Terminal, ChevronRight, Lock, ShieldCheck, Globe } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import WebAuthnLoginButton from '@/components/auth/WebAuthnLoginButton';

@@ -71,7 +71,7 @@ export default function RootLayout({
             <head>
                 <JsonLdProvider />
             </head>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased notranslate`} suppressHydrationWarning>
                 {/* Telegram script disabled for localhost debugging */}
                 <Web3Provider>
                     <ClientOnly>

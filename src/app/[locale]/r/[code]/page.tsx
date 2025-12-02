@@ -1,38 +1,35 @@
-import { getSupabaseClient } from '@/lib/supabase';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+'use client';
 
-interface PageParams {
-    params: Promise<{
-        code: string;
-        locale: string;
-    }>;
-}
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
-export default async function ReferralLandingPage({ params }: PageParams) {
-  const { code } = await params;
-  const supabase = getSupabaseClient();
+export default function ReferralLandingPage() {
+  const params = useParams();
+  const router = useRouter();
+  const code = params?.code as string;
 
-  // Verify code validity
-  const { data: referral } = await supabase
-    .from('referral_codes')
-    .select('user_id') // joined with user profile ideally
-    .eq('code', code)
-    .single();
+  useEffect(() => {
+    if (code) {
+      // 1. Set in LocalStorage (Persistent)
+      localStorage.setItem('referral_code', code);
 
-  if (referral) {
-    // Set cookie for attribution
-    // Note: In Server Components, cookies() is read-only or requires specific handling for setting.
-    // Setting cookies in a Server Component response is done via middleware or by returning a Response object if it was a route handler.
-    // But in a Page, we can't easily set a cookie directly without a Client Component or Middleware intercepting.
-    // Ideally, this logic lives in middleware.ts matching /r/:code.
-    // For this implementation, we will assume Middleware handles the cookie setting 
-    // OR we use a client component wrapper to set it.
-    // Let's use a Client Component approach for simplicity in this stack if middleware isn't modified.
-    
-    // However, strict Server Component redirect is cleaner.
-    // Let's assume we redirect to /signup?ref=CODE and signup page handles it.
-  }
+      // 2. Set in Cookie (For Server/Middleware access if needed)
+      document.cookie = `referral_code=${code}; path=/; max-age=2592000`; // 30 days
 
-  redirect(`/signup?ref=${code}`);
+      // 3. Redirect to Signup
+      router.push(`/signup?ref=${code}`);
+    } else {
+      router.push('/');
+    }
+  }, [code, router]);
+
+  return (
+    <div className="flex h-screen w-full items-center justify-center bg-black text-white">
+      <div className="animate-pulse flex flex-col items-center gap-4">
+        <div className="h-12 w-12 rounded-full border-4 border-t-emerald-500 border-r-emerald-500 border-b-transparent border-l-transparent animate-spin" />
+        <p className="text-zinc-400 font-mono">Applying Referral Code: <span className="text-emerald-400 font-bold">{code}</span></p>
+      </div>
+    </div>
+  );
 }

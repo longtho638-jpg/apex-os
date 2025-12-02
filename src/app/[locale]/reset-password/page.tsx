@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClientSide } from '@/lib/supabase';
 import { Lock, Key, CheckCircle, AlertCircle } from 'lucide-react';
 import { Sidebar } from '@/components/os/sidebar';
 
@@ -14,15 +14,12 @@ export default function ResetPasswordPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [sessionReady, setSessionReady] = useState(false);
-    const [supabase, setSupabase] = useState<any>(null);
+    const [supabase] = useState(() => getSupabaseClientSide());
 
     useEffect(() => {
         const initSupabase = async () => {
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-            const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-            const client = createClient(supabaseUrl, supabaseKey);
-            setSupabase(client);
-
+            // client is already initialized via state from singleton
+            
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const accessToken = hashParams.get('access_token');
             const refreshToken = hashParams.get('refresh_token');
@@ -30,7 +27,7 @@ export default function ResetPasswordPage() {
 
             if (accessToken && type === 'recovery') {
                 try {
-                    const { error: sessionError } = await client.auth.setSession({
+                    const { error: sessionError } = await supabase.auth.setSession({
                         access_token: accessToken,
                         refresh_token: refreshToken || '',
                     });

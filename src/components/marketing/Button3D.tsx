@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 
 interface Button3DProps {
   children: ReactNode;
-  variant?: 'primary' | 'glass';
+  variant?: 'primary' | 'glass' | 'danger';
   full?: boolean;
   onClick?: () => void;
   disabled?: boolean;
@@ -20,13 +20,30 @@ export function Button3D({
   disabled = false,
   className = ''
 }: Button3DProps) {
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'primary': return 'bg-emerald-600 text-white';
+      case 'danger': return 'bg-red-600 text-white';
+      case 'glass': return 'bg-[rgba(255,255,255,0.1)] text-white backdrop-blur-md border border-[rgba(255,255,255,0.1)]';
+      default: return 'bg-emerald-600 text-white';
+    }
+  };
+
+  const getShadowColor = () => {
+    switch (variant) {
+      case 'primary': return 'rgba(16, 185, 129, 0.4)';
+      case 'danger': return 'rgba(239, 68, 68, 0.4)';
+      default: return 'rgba(255, 255, 255, 0.1)';
+    }
+  };
+
   return (
     <motion.button
       onClick={onClick}
       disabled={disabled}
       className={`
         relative px-8 py-4 rounded-xl font-bold overflow-hidden
-        ${variant === 'primary' ? 'bg-emerald-600 text-white' : 'bg-[rgba(255,255,255,0.1)] text-white backdrop-blur-md border border-[rgba(255,255,255,0.1)]'}
+        ${getVariantStyles()}
         ${full ? 'w-full' : ''}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         shadow-lg
@@ -34,9 +51,7 @@ export function Button3D({
       `}
       whileHover={{
         scale: 1.05,
-        boxShadow: variant === 'primary'
-          ? '0 20px 40px rgba(16, 185, 129, 0.4)'
-          : '0 20px 40px rgba(255, 255, 255, 0.1)'
+        boxShadow: `0 20px 40px ${getShadowColor()}`
       }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}

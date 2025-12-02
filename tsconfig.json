@@ -31,5 +31,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "mobile", "scripts", "backend", "supabase"]
+  "exclude": ["node_modules", "mobile", "scripts", "backend", "supabase", "claudekit-docs"]
 }

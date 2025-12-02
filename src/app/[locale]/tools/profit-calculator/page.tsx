@@ -14,11 +14,11 @@ export default function ProfitCalculatorPage() {
 
   const calculateProfit = () => {
     if (!entryPrice || !exitPrice || !positionSize) return 0;
-    
+
     const priceDiff = isLong ? exitPrice - entryPrice : entryPrice - exitPrice;
     const percentageChange = (priceDiff / entryPrice) * 100;
     const profit = (positionSize * leverage * percentageChange) / 100;
-    
+
     return profit;
   };
 
@@ -42,7 +42,7 @@ export default function ProfitCalculatorPage() {
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <Calculator className="w-5 h-5 text-emerald-400" /> Trade Details
             </h3>
-            
+
             <div className="space-y-6">
               <div className="flex bg-zinc-800 rounded-lg p-1">
                 <button
@@ -111,7 +111,7 @@ export default function ProfitCalculatorPage() {
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-emerald-400" /> Results
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/5">
                   <span className="text-zinc-400">Total Profit/Loss</span>
@@ -136,16 +136,23 @@ export default function ProfitCalculatorPage() {
               </div>
             </GlassCard>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-900/20 to-cyan-900/20 border border-emerald-500/20 text-center">
-              <h3 className="text-lg font-bold mb-2 text-white">Want better entries?</h3>
-              <p className="text-zinc-400 text-sm mb-4">Our AI signals tell you exactly when to enter and exit.</p>
-              <Link 
-                href="/signup"
-                className="inline-block px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors text-sm"
-              >
-                Get AI Signals
-              </Link>
-            </div>
+            <Link
+              href="/signup"
+              className="inline-block px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors text-sm"
+            >
+              Get AI Signals
+            </Link>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
+            <h3 className="text-lg font-bold mb-2 text-white">Ready to execute?</h3>
+            <p className="text-zinc-400 text-sm mb-4">Open this position in the terminal instantly.</p>
+            <Link
+              href={`/dashboard/trading?symbol=BTC&side=${isLong ? 'buy' : 'sell'}&amount=${positionSize}&leverage=${leverage}`}
+              className="inline-block w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+            >
+              Trade Now
+            </Link>
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@ export const emailTemplates = {
       </div>
     `,
   },
-  
+
   featureHighlight: {
     subject: '💡 You\'re Missing Out on These ApexOS Features',
     html: (name: string) => `
@@ -39,7 +39,7 @@ export const emailTemplates = {
       </div>
     `,
   },
-  
+
   trialEnding: {
     subject: '⏰ Your ApexOS Trial Ends in 24 Hours',
     html: (name: string) => `

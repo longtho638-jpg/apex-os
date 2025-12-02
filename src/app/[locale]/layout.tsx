@@ -3,9 +3,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from 'next/navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { I18nProvider } from '@/contexts/I18nContext';
+import { NextIntlClientProvider } from 'next-intl';
+import { WagmiProvider } from '@/components/providers/WagmiProvider';
 import { cn } from '@/lib/utils';
 import "../globals.css";
+import { Toaster } from 'sonner';
+import { NotificationsProvider } from '@/components/providers/NotificationsProvider';
 
 // Supported locales
 const locales = ['en', 'vi'] as const;
@@ -39,14 +42,19 @@ async function ApexLayout({ children, params }: Props) {
     }
 
     // Manually load messages (avoid getMessages() which requires config resolution)
-    const messages = (await import(`@/messages/${locale}.json`)).default;
+    const messages = (await import(`../../../messages/${locale}.json`)).default;
 
     return (
-        <I18nProvider messages={messages}>
-            <AuthProvider>
-                {children}
-            </AuthProvider>
-        </I18nProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+            <WagmiProvider>
+                <AuthProvider>
+                    <NotificationsProvider>
+                        {children}
+                        <Toaster position="top-center" richColors theme="dark" />
+                    </NotificationsProvider>
+                </AuthProvider>
+            </WagmiProvider>
+        </NextIntlClientProvider>
     );
 }
 

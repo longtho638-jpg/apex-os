@@ -226,7 +226,7 @@ export function PricingModal({ isOpen, onClose, userId, currentTier, trigger }: 
                     <td className="text-center p-3">Unlimited</td>
                   </tr>
                   <tr className="border-b border-white/5">
-                    <td className="p-3">Trading Signals</td>
+                    <td className="p-3">Predictive Signal Matrix</td>
                     <td className="text-center p-3">3/month</td>
                     <td className="text-center p-3 bg-emerald-400/5 font-bold">Unlimited</td>
                     <td className="text-center p-3">Unlimited</td>

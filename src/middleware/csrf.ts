@@ -22,7 +22,7 @@ export function handleCsrf(request: NextRequest, response?: NextResponse) {
     }
 
     // Skip Login/Signup (initial entry points) - or strictly check Origin
-    if (path.startsWith('/api/v1/auth/') || path.startsWith('/api/auth/')) {
+    if (path.startsWith('/api/v1/auth/') || path.startsWith('/api/auth/') || path.startsWith('/api/debug/') || path.startsWith('/api/v1/market/analyze') || path.startsWith('/api/v1/user/verify-account')) {
         return null;
     }
 

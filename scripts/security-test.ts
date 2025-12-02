@@ -7,7 +7,7 @@ import path from 'path';
 // Load env vars
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3002';
 const ADMIN_EMAIL = 'verified_tester_1763873096775@apex.com'; 
 // Note: We assume this user exists and has a valid password from previous steps.
 // If not, the test setup might need to create a user or reset password.

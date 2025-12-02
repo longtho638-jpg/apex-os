@@ -7,7 +7,7 @@ import { AlertCircle, CheckCircle2, Link, Loader2, Plus } from 'lucide-react';
 import { RelinkInfoCard } from './RelinkInfoCard';
 
 const exchangeSchema = z.object({
-    exchange: z.enum(['binance', 'bybit', 'okx', 'bitget', 'kucoin', 'mexc', 'gate', 'htx', 'bingx', 'phemex', 'coinex', 'bitmart'], {
+    exchange: z.enum(['binance', 'bybit', 'okx', 'bitget', 'kucoin', 'mexc', 'gate', 'htx', 'bingx', 'phemex', 'coinex', 'bitmart', 'exness'], {
         message: 'Please select a valid exchange',
     }),
     user_uid: z.string()

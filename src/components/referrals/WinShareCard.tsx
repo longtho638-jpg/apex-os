@@ -42,7 +42,7 @@ export function WinShareCard({ pair, roi, referralCode }: WinCardProps) {
     // Referral Footer
     ctx.fillStyle = '#18181b'; // Zinc-900
     ctx.fillRect(0, 250, 600, 65);
-    
+
     ctx.fillStyle = '#ffffff';
     ctx.font = '16px Arial';
     ctx.fillText(`Start trading with AI: apexrebate.com/r/${referralCode}`, 40, 290);
@@ -60,21 +60,21 @@ export function WinShareCard({ pair, roi, referralCode }: WinCardProps) {
 
   return (
     <div className="space-y-4">
-      <canvas 
-        ref={canvasRef} 
-        width={600} 
-        height={315} 
+      <canvas
+        ref={canvasRef}
+        width={600}
+        height={315}
         className="w-full h-auto rounded-xl shadow-2xl border border-white/10"
       />
-      
+
       <div className="flex gap-3">
-        <button 
+        <button
           onClick={downloadImage}
           className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition"
         >
           <Download className="w-4 h-4" /> Download
         </button>
-        <button 
+        <button
           className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#1DA1F2] hover:bg-[#1DA1F2]/90 text-white rounded-lg transition"
         >
           <Share2 className="w-4 h-4" /> Tweet

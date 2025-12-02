@@ -9,6 +9,7 @@ const COMMISSION_RATES: Record<TierId, number> = {
   'PRO': 0.20,    // 20%
   'TRADER': 0.25, // 25%
   'ELITE': 0.30,  // 30%
+  'WHALE': 0.40,  // 40%
   'PAY_PER_SIGNAL': 0
 };
 

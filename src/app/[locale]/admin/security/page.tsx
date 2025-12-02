@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { Shield, Lock, Globe, Activity } from 'lucide-react';
 import Link from 'next/link';
 

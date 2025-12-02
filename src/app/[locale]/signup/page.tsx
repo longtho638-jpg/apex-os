@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Terminal, ChevronRight, Lock, ShieldCheck, Globe, UserPlus } from 'lucide-react';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { analytics } from '@/lib/analytics';

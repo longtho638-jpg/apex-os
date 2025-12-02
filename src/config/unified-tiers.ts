@@ -1,11 +1,15 @@
 /**
  * UNIFIED PRICING TIERS - SINGLE SOURCE OF TRUTH
  * 
- * This config consolidates:
- * - PricingModal tiers (FREE, PRO, TRADER, ELITE)
- * - Viral Economics commission structure (L1-L4)
- * - Payment gateway configs (Polar, NOWPayments)
- * - AI rate limits
+ * STRATEGY: VIRAL 4-LEVEL "GOLDEN HANDCUFFS"
+ * 
+ * Logic:
+ * - Base tiers (FREE) get a taste of L1 commission to incentivize sharing.
+ * - Middle tiers (PRO, TRADER) unlock deeper levels (L2, L3).
+ * - Top tiers (ELITE, WHALE) unlock full depth (L4) and maximum Self-Rebate.
+ * 
+ * This structure creates a "Lock-in" effect where leaders MUST maintain 
+ * their subscription to keep earning from their deep downline.
  */
 
 export const UNIFIED_TIERS = {
@@ -21,13 +25,14 @@ export const UNIFIED_TIERS = {
         aiRequestsPerDay: 10,
         tradingSignalsPerMonth: 3,
 
-        // Commission Rates (Viral Economics L1-L4)
+        // FINANCIAL ENGINE (The Hook)
+        selfRebateRate: 0.05, // 5% of Apex share returned to user
         commissionRates: {
-            l1: 0,    // 0% direct referrals
-            l2: 0,    // 0% second level
-            l3: 0,    // 0% third level
-            l4: 0,    // 0% fourth level
-            total: 0, // 0% total - FREE users don't earn commissions
+            l1: 0.10,    // 10% direct referrals (Teaser)
+            l2: 0,       // Locked
+            l3: 0,       // Locked
+            l4: 0,       // Locked
+            total: 0.15, // Total Payout
         },
 
         // Features
@@ -35,15 +40,12 @@ export const UNIFIED_TIERS = {
             'Basic trading features',
             '10 AI requests per day',
             '3 trading signals per month',
-            'Basic technical analysis',
-            'Community support (3-5 days)',
+            'Earn 10% commission on referrals',
+            '5% Self-Rebate on trades',
         ],
 
-        // Payment Gateway Configs
         polar: null,
         nowPayments: null,
-
-        // Binh Pháp: 試探 (Probe) - Free tier để user thử nghiệm
     },
 
     PRO: {
@@ -51,47 +53,43 @@ export const UNIFIED_TIERS = {
         name: 'Pro',
         price: 29,
         monthlyPrice: 29,
-        annualPrice: 290, // ~17% discount (10 months price)
+        annualPrice: 290,
         currency: 'USD',
 
         // AI Limits
         aiRequestsPerDay: 100,
-        tradingSignalsPerMonth: Infinity, // Unlimited
+        tradingSignalsPerMonth: Infinity,
 
-        // Commission Rates (Viral Economics L1-L4)
+        // FINANCIAL ENGINE (The Builder)
+        selfRebateRate: 0.10, // 10% Self-Rebate
         commissionRates: {
-            l1: 0.20,   // 20% direct referrals
-            l2: 0.10,   // 10% second level
-            l3: 0.05,   // 5% third level
-            l4: 0,      // 0% fourth level
-            total: 0.35 // 35% total commission potential
+            l1: 0.20,   // 20% direct (Double the Free tier)
+            l2: 0.05,   // Unlocks Level 2
+            l3: 0,      // Locked
+            l4: 0,      // Locked
+            total: 0.35
         },
 
-        // Features
         features: [
             '🚀 100 AI requests per day',
             '✨ Unlimited trading signals',
+            '🔓 Unlocks Level 2 Commissions',
+            '💰 10% Self-Rebate',
             '📊 Advanced technical analysis',
             '🔔 Real-time price alerts',
-            '📈 Portfolio tracking',
-            '💬 Priority support (24h response)',
-            '🎯 AI-powered trade recommendations',
             '📱 Mobile app access',
         ],
 
-        highlight: 'Most Popular',
+        highlight: 'Starter',
 
-        // Payment Gateway Configs
         polar: {
             productPriceId: process.env.POLAR_PRO_PRICE_ID || 'price_pro_monthly',
         },
         nowPayments: {
             price_amount: 29,
             price_currency: 'usd',
-            cryptoDiscount: 10, // 10% discount for crypto
+            cryptoDiscount: 10,
         },
-
-        // Binh Pháp: 集中兵力 (Concentrate Forces) - Focus tier for most users
     },
 
     TRADER: {
@@ -99,48 +97,44 @@ export const UNIFIED_TIERS = {
         name: 'Trader',
         price: 97,
         monthlyPrice: 97,
-        annualPrice: 970, // ~17% discount
+        annualPrice: 970,
         currency: 'USD',
 
         // AI Limits
         aiRequestsPerDay: 500,
-        tradingSignalsPerMonth: Infinity, // Unlimited
+        tradingSignalsPerMonth: Infinity,
 
-        // Commission Rates (Viral Economics L1-L4)
+        // FINANCIAL ENGINE (The Sweet Spot)
+        selfRebateRate: 0.20, // 20% Self-Rebate
         commissionRates: {
-            l1: 0.25,   // 25% direct referrals
-            l2: 0.15,   // 15% second level
-            l3: 0.10,   // 10% third level
-            l4: 0.05,   // 5% fourth level
-            total: 0.55 // 55% total commission potential
+            l1: 0.25,   // 25% Direct
+            l2: 0.10,   // 10% L2
+            l3: 0.05,   // Unlocks Level 3
+            l4: 0,      // Locked
+            total: 0.60
         },
 
-        // Features
         features: [
             '⚡ 500 AI requests per day',
-            '✨ Everything in Pro',
-            '🧠 DeepSeek Quant Analysis (Daily)',
+            '🔓 Unlocks Level 3 Commissions',
+            '💰 20% Self-Rebate (Double Pro)',
+            '🧠 DeepQuant Neural Core',
             '🤖 AI-powered auto-trading',
-            '📊 Advanced portfolio analytics',
             '🔥 Copy trading from top traders',
             '💎 Exclusive trading strategies',
-            '🎓 1-on-1 trading coaching',
             '⏰ Instant support (1h response)',
         ],
 
         highlight: 'Best Value',
 
-        // Payment Gateway Configs
         polar: {
             productPriceId: process.env.POLAR_TRADER_PRICE_ID || 'price_trader_monthly',
         },
         nowPayments: {
             price_amount: 97,
             price_currency: 'usd',
-            cryptoDiscount: 15, // 15% discount for crypto
+            cryptoDiscount: 15,
         },
-
-        // Binh Pháp: 以戰養戰 (War Feeds War) - Commission starts earning significantly
     },
 
     ELITE: {
@@ -148,48 +142,82 @@ export const UNIFIED_TIERS = {
         name: 'Elite',
         price: 297,
         monthlyPrice: 297,
-        annualPrice: 2970, // ~17% discount
+        annualPrice: 2970,
         currency: 'USD',
 
         // AI Limits
-        aiRequestsPerDay: Infinity, // Unlimited
-        tradingSignalsPerMonth: Infinity, // Unlimited
+        aiRequestsPerDay: Infinity,
+        tradingSignalsPerMonth: Infinity,
 
-        // Commission Rates (Viral Economics L1-L4)
+        // FINANCIAL ENGINE (The Leader)
+        selfRebateRate: 0.30, // 30% Self-Rebate
         commissionRates: {
-            l1: 0.30,   // 30% direct referrals
-            l2: 0.20,   // 20% second level
-            l3: 0.15,   // 15% third level
-            l4: 0.10,   // 10% fourth level (maximum depth)
-            total: 0.75 // 75% total commission potential (capped by 90% pool)
+            l1: 0.30,   // 30% Direct
+            l2: 0.15,   // 15% L2
+            l3: 0.10,   // 10% L3
+            l4: 0.05,   // Unlocks Level 4 (Full Depth)
+            total: 0.90 // High payout to attract leaders
         },
 
-        // Features
         features: [
             '♾️ Unlimited AI requests',
-            '✨ Everything in Trader',
-            '🧠 Real-time DeepSeek Signals',
+            '👑 Unlocks Full Level 4 Commissions',
+            '💰 30% Self-Rebate',
+            '🧠 Real-time DeepQuant Signals',
             '🏆 Dedicated account manager',
             '🔐 Private trading signals',
-            '💰 Revenue share on referrals (30%)',
-            '🎯 Custom AI models trained on your data',
-            '📞 Direct phone support',
+            '🎯 Custom AI models',
             '🌟 VIP community access',
         ],
 
-        highlight: 'Premium',
+        highlight: 'For Leaders',
 
-        // Payment Gateway Configs
         polar: {
             productPriceId: process.env.POLAR_ELITE_PRICE_ID || 'price_elite_monthly',
         },
         nowPayments: {
             price_amount: 297,
             price_currency: 'usd',
-            cryptoDiscount: 20, // 20% discount for crypto
+            cryptoDiscount: 20,
+        },
+    },
+
+    WHALE: {
+        id: 'WHALE',
+        name: 'Whale',
+        price: 997,
+        monthlyPrice: 997,
+        annualPrice: 9997,
+        currency: 'USD',
+
+        // AI Limits
+        aiRequestsPerDay: Infinity,
+        tradingSignalsPerMonth: Infinity,
+
+        // FINANCIAL ENGINE (God Mode)
+        selfRebateRate: 0.35, // 35% Self-Rebate
+        commissionRates: {
+            l1: 0.35,   // 35% Direct
+            l2: 0.20,   // 20% L2
+            l3: 0.15,   // 15% L3
+            l4: 0.10,   // 10% L4
+            total: 1.15 // Burn Strategy: We pay out > 100% of our share to grow fast
         },
 
-        // Binh Pháp: 致人而不致於人 (Control Without Being Controlled) - Maximum leverage
+        features: [
+            '👑 GOD MODE ACCESS',
+            '💰 Max Comms & Rebates',
+            '🏛️ Governance Voting Power (10x)',
+            '🤝 Direct Access to Core Team',
+            '💼 White Label Solutions',
+            '🌐 Global Partner Status',
+            '🔑 API Limit Bypass',
+        ],
+
+        highlight: 'Legendary',
+
+        polar: null,
+        nowPayments: null,
     },
 
     PAY_PER_SIGNAL: {
@@ -201,11 +229,10 @@ export const UNIFIED_TIERS = {
         currency: 'USD',
         pricePerSignal: 5,
 
-        // AI Limits
         aiRequestsPerDay: 10,
-        tradingSignalsPerMonth: Infinity, // Unlimited access, pay per use
+        tradingSignalsPerMonth: Infinity,
 
-        // Commission Rates
+        selfRebateRate: 0,
         commissionRates: {
             l1: 0, l2: 0, l3: 0, l4: 0, total: 0
         },
@@ -231,25 +258,9 @@ export type UnifiedTier = typeof UNIFIED_TIERS[TierId];
 // Backward compatibility aliases
 export const PAYMENT_TIERS = {
     FREE: UNIFIED_TIERS.FREE,
-    FOUNDERS: UNIFIED_TIERS.PRO,    // Map old FOUNDERS → PRO
-    PREMIUM: UNIFIED_TIERS.TRADER,  // Map old PREMIUM → TRADER
-    PAY_PER_SIGNAL: {
-        // Keep pay-per-signal for legacy support
-        id: 'PAY_PER_SIGNAL',
-        name: 'Pay Per Signal',
-        price: 0,
-        currency: 'USD',
-        pricePerSignal: 5,
-        features: [
-            'No monthly commitment',
-            'Pay only $5 per signal used',
-            'Access to all signal types',
-            'Cancel anytime',
-            'Perfect for casual traders'
-        ],
-        polar: null,
-        nowPayments: null,
-    },
+    FOUNDERS: UNIFIED_TIERS.WHALE,
+    PREMIUM: UNIFIED_TIERS.TRADER,
+    PAY_PER_SIGNAL: UNIFIED_TIERS.PAY_PER_SIGNAL
 } as const;
 
 export type PaymentTier = keyof typeof PAYMENT_TIERS;
@@ -271,12 +282,15 @@ export function getCommissionRate(tierId: TierId, level: 1 | 2 | 3 | 4): number 
     return tier.commissionRates[key];
 }
 
+export function getSelfRebateRate(tierId: TierId): number {
+    return UNIFIED_TIERS[tierId].selfRebateRate || 0;
+}
+
 export function getAILimit(tierId: TierId): number {
     return UNIFIED_TIERS[tierId].aiRequestsPerDay;
 }
 
-// Tier order for upgrades
-export const TIER_ORDER: TierId[] = ['FREE', 'PRO', 'TRADER', 'ELITE'];
+export const TIER_ORDER: TierId[] = ['FREE', 'PRO', 'TRADER', 'ELITE', 'WHALE'];
 
 export function canUpgrade(currentTier: TierId, targetTier: TierId): boolean {
     const currentIndex = TIER_ORDER.indexOf(currentTier);

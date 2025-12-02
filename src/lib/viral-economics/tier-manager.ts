@@ -5,22 +5,22 @@ import { UNIFIED_TIERS } from '@/config/unified-tiers';
 const TIER_CONFIG = {
   FREE: {
     commission: UNIFIED_TIERS.FREE.commissionRates.total, // 0
-    rebate: 0.60,
+    rebate: 0.10, // 10% Self-Rebate
     requirements: { referrals: 0, volume: 0 }
   },
   PRO: {
-    commission: UNIFIED_TIERS.PRO.commissionRates.total, // 0.35
-    rebate: 0.60,
-    requirements: { referrals: 0, volume: 0 }
+    commission: UNIFIED_TIERS.PRO.commissionRates.total, // 0.30
+    rebate: 0.20, // 20% Self-Rebate (Total 50% Payout)
+    requirements: { referrals: 20, volume: 50000 }
   },
   TRADER: {
-    commission: UNIFIED_TIERS.TRADER.commissionRates.total, // 0.55
-    rebate: 0.55,
+    commission: UNIFIED_TIERS.TRADER.commissionRates.total, // 0.50
+    rebate: 0.25, // 25% Self-Rebate (Total 75% Payout)
     requirements: { referrals: 20, volume: 50000 }
   },
   ELITE: {
     commission: UNIFIED_TIERS.ELITE.commissionRates.total, // 0.75
-    rebate: 0.50,
+    rebate: 0.25, // 25% Self-Rebate (Total 100% Payout)
     requirements: { referrals: 100, volume: 500000 }
   },
 } as const;

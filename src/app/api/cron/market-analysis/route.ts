@@ -54,24 +54,24 @@ export async function GET(req: NextRequest) {
 
     // 3. Save to Database
     const supabase = getSupabaseClient();
-    
+
     // Check if post exists for today to prevent duplicates
     const { data: existing } = await supabase
-        .from('blog_posts')
-        .select('id')
-        .eq('slug', slug)
-        .single();
+      .from('blog_posts')
+      .select('id')
+      .eq('slug', slug)
+      .single();
 
     if (!existing) {
-        await supabase.from('blog_posts').insert({
-            title,
-            slug,
-            content,
-            seo_keywords: ['Bitcoin', 'Crypto Analysis', 'Trading'],
-            meta_description: `Daily crypto market analysis: BTC, ETH, and top movers for ${new Date().toLocaleDateString()}.`,
-            status: 'published',
-            published_at: new Date().toISOString()
-        });
+      await supabase.from('blog_posts').insert({
+        title,
+        slug,
+        content,
+        seo_keywords: ['Bitcoin', 'Crypto Analysis', 'Trading'],
+        meta_description: `Daily crypto market analysis: BTC, ETH, and top movers for ${new Date().toLocaleDateString()}.`,
+        status: 'published',
+        published_at: new Date().toISOString()
+      });
     }
 
     return NextResponse.json({ success: true, title });

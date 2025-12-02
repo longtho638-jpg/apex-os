@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Plus, Trash2, Globe } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 
 export default function IPWhitelistPage() {
     const t = useTranslations('AdminSecurity.IPWhitelist');

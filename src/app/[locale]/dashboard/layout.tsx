@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
     LayoutDashboard,
@@ -21,20 +21,8 @@ import { SupportChat } from '@/components/support/SupportChat';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 
-const menuItems = [
-    { href: '/en/dashboard/overview', icon: LayoutDashboard, label: 'Overview' },
-    { href: '/en/dashboard/signals', icon: Zap, label: 'AI Signals' },
-    { href: '/en/dashboard/trading', icon: TrendingUp, label: 'Trading' },
-    { href: '/en/dashboard/wallet', icon: Wallet, label: 'Wallet' },
-    { href: '/en/wolf-pack', icon: Users, label: 'Wolf Pack' },
-    { href: '/en/studio', icon: Settings, label: 'Algo Studio' },
-    { href: '/en/launchpad', icon: Zap, label: 'Launchpad' },
-    { href: '/en/dao', icon: Award, label: 'DAO Governance' },
-    { href: '/en/affiliate', icon: Users, label: 'Partner Program' },
-    { href: '/en/dashboard/referrals', icon: Users, label: 'Referrals' },
-    { href: '/en/dashboard/rewards', icon: Award, label: 'Rewards' },
-    { href: '/en/dashboard/settings', icon: Settings, label: 'Settings' },
-];
+import { NAV_ITEMS } from '@/config/navigation';
+import { Sidebar } from '@/components/os/sidebar';
 
 export default function DashboardLayout({
     children,
@@ -42,93 +30,102 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const params = useParams();
+    const locale = params?.locale as string || 'en';
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
+    // Import Sidebar dynamically or at top
+    // We need to import Sidebar from '@/components/os/sidebar'
+
     return (
-        <div className="min-h-screen bg-[#030303]">
-            {/* Mobile menu button */}
-            <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white/5 border border-white/10 rounded-lg text-white"
-            >
-                {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+        <div className="flex h-screen w-full bg-[#030303] overflow-hidden">
+            {/* Mobile menu button - Keep for now if needed, or rely on MobileNav */}
+            {/* For this refactor, we focus on Desktop unification. 
+                We will hide the Sidebar on mobile and show it on desktop.
+            */}
 
-            {/* Sidebar */}
-            <aside
-                className={`
-          fixed top-0 left-0 h-full w-64 bg-[#0A0A0A] border-r border-white/10 z-40 transition-transform
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:block hidden
-        `}
-            >
-                <div className="p-6">
-                    <Link href="/" className="flex items-center gap-2 mb-8">
-                        <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-bold">
-                            A
-                        </div>
-                        <span className="text-xl font-bold text-white">ApexOS</span>
-                    </Link>
+            <div className="hidden lg:flex h-full p-4 pr-0">
+                <Sidebar />
+            </div>
 
-                    <nav className="space-y-2">
-                        {menuItems.map((item) => {
-                            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-                            const Icon = item.icon;
+            {/* Mobile Sidebar (Slide-over) - Optional, reusing Sidebar might need styling adjustments.
+                For now, let's keep the existing mobile sidebar logic BUT use the Sidebar component if possible, 
+                or just keep the simple one for mobile to avoid breaking it. 
+                Actually, let's use the simple one for mobile for safety, or just rely on MobileNav.
+                The user complaint was about "From this Page downwards", implying desktop list.
+            */}
 
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    onClick={() => setSidebarOpen(false)}
-                                    className={`
-                    flex items-center gap-3 px-4 py-3 rounded-xl transition-all
-                    ${isActive
-                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                            : 'text-zinc-400 hover:bg-white/5 hover:text-white'
-                                        }
-                  `}
-                                >
-                                    <Icon size={20} />
-                                    <span className="font-medium">{item.label}</span>
-                                </Link>
-                            );
-                        })}
-                    </nav>
-
-                    {/* User section */}
-                    <div className="absolute bottom-6 left-6 right-6">
-                        <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 font-bold">
-                                    U
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-white">User</p>
-                                    <p className="text-xs text-zinc-500">PRO Plan</p>
-                                </div>
-                            </div>
+            {/* Mobile sidebar overlay & content - simplified for now, assuming MobileNav is primary */}
+            {sidebarOpen && (
+                <div className="lg:hidden fixed inset-0 z-50 flex">
+                    <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+                    <div className="relative w-64 h-full bg-[#0A0A0A] z-50 overflow-y-auto">
+                        {/* We can put a simple menu here or the Sidebar component without margins */}
+                        <div className="p-4">
+                            <nav className="space-y-2">
+                                {NAV_ITEMS.map((item) => {
+                                    const href = `/${locale}${item.href}`;
+                                    const isActive = pathname === href || pathname?.startsWith(href + '/');
+                                    const Icon = item.icon;
+                                    return (
+                                        <Link
+                                            key={href}
+                                            href={href}
+                                            onClick={() => setSidebarOpen(false)}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-emerald-500/10 text-emerald-400' : 'text-zinc-400'}`}
+                                        >
+                                            <Icon size={20} />
+                                            <span className="font-medium">{item.label}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
                         </div>
                     </div>
                 </div>
-            </aside>
+            )}
 
             {/* Main content */}
-            <main className="lg:ml-64 min-h-screen pb-20 lg:pb-0">
-                {/* Top bar */}
-                <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex-1" />
-                        <div className="flex items-center gap-4">
-                            <button className="p-2 hover:bg-white/5 rounded-lg transition-colors relative">
-                                <Bell size={20} className="text-zinc-400" />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full" />
-                            </button>
-                        </div>
-                    </div>
+            <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+                {/* Mobile Header */}
+                <header className="lg:hidden sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-4 flex items-center justify-between">
+                    <button onClick={() => setSidebarOpen(true)} className="p-2 text-white">
+                        <Menu size={24} />
+                    </button>
+                    <span className="font-bold text-white">ApexOS</span>
+                    <div className="w-8" /> {/* Spacer */}
                 </header>
 
-                {/* Page content */}
-                <div className="p-6">
+                {/* Desktop Header - if needed, or let pages handle it. 
+                    Dashboard pages usually have their own header? 
+                    The previous layout had a header with Bell.
+                    Let's keep a generic header container if the pages expect it, 
+                    OR better: The ReportsPage has its OWN header.
+                    If we move Reports to Dashboard, it will have TWO headers if we keep this one.
+                    
+                    DECISION: The Dashboard pages (Overview etc) likely expect the header to be in the layout.
+                    ReportsPage has its own header.
+                    If we unify, we should probably REMOVE the header from the Layout and let pages define it, 
+                    OR make the Layout header adaptable.
+                    
+                    However, for now, let's keep the Layout header but make it visually consistent.
+                    The previous layout header was:
+                    <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-4">
+                    
+                    Let's keep it for now to avoid breaking Overview page.
+                */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    {/* We wrap children in a div if needed, or just render them. 
+                         Previous layout had <div className="p-6">{children}</div>.
+                         ReportsPage has its own padding.
+                         If we keep p-6, ReportsPage will have double padding.
+                         
+                         Let's REMOVE the p-6 from layout and ensure Dashboard pages have their own padding 
+                         OR keep p-6 and remove it from ReportsPage when we move it.
+                         
+                         Let's keep p-6 for now, but maybe make it conditional? No, CSS only.
+                         Let's keep it simple: Render children.
+                     */}
                     {children}
                 </div>
             </main>

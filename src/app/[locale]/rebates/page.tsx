@@ -11,8 +11,11 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { WithdrawalModal } from '@/app/[locale]/finance/components/WithdrawalModal';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { ActiveFarmingTerminal } from '@/components/dashboard/ActiveFarmingTerminal';
+import { useWallet } from '@/hooks/useWallet';
+import { useUserTier } from '@/hooks/useUserTier';
+import { Users } from 'lucide-react';
 
 // Mock payment methods for demo (in real app, fetch these)
 const MOCK_PAYMENT_METHODS = [
@@ -23,37 +26,16 @@ const MOCK_PAYMENT_METHODS = [
 export default function RebatesPage() {
     const t = useTranslations('Rebates');
     const { data, loading, refetch } = useRebates(60000);
+    const { available, refresh: refreshWallet } = useWallet();
+    const { tier } = useUserTier();
     const [calcVolume, setCalcVolume] = useState<string>('');
     const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
-    const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-    const [walletBalance, setWalletBalance] = useState(0);
+    const [paymentMethods, setPaymentMethods] = useState<any[]>(MOCK_PAYMENT_METHODS);
 
-    // Fetch wallet and payment methods
-    useEffect(() => {
-        const fetchFinanceData = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) return;
-
-                const [walletRes, pmRes] = await Promise.all([
-                    fetch('/api/v1/user/finance/wallet', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('/api/v1/user/finance/payment-methods', { headers: { 'Authorization': `Bearer ${token}` } })
-                ]);
-
-                const walletData = await walletRes.json();
-                const pmData = await pmRes.json();
-
-                if (walletData.success) setWalletBalance(walletData.wallet.balance);
-                if (pmData.success) setPaymentMethods(pmData.methods);
-            } catch (e) {
-                console.error("Failed to fetch finance data", e);
-                // Fallback to mock if API fails (for demo)
-                setPaymentMethods(MOCK_PAYMENT_METHODS);
-                setWalletBalance(1847.25);
-            }
-        };
-        fetchFinanceData();
-    }, []);
+    // Calculate dynamic rebate rate based on tier
+    const rebateRate = tier === 'WHALE' ? 0.4 : tier === 'ELITE' ? 0.3 : tier === 'PRO' ? 0.2 : 0.1;
+    const nextTierRate = tier === 'WHALE' ? 0.4 : tier === 'ELITE' ? 0.4 : tier === 'PRO' ? 0.3 : 0.2;
+    const upgradePotential = ((nextTierRate - rebateRate) / rebateRate) * 100;
 
     // Prepare chart data
     const chartData = data?.rebate_history?.slice(0, 30).reverse().map(r => ({
@@ -131,7 +113,7 @@ export default function RebatesPage() {
                                     <div>
                                         <p className="text-sm text-zinc-400 font-medium">{t('available_balance')}</p>
                                         <h2 className="text-4xl font-bold text-white mt-1 tracking-tight">
-                                            ${walletBalance.toFixed(2)}
+                                            ${available.toFixed(2)}
                                         </h2>
                                     </div>
                                     <div className="p-2 rounded-lg bg-blue-500/10">
@@ -162,8 +144,16 @@ export default function RebatesPage() {
                                     <div className="flex justify-between items-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
                                         <span className="text-xs text-purple-300">{t('est_rebate')}</span>
                                         <span className="font-bold text-purple-400">
-                                            ${calcVolume ? calculateEstimatedRebate(parseFloat(calcVolume)).toFixed(2) : '0.00'}
+                                            ${calcVolume ? (parseFloat(calcVolume) * rebateRate / 100).toFixed(2) : '0.00'}
                                         </span>
+                                    </div>
+                                    <div className="text-xs text-zinc-500 text-center">
+                                        Current Rate: <span className="text-emerald-400 font-bold">{rebateRate}%</span> ({tier})
+                                        {tier !== 'WHALE' && (
+                                            <div className="mt-1 text-yellow-500">
+                                                Upgrade to get {nextTierRate}% (+{upgradePotential.toFixed(0)}% more)
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </GlassCard>
@@ -272,18 +262,11 @@ export default function RebatesPage() {
             <WithdrawalModal
                 isOpen={isWithdrawModalOpen}
                 onClose={() => setIsWithdrawModalOpen(false)}
-                balance={walletBalance}
+                balance={available}
                 paymentMethods={paymentMethods}
                 onSuccess={() => {
                     refetch();
-                    const token = localStorage.getItem('token');
-                    if (token) {
-                        fetch('/api/v1/user/finance/wallet', { headers: { 'Authorization': `Bearer ${token}` } })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) setWalletBalance(data.wallet.balance);
-                            });
-                    }
+                    refreshWallet();
                 }}
             />
         </div>

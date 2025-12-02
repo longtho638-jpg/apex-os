@@ -36,9 +36,6 @@ export async function POST(request: NextRequest) {
         const redirectUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`);
         redirectUrl.searchParams.set('next', '/dashboard/settings/security');
 
-        console.log('[Auth] Generating recovery link for:', email);
-        console.log('[Auth] Redirect URL:', redirectUrl.toString());
-
         const { data, error: linkError } = await supabase.auth.admin.generateLink({
             type: 'recovery',
             email: email,
@@ -64,7 +61,7 @@ export async function POST(request: NextRequest) {
 
         // Construct custom link to hide Supabase domain
         // Point to our own /auth/verify page which will handle the verification
-        const actionLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}&type=recovery&next=/dashboard/settings/security`;
+        const actionLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}&type=recovery&email=${encodeURIComponent(email)}&next=/auth/update-password`;
 
         const template = emailTemplates.resetPassword;
 

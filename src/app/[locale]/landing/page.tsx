@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, CheckCircle2, Clock, FileX, EyeOff, Zap, AlertCircle, TrendingDown, ShieldCheck, Globe, Shield, TrendingUp } from 'lucide-react';
 import { Button3D } from '@/components/marketing/Button3D';
 import { motion } from 'framer-motion';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { SiteHeader } from '@/components/marketing/SiteHeader';
 import { SiteFooter } from '@/components/marketing/SiteFooter';
 import { AnimatedNumber } from '@/components/marketing/AnimatedNumber';

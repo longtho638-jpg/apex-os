@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createHmac } from 'crypto';
+import { decrypt } from '@/lib/security/encryption';
 
 export async function verifyApiKey(request: NextRequest) {
     const apiKey = request.headers.get('x-api-key');
@@ -8,7 +9,7 @@ export async function verifyApiKey(request: NextRequest) {
     const timestamp = request.headers.get('x-api-timestamp');
     const method = request.method;
     const path = request.nextUrl.pathname;
-    
+
     if (!apiKey || !signature || !timestamp) {
         return { success: false, error: 'Missing API Key headers', status: 401 };
     }
@@ -48,8 +49,20 @@ export async function verifyApiKey(request: NextRequest) {
 
     // Construct payload: timestamp + method + path + body
     const payload = `${timestamp}${method.toUpperCase()}${path}${body}`;
-    
-    const expectedSignature = createHmac('sha256', keyData.secret_key)
+
+    // Decrypt the secret key
+    let secretKey = keyData.secret_key;
+    try {
+        // If it looks encrypted (contains colons), decrypt it
+        if (secretKey.includes(':')) {
+            secretKey = decrypt(secretKey);
+        }
+    } catch (e) {
+        console.error('Failed to decrypt API key:', e);
+        return { success: false, error: 'Internal Server Error', status: 500 };
+    }
+
+    const expectedSignature = createHmac('sha256', secretKey)
         .update(payload)
         .digest('hex');
 
@@ -63,9 +76,9 @@ export async function verifyApiKey(request: NextRequest) {
         .eq('access_key', apiKey)
         .then();
 
-    return { 
-        success: true, 
-        userId: keyData.user_id, 
-        permissions: keyData.permissions 
+    return {
+        success: true,
+        userId: keyData.user_id,
+        permissions: keyData.permissions
     };
 }

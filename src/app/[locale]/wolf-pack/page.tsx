@@ -3,14 +3,19 @@
 import React, { useState } from 'react';
 import { Sidebar } from '@/components/os/sidebar';
 import { Users, Copy, Check, UserPlus, TrendingUp } from 'lucide-react';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { useWolfPack } from '@/hooks/useWolfPack';
 import { cn } from '@/lib/utils';
+import { useUserTier } from '@/hooks/useUserTier';
 
 export default function WolfPackPage() {
     const t = useTranslations('WolfPack');
     const { data, loading, error, refetch } = useWolfPack();
+    const { tier } = useUserTier();
     const [copied, setCopied] = useState(false);
+
+    // Tier Bonus Calculation
+    const tierBonus = tier === 'WHALE' ? 20 : tier === 'ELITE' ? 10 : tier === 'PRO' ? 5 : 0;
 
     const copyInviteLink = () => {
         if (!data?.invite_link) return;
@@ -105,6 +110,9 @@ export default function WolfPackPage() {
                                             <div className="text-2xl font-bold text-[#00FF94]">
                                                 ${data.shared_rebates.toFixed(2)}
                                             </div>
+                                            <div className="text-xs text-emerald-400 mt-1">
+                                                +{tierBonus}% Tier Bonus Active
+                                            </div>
                                         </div>
                                     </div>
 
@@ -156,7 +164,7 @@ export default function WolfPackPage() {
                                         <div className="flex gap-3">
                                             <input
                                                 type="text"
-                                                value={data.invite_link}
+                                                value={data.invite_link || `${window.location.origin}/r/APEX-${data.member_count}`}
                                                 readOnly
                                                 className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white font-mono text-sm"
                                             />

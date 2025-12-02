@@ -5,14 +5,16 @@ import * as dotenv from 'dotenv';
 import path from 'path';
 import { RiskCalculator } from './risk-calculator';
 import { CONFIG } from '../config';
-
-
+import { UNIFIED_TIERS, getCommissionRate, getSelfRebateRate, TierId } from '../../src/config/unified-tiers';
+import { NotificationService } from '../../src/lib/notifications';
+import { RiskService } from './risk';
 
 export class TradingService {
     private supabase!: SupabaseClient;
     private exchange!: ccxt.Exchange;
     private riskCalculator!: RiskCalculator;
     private redis!: Redis;
+    private riskService!: RiskService;
 
     private mode: 'PAPER' | 'LIVE' = 'PAPER';
     private exchangeClient: any = null; // CCXT client placeholder
@@ -37,9 +39,16 @@ export class TradingService {
         this.exchange = new ccxt.binance();
         this.riskCalculator = new RiskCalculator();
         this.redis = new Redis(CONFIG.REDIS_URL);
+        this.riskService = new RiskService();
     }
 
     async placeOrder(userId: string, symbol: string, side: 'BUY' | 'SELL', quantity: number, price?: number, type: 'MARKET' | 'LIMIT' = 'MARKET') {
+        // 0. CIRCUIT BREAKER CHECK (Deep x10 Integration)
+        const circuitCheck = await this.riskService.checkCircuitBreaker(userId);
+        if (!circuitCheck.allowed) {
+            throw new Error(circuitCheck.reason);
+        }
+
         // 1. Get User Balance & Current Positions for Risk Check
         const { data: wallet } = await this.supabase
             .from('wallets')
@@ -132,7 +141,114 @@ export class TradingService {
             console.error('Failed to publish trade event:', err);
         });
 
+        // 8. COMMISSION LOGIC (Deep x10 Integration)
+        // Execute asynchronously to not block the trade response
+        this.processCommission(userId, order.id, fillPrice * quantity).catch(err => {
+            console.error('Failed to process commission:', err);
+        });
+
         return { order, position };
+    }
+
+    private async processCommission(userId: string, orderId: string, volume: number) {
+        // CRITICAL: Do not process commissions for Paper Trading
+        if (this.mode === 'PAPER') return;
+
+        try {
+            const notificationService = new NotificationService();
+
+            // 1. Get User Info (Tier & Referrer)
+            const { data: user } = await this.supabase
+                .from('users')
+                .select('referred_by, tier')
+                .eq('id', userId)
+                .single();
+
+            if (!user) return;
+
+            const userTier = (user.tier || 'FREE') as TierId;
+            const tradingFee = volume * 0.001; // 0.1% Standard Fee
+
+            // 2. SELF-REBATE (The "Cashback")
+            const selfRebateRate = getSelfRebateRate(userTier);
+            if (selfRebateRate > 0) {
+                const rebateAmount = tradingFee * selfRebateRate;
+
+                // Credit User
+                await this.creditWallet(userId, rebateAmount, 'SELF_REBATE', orderId);
+
+                // Notify User
+                await notificationService.send(
+                    userId,
+                    'Fee Rebate',
+                    `You saved $${rebateAmount.toFixed(4)} on trading fees!`,
+                    'SUCCESS'
+                );
+            }
+
+            // 3. REFERRAL COMMISSION (The "Viral Loop")
+            if (user.referred_by) {
+                // Get Referrer's Tier to determine their commission rate
+                const { data: referrer } = await this.supabase
+                    .from('users')
+                    .select('tier')
+                    .eq('id', user.referred_by)
+                    .single();
+
+                const referrerTier = (referrer?.tier || 'FREE') as TierId;
+
+                // Level 1 Commission
+                const l1Rate = getCommissionRate(referrerTier, 1);
+                const commissionAmount = tradingFee * l1Rate;
+
+                if (commissionAmount > 0) {
+                    await this.supabase.from('commissions').insert({
+                        referrer_id: user.referred_by,
+                        referee_id: userId,
+                        amount: commissionAmount,
+                        order_id: orderId,
+                        reason: 'TRADE_COMMISSION_L1'
+                    });
+
+                    await this.creditWallet(user.referred_by, commissionAmount, 'COMMISSION', orderId, { from_user: userId, level: 1 });
+
+                    // Notify Referrer (THE WOW MOMENT)
+                    await notificationService.send(
+                        user.referred_by,
+                        'Commission Earned 💰',
+                        `Cha-ching! You earned $${commissionAmount.toFixed(4)} from a Level 1 trade.`,
+                        'MONEY'
+                    );
+                }
+            }
+
+        } catch (error) {
+            console.error('Commission processing error:', error);
+        }
+    }
+
+    private async creditWallet(userId: string, amount: number, type: string, refId: string, metadata: any = {}) {
+        const { data: wallet } = await this.supabase
+            .from('wallets')
+            .select('id, balance')
+            .eq('user_id', userId)
+            .single();
+
+        if (wallet) {
+            await this.supabase
+                .from('wallets')
+                .update({ balance: Number(wallet.balance) + amount })
+                .eq('id', wallet.id);
+
+            await this.supabase.from('transactions').insert({
+                wallet_id: wallet.id,
+                type: type,
+                amount: amount,
+                reference_id: refId,
+                status: 'COMPLETED',
+                metadata
+            });
+        }
     }
 
     private async updatePosition(userId: string, symbol: string, side: 'BUY' | 'SELL', quantity: number, price: number) {
@@ -258,6 +374,33 @@ export class TradingService {
         const diff = position.side === 'LONG' ? closePrice - Number(position.entry_price) : Number(position.entry_price) - closePrice;
         const realizedPnL = diff * Number(position.quantity) * (position.leverage || 1);
 
+        // PROFIT SHARING LOGIC (Deep x10 Integration)
+        let finalPnL = realizedPnL;
+        if (realizedPnL > 0) {
+            // Check if this was a Copy Trade (metadata or specific flag)
+            // For now, we assume all profitable trades pay a "Success Fee" to the ecosystem
+            const profitShareRate = 0.10; // 10%
+            const profitShareAmount = realizedPnL * profitShareRate;
+            finalPnL = realizedPnL - profitShareAmount;
+
+            // Distribute Profit Share
+            // 1. Trader/Leader (80% of fee)
+            // 2. Platform/Referrer (20% of fee)
+
+            // Log the deduction
+            await this.supabase.from('transactions').insert({
+                wallet_id: (await this.getWalletId(userId)),
+                type: 'FEE',
+                amount: -profitShareAmount,
+                reference_id: positionId,
+                status: 'COMPLETED',
+                metadata: { reason: 'PROFIT_SHARE', original_pnl: realizedPnL }
+            });
+
+            // Credit the "Leader" (Mocked as System for now, or find leader from position metadata)
+            // In a real scenario, we'd look up position.leader_id
+        }
+
         // Close Position
         const { data: closed, error } = await this.supabase
             .from('positions')
@@ -265,7 +408,8 @@ export class TradingService {
                 status: 'CLOSED',
                 closed_at: new Date().toISOString(),
                 current_price: closePrice,
-                unrealized_pnl: 0
+                unrealized_pnl: 0,
+                realized_pnl: finalPnL // Store net profit
             })
             .eq('id', positionId)
             .select()
@@ -288,6 +432,14 @@ export class TradingService {
             exchange_order_id: `PAPER_CLOSE_${Date.now()}`
         });
 
-        return { position: closed, realizedPnL };
+        // Update Daily PnL for Risk Tracking
+        await this.riskService.updateDailyPnL(userId, finalPnL);
+
+        return { position: closed, realizedPnL: finalPnL };
+    }
+
+    private async getWalletId(userId: string) {
+        const { data } = await this.supabase.from('wallets').select('id').eq('user_id', userId).single();
+        return data?.id;
     }
 }

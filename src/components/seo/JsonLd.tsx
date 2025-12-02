@@ -51,24 +51,24 @@ export function SoftwareAppJsonLd() {
 }
 
 export function FAQPageJsonLd() {
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [{
-        "@type": "Question",
-        "name": "Is ApexOS free to try?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, we offer a 7-day free trial with full access to AI signals."
-        }
-      }, {
-        "@type": "Question",
-        "name": "Can I cancel anytime?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Absolutely. You can cancel your subscription instantly from your dashboard."
-        }
-      }]
-    };
-    return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [{
+      "@type": "Question",
+      "name": "Is ApexOS free to try?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we offer a 7-day free trial with full access to AI signals."
+      }
+    }, {
+      "@type": "Question",
+      "name": "Can I cancel anytime?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. You can cancel your subscription instantly from your dashboard."
+      }
+    }]
+  };
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }

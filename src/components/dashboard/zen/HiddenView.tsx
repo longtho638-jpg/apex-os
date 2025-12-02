@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 export function HiddenView() {
+    const t = useTranslations('DashboardComponents.Zen.hidden_view');
+
     return (
         <motion.div
             key="zen-hidden"
@@ -19,9 +22,9 @@ export function HiddenView() {
             </motion.div>
 
             <div className="space-y-2 text-xs font-mono text-gray-500">
-                <p>// PROFIT_DISPLAY: HIDDEN</p>
-                <p>// EMOTIONAL_OVERRIDE: ACTIVE</p>
-                <p>// FOCUS: STRATEGY_ONLY</p>
+                <p>{t('profit_hidden')}</p>
+                <p>{t('emotional_override')}</p>
+                <p>{t('focus_strategy')}</p>
             </div>
         </motion.div>
     );

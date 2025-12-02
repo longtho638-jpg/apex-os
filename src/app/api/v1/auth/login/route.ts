@@ -9,7 +9,7 @@ import { auditService } from '@/lib/audit';
 
 // JWT Configuration - must match middleware
 const JWT_SECRET = new TextEncoder().encode(
-    process.env.SUPABASE_JWT_SECRET || 'your-secret-key-change-in-production'
+    process.env.SUPABASE_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
 export async function POST(request: NextRequest) {
@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (error || !data.user || !data.session) {
+            console.error('[Login Debug] Supabase Error:', error);
             return NextResponse.json(
                 { success: false, message: 'Invalid email or password' },
                 { status: 401 }

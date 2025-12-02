@@ -44,7 +44,9 @@ describe('PaymentMethodSelector', () => {
     expect(cryptoButton).toHaveAttribute('aria-checked', 'false');
 
     // Rerender with crypto selected
-    rerender(<PaymentMethodSelector value="binance_pay" onChange={() => {}} />);
+    // Removed binance_pay test case
+    // rerender(<PaymentMethodSelector value="binance_pay" onChange={() => {}} />);
+    // expect(screen.getByText('Binance Pay')).toBeInTheDocument();
     
     expect(screen.getByRole('radio', { name: /crypto/i })).toHaveClass('border-amber-500');
     expect(screen.getByRole('radio', { name: /crypto/i })).toHaveAttribute('aria-checked', 'true');

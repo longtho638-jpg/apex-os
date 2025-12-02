@@ -16,6 +16,7 @@ export default function VerifyPage() {
         const verifyToken = async () => {
             const token = searchParams.get('token');
             const type = searchParams.get('type') as any; // 'recovery' | 'signup' | 'magiclink'
+            const email = searchParams.get('email');
             const next = searchParams.get('next') || '/dashboard';
 
             if (!token || !type) {
@@ -24,10 +25,24 @@ export default function VerifyPage() {
             }
 
             try {
-                const { error } = await supabase.auth.verifyOtp({
-                    token,
-                    type,
-                });
+                let error;
+
+                // If token is long, it's likely a hash/link token -> use token_hash
+                if (token.length > 6) {
+                    const res = await supabase.auth.verifyOtp({
+                        token_hash: token,
+                        type,
+                    });
+                    error = res.error;
+                } else {
+                    // If token is short (6 digits), it's an OTP -> use token + email
+                    const res = await supabase.auth.verifyOtp({
+                        token,
+                        type,
+                        email: email as string,
+                    });
+                    error = res.error;
+                }
 
                 if (error) {
                     console.error('Verification error:', error);
@@ -56,11 +71,25 @@ export default function VerifyPage() {
                     </div>
                     <h2 className="text-xl font-bold mb-2 text-white">Verification Failed</h2>
                     <p className="text-gray-400 mb-6">{error}</p>
+
+                    {/* Debug Info */}
+                    <div className="bg-black/50 p-4 rounded-lg text-left text-xs font-mono text-gray-500 mb-6 overflow-hidden break-all">
+                        <p><strong>Token:</strong> {searchParams.get('token')?.substring(0, 10)}...</p>
+                        <p><strong>Type:</strong> {searchParams.get('type')}</p>
+                        <p><strong>Email:</strong> {searchParams.get('email')}</p>
+                    </div>
+
                     <button
                         onClick={() => router.push('/en/forgot-password')}
                         className="w-full bg-[#00FF94] text-black font-bold py-3 rounded-lg hover:bg-[#00cc76] transition-colors"
                     >
                         Request New Link
+                    </button>
+                    <button
+                        onClick={() => router.push('/en/login')}
+                        className="mt-4 text-sm text-gray-500 hover:text-white transition-colors"
+                    >
+                        Back to Login
                     </button>
                 </div>
             </div>

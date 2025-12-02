@@ -2,49 +2,53 @@
 
 import { useEffect, useState } from 'react';
 import { getSupabaseClientSide } from '@/lib/supabase';
-import { ArrowUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { ArrowUp, CheckCircle } from 'lucide-react';
 
-interface CommissionEvent {
+interface Transaction {
   id: string;
   amount: number;
-  source: string;
+  description: string;
   created_at: string;
+  type: string;
 }
 
 interface WalletData {
-  balance_usd: number;
+  balance: number;
   total_earned: number;
 }
 
 export function RealtimeWallet({ userId }: { userId: string }) {
-  const [wallet, setWallet] = useState<WalletData>({ balance_usd: 0, total_earned: 0 });
-  const [recentCommissions, setRecentCommissions] = useState<CommissionEvent[]>([]);
+  const t = useTranslations('Wallet');
+  const [wallet, setWallet] = useState<WalletData>({ balance: 0, total_earned: 0 });
+  const [recentTx, setRecentTx] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Use singleton client
   const supabase = getSupabaseClientSide();
 
   useEffect(() => {
     if (!userId) return;
 
-    // Initial Fetch
     async function fetchData() {
+      // 1. Fetch Wallet Balance
       const { data: walletData } = await supabase
         .from('user_wallets')
-        .select('balance_usd, total_earned')
+        .select('balance, total_earned')
         .eq('user_id', userId)
         .single();
         
       if (walletData) setWallet(walletData);
 
-      const { data: events } = await supabase
-        .from('commission_events')
+      // 2. Fetch Recent Transactions
+      const { data: txs } = await supabase
+        .from('wallet_transactions')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(5);
         
-      if (events) setRecentCommissions(events);
+      if (txs) setRecentTx(txs);
+      
       setLoading(false);
     }
 
@@ -64,7 +68,7 @@ export function RealtimeWallet({ userId }: { userId: string }) {
         (payload) => {
           console.log('Wallet Update:', payload);
           setWallet({
-            balance_usd: payload.new.balance_usd,
+            balance: payload.new.balance,
             total_earned: payload.new.total_earned
           });
         }
@@ -74,12 +78,12 @@ export function RealtimeWallet({ userId }: { userId: string }) {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'commission_events',
+          table: 'wallet_transactions',
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          console.log('New Commission:', payload);
-          setRecentCommissions((prev) => [payload.new as CommissionEvent, ...prev].slice(0, 5));
+          console.log('New Transaction:', payload);
+          setRecentTx((prev) => [payload.new as Transaction, ...prev].slice(0, 5));
         }
       )
       .subscribe();
@@ -97,45 +101,45 @@ export function RealtimeWallet({ userId }: { userId: string }) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Balance Card */}
       <div className="bg-gray-900 p-6 rounded-xl border border-gray-800">
-        <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider">Current Balance</h3>
+        <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider">{t('current_balance')}</h3>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-4xl font-bold text-white">${wallet.balance_usd.toFixed(2)}</span>
+          <span className="text-4xl font-bold text-white">${wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           <span className="text-sm text-green-400 flex items-center">
             <ArrowUp className="w-3 h-3 mr-1" />
-            Realtime
+            {t('realtime')}
           </span>
         </div>
         <div className="mt-4 text-sm text-gray-500">
-          Total Earned: ${wallet.total_earned.toFixed(2)}
+          {t('total_earned')}: ${wallet.total_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
         <button className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
-          Withdraw
+          {t('withdraw')}
         </button>
       </div>
 
       {/* Recent Activity */}
       <div className="bg-gray-900 p-6 rounded-xl border border-gray-800">
-        <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-4">Recent Earnings</h3>
+        <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-4">{t('recent_earnings')}</h3>
         <div className="space-y-3">
-          {recentCommissions.length === 0 ? (
-            <div className="text-gray-500 text-sm">No recent activity</div>
+          {recentTx.length === 0 ? (
+            <div className="text-gray-500 text-sm">{t('no_activity')}</div>
           ) : (
-            recentCommissions.map((event) => (
-              <div key={event.id} className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
+            recentTx.map((tx) => (
+              <div key={tx.id} className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="bg-green-500/10 p-2 rounded-full">
                     <CheckCircle className="w-4 h-4 text-green-500" />
                   </div>
                   <div>
                     <div className="text-white font-medium text-sm">
-                      {event.source.replace('_', ' ')}
+                      {tx.description || tx.type}
                     </div>
                     <div className="text-gray-500 text-xs">
-                      {new Date(event.created_at).toLocaleTimeString()}
+                      {new Date(tx.created_at).toLocaleTimeString()}
                     </div>
                   </div>
                 </div>
-                <div className="text-green-400 font-bold">+${event.amount.toFixed(2)}</div>
+                <div className="text-green-400 font-bold">+${Number(tx.amount).toFixed(2)}</div>
               </div>
             ))
           )}

@@ -2,17 +2,38 @@
 
 import React, { useState } from 'react';
 import { Sidebar } from '@/components/os/sidebar';
-import { TrendingUp, TrendingDown, RefreshCw, Calendar } from 'lucide-react';
-import { useTranslations } from '@/contexts/I18nContext';
+import { TrendingUp, TrendingDown, RefreshCw, Calendar, Share2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { usePnLSummary } from '@/hooks/usePnLSummary';
 import { PnLPeriod } from '@/lib/api/pnl';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { toast } from 'sonner';
+import { useWallet } from '@/hooks/useWallet';
+import { getSupabaseClientSide } from '@/lib/supabase';
+import { WowEmptyState } from '@/components/ui/WowEmptyState';
+import { useRouter } from 'next/navigation';
 
 export default function PnLPage() {
+    const router = useRouter();
     const t = useTranslations('PnL');
     const [period, setPeriod] = useState<PnLPeriod>('30d');
     const { data, loading, error, refetch } = usePnLSummary(period);
+    const { available, locked } = useWallet();
+    const [realPnL, setRealPnL] = useState(0);
+
+    // Calculate Real PnL based on Wallet vs Deposits
+    React.useEffect(() => {
+        const calcPnL = async () => {
+            const supabase = getSupabaseClientSide();
+            // Use lowercase 'deposit' to match the database constraint
+            const { data: txs } = await supabase.from('transactions').select('amount').eq('type', 'deposit');
+            const totalDeposited = txs?.reduce((acc, tx) => acc + (tx.amount || 0), 0) || 1000; // Default 1000 for demo
+            const totalEquity = available + locked;
+            setRealPnL(totalEquity - totalDeposited);
+        };
+        calcPnL();
+    }, [available, locked]);
 
     const periods: { value: PnLPeriod; label: string }[] = [
         { value: '7d', label: t('7d') },
@@ -20,6 +41,12 @@ export default function PnLPage() {
         { value: '90d', label: t('90d') },
         { value: '1y', label: t('1y') },
     ];
+
+    const handleShare = async () => {
+        const text = `🚀 My PnL on ApexOS: ${realPnL >= 0 ? '+' : ''}$${realPnL.toFixed(2)} (${((realPnL / 1000) * 100).toFixed(1)}% ROI)\nJoin the Wolf Pack!`;
+        navigator.clipboard.writeText(text);
+        toast.success('PnL Stats Copied!', { description: 'Ready to paste on Twitter/Telegram.' });
+    };
 
     return (
         <div className="flex h-screen w-full bg-[#030303] text-white font-sans overflow-hidden">
@@ -70,6 +97,12 @@ export default function PnLPage() {
                             className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
                         >
                             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                        </button>
+                        <button
+                            onClick={handleShare}
+                            className="p-2 rounded-lg bg-[#00FF94]/10 hover:bg-[#00FF94]/20 border border-[#00FF94]/20 text-[#00FF94] transition-all"
+                        >
+                            <Share2 className="h-4 w-4" />
                         </button>
                     </div>
                 </header>
@@ -124,9 +157,9 @@ export default function PnLPage() {
                                     </div>
                                     <div className={cn(
                                         "text-3xl font-bold",
-                                        data.total_pnl >= 0 ? "text-[#00FF94]" : "text-red-500"
+                                        realPnL >= 0 ? "text-[#00FF94]" : "text-red-500"
                                     )}>
-                                        {data.total_pnl >= 0 ? '+' : ''}{data.total_pnl.toFixed(2)} USD
+                                        {realPnL >= 0 ? '+' : ''}{realPnL.toFixed(2)} USD
                                     </div>
                                 </div>
 
@@ -232,10 +265,16 @@ export default function PnLPage() {
 
                             {/* Empty State for no trades */}
                             {data.total_trades === 0 && (
-                                <div className="glass-card rounded-xl p-12 text-center">
-                                    <Calendar className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                                    <h3 className="text-xl font-bold mb-2">{t('no_trades_title')}</h3>
-                                    <p className="text-gray-400">{t('no_trades_desc')}</p>
+                                <div className="mt-8">
+                                    <WowEmptyState
+                                        title={t('no_trades_title')}
+                                        description={t('no_trades_desc')}
+                                        icon={TrendingUp}
+                                        action={{
+                                            label: "Start Trading",
+                                            onClick: () => router.push('/en/trade')
+                                        }}
+                                    />
                                 </div>
                             )}
                         </div>

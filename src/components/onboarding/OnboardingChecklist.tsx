@@ -3,15 +3,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, Circle, Trophy, ArrowRight, Wallet, LineChart, PlayCircle, MessageCircle, Gift } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClientSide } from '@/lib/supabase';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
+import { useTranslations } from 'next-intl';
 
 // Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = getSupabaseClientSide();
 
 interface OnboardingState {
   step_connect_wallet: boolean;
@@ -23,6 +21,7 @@ interface OnboardingState {
 }
 
 export function OnboardingChecklist() {
+  const t = useTranslations('Onboarding');
   const [state, setState] = useState<OnboardingState>({
     step_connect_wallet: false,
     step_view_signal: false,
@@ -81,7 +80,7 @@ export function OnboardingChecklist() {
       if (error) throw error;
 
       setState(prev => ({ ...prev, [step]: true }));
-      toast.success('Task Completed!');
+      toast.success(t('task_completed'));
 
       // Check if all steps completed
       const newState = { ...state, [step]: true };
@@ -114,7 +113,7 @@ export function OnboardingChecklist() {
       if (error) throw error;
 
       setState(prev => ({ ...prev, reward_claimed: true }));
-      toast.success('Reward Claimed! 24h Elite Trial Activated.');
+      toast.success(t('reward_claimed'));
       setIsOpen(false);
     } catch (error) {
       toast.error('Failed to claim reward');
@@ -122,10 +121,10 @@ export function OnboardingChecklist() {
   };
 
   const steps = [
-    { key: 'step_connect_wallet', label: 'Connect Wallet', icon: Wallet, action: () => updateStep('step_connect_wallet') }, // In real app, this would be triggered by actual wallet connection
-    { key: 'step_view_signal', label: 'View a Signal', icon: LineChart, action: () => updateStep('step_view_signal') },
-    { key: 'step_run_backtest', label: 'Run Backtest', icon: PlayCircle, action: () => updateStep('step_run_backtest') },
-    { key: 'step_join_telegram', label: 'Join Telegram', icon: MessageCircle, action: () => { window.open('https://t.me/apex_os', '_blank'); updateStep('step_join_telegram'); } },
+    { key: 'step_connect_wallet', label: t('connect_wallet'), icon: Wallet, action: () => updateStep('step_connect_wallet') }, // In real app, this would be triggered by actual wallet connection
+    { key: 'step_view_signal', label: t('view_signal'), icon: LineChart, action: () => updateStep('step_view_signal') },
+    { key: 'step_run_backtest', label: t('run_backtest'), icon: PlayCircle, action: () => updateStep('step_run_backtest') },
+    { key: 'step_join_telegram', label: t('join_telegram'), icon: MessageCircle, action: () => { window.open('https://t.me/apex_os', '_blank'); updateStep('step_join_telegram'); } },
   ];
 
   const completedCount = steps.filter(s => state[s.key as keyof OnboardingState]).length;
@@ -144,7 +143,7 @@ export function OnboardingChecklist() {
       <div className="p-4 bg-gradient-to-r from-emerald-900/50 to-black border-b border-white/10 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-yellow-500" />
-          <span className="font-bold text-white">Setup Guide</span>
+          <span className="font-bold text-white">{t('setup_guide')}</span>
         </div>
         <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white">×</button>
       </div>
@@ -152,7 +151,7 @@ export function OnboardingChecklist() {
       {/* Progress */}
       <div className="px-4 pt-4">
         <div className="flex justify-between text-xs text-zinc-400 mb-1">
-          <span>{completedCount}/{steps.length} Completed</span>
+          <span>{completedCount}/{steps.length} {t('completed')}</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -205,7 +204,7 @@ export function OnboardingChecklist() {
               className="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               <Gift className="h-4 w-4" />
-              Claim 24h Elite Trial
+              {t('claim_reward')}
             </button>
           </motion.div>
         )}

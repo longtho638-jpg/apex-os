@@ -1,7 +1,7 @@
 'use client';
 
 import { Twitter, Linkedin, Github, Mail } from 'lucide-react';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 
 export function SiteFooter() {
     const t = useTranslations('Homepage');
@@ -28,24 +28,30 @@ export function SiteFooter() {
                     </div>
 
                     {[
-                        { title: t('footer.product'), links: [
-                            { name: t('nav.features'), href: '/#features' },
-                            { name: t('nav.pricing'), href: '/payment' },
-                            { name: 'Demo', href: '/landing' },
-                            { name: 'Dashboard', href: '/dashboard' }
-                        ]},
-                        { title: t('footer.resources'), links: [
-                            { name: 'Documentation', href: '/resources' },
-                            { name: 'API Reference', href: '#' },
-                            { name: 'Status', href: '#' },
-                            { name: 'Support', href: '#' }
-                        ]},
-                        { title: t('footer.legal'), links: [
-                            { name: 'Terms', href: '#' },
-                            { name: 'Privacy', href: '#' },
-                            { name: 'Security', href: '#' },
-                            { name: 'Cookies', href: '#' }
-                        ]}
+                        {
+                            title: t('footer.product'), links: [
+                                { name: t('nav.features'), href: '/#features' },
+                                { name: t('nav.pricing'), href: '/pricing' },
+                                { name: 'Demo', href: '/landing' },
+                                { name: 'Dashboard', href: '/dashboard/overview' }
+                            ]
+                        },
+                        {
+                            title: t('footer.resources'), links: [
+                                { name: 'Documentation', href: '/docs' },
+                                { name: 'API Reference', href: '/docs' }, // Point to docs for now
+                                { name: 'Status', href: '/status' },
+                                { name: 'Support', href: '/support' }
+                            ]
+                        },
+                        {
+                            title: t('footer.legal'), links: [
+                                { name: 'Terms', href: '/legal/terms' },
+                                { name: 'Privacy', href: '/legal/privacy' },
+                                { name: 'Security', href: '/legal/security' },
+                                { name: 'Cookies', href: '/legal/cookies' }
+                            ]
+                        }
                     ].map((col, i) => (
                         <div key={i}>
                             <h4 className="font-bold mb-6">{col.title}</h4>
@@ -66,12 +72,12 @@ export function SiteFooter() {
                 <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
                     <p>&copy; 2026 ApexOS. {t('footer.rights')}</p>
                     <div className="flex items-center gap-6">
-                        <a href="mailto:support@apexos.io" className="hover:text-white flex items-center gap-2">
-                            <Mail className="w-4 h-4" /> support@apexos.io
+                        <a href="mailto:support@apexrebate.com" className="hover:text-white flex items-center gap-2">
+                            <Mail className="w-4 h-4" /> support@apexrebate.com
                         </a>
                     </div>
                 </div>
-                
+
                 <div className="mt-8 p-4 bg-white/5 rounded-lg border border-white/5 text-xs text-zinc-600 text-center leading-relaxed">
                     {t('footer.risk_disclosure')}
                 </div>

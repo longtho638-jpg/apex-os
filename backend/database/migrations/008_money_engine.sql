@@ -124,7 +124,7 @@ CREATE POLICY "Admins manage withdrawals" ON public.withdrawals
 CREATE TABLE IF NOT EXISTS public.transactions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     wallet_id UUID NOT NULL REFERENCES public.wallets(id),
-    type TEXT NOT NULL CHECK (type IN ('rebate', 'withdrawal', 'withdrawal_fee', 'adjustment', 'bonus', 'refund')),
+    type TEXT NOT NULL CHECK (type IN ('rebate', 'withdrawal', 'withdrawal_fee', 'adjustment', 'bonus', 'refund', 'deposit')),
     amount DECIMAL(20, 8) NOT NULL, -- Can be negative for deductions
     balance_after DECIMAL(20, 8) NOT NULL,
     reference_id TEXT, -- e.g., trade_id or withdrawal_id

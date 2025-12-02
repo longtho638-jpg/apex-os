@@ -78,7 +78,7 @@ export default function DeepSeekInsight({ symbol, marketContext, onExecute }: De
                         <Brain className="h-4 w-4 text-blue-400" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-white">DeepSeek Quant</h3>
+                        <h3 className="text-sm font-bold text-white">DeepQuant Neural Core</h3>
                         <p className="text-[10px] text-zinc-400">AI Strategy Engine</p>
                     </div>
                 </div>
@@ -107,14 +107,27 @@ export default function DeepSeekInsight({ symbol, marketContext, onExecute }: De
                 )}
 
                 {loading && (
-                    <div className="h-full flex flex-col items-center justify-center space-y-4">
-                        <div className="relative">
-                            <div className="h-12 w-12 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+                    <div className="h-full flex flex-col items-center justify-center space-y-4 relative overflow-hidden">
+                        {/* Scanning Effect */}
+                        <motion.div
+                            className="absolute top-0 left-0 w-full h-1 bg-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.5)] z-10"
+                            animate={{ top: ["0%", "100%"] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                        />
+                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+
+                        <div className="relative z-20">
+                            <div className="h-16 w-16 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin flex items-center justify-center">
+                                <div className="h-10 w-10 rounded-full bg-blue-500/20 animate-pulse" />
+                            </div>
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <Brain className="h-5 w-5 text-blue-500 animate-pulse" />
+                                <Brain className="h-6 w-6 text-blue-400" />
                             </div>
                         </div>
-                        <p className="text-xs text-blue-400 animate-pulse">DeepSeek is thinking...</p>
+                        <div className="text-center z-20">
+                            <p className="text-sm font-bold text-blue-400 animate-pulse">NEURAL SCANNING</p>
+                            <p className="text-[10px] text-blue-500/70 font-mono mt-1">Analyzing 50+ Indicators...</p>
+                        </div>
                     </div>
                 )}
 

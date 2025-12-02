@@ -19,27 +19,27 @@ export async function GET(req: NextRequest) {
     // But for modularity, we will simulate the logic here or reuse the function if exported.
     // Since we can't easily import the POST handler from another route file in Next.js app dir structure without refactoring,
     // we will reimplement the core logic briefly or assume we call the external URL.
-    
+
     // For this CLI task, let's just create a draft directly to simulate the "Auto-Generate"
-    
+
     const supabase = getSupabaseClient();
-    
+
     // Check if we already posted today
     const startOfDay = new Date();
-    startOfDay.setHours(0,0,0,0);
-    
+    startOfDay.setHours(0, 0, 0, 0);
+
     const { count } = await supabase
-        .from('blog_posts')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', startOfDay.toISOString());
-        
+      .from('blog_posts')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', startOfDay.toISOString());
+
     if (count && count > 0) {
-        return NextResponse.json({ message: 'Daily post already generated' });
+      return NextResponse.json({ message: 'Daily post already generated' });
     }
 
     // Call OpenAI/OpenRouter to generate content
     const prompt = `Write a 1000-word blog post about ${topic} for a crypto trading audience.`;
-    
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {

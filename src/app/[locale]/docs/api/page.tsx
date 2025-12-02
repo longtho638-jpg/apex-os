@@ -18,17 +18,17 @@ export default function ApiDocsPage() {
         </header>
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <FeatureCard 
+          <FeatureCard
             icon={<Shield className="w-6 h-6 text-emerald-400" />}
             title="Secure Authentication"
             description="Bearer Token authentication with SHA-256 hashed keys and granular scopes."
           />
-          <FeatureCard 
+          <FeatureCard
             icon={<Zap className="w-6 h-6 text-emerald-400" />}
             title="Real-Time Latency"
             description="Signals delivered with <50ms latency via our optimized edge network."
           />
-          <FeatureCard 
+          <FeatureCard
             icon={<Code className="w-6 h-6 text-emerald-400" />}
             title="Developer Friendly"
             description="OpenAPI 3.0 spec, clear error messages, and easy-to-use SDKs."
@@ -37,21 +37,21 @@ export default function ApiDocsPage() {
 
         {/* Documentation Viewer Placeholder */}
         <GlassCard className="p-0 overflow-hidden">
-            <div className="bg-[#1e1e1e] p-4 flex items-center gap-2 border-b border-white/10">
-                <Terminal className="w-5 h-5 text-zinc-400" />
-                <span className="font-mono text-sm text-zinc-300">bash</span>
-            </div>
-            <div className="p-6 bg-[#0d0d0d] font-mono text-sm text-zinc-300 overflow-x-auto">
-                <p className="mb-4 text-zinc-500"># Get latest signals</p>
-                <p className="whitespace-pre">
-                    curl -X GET https://api.apexrebate.com/v1/signals/latest \<br/>
-                    &nbsp;&nbsp;-H "Authorization: Bearer apx_live_..." \<br/>
-                    &nbsp;&nbsp;-H "Content-Type: application/json"
-                </p>
-                
-                <p className="mt-6 mb-4 text-zinc-500"># Response</p>
-                <pre className="text-emerald-400">
-{`{
+          <div className="bg-[#1e1e1e] p-4 flex items-center gap-2 border-b border-white/10">
+            <Terminal className="w-5 h-5 text-zinc-400" />
+            <span className="font-mono text-sm text-zinc-300">bash</span>
+          </div>
+          <div className="p-6 bg-[#0d0d0d] font-mono text-sm text-zinc-300 overflow-x-auto">
+            <p className="mb-4 text-zinc-500"># Get latest signals</p>
+            <p className="whitespace-pre">
+              curl -X GET https://api.apexrebate.com/v1/signals/latest \<br />
+              &nbsp;&nbsp;-H "Authorization: Bearer apx_live_..." \<br />
+              &nbsp;&nbsp;-H "Content-Type: application/json"
+            </p>
+
+            <p className="mt-6 mb-4 text-zinc-500"># Response</p>
+            <pre className="text-emerald-400">
+              {`{
   "signals": [
     {
       "pair": "BTC/USDT",
@@ -62,17 +62,17 @@ export default function ApiDocsPage() {
     }
   ]
 }`}
-                </pre>
-            </div>
+            </pre>
+          </div>
         </GlassCard>
 
         <div className="mt-12 text-center">
-            <Link 
-                href="/contact-sales"
-                className="inline-flex items-center gap-2 px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors"
-            >
-                Get API Access <ArrowRight className="w-5 h-5" />
-            </Link>
+          <Link
+            href="/contact-sales"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors"
+          >
+            Get API Access <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </div>
     </div>
@@ -80,13 +80,13 @@ export default function ApiDocsPage() {
 }
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
-    return (
-        <GlassCard className="p-6">
-            <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
-                {icon}
-            </div>
-            <h3 className="text-xl font-bold mb-2">{title}</h3>
-            <p className="text-zinc-400">{description}</p>
-        </GlassCard>
-    );
+  return (
+    <GlassCard className="p-6">
+      <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold mb-2">{title}</h3>
+      <p className="text-zinc-400">{description}</p>
+    </GlassCard>
+  );
 }

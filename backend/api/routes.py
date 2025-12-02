@@ -481,8 +481,8 @@ class ConnectExchangeRequest(BaseModel):
         
 #         # Encrypt and save credentials (Mock implementation for demo)
         # In production, use Fernet or similar symmetric encryption
-        encrypted_api_key = f"enc_{api_key}" 
-        encrypted_secret = f"enc_{api_secret}"
+#         encrypted_api_key = f"enc_{api_key}" 
+#         encrypted_secret = f"enc_{api_secret}"
         
         # Save to DB (Mock)
         # db.save_credentials(user_id, exchange_id, encrypted_api_key, encrypted_secret)

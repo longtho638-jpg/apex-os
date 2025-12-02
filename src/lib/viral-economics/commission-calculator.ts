@@ -67,8 +67,9 @@ export async function calculateMonthlyCommissions(month: string): Promise<Commis
     }
   }
 
-  // 3. Validate against pool cap (90%)
-  const maxPayout = totalRebateAvailable * 0.90;
+  // 3. Validate against pool cap (100%)
+  // We allow 100% payout because the company monetizes via SaaS (Subscription)
+  const maxPayout = totalRebateAvailable * 1.0;
   let scalingFactor = 1.0;
 
   if (totalTheoreticalPayout > maxPayout) {

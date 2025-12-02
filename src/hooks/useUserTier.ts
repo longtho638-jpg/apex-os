@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getApiUrl } from '@/lib/api/config';
 import { TierId, UNIFIED_TIERS, TIER_ORDER } from '@/config/unified-tiers';
 
-export type MenuId = 'overview' | 'trade' | 'pnl' | 'wolfpack' | 'rebates' | 'risk' | 'referrals' | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
+export type MenuId = 'overview' | 'trade' | 'copy-trading' | 'pnl' | 'wolfpack' | 'rebates' | 'risk' | 'referrals' | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
 
 interface TierInfo {
     tier: TierId | 'ADMIN'; // Admin is special case, not in UNIFIED_TIERS
@@ -43,7 +43,7 @@ export function useUserTier() {
                 let tier = (data.tier || 'FREE').toUpperCase();
 
                 // Map legacy values if backend returns them
-                if (tier === 'FOUNDERS') tier = 'PRO';
+                if (tier === 'FOUNDERS') tier = 'WHALE'; // Upgrade FOUNDERS to WHALE
                 if (tier === 'PREMIUM') tier = 'TRADER';
 
                 setTierInfo({
@@ -63,6 +63,7 @@ export function useUserTier() {
         const minTierForMenu: Record<MenuId, TierId> = {
             overview: 'FREE',
             trade: 'FREE',
+            'copy-trading': 'FREE',
             pnl: 'FREE',
             wolfpack: 'PRO', // Was Founders
             rebates: 'FREE',
@@ -90,11 +91,12 @@ export function useUserTier() {
     return {
         ...tierInfo,
         loading,
-        isAdmin: tierInfo.tier === 'ADMIN',
+        isAdmin: tierInfo.tier === 'ADMIN' || tierInfo.tier === 'WHALE', // WHALE is basically God Mode
         isFree: tierInfo.tier === 'FREE',
         isPro: tierInfo.tier === 'PRO',
         isTrader: tierInfo.tier === 'TRADER',
         isElite: tierInfo.tier === 'ELITE',
+        isWhale: tierInfo.tier === 'WHALE',
         canViewMenu,
 
         // Feature access helpers

@@ -111,8 +111,8 @@ Output MUST be valid JSON with the following structure:
      * Specialized method for Volume/Rebate Farming Strategy
      * Focuses on Delta Neutral, High Turnover, and Capital Preservation
      */
-    async generateVolumeStrategy(marketContext: string, userTier: string): Promise < any > {
-            const systemPrompt = `
+    async generateVolumeStrategy(marketContext: string, userTier: string): Promise<any> {
+        const systemPrompt = `
 You are "The Farmer" - a Senior Quantitative AI specializing in Market Making and Rebate Arbitrage.
 Your goal is NOT to predict price direction, but to MAXIMIZE TRADING VOLUME while maintaining DELTA NEUTRALITY (Zero Risk).
 
@@ -137,20 +137,20 @@ Output MUST be valid JSON:
 }
         `;
 
-            const response = await this.chatCompletion([
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: `User Tier: ${userTier}\n${marketContext}` }
-            ], 0.2);
+        const response = await this.chatCompletion([
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `User Tier: ${userTier}\n${marketContext}` }
+        ], 0.2);
 
-            try {
-                const content = response.choices[0].message.content;
-                const jsonStr = content.replace(/```json\n|\n```/g, '');
-                return JSON.parse(jsonStr);
-            } catch(e) {
-                console.error('Failed to parse DeepSeek volume strategy:', e);
-                throw new Error('Invalid JSON response from DeepSeek');
-            }
+        try {
+            const content = response.choices[0].message.content;
+            const jsonStr = content.replace(/```json\n|\n```/g, '');
+            return JSON.parse(jsonStr);
+        } catch (e) {
+            console.error('Failed to parse DeepSeek volume strategy:', e);
+            throw new Error('Invalid JSON response from DeepSeek');
         }
     }
+}
 
-    export const deepseek = new DeepSeekClient();
+export const deepseek = new DeepSeekClient();

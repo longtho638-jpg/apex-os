@@ -5,12 +5,14 @@ import { Sidebar } from '@/components/os/sidebar';
 import { Settings, User, Key, Bell, Shield, Save, Trash2, Plus, Link, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { cn } from '@/lib/utils';
+import { useUserTier } from '@/hooks/useUserTier';
+import { Crown } from 'lucide-react';
 import ExchangeLinkingManager from '@/components/settings/ExchangeLinkingManager';
 import PaymentMethodsManager from '@/components/settings/PaymentMethodsManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 
 type TabType = 'profile' | 'connections' | 'payment' | 'api-keys' | 'preferences' | 'security';
@@ -36,6 +38,7 @@ export default function SettingsPage() {
         removeAPIKey,
         updatePrefs
     } = useUserSettings();
+    const { tier } = useUserTier();
 
     React.useEffect(() => {
         if (profile) {
@@ -198,7 +201,7 @@ export default function SettingsPage() {
                                             <h2 className="text-2xl font-bold mb-6">{t('profile_info')}</h2>
                                             <div className="space-y-6 max-w-xl">
                                                 <div className="flex items-center gap-6 mb-8">
-                                                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 p-[2px]">
+                                                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 p-[2px] relative">
                                                         <div className="h-full w-full rounded-full bg-black overflow-hidden relative">
                                                             {avatarUrl ? (
                                                                 <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
@@ -207,6 +210,16 @@ export default function SettingsPage() {
                                                                     {displayName?.[0]?.toUpperCase() || 'U'}
                                                                 </div>
                                                             )}
+                                                        </div>
+                                                        {/* Tier Badge */}
+                                                        <div className="absolute -bottom-2 -right-2 bg-black rounded-full p-1 border border-white/10">
+                                                            <div className={cn(
+                                                                "px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1",
+                                                                tier === 'WHALE' ? "bg-purple-500 text-white" : "bg-emerald-500 text-black"
+                                                            )}>
+                                                                {tier === 'WHALE' && <Crown className="w-3 h-3" />}
+                                                                {tier}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div>

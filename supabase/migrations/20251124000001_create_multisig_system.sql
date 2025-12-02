@@ -39,6 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_approval_requests_status ON approval_requests(sta
 CREATE INDEX IF NOT EXISTS idx_approvals_request_id ON approvals(request_id);
 
 -- RLS Policies
+ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE approval_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE approvals ENABLE ROW LEVEL SECURITY;
 

@@ -1,8 +1,8 @@
-export type Exchange = 'binance' | 'bybit' | 'okx' | 'bitget' | 'kucoin' | 'mexc' | 'gate' | 'htx' | 'bingx' | 'phemex' | 'coinex' | 'bitmart';
+export type Exchange = 'binance' | 'bybit' | 'okx' | 'bitget' | 'kucoin' | 'mexc' | 'gate' | 'htx' | 'bingx' | 'phemex' | 'coinex' | 'bitmart' | 'exness';
 
 export const EXCHANGES: Exchange[] = [
     'binance', 'bybit', 'okx', 'bitget', 'kucoin', 'mexc',
-    'gate', 'htx', 'bingx', 'phemex', 'coinex', 'bitmart'
+    'gate', 'htx', 'bingx', 'phemex', 'coinex', 'bitmart', 'exness'
 ];
 
 export interface ExchangeFormValues {

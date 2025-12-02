@@ -1,0 +1,32 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║              APEX OS - DATA INTEGRITY CHECK SUMMARY REPORT                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+REPORT METADATA:
+  Timestamp:        2025-12-02 18:22:02
+  Check Type:       quick
+  Project Root:     /Users/macbookprom1/apex-os
+  Report Directory: /Users/macbookprom1/apex-os/.data-integrity-reports
+
+CHECK RESULTS:
+  Status:           Checking...
+  Integrity Score:  Pending...
+  Issues Found:     Pending...
+
+NEXT STEPS:
+  1. Review detailed reports in: /Users/macbookprom1/apex-os/.data-integrity-reports
+  2. Check Gemini output: /Users/macbookprom1/apex-os/.data-integrity-reports/gemini-output-*.txt
+  3. Review Python audit: /Users/macbookprom1/apex-os/.data-integrity-reports/data-integrity-*.json
+  4. View HTML report: /Users/macbookprom1/apex-os/.data-integrity-reports/data-integrity-*.html
+  5. View full log: /Users/macbookprom1/apex-os/.data-integrity-reports/data-integrity-20251202-182147.log
+
+RECOMMENDATIONS:
+  - Schedule daily checks at 2 AM UTC
+  - Set up email alerts for critical issues
+  - Review issues within 24 hours
+  - Archive reports for compliance
+
+═════════════════════════════════════════════════════════════════════════════
+
+For detailed analysis, review the Gemini CLI output and Python audit results.
+

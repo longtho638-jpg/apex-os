@@ -72,7 +72,7 @@ export class SmartRouter {
   private selectModel(complexity: 'simple' | 'medium' | 'complex'): string {
     // Free users get cheapest models
     if (this.config.userTier === 'free') {
-      return complexity === 'simple' 
+      return complexity === 'simple'
         ? 'deepseek/deepseek-chat'          // $0.14/1M
         : 'meta-llama/llama-3-8b-instruct'; // $0.06/1M
     }
@@ -164,7 +164,7 @@ export class SmartRouter {
     try {
       // Primary: OpenRouter
       if (process.env.NODE_ENV === 'development') {
-          console.log(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
+        console.log(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
       }
       return await this.callOpenRouter(model, messages);
 

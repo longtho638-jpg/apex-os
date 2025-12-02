@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslations } from '@/contexts/I18nContext';
+import { useTranslations } from 'next-intl';
 import { ArrowLeftRight } from 'lucide-react';
 // import SwapInterface from '@/components/defi/SwapInterface';
 
