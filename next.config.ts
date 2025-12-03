@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://*.tradingview.com",
               "img-src 'self' data: blob: https://*.supabase.co https://telegram.org https://*.telegram.org https://grainy-gradients.vercel.app https://*.tradingview.com",
               "font-src 'self' data: https://*.tradingview.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://vercel.live wss://*.vercel.live https://api.coingecko.com wss://stream.binance.com:9443 wss://stream.binance.com wss://*.tradingview.com https://*.tradingview.com wss://ws.okx.com:8443 https://api.binance.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co wss://ryvpqbuftmlsynmajecx.supabase.co https://*.vercel.app https://vercel.live wss://*.vercel.live https://api.coingecko.com wss://stream.binance.com:9443 wss://stream.binance.com wss://*.tradingview.com wss://widgetdata.tradingview.com https://*.tradingview.com wss://ws.okx.com:8443 https://api.binance.com",
               "frame-src 'self' https://telegram.org https://*.telegram.org https://challenges.cloudflare.com https://*.tradingview.com",
               "worker-src 'self' blob:",
               "object-src 'none'",
