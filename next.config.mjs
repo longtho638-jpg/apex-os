@@ -1,10 +1,10 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from 'next-intl/plugin';
-import type { NextConfig } from "next";
 
 const withNextIntl = createNextIntlPlugin();
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   /* config options here */
   reactCompiler: true,
   images: {
