@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -7,7 +8,7 @@ export async function GET(req: Request) {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase environment variables');
+      logger.error('Missing Supabase environment variables');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -30,7 +31,7 @@ export async function GET(req: Request) {
     const { data, error } = await query;
 
     if (error) {
-        console.warn('Database error (falling back to mocks):', error.message);
+        logger.warn('Database error (falling back to mocks):', error.message);
         // Mock Data Fallback for Demo/Uninitialized DB
         return NextResponse.json({
             data: Array.from({ length: 5 }).map((_, i) => ({
@@ -50,7 +51,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ data });
   } catch (error: any) {
-    console.error('Error in signals API:', error);
+    logger.error('Error in signals API:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

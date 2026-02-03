@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseClient } from './supabase';
 
@@ -37,7 +38,7 @@ export class AuditService {
                 user_agent: event.userAgent
             });
         } catch (error) {
-            console.error('Audit log error:', error);
+            logger.error('Audit log error:', error);
             // Don't throw - audit logging should not break app flow
         }
     }
@@ -54,7 +55,7 @@ export class AuditService {
             .limit(limit);
 
         if (error) {
-            console.error('Failed to fetch audit logs:', error);
+            logger.error('Failed to fetch audit logs:', error);
             return [];
         }
 
@@ -73,7 +74,7 @@ export class AuditService {
             .limit(limit);
 
         if (error) {
-            console.error('Failed to fetch audit logs:', error);
+            logger.error('Failed to fetch audit logs:', error);
             return [];
         }
 
@@ -97,7 +98,7 @@ export class AuditService {
             .limit(limit);
 
         if (error) {
-            console.error('Failed to fetch audit logs:', error);
+            logger.error('Failed to fetch audit logs:', error);
             return [];
         }
 
@@ -135,7 +136,7 @@ export class AuditService {
             .select('id');
 
         if (error) {
-            console.error('Failed to delete old audit logs:', error);
+            logger.error('Failed to delete old audit logs:', error);
             return 0;
         }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Search, Edit, Trash2, Layout, Eye } from 'lucide-react';
@@ -34,7 +35,7 @@ export default function TemplatesPage() {
                 setTemplates(data.templates);
             }
         } catch (error) {
-            console.error('Fetch templates error:', error);
+            logger.error('Fetch templates error:', error);
         } finally {
             setLoading(false);
         }
@@ -52,7 +53,7 @@ export default function TemplatesPage() {
                 fetchTemplates();
             }
         } catch (error) {
-            console.error('Delete error:', error);
+            logger.error('Delete error:', error);
         }
     }
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * Hook to maintain rolling price history and calculate technical indicators
  * 
@@ -101,7 +102,7 @@ export function useTechnicalIndicators(symbol: string) {
             setIndicators(calculated as CalculatedIndicators);
             setLoading(false);
         } catch (error) {
-            console.error('[useTechnicalIndicators] Calculation error:', error);
+            logger.error('[useTechnicalIndicators] Calculation error:', error);
             setLoading(false);
         }
     }, [candles]);

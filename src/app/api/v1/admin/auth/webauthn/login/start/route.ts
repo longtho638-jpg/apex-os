@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateAuthenticationOptions } from '@simplewebauthn/server';
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error) {
-        console.error('WebAuthn login start error:', error);
+        logger.error('WebAuthn login start error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

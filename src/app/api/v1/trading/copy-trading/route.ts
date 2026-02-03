@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
     } catch (error) {
-        console.error('[CopyTrading API] Error:', error);
+        logger.error('[CopyTrading API] Error:', error);
         return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     // Validate env variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        console.error('[CopyTrading] Missing env variables:', {
+        logger.error('[CopyTrading] Missing env variables:', {
             NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
             SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
         });
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
 
     } catch (error: any) {
-        console.error('[CopyTrading API] POST Error:', error);
+        logger.error('[CopyTrading API] POST Error:', error);
         return NextResponse.json({
             success: false,
             error: error.message || 'Internal Server Error',
@@ -134,7 +135,7 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ success: true, message: 'Unfollowed leader' });
 
     } catch (error) {
-        console.error('[CopyTrading API] DELETE Error:', error);
+        logger.error('[CopyTrading API] DELETE Error:', error);
         return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
     }
 }

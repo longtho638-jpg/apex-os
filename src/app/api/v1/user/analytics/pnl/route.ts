@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { applyRateLimit } from '@/middleware/rateLimit';
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Analytics error:', error);
+        logger.error('Analytics error:', error);
         return NextResponse.json(
             { success: false, message: 'Failed to fetch analytics' },
             { status: 500 }

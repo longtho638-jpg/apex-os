@@ -127,7 +127,7 @@ export async function middleware(request: NextRequest) {
       const isSuperAdmin = userRole === 'service_role' || userRole === 'admin' || userRole === 'super_admin';
 
       if (!isSuperAdmin) {
-        console.warn(`[Middleware] Blocked non-admin user ${userId} from ${request.nextUrl.pathname}`);
+        logger.warn(`[Middleware] Blocked non-admin user ${userId} from ${request.nextUrl.pathname}`);
         if (request.nextUrl.pathname.startsWith('/api/')) {
           return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
         }
@@ -248,7 +248,7 @@ export async function middleware(request: NextRequest) {
   // 6. Default pass-through for API
   // CRITICAL SECURITY FIX: Ensure all API routes are checked
   if (request.nextUrl.pathname.startsWith('/api')) {
-    console.error('Middleware API Check:', request.nextUrl.pathname);
+    logger.error('Middleware API Check:', request.nextUrl.pathname);
     // Whitelist public API routes
     const publicApiRoutes = [
       '/api/v1/auth/login',

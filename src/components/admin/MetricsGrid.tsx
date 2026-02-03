@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,7 +25,7 @@ export default function MetricsGrid() {
                 const data = await res.json();
                 setMetrics(data);
             } catch (error) {
-                console.error('Failed to fetch metrics:', error);
+                logger.error('Failed to fetch metrics:', error);
             } finally {
                 setLoading(false);
             }

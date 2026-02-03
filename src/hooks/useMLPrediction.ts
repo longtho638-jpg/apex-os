@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * React Hook for ML Predictions
  * 
@@ -61,7 +62,7 @@ export function useMLPrediction({
                     error: null
                 });
             } catch (error) {
-                console.error('[useMLPrediction] Error:', error);
+                logger.error('[useMLPrediction] Error:', error);
                 setState(prev => ({
                     ...prev,
                     loading: false,

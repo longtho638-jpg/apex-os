@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * useUserTier - Feature gate hook for Unified Tiers
  */
@@ -53,7 +54,7 @@ export function useUserTier() {
                 setLoading(false);
             })
             .catch(err => {
-                console.error('Failed to fetch user tier:', err);
+                logger.error('Failed to fetch user tier:', err);
                 setLoading(false);
             });
     }, [isAuthenticated, user, token]);

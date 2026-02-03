@@ -22,7 +22,7 @@ export interface Transaction {
     reference_id?: string;
     reference_type?: 'trade' | 'withdrawal' | 'manual';
     description?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     created_at: string;
 }
 
@@ -40,7 +40,7 @@ export interface PaymentMethod {
         account_number?: string;
         account_holder?: string;
         swift_code?: string;
-        [key: string]: any;
+        [key: string]: unknown;
     };
     is_default: boolean;
     created_at: string;

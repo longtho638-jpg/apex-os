@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '../supabase';
 import type { User } from '@supabase/supabase-js';
 import { auditService } from '@/lib/audit';
@@ -62,7 +63,7 @@ export class MultiSigService {
 
             return { success: true, requestId: data.id };
         } catch (error: any) {
-            console.error('Create approval request error:', error);
+            logger.error('Create approval request error:', error);
             return { success: false, error: error.message };
         }
     }
@@ -120,7 +121,7 @@ export class MultiSigService {
             return { success: true, isFullyApproved };
 
         } catch (error: any) {
-            console.error('Approve request error:', error);
+            logger.error('Approve request error:', error);
             return { success: false, error: error.message };
         }
     }

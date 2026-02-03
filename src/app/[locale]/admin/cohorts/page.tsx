@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Sidebar } from '@/components/os/sidebar';
@@ -26,7 +27,7 @@ export default function CohortsPage() {
         setLoading(false);
       })
       .catch(err => {
-          console.error("Failed to fetch cohorts", err);
+          logger.error("Failed to fetch cohorts", err);
           setLoading(false);
       });
   }, []);

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,7 +52,7 @@ export function CopyTradingLeaderboard({ userId }: { userId: string }) {
                     setFollowing(followingIds);
                 }
             } catch (error) {
-                console.error('Failed to fetch following:', error);
+                logger.error('Failed to fetch following:', error);
             }
         };
 
@@ -66,7 +67,7 @@ export function CopyTradingLeaderboard({ userId }: { userId: string }) {
                 setLeaders(data.leaders || []);
             }
         } catch (error) {
-            console.error('Failed to fetch leaders:', error);
+            logger.error('Failed to fetch leaders:', error);
         } finally {
             setLoading(false);
         }
@@ -110,11 +111,11 @@ export function CopyTradingLeaderboard({ userId }: { userId: string }) {
                 await fetchLeaders();
                 toast.success(`Successfully copying ${selectedLeader.display_name}`);
             } else {
-                console.error('[CopyTrading] API Error:', data);
+                logger.error('[CopyTrading] API Error:', data);
                 toast.error(data.message || data.error || 'Failed to copy leader');
             }
         } catch (error) {
-            console.error('Failed to follow leader:', error);
+            logger.error('Failed to follow leader:', error);
             toast.error('Network error occurred');
         }
     };
@@ -143,7 +144,7 @@ export function CopyTradingLeaderboard({ userId }: { userId: string }) {
                 toast.success('Stopped copying leader');
             }
         } catch (error) {
-            console.error('Failed to unfollow leader:', error);
+            logger.error('Failed to unfollow leader:', error);
         }
     };
 

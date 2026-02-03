@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
@@ -29,13 +30,13 @@ export async function POST(request: NextRequest) {
             });
 
         if (error) {
-            console.error('Error storing nonce:', error);
+            logger.error('Error storing nonce:', error);
             return NextResponse.json({ error: 'Database error' }, { status: 500 });
         }
 
         return NextResponse.json({ nonce });
     } catch (error) {
-        console.error('Nonce generation error:', error);
+        logger.error('Nonce generation error:', error);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }
 }

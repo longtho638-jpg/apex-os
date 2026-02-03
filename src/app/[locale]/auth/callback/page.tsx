@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSupabaseClientSide } from '@/lib/supabase';
@@ -24,7 +25,7 @@ export default function AuthCallbackPage() {
                 const errorCode = params.get('error_code');
 
                 if (errorDescription || errorCode) {
-                    console.error('Auth Error:', errorDescription);
+                    logger.error('Auth Error:', errorDescription);
                     setError(errorDescription?.replace(/\+/g, ' ') || 'Authentication failed');
                     return;
                 }
@@ -35,7 +36,7 @@ export default function AuthCallbackPage() {
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
                 if (sessionError) {
-                    console.error('Auth callback error:', sessionError);
+                    logger.error('Auth callback error:', sessionError);
                     setError(sessionError.message);
                     return;
                 }
@@ -53,9 +54,10 @@ export default function AuthCallbackPage() {
                     });
                     authListener = data;
                 }
-            } catch (err: any) {
-                console.error('Unexpected auth error:', err);
-                setError(err.message || 'An unexpected error occurred');
+            } catch (err: unknown) {
+                logger.error('Unexpected auth error:', err);
+                const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+                setError(message);
             }
         };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -44,7 +45,7 @@ export default function TradePage() {
                     setTrades(history.trades);
                 }
             } catch (error) {
-                console.error("Failed to load trade data", error);
+                logger.error("Failed to load trade data", error);
             }
         };
 
@@ -58,7 +59,7 @@ export default function TradePage() {
         try {
             await triggerSync('demo-user', 'binance', 'demo-key', 'demo-secret');
         } catch (error) {
-            console.error(error);
+            logger.error("Operation failed", error);
         } finally {
             setSyncing(false);
         }

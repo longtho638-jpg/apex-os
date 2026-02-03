@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import crypto from 'crypto';
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) {
-      console.error('Failed to create API key:', error);
+      logger.error('Failed to create API key:', error);
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
 

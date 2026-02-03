@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { broadcastSignal } from '@/lib/trading/broadcaster';
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
             if (error) throw error;
 
             // Broadcast to Followers (Async - fire and forget)
-            broadcastSignal(userId, position).catch(err => console.error('Broadcast Error:', err));
+            broadcastSignal(userId, position).catch(err => logger.error('Broadcast Error:', err));
 
             return NextResponse.json({ success: true, position });
 
@@ -121,7 +122,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
 
     } catch (error: any) {
-        console.error('Trade Execution Error:', error);
+        logger.error('Trade Execution Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

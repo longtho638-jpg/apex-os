@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -80,7 +81,7 @@ export async function GET(
             // 4. Record View (Async - fire and forget)
             // In a real high-scale app, use a queue. Here, direct DB update is fine for MVP.
             // We haven't created a 'views' table yet, so we'll skip this or log it.
-            console.log(`[AB-TEST] Campaign ${campaign.id} -> Variation ${selectedVariation.id}`);
+            logger.info(`[AB-TEST] Campaign ${campaign.id} -> Variation ${selectedVariation.id}`);
 
             // 5. Determine Response
             if (selectedVariation.template) {
@@ -116,7 +117,7 @@ export async function GET(
         });
 
     } catch (error) {
-        console.error('Redirect error:', error);
+        logger.error('Redirect error:', error);
         return NextResponse.redirect(new URL('/error', request.url));
     }
 }

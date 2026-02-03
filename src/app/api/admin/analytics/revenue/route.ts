@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Analytics Revenue Error:', error);
+    logger.error('Analytics Revenue Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

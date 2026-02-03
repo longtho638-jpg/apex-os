@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * MFA Disable API
  * POST /api/v1/admin/mfa/disable
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
             .eq('email', email);
 
         if (updateError) {
-            console.error('Error disabling MFA:', updateError);
+            logger.error('Error disabling MFA:', updateError);
             return NextResponse.json(
                 { error: 'Failed to disable MFA' },
                 { status: 500 }
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('MFA disable error:', error);
+        logger.error('MFA disable error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { jwtVerify } from 'jose';
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('MFA Setup Error:', error);
+        logger.error('MFA Setup Error:', error);
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }

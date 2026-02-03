@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import crypto from 'crypto';
 
 interface BinanceBalance {
@@ -48,7 +49,7 @@ export class BinanceClient {
             return data.balances.filter((b: any) => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0);
 
         } catch (error) {
-            console.error('Binance Balance Fetch Error:', error);
+            logger.error('Binance Balance Fetch Error:', error);
             throw error;
         }
     }

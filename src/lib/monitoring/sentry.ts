@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 
 export const initSentry = () => {
@@ -5,13 +6,13 @@ export const initSentry = () => {
     // This function can be used for manual initialization if needed, 
     // but usually not required with the Next.js SDK.
     if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_SENTRY_DSN) {
-        console.warn('Sentry DSN not found in production environment.');
+        logger.warn('Sentry DSN not found in production environment.');
     }
 };
 
 export const captureError = (error: Error, context?: Record<string, any>) => {
     if (process.env.NODE_ENV === 'development') {
-        console.error('Captured Error:', error, context);
+        logger.error('Captured Error:', error, context);
     }
 
     Sentry.captureException(error, { extra: context });
@@ -19,7 +20,7 @@ export const captureError = (error: Error, context?: Record<string, any>) => {
 
 export const captureMessage = (message: string, level: 'info' | 'warning' | 'error' | 'fatal' | 'debug' = 'info') => {
     if (process.env.NODE_ENV === 'development') {
-        console.log(`[${level.toUpperCase()}] ${message}`);
+        logger.info(`[${level.toUpperCase()}] ${message}`);
     }
 
     Sentry.captureMessage(message, level);

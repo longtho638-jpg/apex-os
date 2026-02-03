@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
             .single();
 
         if (error) {
-            console.error('Error fetching admin profile:', error);
+            logger.error('Error fetching admin profile:', error);
             return NextResponse.json({ success: false, message: 'Admin profile not found' }, { status: 404 });
         }
 
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Admin Me API Error:', error);
+        logger.error('Admin Me API Error:', error);
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { crmService } from '@/lib/crm-service';
 import { getSupabaseClient } from '@/lib/supabase';
 import dotenv from 'dotenv';
@@ -7,12 +8,12 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 async function testBeehiveSignal() {
-    console.log('🐝 Testing Beehive Signal...');
+    logger.info('🐝 Testing Beehive Signal...');
 
     const supabase = getSupabaseClient();
 
     // 1. Get a test user (Admin)
-    console.log('🔑 Service Role Key Loaded:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+    logger.info('🔑 Service Role Key Loaded:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 
     let targetUser: { id: string; email?: string } | null = null;
 
@@ -22,11 +23,11 @@ async function testBeehiveSignal() {
             const admin = users.find(u => u.email?.includes('billwill'));
             targetUser = admin || users[0];
         } else {
-            console.warn('⚠️ auth.admin.listUsers() failed or empty. Trying "admin_users" table...');
-            if (error) console.error('Auth Error:', error);
+            logger.warn('⚠️ auth.admin.listUsers() failed or empty. Trying "admin_users" table...');
+            if (error) logger.error('Auth Error:', error);
         }
     } catch (e) {
-        console.error('⚠️ Exception calling listUsers:', e);
+        logger.error('⚠️ Exception calling listUsers:', e);
     }
 
     if (!targetUser) {
@@ -37,25 +38,25 @@ async function testBeehiveSignal() {
             .limit(1);
 
         if (adminError) {
-            console.error('❌ Error fetching admin_users:', adminError);
+            logger.error('❌ Error fetching admin_users:', adminError);
             return;
         }
 
         if (admins && admins.length > 0) {
             targetUser = admins[0];
-            console.log('✅ Found user in admin_users table.');
+            logger.info('✅ Found user in admin_users table.');
         }
     }
 
     if (!targetUser) {
-        console.error('❌ No users found in auth.users OR admin_users.');
+        logger.error('❌ No users found in auth.users OR admin_users.');
         return;
     }
 
-    console.log(`🎯 Target User: ${targetUser.email || 'Unknown'} (${targetUser.id})`);
+    logger.info(`🎯 Target User: ${targetUser.email || 'Unknown'} (${targetUser.id})`);
 
     // 2. Simulate a "Whale" Signal (High Confidence)
-    console.log('📡 Simulating Whale Signal...');
+    logger.info('📡 Simulating Whale Signal...');
 
     await crmService.decidePush(targetUser.id, 'TRADE_EXECUTE', {
         symbol: 'BTC/USD',
@@ -66,7 +67,7 @@ async function testBeehiveSignal() {
     });
 
     // 3. Send a direct Notification (Resonance Bell)
-    console.log('🔔 Sending Resonance Bell Notification...');
+    logger.info('🔔 Sending Resonance Bell Notification...');
 
     await crmService.sendNotification(targetUser.id, {
         type: 'NECTAR',
@@ -76,7 +77,7 @@ async function testBeehiveSignal() {
         metadata: { profit_potential: 1200 }
     });
 
-    console.log('✅ Signal Sent! Check the "notifications" table and your Email (if configured).');
+    logger.info('✅ Signal Sent! Check the "notifications" table and your Email (if configured).');
 }
 
 testBeehiveSignal().catch(console.error);

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '../supabase';
 import { multiSigService } from '@/lib/security/multi-sig';
 import { auditService } from '@/lib/audit';
@@ -83,7 +84,7 @@ export class WithdrawalService {
             };
 
         } catch (error: any) {
-            console.error('Withdrawal request error:', error);
+            logger.error('Withdrawal request error:', error);
             return { success: false, status: 'FAILED', message: error.message };
         }
     }

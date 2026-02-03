@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -33,7 +34,7 @@ export async function GET() {
     .order('created_at', { ascending: false });
 
   if (error) {
-      console.error('Error fetching users for cohorts:', error);
+      logger.error('Error fetching users for cohorts:', error);
       return NextResponse.json({ cohorts: [] });
   }
 

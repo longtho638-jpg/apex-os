@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('[ADMIN] Bulk import error:', error);
+        logger.error('[ADMIN] Bulk import error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { jwtVerify } from 'jose';
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
             // We can rely on the payload for user ID.
 
         } catch (err) {
-            console.error('[Alerts API] JWT Verification Failed:', err);
+            logger.error('[Alerts API] JWT Verification Failed:', err);
             return NextResponse.json(
                 {
                     error: 'Unauthorized',
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
         const { data: alerts, error } = await query;
 
         if (error) {
-            console.error('Error fetching alerts:', error);
+            logger.error('Error fetching alerts:', error);
             return NextResponse.json(
                 { error: 'Failed to fetch alerts' },
                 { status: 500 }
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Alerts API error:', error);
+        logger.error('Alerts API error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

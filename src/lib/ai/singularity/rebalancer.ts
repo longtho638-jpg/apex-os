@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function rebalancePortfolio(userId: string) {
@@ -31,7 +32,7 @@ export async function rebalancePortfolio(userId: string) {
   // This would involve withdrawing from underperformers and depositing to top performers
   // For Phase 30 demo, we'll just log the intention or update records if simple
   
-  console.log(`[Rebalancer] Rebalancing User ${userId}: Moving capital to ${topAgents.map(a => a.name).join(', ')}`);
+  logger.info(`[Rebalancer] Rebalancing User ${userId}: Moving capital to ${topAgents.map(a => a.name).join(', ')}`);
   
   // In production: 
   // - Create 'rebalance_transactions'

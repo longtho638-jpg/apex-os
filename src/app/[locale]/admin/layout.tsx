@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import React from 'react';
 import { redirect } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -35,7 +36,7 @@ export default async function AdminLayout({
             .single();
 
         if (!adminUser) {
-            console.warn(`[AdminLayout] Access NORMALLY DENIED but ALLOWED for DEBUG. User: ${user?.id}`);
+            logger.warn(`[AdminLayout] Access NORMALLY DENIED but ALLOWED for DEBUG. User: ${user?.id}`);
             // redirect('/en/dashboard'); // TEMPORARILY DISABLED
         }
     }

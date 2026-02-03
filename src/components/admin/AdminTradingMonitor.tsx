@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,7 +46,7 @@ export function AdminTradingMonitor() {
             const res = await fetch('/api/v1/trading/orders');
             
             if (!res.ok) {
-                 console.warn("API Fetch failed, using mock data");
+                 logger.warn("API Fetch failed, using mock data");
                  setTrades(generateMockTrades());
                  return; 
             }
@@ -59,7 +60,7 @@ export function AdminTradingMonitor() {
                  setTrades(generateMockTrades());
             }
         } catch (error) {
-            console.error('Failed to fetch trades, using mock:', error);
+            logger.error('Failed to fetch trades, using mock:', error);
             setTrades(generateMockTrades());
         } finally {
             setLoading(false);

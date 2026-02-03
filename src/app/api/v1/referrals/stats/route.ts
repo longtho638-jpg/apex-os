@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { auditService } from '@/lib/audit';
@@ -37,12 +38,12 @@ export async function GET(request: NextRequest) {
 
             if (createError) {
                 // Handle collision or other error
-                console.error('Error creating referral code:', createError);
+                logger.error('Error creating referral code:', createError);
                 return NextResponse.json({ error: 'Failed to create referral code' }, { status: 500 });
             }
             referralData = newCode;
         } else if (error && error.code !== 'PGRST116') { // PGRST116 is "Row not found"
-            console.error('Error fetching referral code:', error);
+            logger.error('Error fetching referral code:', error);
             return NextResponse.json({ error: 'Database error' }, { status: 500 });
         } else if (error && error.code === 'PGRST116') {
             // Create new code if not exists (Row not found)
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Referral stats error:', error);
+        logger.error('Referral stats error:', error);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }
 }

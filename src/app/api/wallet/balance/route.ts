@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 
         // If table doesn't exist or user has no wallet yet -> Return Simulation Data
         // This ensures the UI never breaks during the transition phase.
-        console.warn('User wallet not found or DB error, using simulation data');
+        logger.warn('User wallet not found or DB error, using simulation data');
         
         const mockWallet = {
             user_id: user.id,

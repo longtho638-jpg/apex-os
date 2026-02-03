@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 const API_URL = "http://localhost:8000/api/v1";
 
 export async function fetchWatchlist() {
@@ -6,7 +7,7 @@ export async function fetchWatchlist() {
         if (!res.ok) throw new Error("Failed to fetch watchlist");
         return await res.json();
     } catch (error) {
-        console.error(error);
+        logger.error("Operation failed", error);
         return [];
     }
 }
@@ -17,7 +18,7 @@ export async function fetchPositions() {
         if (!res.ok) throw new Error("Failed to fetch positions");
         return await res.json();
     } catch (error) {
-        console.error(error);
+        logger.error("Operation failed", error);
         return [];
     }
 }
@@ -28,7 +29,7 @@ export async function fetchSystemStatus() {
         if (!res.ok) throw new Error("Failed to fetch status");
         return await res.json();
     } catch (error) {
-        console.error(error);
+        logger.error("Operation failed", error);
         return { market: "OFFLINE", connection: "ERROR", agents_active: 0 };
     }
 }
@@ -44,7 +45,7 @@ export async function fetchMarketConditions(symbol: string) {
             volatility_percent: "1.2%"
         };
     } catch (error) {
-        console.error("fetchMarketConditions error", error);
+        logger.error("fetchMarketConditions error", error);
         return null;
     }
 }
@@ -59,7 +60,7 @@ export async function fetchTradeHistory(userId: string, symbol: string) {
             ]
         };
     } catch (error) {
-        console.error("fetchTradeHistory error", error);
+        logger.error("fetchTradeHistory error", error);
         return { trades: [] };
     }
 }
@@ -69,7 +70,7 @@ export async function triggerSync(userId: string, exchange: string, key: string,
         // Mock sync
         return { success: true };
     } catch (error) {
-        console.error("triggerSync error", error);
+        logger.error("triggerSync error", error);
         throw error;
     }
 }

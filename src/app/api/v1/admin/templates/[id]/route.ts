@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -50,7 +51,7 @@ export async function GET(
         });
 
     } catch (error) {
-        console.error('Fetch template error:', error);
+        logger.error('Fetch template error:', error);
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }
@@ -114,7 +115,7 @@ export async function PUT(
         });
 
     } catch (error) {
-        console.error('Update template error:', error);
+        logger.error('Update template error:', error);
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }
@@ -165,7 +166,7 @@ export async function DELETE(
         });
 
     } catch (error) {
-        console.error('Delete template error:', error);
+        logger.error('Delete template error:', error);
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }

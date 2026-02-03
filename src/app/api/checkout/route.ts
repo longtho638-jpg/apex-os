@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createPolarCheckout } from '@/lib/payments/polar-client';
 import { createNOWPaymentsInvoice } from '@/lib/payments/nowpayments-client';
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const cachedResponse = await redis.get(`idempotency:${idempotencyKey}`);
     if (cachedResponse) {
-      console.log(`[Idempotency] Returning cached response for key: ${idempotencyKey}`);
+      logger.info(`[Idempotency] Returning cached response for key: ${idempotencyKey}`);
       return NextResponse.json(JSON.parse(cachedResponse));
     }
 
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (error) {
-        console.error('Wallet payment error:', error);
+        logger.error('Wallet payment error:', error);
         return NextResponse.json({ error: 'Wallet payment failed' }, { status: 500 });
       }
 
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(responseData);
 
   } catch (error) {
-    console.error('Checkout error:', error);
+    logger.error('Checkout error:', error);
     return NextResponse.json(
       { error: 'Checkout failed' },
       { status: 500 }

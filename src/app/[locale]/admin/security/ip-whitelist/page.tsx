@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ export default function IPWhitelistPage() {
             const data = await res.json();
             setCurrentIP(data.ip);
         } catch (err) {
-            console.error('Failed to fetch current IP:', err);
+            logger.error('Failed to fetch current IP:', err);
         }
     };
 
@@ -52,7 +53,7 @@ export default function IPWhitelistPage() {
                 setAllowedIPs(data.allowedIPs || []);
             }
         } catch (err) {
-            console.error('Failed to fetch IPs:', err);
+            logger.error('Failed to fetch IPs:', err);
         }
     };
 
@@ -81,7 +82,7 @@ export default function IPWhitelistPage() {
                 setError(data.error || 'Failed to add IP');
             }
         } catch (err: any) {
-            console.error('Failed to add IP:', err);
+            logger.error('Failed to add IP:', err);
             setError('Failed to add IP');
         } finally {
             setLoading(false);

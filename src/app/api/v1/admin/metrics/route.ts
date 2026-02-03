@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { monitorQuery } from '@/lib/db';
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Metrics API error:', error);
+        logger.error('Metrics API error:', error);
         return NextResponse.json(
             { success: false, message: 'Failed to fetch metrics' },
             { status: 500 }

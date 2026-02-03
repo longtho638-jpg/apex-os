@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * React Hook for Portfolio Risk Analytics
  * 
@@ -90,7 +91,7 @@ export function usePortfolioRisk({
                     lastUpdate: Date.now()
                 });
             } catch (error) {
-                console.error('[usePortfolioRisk] Error:', error);
+                logger.error('[usePortfolioRisk] Error:', error);
                 setState(prev => ({
                     ...prev,
                     loading: false,

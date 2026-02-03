@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * API hooks for ApexOS
  * Connects frontend to backend APIs
@@ -184,7 +185,7 @@ export function useSystemMetrics() {
           pnl = await fetch(`${API_BASE}/pnl/summary?user_id=${USER_ID}`).then(r => r.json());
           if (pnl) queryCache.set(pnlKey, pnl);
         } catch (e) {
-          console.error('Failed to fetch PnL', e);
+          logger.error('Failed to fetch PnL', e);
         }
       }
 
@@ -193,7 +194,7 @@ export function useSystemMetrics() {
           rebate = await fetch(`${API_BASE}/auditor/rebates?user_id=${USER_ID}`).then(r => r.json());
           if (rebate) queryCache.set(rebateKey, rebate);
         } catch (e) {
-          console.error('Failed to fetch Rebates', e);
+          logger.error('Failed to fetch Rebates', e);
         }
       }
 
@@ -233,9 +234,9 @@ export function useApi() {
 
       if (token) {
         (headers as any)['Authorization'] = `Bearer ${token}`;
-        console.log(`[useApi] Sending request to ${endpoint} with token: ${token.substring(0, 10)}...`);
+        logger.info(`[useApi] Sending request to ${endpoint} with token: ${token.substring(0, 10)}...`);
       } else {
-        console.warn(`[useApi] Sending request to ${endpoint} WITHOUT token`);
+        logger.warn(`[useApi] Sending request to ${endpoint} WITHOUT token`);
       }
 
       const response = await fetch(endpoint, {
@@ -247,17 +248,17 @@ export function useApi() {
         let errorDetails = '';
         try {
           const errorData = await response.json();
-          console.error('[useApi] Request failed:', errorData);
+          logger.error('[useApi] Request failed:', errorData);
           errorDetails = errorData.details || errorData.message || errorData.error || JSON.stringify(errorData);
         } catch (e) {
-          console.error('[useApi] Failed to parse error response');
+          logger.error('[useApi] Failed to parse error response');
         }
         throw new Error(`API error: ${response.status} - ${errorDetails}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('API error:', error);
+      logger.error('API error:', error);
       throw error;
     }
   };
@@ -289,17 +290,17 @@ export function useApiClient() {
         let errorDetails = '';
         try {
           const errorData = await response.json();
-          console.error('[useApi] Request failed:', errorData);
+          logger.error('[useApi] Request failed:', errorData);
           errorDetails = errorData.details || errorData.message || errorData.error || JSON.stringify(errorData);
         } catch (e) {
-          console.error('[useApi] Failed to parse error response');
+          logger.error('[useApi] Failed to parse error response');
         }
         throw new Error(`API error: ${response.status} - ${errorDetails}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('API error:', error);
+      logger.error('API error:', error);
       throw error;
     }
   };

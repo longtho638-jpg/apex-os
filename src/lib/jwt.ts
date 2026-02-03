@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * JWT Utilities for Admin Authentication
  * Generates and validates JWTs for sessions and temporary tokens
@@ -11,7 +12,7 @@ if (!JWT_SECRET_ENV) {
     if (process.env.NODE_ENV === 'production') {
         throw new Error('FATAL: SUPABASE_JWT_SECRET is not defined in production environment.');
     }
-    console.warn('⚠️ WARNING: SUPABASE_JWT_SECRET is not defined. Using insecure default for development.');
+    logger.warn('⚠️ WARNING: SUPABASE_JWT_SECRET is not defined. Using insecure default for development.');
 }
 
 import { ROLES, UserRole } from '@/lib/constants/roles';

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Activity, DollarSign } from 'lucide-react';
@@ -92,7 +93,7 @@ export function PnLDashboard({ userId }: PnLDashboardProps) {
                 lossTrades
             });
         } catch (error) {
-            console.error('Failed to fetch PnL metrics:', error);
+            logger.error('Failed to fetch PnL metrics:', error);
         } finally {
             setLoading(false);
         }

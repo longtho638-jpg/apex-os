@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * IP Whitelist Toggle API
  * POST - Enable/disable IP whitelisting for admin
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
             .eq('id', adminId);
 
         if (error) {
-            console.error('Error toggling IP whitelist:', error);
+            logger.error('Error toggling IP whitelist:', error);
             return NextResponse.json(
                 { error: 'Failed to toggle IP whitelist' },
                 { status: 500 }
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('IP whitelist toggle error:', error);
+        logger.error('IP whitelist toggle error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

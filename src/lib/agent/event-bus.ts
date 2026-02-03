@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export interface AgentEvent {
@@ -42,7 +43,7 @@ export class AgentEventBus {
             .single();
 
         if (error) {
-            console.error(`[EventBus] Failed to publish ${type}:`, error);
+            logger.error(`[EventBus] Failed to publish ${type}:`, error);
             return null;
         }
 
@@ -73,13 +74,13 @@ export class AgentEventBus {
                 },
                 async (payload) => {
                     const newEvent = payload.new as AgentEvent;
-                    console.log(`[EventBus] Received ${newEvent.type} from ${newEvent.source}`);
+                    logger.info(`[EventBus] Received ${newEvent.type} from ${newEvent.source}`);
                     
                     // Execute handlers
                     try {
                         await handler(newEvent);
                     } catch (err) {
-                        console.error(`[EventBus] Handler error for ${eventType}:`, err);
+                        logger.error(`[EventBus] Handler error for ${eventType}:`, err);
                     }
                 }
             )

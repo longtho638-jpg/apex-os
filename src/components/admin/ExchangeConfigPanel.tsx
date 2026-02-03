@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, Lock, Eye, EyeOff, Check, AlertTriangle, Loader2 } from 'lucide-react';
@@ -57,7 +58,7 @@ export function ExchangeConfigPanel() {
                 setConfigs(data.configs);
             }
         } catch (err) {
-            console.error('Failed to fetch exchange configs', err);
+            logger.error('Failed to fetch exchange configs', err);
         } finally {
             setLoading(false);
         }

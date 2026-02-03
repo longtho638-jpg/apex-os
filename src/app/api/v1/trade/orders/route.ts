@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { CreateOrderSchema } from '@/lib/validations/trade';
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Order placement error:', error);
+        logger.error('Order placement error:', error);
         return NextResponse.json(
             { success: false, message: error.message || 'Internal Server Error' },
             { status: 500 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { Resend } from 'resend';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -13,7 +14,7 @@ export interface EmailOptions {
 
 export async function sendEmail({ to, subject, html, userId, templateId }: EmailOptions): Promise<{ success: boolean; error?: string }> {
   if (!process.env.RESEND_API_KEY) {
-    console.error('[Email] Missing RESEND_API_KEY');
+    logger.error('[Email] Missing RESEND_API_KEY');
     return { success: false, error: 'Server configuration error' };
   }
 
@@ -26,7 +27,7 @@ export async function sendEmail({ to, subject, html, userId, templateId }: Email
     });
 
     if (data.error) {
-      console.error('[Email] Resend API Error:', data.error);
+      logger.error('[Email] Resend API Error:', data.error);
       // Log Failure to CRM if userId exists
       if (userId) {
         await logEmailToCRM(userId, to, templateId || 'unknown', 'BOUNCED', { error: data.error });
@@ -41,7 +42,7 @@ export async function sendEmail({ to, subject, html, userId, templateId }: Email
 
     return { success: true };
   } catch (error: any) {
-    console.error('[Email] Critical Error:', error);
+    logger.error('[Email] Critical Error:', error);
     return { success: false, error: error.message };
   }
 }
@@ -65,6 +66,6 @@ async function logEmailToCRM(userId: string, email: string, templateId: string, 
       severity: status === 'SENT' ? 'SUCCESS' : 'WARN'
     });
   } catch (e) {
-    console.error('[Email] Failed to log to CRM:', e);
+    logger.error('[Email] Failed to log to CRM:', e);
   }
 }

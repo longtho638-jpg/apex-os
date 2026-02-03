@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
         return NextResponse.json(options);
 
     } catch (error) {
-        console.error('WebAuthn registration start error:', error);
+        logger.error('WebAuthn registration start error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

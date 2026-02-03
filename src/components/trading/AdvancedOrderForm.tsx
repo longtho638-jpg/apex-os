@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -91,7 +92,7 @@ export default function AdvancedOrderForm({ symbol = 'BTC/USDT', currentPrice = 
             reset({ symbol, side, type: orderType, quantity: '', price: undefined });
             
         } catch (error: any) {
-            console.error(error);
+            logger.error("Operation failed", error);
             toast.error('Order Failed', {
                 description: error.message
             });

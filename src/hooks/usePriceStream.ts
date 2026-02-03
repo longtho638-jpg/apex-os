@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useRef, useState } from 'react';
 import { create } from 'zustand';
 
@@ -51,7 +52,7 @@ export function usePriceStream({ symbols, autoConnect = true }: UsePriceStreamOp
             wsRef.current = ws;
 
             ws.onopen = () => {
-                console.log('✅ WebSocket connected');
+                logger.info('✅ WebSocket connected');
                 setConnected(true);
                 setError(null);
 
@@ -80,34 +81,34 @@ export function usePriceStream({ symbols, autoConnect = true }: UsePriceStreamOp
                     if (message.type === 'PRICE_UPDATE') {
                         updatePrice(message.data.symbol, message.data);
                     } else if (message.type === 'SUBSCRIBED') {
-                        console.log('✅ Subscribed to:', message.symbols);
+                        logger.info('✅ Subscribed to:', message.symbols);
                     } else if (message.type === 'PONG') {
                         // Heartbeat response
                     }
                 } catch (err) {
-                    console.error('❌ WebSocket message error:', err);
+                    logger.error('❌ WebSocket message error:', err);
                 }
             };
 
             ws.onerror = (event) => {
-                console.error('❌ WebSocket error:', event);
+                logger.error('❌ WebSocket error:', event);
                 setError('WebSocket connection error');
             };
 
             ws.onclose = () => {
-                console.log('❌ WebSocket disconnected');
+                logger.info('❌ WebSocket disconnected');
                 setConnected(false);
 
                 // Auto-reconnect after 3 seconds
                 if (autoConnect) {
                     reconnectTimeoutRef.current = setTimeout(() => {
-                        console.log('🔄 Reconnecting...');
+                        logger.info('🔄 Reconnecting...');
                         connect();
                     }, 3000);
                 }
             };
         } catch (err) {
-            console.error('❌ Failed to create WebSocket:', err);
+            logger.error('❌ Failed to create WebSocket:', err);
             setError('Failed to connect to WebSocket server');
         }
     };

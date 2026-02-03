@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { getTierById, getTierPrice, TierId, PaymentTier } from '@/config/unified-tiers';
@@ -22,7 +23,7 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
   const tierConfig = getTierById(tier);
 
   if (!tierConfig) {
-      console.error('Invalid tier ID:', tier);
+      logger.error('Invalid tier ID:', tier);
       return null; 
   }
 
@@ -83,7 +84,7 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
         setWalletBalance(data.balance || 0);
       }
     } catch (e) {
-      console.error('Failed to fetch balance', e);
+      logger.error('Failed to fetch balance', e);
       setWalletBalance(0);
     }
   };

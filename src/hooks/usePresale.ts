@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { useWallet } from './useWallet';
 import { useAuth } from '@/contexts/AuthContext';
@@ -52,7 +53,7 @@ export function usePresale() {
       }));
 
     } catch (e: any) {
-      console.error(e);
+      logger.error("Error occurred", e);
       setError(e.message);
       toast.error(e.message);
     } finally {

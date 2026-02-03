@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 
 interface TradeSignal {
@@ -15,7 +16,7 @@ export class CopyTradingEngine {
     static async processSignal(signal: TradeSignal) {
         const supabase = await createClient();
 
-        console.log(`[CopyEngine] Processing signal from leader ${signal.leaderId} for ${signal.symbol}`);
+        logger.info(`[CopyEngine] Processing signal from leader ${signal.leaderId} for ${signal.symbol}`);
 
         // 1. Get all active followers for this leader
         const { data: followers, error: followerError } = await supabase
@@ -25,16 +26,16 @@ export class CopyTradingEngine {
             .eq('status', 'ACTIVE');
 
         if (followerError) {
-            console.error('[CopyEngine] Failed to fetch followers:', followerError);
+            logger.error('[CopyEngine] Failed to fetch followers:', followerError);
             return;
         }
 
         if (!followers || followers.length === 0) {
-            console.log('[CopyEngine] No active followers found.');
+            logger.info('[CopyEngine] No active followers found.');
             return;
         }
 
-        console.log(`[CopyEngine] Found ${followers.length} followers. Executing trades...`);
+        logger.info(`[CopyEngine] Found ${followers.length} followers. Executing trades...`);
 
         // 2. Execute trade for each follower
         const tradePromises = followers.map(async (setting) => {
@@ -62,7 +63,7 @@ export class CopyTradingEngine {
 
                 if (tradeError) throw tradeError;
 
-                console.log(`[CopyEngine] ✅ Executed trade for user ${setting.follower_id}`);
+                logger.info(`[CopyEngine] ✅ Executed trade for user ${setting.follower_id}`);
 
                 // Log to history
                 await supabase.from('copy_trade_history').insert({
@@ -72,7 +73,7 @@ export class CopyTradingEngine {
                 });
 
             } catch (err) {
-                console.error(`[CopyEngine] ❌ Failed to execute for user ${setting.follower_id}:`, err);
+                logger.error(`[CopyEngine] ❌ Failed to execute for user ${setting.follower_id}:`, err);
             }
         });
 

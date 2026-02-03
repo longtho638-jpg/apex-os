@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { executeWithdrawal } from '@/lib/agents/execution-agent';
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
         }
 
     } catch (error: any) {
-        console.error('Super Admin Resolution Error:', error);
+        logger.error('Super Admin Resolution Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

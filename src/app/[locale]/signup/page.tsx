@@ -76,8 +76,9 @@ export default function SignupPage() {
             setTimeout(() => {
                 router.push(`/${locale}/login?message=account_created`);
             }, 2000);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Signup failed';
+            setError(message);
             setIsLoading(false);
         }
     };

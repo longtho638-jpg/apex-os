@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (error || !data.user || !data.session) {
-            console.error('[Login Debug] Supabase Error:', error);
+            logger.error('[Login Debug] Supabase Error:', error);
             return NextResponse.json(
                 { success: false, message: 'Invalid email or password' },
                 { status: 401 }
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
                 userDetails = userData;
             }
         } catch (detailError) {
-            console.error('Error fetching user details:', detailError);
+            logger.error('Error fetching user details:', detailError);
         }
 
         // Check for Admin MFA Requirement
@@ -153,7 +154,7 @@ export async function POST(request: NextRequest) {
             },
         });
     } catch (error) {
-        console.error('Login endpoint error:', error);
+        logger.error('Login endpoint error:', error);
         return NextResponse.json(
             { success: false, message: 'Server error' },
             { status: 500 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyMFAToken, verifyRecoveryCode, decryptMFASecret } from '@/lib/mfa';
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
         // 🔥 DEVELOPMENT BYPASS: Allow '999999' to skip MFA in non-production
         const isDev = process.env.NODE_ENV !== 'production';
         if (isDev && token === '999999') {
-            console.log('🔓 DEV BYPASS: Using development MFA bypass code');
+            logger.info('🔓 DEV BYPASS: Using development MFA bypass code');
 
             // Get admin from DB
             const { data: admin, error: adminError } = await supabase
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
                 isValid = verifyMFAToken(token, decryptedSecret);
             }
         } catch (verifyError: any) {
-            console.error('Error during token verification:', verifyError);
+            logger.error('Error during token verification:', verifyError);
             return NextResponse.json(
                 { error: `Verification failed: ${verifyError.message}` },
                 { status: 500 }
@@ -169,7 +170,7 @@ export async function POST(request: NextRequest) {
                     .eq('email', email);
             }
         } catch (dbError: any) {
-            console.error('Error updating MFA status:', dbError);
+            logger.error('Error updating MFA status:', dbError);
             return NextResponse.json(
                 { error: `Database error: ${dbError.message}` },
                 { status: 500 }
@@ -198,7 +199,7 @@ export async function POST(request: NextRequest) {
                 message: admin.mfa_enabled ? 'MFA verified' : 'MFA enabled successfully'
             });
         } catch (jwtError: any) {
-            console.error('Error generating session token:', jwtError);
+            logger.error('Error generating session token:', jwtError);
             return NextResponse.json(
                 { error: `JWT error: ${jwtError.message}` },
                 { status: 500 }
@@ -206,9 +207,9 @@ export async function POST(request: NextRequest) {
         }
 
     } catch (error: any) {
-        console.error('MFA verification error (outer catch):', error);
-        console.error('Error stack:', error.stack);
-        console.error('Error message:', error.message);
+        logger.error('MFA verification error (outer catch):', error);
+        logger.error('Error stack:', error.stack);
+        logger.error('Error message:', error.message);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

@@ -1,10 +1,11 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 // import { trackEvent } from '@/lib/analytics';
 
 // Simple wrapper for trackEvent
 async function trackEvent(params: any) {
     if (process.env.NODE_ENV === 'development') {
-        console.log('[Analytics Track]', params);
+        logger.info('[Analytics Track]', params);
     }
 }
 
@@ -34,7 +35,7 @@ export const usageTracker = {
       });
 
       if (error) {
-          console.error('Failed to create usage charge:', error);
+          logger.error('Failed to create usage charge:', error);
           return;
       }
 

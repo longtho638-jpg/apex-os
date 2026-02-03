@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
@@ -70,7 +71,7 @@ export default function AdminDashboardPage() {
                 setActivities(formattedActivity);
 
             } catch (error) {
-                console.error('Failed to fetch admin stats:', error);
+                logger.error('Failed to fetch admin stats:', error);
                 toast.error('Failed to sync with blockchain nodes');
             } finally {
                 setLoading(false);

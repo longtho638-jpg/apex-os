@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { Shield, Plus, Trash2, Globe, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
@@ -112,7 +113,7 @@ export function IPWhitelistManager({ adminId }: IPWhitelistManagerProps) {
                 setError(data.error);
             }
         } catch (err) {
-            console.error('Failed to remove IP:', err);
+            logger.error('Failed to remove IP:', err);
             setError('Failed to remove IP from whitelist');
         }
     };

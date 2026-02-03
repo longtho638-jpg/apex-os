@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { redis } from './redis';
 import { NextResponse } from 'next/server';
 
@@ -27,7 +28,7 @@ export async function rateLimit(
             reset: Date.now() + (ttl * 1000),
         };
     } catch (error) {
-        console.error('Rate limit error:', error);
+        logger.error('Rate limit error:', error);
         // Fail open if Redis is down
         return { success: true, remaining: 1, reset: Date.now() };
     }

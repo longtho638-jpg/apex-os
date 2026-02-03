@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   if (error) {
       // Handle FK error gracefully for demo
-      console.error('Purchase Record Error:', error);
+      logger.error('Purchase Record Error:', error);
       return NextResponse.json({ error: 'Failed to record purchase' }, { status: 500 });
   }
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getClaudeClient } from '@/lib/claude';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ response });
   } catch (error) {
-    console.error('Claude API error:', error);
+    logger.error('Claude API error:', error);
     return NextResponse.json(
       {
         error:

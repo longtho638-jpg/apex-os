@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useEffect, useState, useRef } from 'react';
 
 export interface MarketTicker {
@@ -84,7 +85,7 @@ export function useMarketData(selectedTimeframe: string = '1h') {
 
     useEffect(() => {
         // WebSocket logic remains the same (Real-time layer)
-        if (debugMode) console.log('[Gemini Agent] Connecting to Binance Stream...');
+        if (debugMode) logger.info('[Gemini Agent] Connecting to Binance Stream...');
         const binanceWs = new WebSocket(`wss://stream.binance.com:9443/ws/${SYMBOLS.join('@aggTrade/')}`);
         binanceWsRef.current = binanceWs;
 

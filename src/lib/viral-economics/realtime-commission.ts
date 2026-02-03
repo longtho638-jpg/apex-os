@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 import { TIERS, EXCHANGE_AVG_REBATE_RATE } from './tier-manager';
 import { getCommissionRate, TierId } from '@/config/unified-tiers';
@@ -43,7 +44,7 @@ export async function processTradeCommission(trade: TradeExecution) {
     } else {
       // Fallback only if fee is missing (should not happen with proper sync)
       // Log warning in production
-      console.warn(`[Commission] Missing fee for trade ${trade_id}, using volume estimation. Risk of overpayment.`);
+      logger.warn(`[Commission] Missing fee for trade ${trade_id}, using volume estimation. Risk of overpayment.`);
       revenueGenerated = volume * EXCHANGE_AVG_REBATE_RATE;
     }
 
@@ -65,7 +66,7 @@ export async function processTradeCommission(trade: TradeExecution) {
       });
 
       if (creditError) {
-        console.error('Failed to credit self-rebate:', creditError);
+        logger.error('Failed to credit self-rebate:', creditError);
       }
     }
 
@@ -166,7 +167,7 @@ export async function processTradeCommission(trade: TradeExecution) {
     }
 
   } catch (error) {
-    console.error('ProcessTradeCommission Error:', error);
+    logger.error('ProcessTradeCommission Error:', error);
     throw error; // Re-throw for caller to handle
   }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -26,13 +27,13 @@ export async function POST(request: Request) {
       });
       
     if (error) {
-        console.error('Supabase Analytics Error:', error);
+        logger.error('Supabase Analytics Error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
     
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Analytics API error:', error);
+    logger.error('Analytics API error:', error);
     return NextResponse.json({ error: 'Failed to track event' }, { status: 500 });
   }
 }

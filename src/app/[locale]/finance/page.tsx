@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/os/sidebar';
 import { Wallet as WalletIcon, DollarSign } from 'lucide-react';
@@ -67,7 +68,7 @@ export default function FinancePage() {
             refresh(); // Refresh wallet hook
 
         } catch (error) {
-            console.error('Failed to load finance data', error);
+            logger.error('Failed to load finance data', error);
         } finally {
             setIsLoading(false);
         }

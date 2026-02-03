@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { SystemStatsService } from '@/lib/system-stats';
 
@@ -27,7 +28,7 @@ export async function GET() {
     });
 
   } catch (error: any) {
-    console.error('[System Stats API] Error:', error);
+    logger.error('[System Stats API] Error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal Server Error' },
       { status: 500 }

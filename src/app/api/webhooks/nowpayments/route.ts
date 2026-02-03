@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const secret = process.env.NOWPAYMENTS_IPN_SECRET;
     if (!secret) {
-      console.error('NOWPAYMENTS_IPN_SECRET not set');
+      logger.error('NOWPAYMENTS_IPN_SECRET not set');
       return NextResponse.json({ error: 'Server config error' }, { status: 500 });
     }
 
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     const generatedSignature = hmac.digest('hex');
 
     if (generatedSignature !== signature) {
-      console.error('Signature mismatch', { expected: generatedSignature, received: signature });
+      logger.error('Signature mismatch', { expected: generatedSignature, received: signature });
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     // order_id format: TIER_USERID_TIMESTAMP
     const parts = order_id.split('_');
     if (parts.length < 3) {
-      console.error('Invalid order_id format:', order_id);
+      logger.error('Invalid order_id format:', order_id);
       return NextResponse.json({ received: true });
     }
 
@@ -76,13 +77,13 @@ export async function POST(request: NextRequest) {
         p_user_id: userId
       });
 
-      if (claimError) console.error('Error claiming pending funds:', claimError);
+      if (claimError) logger.error('Error claiming pending funds:', claimError);
     }
 
     return NextResponse.json({ received: true });
 
   } catch (error) {
-    console.error('NOWPayments webhook error:', error);
+    logger.error('NOWPayments webhook error:', error);
     return NextResponse.json({ error: 'Internal Error' }, { status: 500 });
   }
 }

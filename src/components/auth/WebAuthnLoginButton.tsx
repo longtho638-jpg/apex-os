@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { startAuthentication } from '@simplewebauthn/browser';
 import { Key, Loader2 } from 'lucide-react';
@@ -75,7 +76,7 @@ export default function WebAuthnLoginButton({ email, onSuccess }: WebAuthnLoginB
             }
 
         } catch (err: any) {
-            console.error(err);
+            logger.error("Error occurred", err);
             alert(err.message || 'An error occurred during login');
         } finally {
             setIsLoading(false);

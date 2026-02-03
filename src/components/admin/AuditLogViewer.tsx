@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useApi } from '@/hooks/useApi';
@@ -53,7 +54,7 @@ export default function AuditLogViewer() {
                 setTotalPages(1); // Default to 1 page for now
             }
         } catch (error) {
-            console.error('Failed to fetch logs:', error);
+            logger.error('Failed to fetch logs:', error);
         } finally {
             setLoading(false);
         }
@@ -93,7 +94,7 @@ export default function AuditLogViewer() {
                 a.click();
             }
         } catch (error) {
-            console.error('Export failed:', error);
+            logger.error('Export failed:', error);
             alert('Export failed');
         }
     };

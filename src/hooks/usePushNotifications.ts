@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -41,9 +42,9 @@ export function usePushNotifications() {
         body: JSON.stringify({ subscription: sub, userId }),
       });
 
-      console.log('Web Push Subscribed!');
+      logger.info('Web Push Subscribed!');
     } catch (error) {
-      console.error('Failed to subscribe to Push', error);
+      logger.error('Failed to subscribe to Push', error);
     }
   };
 

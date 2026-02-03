@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
 
         const secret = process.env.NOWPAYMENTS_IPN_SECRET;
         if (!secret) {
-            console.error('NOWPAYMENTS_IPN_SECRET not set');
+            logger.error('NOWPAYMENTS_IPN_SECRET not set');
             return NextResponse.json({ error: 'Server config error' }, { status: 500 });
         }
 
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
         const generatedSignature = hmac.digest('hex');
 
         if (generatedSignature !== signature) {
-            console.error('Payout Signature mismatch');
+            logger.error('Payout Signature mismatch');
             return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
         }
 
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (findError || !withdrawalRequest) {
-            console.error(`Withdrawal not found for payout_id: ${id}`);
+            logger.error(`Withdrawal not found for payout_id: ${id}`);
             return NextResponse.json({ received: true });
         }
 
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true });
 
     } catch (error) {
-        console.error('Payout Webhook Error:', error);
+        logger.error('Payout Webhook Error:', error);
         return NextResponse.json({ error: 'Internal Error' }, { status: 500 });
     }
 }

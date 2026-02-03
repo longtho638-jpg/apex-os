@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -105,7 +106,7 @@ export async function POST(
 
                 healthChecks.referral_link_accessible = linkResponse.ok || linkResponse.status === 301 || linkResponse.status === 302;
             } catch (error) {
-                console.error(`[HEALTH CHECK] Referral link check failed for ${provider.provider_code}:`, error);
+                logger.error(`[HEALTH CHECK] Referral link check failed for ${provider.provider_code}:`, error);
                 healthChecks.referral_link_accessible = false;
             }
         }
@@ -146,7 +147,7 @@ export async function POST(
         });
 
     } catch (error) {
-        console.error('[ADMIN] Health check error:', error);
+        logger.error('[ADMIN] Health check error:', error);
         return NextResponse.json({
             success: false,
             message: 'Health check failed'

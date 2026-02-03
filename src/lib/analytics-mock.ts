@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * Mock Analytics Service
  * 
@@ -21,7 +22,7 @@ interface AnalyticsEvent {
  */
 export function trackEvent(event: AnalyticsEvent): void {
     if (process.env.NODE_ENV === 'development') {
-        console.log('[Analytics Mock]', event);
+        logger.info('[Analytics Mock]', event);
     }
 
     // TODO: In production, this should call actual analytics service:
@@ -45,7 +46,7 @@ export function trackPageView(page: string, metadata?: Record<string, any>): voi
  */
 export function identifyUser(userId: string, traits?: Record<string, any>): void {
     if (process.env.NODE_ENV === 'development') {
-        console.log('[Analytics Mock] Identify:', userId, traits);
+        logger.info('[Analytics Mock] Identify', { userId, traits });
     }
 
     // TODO: In production: analytics.identify(userId, traits)

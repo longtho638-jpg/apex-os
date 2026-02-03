@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Fetch campaigns error:', error);
+        logger.error('Fetch campaigns error:', error);
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Create campaign error:', error);
+        logger.error('Create campaign error:', error);
         return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
     }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export type CRMEventType =
@@ -53,7 +54,7 @@ export class CRMService {
             if (event === 'LOGIN') await this.updateScore(userId, 1);
 
         } catch (error) {
-            console.error('[CRM] Failed to track event:', error);
+            logger.error('[CRM] Failed to track event:', error);
         }
     }
 
@@ -69,7 +70,7 @@ export class CRMService {
                 last_interaction: new Date().toISOString()
             });
         } catch (error) {
-            console.error('[CRM] Failed to update stage:', error);
+            logger.error('[CRM] Failed to update stage:', error);
         }
     }
 
@@ -90,7 +91,7 @@ export class CRMService {
                 last_interaction: new Date().toISOString()
             });
         } catch (error) {
-            console.error('[CRM] Failed to update score:', error);
+            logger.error('[CRM] Failed to update score:', error);
         }
     }
     /**
@@ -107,7 +108,7 @@ export class CRMService {
             .single();
 
         if (fetchError) {
-            console.error('Error fetching pipeline metadata:', fetchError);
+            logger.error('Error fetching pipeline metadata:', fetchError);
             return;
         }
 
@@ -119,7 +120,7 @@ export class CRMService {
             .eq('user_id', userId);
 
         if (error) {
-            console.error('Error updating pipeline metadata:', error);
+            logger.error('Error updating pipeline metadata:', error);
         }
     }
     /**
@@ -143,7 +144,7 @@ export class CRMService {
                 metadata: notification.metadata
             });
         } catch (error) {
-            console.error('[CRM] Failed to send notification:', error);
+            logger.error('[CRM] Failed to send notification:', error);
         }
     }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +29,7 @@ export default function AlertsPanel() {
                 const data = await res.json();
                 setAlerts(data.recentAlerts || []);
             } catch (error) {
-                console.error('Failed to fetch alerts:', error);
+                logger.error('Failed to fetch alerts:', error);
             } finally {
                 setLoading(false);
             }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * React Hook for Quantitative Features
  * 
@@ -27,8 +28,8 @@ interface QuantFeaturesState {
  * @example
  * const { features, loading } = useQuantFeatures({ symbol: 'BTCUSDT', timeframe: '1h' });
  * if (features) {
- *   console.log('RSI:', features.momentum.rsi);
- *   console.log('Trend:', features.trend.trend);
+ *   logger.info('RSI:', features.momentum.rsi);
+ *   logger.info('Trend:', features.trend.trend);
  * }
  */
 export function useQuantFeatures({
@@ -71,7 +72,7 @@ export function useQuantFeatures({
                     lastUpdate: Date.now()
                 });
             } catch (error) {
-                console.error('[useQuantFeatures] Calculation error:', error);
+                logger.error('[useQuantFeatures] Calculation error:', error);
                 setState(prev => ({
                     ...prev,
                     loading: false,
@@ -114,7 +115,7 @@ export function useQuantFeaturesFromCandles(candles: OHLCV[]): TechnicalFeatures
         try {
             return quantEngine.calculateFeatures(candles);
         } catch (error) {
-            console.error('[useQuantFeaturesFromCandles] Error:', error);
+            logger.error('[useQuantFeaturesFromCandles] Error:', error);
             return null;
         }
     }, [candles]);
@@ -132,7 +133,7 @@ async function fetchHistoricalCandles(symbol: string, timeframe: Timeframe): Pro
     // Placeholder implementation
     // Replace this with actual API call to your backend or exchange API
 
-    console.warn('[fetchHistoricalCandles] Using mock data - implement actual data fetch');
+    logger.warn('[fetchHistoricalCandles] Using mock data - implement actual data fetch');
 
     // Generate mock candles for development
     const mockCandles: OHLCV[] = [];

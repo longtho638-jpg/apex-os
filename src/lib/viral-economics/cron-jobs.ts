@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { calculateMonthlyCommissions } from './commission-calculator';
 import { promoteTier } from './tier-manager';
 import { updateRefereeMetrics } from './referral-manager';
@@ -8,9 +9,9 @@ export async function monthlyCommissionCalculation() {
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   
-  console.log(`Starting monthly commission calculation for ${month}...`);
+  logger.info(`Starting monthly commission calculation for ${month}...`);
   const result = await calculateMonthlyCommissions(month);
-  console.log('Commission calculation complete:', result);
+  logger.info('Commission calculation complete:', result);
 }
 
 export async function dailyTierCheck() {
@@ -26,12 +27,12 @@ export async function dailyTierCheck() {
       // Also check badges
       await checkBadgeEligibility(user.user_id);
     }
-    console.log(`Daily tier check complete. Promoted ${promotedCount} users.`);
+    logger.info(`Daily tier check complete. Promoted ${promotedCount} users.`);
   }
 }
 
 export async function hourlyMetricsUpdate() {
   // Update referee volume if we had a source of recent trades
   // For MVP, assuming trade engine calls updateRefereeMetrics directly or we scan active traders
-  console.log('Hourly metrics sync skipped (event-driven preferred).');
+  logger.info('Hourly metrics sync skipped (event-driven preferred).');
 }

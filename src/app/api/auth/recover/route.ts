@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email-service';
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
                 }
             }
         } catch (redisError) {
-            console.warn('[Auth] Redis Rate Limit failed, proceeding without it:', redisError);
+            logger.warn('[Auth] Redis Rate Limit failed, proceeding without it:', redisError);
         }
 
         // 2. Generate Recovery Link (Admin)
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (linkError || !data.properties?.action_link) {
-            console.error('[Auth] Generate Link Error:', linkError);
+            logger.error('[Auth] Generate Link Error:', linkError);
             // Return success even if failed to prevent user enumeration (security best practice)
             // But for debugging/this context, we might want to know. 
             // Let's return a generic error if it's a system issue, but success if user not found (to mimic standard auth)
@@ -79,14 +80,14 @@ export async function POST(request: NextRequest) {
         });
 
         if (!success) {
-            console.error('[Auth] Send Email Error:', emailError);
+            logger.error('[Auth] Send Email Error:', emailError);
             return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: 'Recovery email sent' });
 
     } catch (error) {
-        console.error('[Auth] Recovery Error:', error);
+        logger.error('[Auth] Recovery Error:', error);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }
 }

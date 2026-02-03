@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { getSupabaseClientSide } from '@/lib/supabase';
 import { Save, RefreshCw, AlertCircle, Check } from 'lucide-react';
@@ -26,7 +27,7 @@ export default function ExchangeConfigPage() {
             .order('exchange_name');
         
         if (error) {
-            console.error('Error fetching configs:', error);
+            logger.error('Error fetching configs:', error);
             // Mock data
             setConfigs([
                 { exchange_name: 'Binance', standard_maker_fee: 0.001, standard_taker_fee: 0.001, apex_partner_rate: 0.20, partner_uuid: '', is_active: true },
@@ -66,7 +67,7 @@ export default function ExchangeConfigPage() {
             .upsert(updates, { onConflict: 'exchange_name' });
         
         if (error) {
-            console.error('Error saving configs:', error);
+            logger.error('Error saving configs:', error);
             alert('Failed to save changes');
         } else {
             alert('Changes saved successfully');

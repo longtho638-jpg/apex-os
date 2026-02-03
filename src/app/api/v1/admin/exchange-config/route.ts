@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { jwtVerify } from 'jose';
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
             });
 
         if (error) {
-            console.error('Database error:', error);
+            logger.error('Database error:', error);
             return NextResponse.json({
                 success: false,
                 message: 'Failed to save configuration'
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Exchange config save error:', error);
+        logger.error('Exchange config save error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'
@@ -123,7 +124,7 @@ export async function GET(request: NextRequest) {
             .eq('is_active', true);
 
         if (error) {
-            console.error('Database error:', error);
+            logger.error('Database error:', error);
             return NextResponse.json({
                 success: false,
                 message: 'Failed to fetch configurations'
@@ -144,7 +145,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Exchange config fetch error:', error);
+        logger.error('Exchange config fetch error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'

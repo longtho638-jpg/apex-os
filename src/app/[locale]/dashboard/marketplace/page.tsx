@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 
 import { Search, Filter, TrendingUp, Users, Shield, Crown, Zap, Star } from 'lucide-react';
@@ -82,7 +83,7 @@ export default function MarketplacePage() {
                     setStrategies(data.data);
                 }
             } catch (error) {
-                console.error('Failed to fetch strategies', error);
+                logger.error('Failed to fetch strategies', error);
             } finally {
                 setLoading(false);
             }

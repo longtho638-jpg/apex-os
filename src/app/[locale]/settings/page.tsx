@@ -91,7 +91,7 @@ export default function SettingsPage() {
         }
     };
 
-    const tabs: { id: TabType; label: string; icon: any }[] = [
+    const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
         { id: 'profile', label: t('tab_profile'), icon: User },
         { id: 'connections', label: t('tab_connections'), icon: Link },
         { id: 'payment', label: 'Payment Methods', icon: CreditCard },

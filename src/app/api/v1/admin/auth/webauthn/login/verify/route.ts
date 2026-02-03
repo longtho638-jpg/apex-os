@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ verified: false, error: 'Verification failed' }, { status: 400 });
 
     } catch (error) {
-        console.error('WebAuthn login verify error:', error);
+        logger.error('WebAuthn login verify error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

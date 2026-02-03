@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient } from '@supabase/supabase-js';
 
 const DEEPSEEK_API_URL = 'https://openrouter.ai/api/v1';
@@ -30,7 +31,7 @@ export class DeepSeekClient {
         // Use OPENROUTER_API_KEY as primary source
         this.apiKey = apiKey || process.env.OPENROUTER_API_KEY || '';
         if (!this.apiKey) {
-            console.warn('OpenRouter API Key is missing');
+            logger.warn('OpenRouter API Key is missing');
         }
     }
 
@@ -102,7 +103,7 @@ Output MUST be valid JSON with the following structure:
             const jsonStr = content.replace(/```json\n|\n```/g, '');
             return JSON.parse(jsonStr);
         } catch (e) {
-            console.error('Failed to parse DeepSeek strategy:', e);
+            logger.error('Failed to parse DeepSeek strategy:', e);
             throw new Error('Invalid JSON response from DeepSeek');
         }
     }
@@ -147,7 +148,7 @@ Output MUST be valid JSON:
             const jsonStr = content.replace(/```json\n|\n```/g, '');
             return JSON.parse(jsonStr);
         } catch (e) {
-            console.error('Failed to parse DeepSeek volume strategy:', e);
+            logger.error('Failed to parse DeepSeek volume strategy:', e);
             throw new Error('Invalid JSON response from DeepSeek');
         }
     }

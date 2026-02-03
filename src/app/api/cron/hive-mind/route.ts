@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -56,7 +57,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, signals_generated: inserts.length });
 
   } catch (error: any) {
-    console.error('Hive Mind Error:', error);
+    logger.error('Hive Mind Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

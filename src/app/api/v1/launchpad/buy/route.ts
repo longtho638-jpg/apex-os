@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true });
 
     } catch (error: any) {
-        console.error('Launchpad Buy Error:', error);
+        logger.error('Launchpad Buy Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

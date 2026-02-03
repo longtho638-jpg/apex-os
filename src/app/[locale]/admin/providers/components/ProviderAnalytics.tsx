@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -49,7 +50,7 @@ export default function ProviderAnalytics({ providerId }: ProviderAnalyticsProps
                 setMetrics(data.metrics);
             }
         } catch (error) {
-            console.error('Failed to fetch metrics:', error);
+            logger.error('Failed to fetch metrics:', error);
         } finally {
             setLoading(false);
         }

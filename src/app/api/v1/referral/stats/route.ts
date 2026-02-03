@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -104,7 +105,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Referral Stats Error:', error);
+        logger.error('Referral Stats Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

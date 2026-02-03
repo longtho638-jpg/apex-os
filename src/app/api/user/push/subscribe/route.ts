@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -23,13 +24,13 @@ export async function POST(req: NextRequest) {
       }, { onConflict: 'user_id, endpoint' });
 
     if (error) {
-        console.error('Push DB Error:', error);
+        logger.error('Push DB Error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Push Subscribe API Error:', error);
+    logger.error('Push Subscribe API Error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

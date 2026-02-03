@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export type NotificationType = 'AMBIENT' | 'NECTAR' | 'CRITICAL';
@@ -45,7 +46,7 @@ export class NotificationService {
             .single();
 
         if (error) {
-            console.error('Error creating notification:', error);
+            logger.error('Error creating notification:', error);
             throw error;
         }
 
@@ -64,7 +65,7 @@ export class NotificationService {
             .eq('id', notificationId);
 
         if (error) {
-            console.error('Error marking notification as read:', error);
+            logger.error('Error marking notification as read:', error);
             throw error;
         }
     }
@@ -81,7 +82,7 @@ export class NotificationService {
             .eq('user_id', userId);
 
         if (error) {
-            console.error('Error marking all notifications as read:', error);
+            logger.error('Error marking all notifications as read:', error);
             throw error;
         }
     }
@@ -100,7 +101,7 @@ export class NotificationService {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching unread notifications:', error);
+            logger.error('Error fetching unread notifications:', error);
             throw error;
         }
 

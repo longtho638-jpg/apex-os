@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
                     .eq('id', provider.id);
 
                 if (updateError) {
-                    console.error(`Failed to update provider ${provider.provider_code}:`, updateError);
+                    logger.error(`Failed to update provider ${provider.provider_code}:`, updateError);
                 }
 
                 // 5. Log to Audit and Send Alerts
@@ -136,7 +137,7 @@ export async function GET(request: NextRequest) {
 
             } catch (error: any) {
                 result.status = 'error';
-                console.error(`Health check failed for ${provider.provider_code}:`, error);
+                logger.error(`Health check failed for ${provider.provider_code}:`, error);
             }
 
             results.push(result);
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Cron Job Error:', error);
+        logger.error('Cron Job Error:', error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

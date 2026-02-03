@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyMessage } from 'viem';
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, userId });
 
     } catch (error) {
-        console.error('Web3 Verify error:', error);
+        logger.error('Web3 Verify error:', error);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }
 }

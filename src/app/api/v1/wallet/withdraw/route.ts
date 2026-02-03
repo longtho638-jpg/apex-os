@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
@@ -111,7 +112,7 @@ export async function POST(req: Request) {
       .single();
 
     if (insertError) {
-      console.error('Withdrawal Insert Error:', insertError);
+      logger.error('Withdrawal Insert Error:', insertError);
       return NextResponse.json({ error: 'Failed to create request' }, { status: 500 });
     }
 
@@ -143,7 +144,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error('Withdrawal Error:', error);
+    logger.error('Withdrawal Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Sidebar } from '@/components/os/sidebar';
@@ -40,7 +41,7 @@ export default function AnalyticsDashboard() {
         setMetrics(revData);
         setFunnel(funnelData.funnel);
       } catch (error) {
-        console.error('Failed to fetch analytics', error);
+        logger.error('Failed to fetch analytics', error);
       } finally {
         setLoading(false);
       }

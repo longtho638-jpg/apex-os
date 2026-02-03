@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { getSupabaseClientSide } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
@@ -35,7 +36,7 @@ export default function CRMDashboard() {
 
             if (eventData) setEvents(eventData);
         } catch (error) {
-            console.error('Error fetching CRM data:', error);
+            logger.error('Error fetching CRM data:', error);
         } finally {
             setLoading(false);
         }

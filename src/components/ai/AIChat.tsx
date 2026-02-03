@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useRef, useEffect } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -81,7 +82,7 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
       setUsage(data.usage);
 
     } catch (error) {
-      console.error('AI Chat error:', error);
+      logger.error('AI Chat error:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: '❌ Sorry, something went wrong. Please try again.',

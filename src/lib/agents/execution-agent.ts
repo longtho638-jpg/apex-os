@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 import { nowPayments } from '@/lib/payments/nowpayments-client';
 import crypto from 'crypto';
@@ -109,7 +110,7 @@ export async function executeWithdrawal(withdrawalId: string) {
     return { success: true, tx_hash: txHash };
 
   } catch (error: any) {
-    console.error('Execution Error:', error);
+    logger.error('Execution Error:', error);
 
     // Revert status if possible (unless it's a critical unknown state)
     await supabase

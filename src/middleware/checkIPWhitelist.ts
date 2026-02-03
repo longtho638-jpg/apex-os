@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -38,7 +39,7 @@ export async function checkIPWhitelist(userId: string, clientIP: string): Promis
             .single();
 
         if (error || !user) {
-            console.error('IP whitelist check - user not found:', userId);
+            logger.error('IP whitelist check - user not found:', userId);
             return false;
         }
 
@@ -53,7 +54,7 @@ export async function checkIPWhitelist(userId: string, clientIP: string): Promis
         const isAllowed = allowedIPs.includes(clientIP);
 
         if (!isAllowed) {
-            console.warn(`IP blocked: ${clientIP} for user ${userId}`);
+            logger.warn(`IP blocked: ${clientIP} for user ${userId}`);
 
             // Log blocked attempt
             await supabase.from('security_alerts').insert({
@@ -67,7 +68,7 @@ export async function checkIPWhitelist(userId: string, clientIP: string): Promis
 
         return isAllowed;
     } catch (error) {
-        console.error('IP whitelist check error:', error);
+        logger.error('IP whitelist check error:', error);
         return false; // Fail closed for security
     }
 }

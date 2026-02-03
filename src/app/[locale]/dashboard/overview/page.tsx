@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -76,7 +77,7 @@ export default function DashboardOverviewPage() {
                     signalsGenerated: signalsCount || 0
                 });
             } catch (error) {
-                console.error('Error fetching dashboard metrics:', error);
+                logger.error('Error fetching dashboard metrics:', error);
             } finally {
                 setLoading(false);
             }

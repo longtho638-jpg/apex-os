@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { middleware } from '../middleware';
@@ -81,7 +82,7 @@ describe('Security Middleware', () => {
         const req = createRequest('/api/v1/admin/users');
         const res = await middleware(req);
 
-        console.log('Response Status:', res.status);
+        logger.info('Response Status:', res.status);
         // Expect 401 JSON response
         expect(res.status).toBe(401);
         // We can't easily check body of NextResponse without reading stream, but status is enough

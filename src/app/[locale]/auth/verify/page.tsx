@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSupabaseClientSide } from '@/lib/supabase';
@@ -45,14 +46,14 @@ export default function VerifyPage() {
                 }
 
                 if (error) {
-                    console.error('Verification error:', error);
+                    logger.error('Verification error:', error);
                     setError(error.message);
                 } else {
                     toast.success('Verification successful');
                     router.push(next);
                 }
             } catch (err) {
-                console.error('Verification exception:', err);
+                logger.error('Verification exception:', err);
                 setError('An unexpected error occurred');
             }
         };

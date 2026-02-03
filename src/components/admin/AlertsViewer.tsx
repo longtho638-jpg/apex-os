@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +31,7 @@ export default function AlertsViewer() {
                 setAlerts(response.data);
             }
         } catch (error) {
-            console.error('Failed to load alerts:', error);
+            logger.error('Failed to load alerts:', error);
         } finally {
             setLoading(false);
         }

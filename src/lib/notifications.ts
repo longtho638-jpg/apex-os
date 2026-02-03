@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient } from '@supabase/supabase-js';
 
 export class NotificationService {
@@ -8,7 +9,7 @@ export class NotificationService {
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
         if (!supabaseUrl || !supabaseKey) {
-            console.warn('NotificationService: Missing Supabase credentials');
+            logger.warn('NotificationService: Missing Supabase credentials');
         }
 
         this.supabase = createClient(supabaseUrl || '', supabaseKey || '');
@@ -33,7 +34,7 @@ export class NotificationService {
             // For now, Supabase Realtime on the table is sufficient for client subscription
 
         } catch (error) {
-            console.error('Failed to send notification:', error);
+            logger.error('Failed to send notification:', error);
         }
     }
 
@@ -45,7 +46,7 @@ export class NotificationService {
     }
 
     static async sendAlert(alert: { title: string; message: string; level: string; metadata?: any }) {
-        console.log(`[ALERT] ${alert.level.toUpperCase()}: ${alert.title} - ${alert.message}`, alert.metadata);
+        logger.info(`[ALERT] ${alert.level.toUpperCase()}: ${alert.title} - ${alert.message}`, alert.metadata);
         // TODO: Implement actual alert dispatch (e.g. to admin users or external service)
     }
 }

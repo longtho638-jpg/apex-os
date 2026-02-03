@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyWithExchangeAPI } from '@/lib/services/exchange-verification';
@@ -5,7 +6,7 @@ import { decodeJwt } from 'jose';
 
 // BYPASS AUTH MODE (FOR DEMO ONLY)
 export async function POST(request: NextRequest) {
-    console.log('[Verify API] BYPASS AUTH MODE');
+    logger.info('[Verify API] BYPASS AUTH MODE');
     try {
         // 1. Try to get User ID from Token (Unverified Decode)
         const authHeader = request.headers.get('authorization');
@@ -16,9 +17,9 @@ export async function POST(request: NextRequest) {
             try {
                 const payload = decodeJwt(token);
                 if (payload.sub) userId = payload.sub;
-                console.log('[Verify API] Decoded User ID:', userId);
+                logger.info('[Verify API] Decoded User ID:', userId);
             } catch (e) {
-                console.warn('[Verify API] Failed to decode token, using fallback ID');
+                logger.warn('[Verify API] Failed to decode token, using fallback ID');
             }
         }
 
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('[Verify API] Critical Error:', error);
+        logger.error('[Verify API] Critical Error:', error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

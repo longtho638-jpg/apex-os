@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { createSmartRouter } from '@/lib/ai/smart-router';
@@ -8,7 +9,7 @@ import { RateLimiter } from '@/lib/ai/rate-limiter';
 async function trackEvent(params: any) {
     // This would normally call the analytics service
     if (process.env.NODE_ENV === 'development') {
-        console.log('[Analytics Track]', params);
+        logger.info('[Analytics Track]', params);
     }
 }
 
@@ -92,7 +93,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[AI Chat] Error:', error);
+    logger.error('[AI Chat] Error:', error);
     return NextResponse.json({
       error: 'AI request failed',
       details: error instanceof Error ? error.message : 'Unknown error',

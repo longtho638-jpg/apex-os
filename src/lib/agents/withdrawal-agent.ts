@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 import crypto from 'crypto';
 
@@ -65,7 +66,7 @@ export async function agentCheckWithdrawal(withdrawalId: string): Promise<AgentC
 
       if (gap > 1.0) { // $1 tolerance
         riskScore += 100; // Critical failure
-        console.error(`Balance Mismatch: Earned ${wallet.total_earned} vs Accounted ${accountedFor}`);
+        logger.error(`Balance Mismatch: Earned ${wallet.total_earned} vs Accounted ${accountedFor}`);
       }
     }
 
@@ -106,7 +107,7 @@ export async function agentCheckWithdrawal(withdrawalId: string): Promise<AgentC
     return { approved: true, risk_score: riskScore };
 
   } catch (error: any) {
-    console.error('Agent Check Error:', error);
+    logger.error('Agent Check Error:', error);
     return { approved: false, reason: error.message };
   }
 }

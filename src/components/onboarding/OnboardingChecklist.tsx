@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, Circle, Trophy, ArrowRight, Wallet, LineChart, PlayCircle, MessageCircle, Gift } from 'lucide-react';
@@ -49,7 +50,7 @@ export function OnboardingChecklist() {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching onboarding:', error);
+        logger.error('Error fetching onboarding:', error);
         return;
       }
 
@@ -61,7 +62,7 @@ export function OnboardingChecklist() {
         await supabase.from('user_onboarding').insert({ user_id: user.id });
       }
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
     } finally {
       setLoading(false);
     }

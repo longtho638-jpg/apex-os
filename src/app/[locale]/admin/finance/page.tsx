@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -37,7 +38,7 @@ export default function AdminFinancePage() {
                     });
                 }
             } catch (error) {
-                console.error('Failed to fetch finance stats:', error);
+                logger.error('Failed to fetch finance stats:', error);
             } finally {
                 setLoading(false);
             }

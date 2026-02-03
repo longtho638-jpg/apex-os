@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { crmService } from '@/lib/crm-service';
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Ghost Profit Cron Error:', error);
+        logger.error('Ghost Profit Cron Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

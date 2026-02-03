@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
 import { X, Upload, FileText, AlertCircle, CheckCircle2, Loader2, Download } from 'lucide-react';
@@ -70,7 +71,7 @@ export default function ProviderImportModal({ isOpen, onClose, onSuccess, token 
                 setIsParsing(false);
             },
             error: (error) => {
-                console.error('CSV Parse Error:', error);
+                logger.error('CSV Parse Error:', error);
                 setIsParsing(false);
             }
         });
@@ -105,7 +106,7 @@ export default function ProviderImportModal({ isOpen, onClose, onSuccess, token 
                 alert('Import failed: ' + data.message);
             }
         } catch (error) {
-            console.error('Import error:', error);
+            logger.error('Import error:', error);
             alert('Import failed due to network error');
         } finally {
             setIsImporting(false);

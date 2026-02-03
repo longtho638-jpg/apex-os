@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { deepseek } from '@/lib/ai/deepseek';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
         // We enrich the context with the symbol
         const enrichedContext = `Symbol: ${symbol}\n${marketContext}`;
 
-        console.log(`[DeepSeek] Analyzing ${symbol} for user ${userId}...`);
+        logger.info(`[DeepSeek] Analyzing ${symbol} for user ${userId}...`);
         const strategy = await deepseek.generateQuantStrategy(enrichedContext);
 
         // 4. Log the Signal (for transparency and performance tracking)
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('[DeepSeek Analysis Error]', error);
+        logger.error('[DeepSeek Analysis Error]', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

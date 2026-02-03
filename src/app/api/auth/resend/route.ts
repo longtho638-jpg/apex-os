@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { redis } from '@/lib/redis';
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (linkError || !data.properties?.action_link) {
-            console.error('Supabase Generate Link Error:', linkError);
+            logger.error('Supabase Generate Link Error:', linkError);
             return NextResponse.json({ error: 'Failed to generate verification link' }, { status: 400 });
         }
 
@@ -93,14 +94,14 @@ export async function POST(request: NextRequest) {
         });
 
         if (!success) {
-            console.error('Resend Email Error:', emailError);
+            logger.error('Resend Email Error:', emailError);
             return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
         }
 
         return NextResponse.json({ success: true, message: 'Custom email sent successfully' });
 
     } catch (error) {
-        console.error('Resend API Error:', error);
+        logger.error('Resend API Error:', error);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -77,7 +78,7 @@ export default function SmartSwitchWizard() {
     } catch (error) {
         clearInterval(interval);
         setState('idle');
-        console.error(error);
+        logger.error("Operation failed", error);
     }
   };
 

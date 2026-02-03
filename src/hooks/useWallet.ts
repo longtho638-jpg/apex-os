@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getSupabaseClientSide } from '@/lib/supabase';
@@ -34,7 +35,7 @@ export function useWallet() {
                 .single();
 
             if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching wallet:', error);
+                logger.error('Error fetching wallet:', error);
             }
 
             // 2. Calculate Total Profit from closed positions
@@ -61,7 +62,7 @@ export function useWallet() {
             }
 
         } catch (error) {
-            console.error('Failed to fetch wallet data:', error);
+            logger.error('Failed to fetch wallet data:', error);
             setWallet(prev => ({ ...prev, loading: false }));
         }
     };

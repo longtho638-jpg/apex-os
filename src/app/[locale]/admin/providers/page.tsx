@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Search, Filter, Activity, TrendingUp, AlertCircle } from 'lucide-react';
@@ -92,7 +93,7 @@ export default function ProvidersPage() {
             setProviders(data.providers || []);
             setStats(data.stats);
         } catch (error) {
-            console.error('Fetch providers error:', error);
+            logger.error('Fetch providers error:', error);
         } finally {
             setLoading(false);
         }
@@ -108,7 +109,7 @@ export default function ProvidersPage() {
                 fetchProviders(); // Refresh to show updated health status
             }
         } catch (error) {
-            console.error('Health check error:', error);
+            logger.error('Health check error:', error);
         }
     }
 
@@ -127,7 +128,7 @@ export default function ProvidersPage() {
 
             fetchProviders(); // Refresh list
         } catch (error) {
-            console.error('Delete provider error:', error);
+            logger.error('Delete provider error:', error);
             throw error;
         }
     }
@@ -159,7 +160,7 @@ export default function ProvidersPage() {
 
             fetchProviders();
         } catch (error) {
-            console.error('Bulk action error:', error);
+            logger.error('Bulk action error:', error);
             alert('Failed to perform bulk action');
         }
     };

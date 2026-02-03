@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
         const { data: providers, error: providersError } = await query;
 
         if (providersError) {
-            console.error('Providers fetch error:', providersError);
+            logger.error('Providers fetch error:', providersError);
             return NextResponse.json({
                 success: false,
                 message: 'Failed to fetch providers'
@@ -112,7 +113,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('[ADMIN] Providers fetch error:', error);
+        logger.error('[ADMIN] Providers fetch error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'
@@ -213,7 +214,7 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (insertError) {
-            console.error('Provider insert error:', insertError);
+            logger.error('Provider insert error:', insertError);
             return NextResponse.json({
                 success: false,
                 message: insertError.message
@@ -228,7 +229,7 @@ export async function POST(request: NextRequest) {
         }, { status: 201 });
 
     } catch (error) {
-        console.error('[ADMIN] Provider creation error:', error);
+        logger.error('[ADMIN] Provider creation error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'

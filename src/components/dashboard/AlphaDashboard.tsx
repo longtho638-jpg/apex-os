@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState, useMemo, memo, useRef, useCallback } from 'react';
 import { ArrowUpRight, ArrowDownRight, Activity, Zap, BarChart2, Play, Loader2, CheckCircle2, Eye, Maximize2, Minimize2, Wallet, Wifi, TrendingUp, Shield, Crosshair, Settings2, Search, Layers, RefreshCw, X, ScanSearch, BrainCircuit, Target, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -569,7 +570,7 @@ export default function AlphaDashboard({ filters: parentFilters }: Props) {
             // Optimistically add position (optional, or wait for real-time update)
 
         } catch (error: any) {
-            console.error('Execution failed:', error);
+            logger.error('Execution failed:', error);
             toast.error('EXECUTION FAILED', {
                 description: error.message
             });

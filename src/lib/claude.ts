@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
 
 export interface ChatMessage {
@@ -82,7 +83,7 @@ ${context ? `Context: ${context}` : ''}`;
 
       return response.choices[0]?.message?.content || 'No response generated.';
     } catch (error) {
-      console.error('Claude API error:', error);
+      logger.error('Claude API error:', error);
       throw new Error('Failed to get response from Claude');
     }
   }
@@ -116,7 +117,7 @@ ${context ? `Context: ${context}` : ''}`;
         }
       }
     } catch (error) {
-      console.error('Claude streaming error:', error);
+      logger.error('Claude streaming error:', error);
       throw new Error('Failed to stream response from Claude');
     }
   }

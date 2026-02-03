@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Globe, Shield, Zap, TrendingUp, ChevronRight, Activity, Users, Crown, Wallet, Check, ArrowRight, LockKeyhole } from 'lucide-react';
@@ -27,7 +28,7 @@ export default function Homepage() {
             .then(data => {
                 if (data.success) setStrategies(data.data.slice(0, 3));
             })
-            .catch(err => console.error(err));
+            .catch(err => logger.error("Error occurred", err));
     }, []);
 
     return (

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { getSupabaseClientSide } from '@/lib/supabase';
 import { LinkedAccount, ExchangeFormValues } from '@/types/exchange';
@@ -24,7 +25,7 @@ export function useExchangeAccounts() {
             if (error) throw error;
             setLinkedAccounts(data as LinkedAccount[] || []);
         } catch (err: any) {
-            console.error('Error fetching accounts:', err);
+            logger.error('Error fetching accounts:', err);
             setError('Failed to load linked accounts');
         } finally {
             setLoading(false);
@@ -75,7 +76,7 @@ export function useExchangeAccounts() {
 
             if (error) throw error;
         } catch (err: any) {
-            console.error('Error deleting account:', err);
+            logger.error('Error deleting account:', err);
             setError('Failed to delete account');
             setLinkedAccounts(previousAccounts); // Revert
             throw err;

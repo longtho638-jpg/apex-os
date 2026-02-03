@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySessionToken } from '@/lib/jwt';
 import { WalletService } from '@/lib/services/wallet.service';
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Withdrawal API Error:', error);
+        logger.error('Withdrawal API Error:', error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

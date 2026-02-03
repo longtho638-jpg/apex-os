@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, title });
 
   } catch (error: any) {
-    console.error('Market Analysis Cron Error:', error);
+    logger.error('Market Analysis Cron Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auditService } from '@/lib/audit';
 import { createClient } from '@supabase/supabase-js';
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
         try {
             await jwtVerify(token, JWT_SECRET);
         } catch (err) {
-            console.error('[Audit Export API] JWT Verification Failed:', err);
+            logger.error('[Audit Export API] JWT Verification Failed:', err);
             return NextResponse.json(
                 {
                     error: 'Unauthorized',
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
         );
 
     } catch (error) {
-        console.error('Audit logs export error:', error);
+        logger.error('Audit logs export error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

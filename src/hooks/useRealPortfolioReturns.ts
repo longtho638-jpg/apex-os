@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * Hook for Real Portfolio Returns
  * 
@@ -49,7 +50,7 @@ export function useRealPortfolioReturns(userId?: string, demoMode: boolean = fal
 
             // 2. If Demo Mode (explicit or auto-fallback)
             if (isDemo || demoMode) {
-                console.log('[useRealPortfolioReturns] Using DEMO DATA (Beta Launch Mode)');
+                logger.info('[useRealPortfolioReturns] Using DEMO DATA (Beta Launch Mode)');
                 const fakeTrades = generateFakeTrades(50);
 
                 const mappedTrades: TradeHistory[] = fakeTrades.map((t, i) => ({
@@ -118,7 +119,7 @@ export function useRealPortfolioReturns(userId?: string, demoMode: boolean = fal
                     }));
                 }
             } catch (err) {
-                console.error('[useRealPortfolioReturns] Error:', err);
+                logger.error('[useRealPortfolioReturns] Error:', err);
                 setError(err instanceof Error ? err : new Error('Failed to fetch trades'));
                 // On error, maybe fallback to demo? No, better to show error.
             } finally {

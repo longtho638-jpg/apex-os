@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { withdrawalService } from '@/lib/finance/withdrawal-service';
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
         return NextResponse.json(result);
 
     } catch (error) {
-        console.error('Withdrawal API error:', error);
+        logger.error('Withdrawal API error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

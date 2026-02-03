@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import path from 'path';
@@ -9,7 +10,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !serviceRoleKey) {
-    console.error('❌ Missing Supabase keys');
+    logger.error('❌ Missing Supabase keys');
     process.exit(1);
 }
 
@@ -18,7 +19,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey);
 async function disableMFA() {
     const email = process.argv[2] || 'verified_tester_1763873096775@apex.com';
 
-    console.log('🔓 Disabling MFA for:', email);
+    logger.info('🔓 Disabling MFA for:', email);
 
     try {
         // Check if admin_users table exists and disable MFA there
@@ -29,7 +30,7 @@ async function disableMFA() {
             .maybeSingle();
 
         if (adminUser) {
-            console.log('✅ Found in admin_users table');
+            logger.info('✅ Found in admin_users table');
 
             const { error: updateError } = await supabase
                 .from('admin_users')
@@ -41,30 +42,30 @@ async function disableMFA() {
                 .eq('email', email);
 
             if (updateError) {
-                console.error('❌ Error updating admin_users:', updateError);
+                logger.error('❌ Error updating admin_users:', updateError);
             } else {
-                console.log('✅ MFA disabled in admin_users table');
+                logger.info('✅ MFA disabled in admin_users table');
             }
         } else if (adminError && !adminError.message.includes('does not exist')) {
-            console.error('❌ Error checking admin_users:', adminError);
+            logger.error('❌ Error checking admin_users:', adminError);
         }
 
         // Also check users table
         const { data: users, error: listError } = await supabase.auth.admin.listUsers();
 
         if (listError) {
-            console.error('❌ Error listing users:', listError);
+            logger.error('❌ Error listing users:', listError);
             return;
         }
 
         const user = users.users.find(u => u.email === email);
 
         if (!user) {
-            console.error('❌ User not found in auth:', email);
+            logger.error('❌ User not found in auth:', email);
             return;
         }
 
-        console.log('✅ User found in auth:', user.id);
+        logger.info('✅ User found in auth:', user.id);
 
         // Update users table to disable MFA
         const { error: usersUpdateError } = await supabase
@@ -75,22 +76,22 @@ async function disableMFA() {
             .eq('user_id', user.id);
 
         if (!usersUpdateError) {
-            console.log('✅ MFA disabled in users table');
+            logger.info('✅ MFA disabled in users table');
         }
 
-        console.log('');
-        console.log('✅ MFA COMPLETELY DISABLED!');
-        console.log('');
-        console.log('📝 You can now login with:');
-        console.log(`   Email: ${email}`);
-        console.log(`   Password: password123`);
-        console.log('');
-        console.log('🌐 Go to: http://localhost:3000/login');
-        console.log('');
-        console.log('⚠️  You should be redirected directly to dashboard (no MFA screen)');
+        logger.info('');
+        logger.info('✅ MFA COMPLETELY DISABLED!');
+        logger.info('');
+        logger.info('📝 You can now login with:');
+        logger.info(`   Email: ${email}`);
+        logger.info(`   Password: password123`);
+        logger.info('');
+        logger.info('🌐 Go to: http://localhost:3000/login');
+        logger.info('');
+        logger.info('⚠️  You should be redirected directly to dashboard (no MFA screen)');
 
     } catch (error) {
-        console.error('❌ Unexpected error:', error);
+        logger.error('❌ Unexpected error:', error);
     }
 }
 

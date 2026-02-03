@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,7 @@ export default function AuditLogsPage() {
             const data = await auditService.getLogsByDateRange(startDate, endDate, 100);
             setLogs(data);
         } catch (error) {
-            console.error('Failed to fetch logs:', error);
+            logger.error('Failed to fetch logs:', error);
         } finally {
             setLoading(false);
         }

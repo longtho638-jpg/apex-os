@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseClientSide } from '@/lib/supabase';
@@ -39,9 +40,10 @@ export default function UpdatePasswordPage() {
 
             toast.success('Password updated successfully');
             router.push('/login');
-        } catch (error: any) {
-            console.error('Error updating password:', error);
-            toast.error(error.message || 'Failed to update password');
+        } catch (error: unknown) {
+            logger.error('Error updating password:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to update password';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

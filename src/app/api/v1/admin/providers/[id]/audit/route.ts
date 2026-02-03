@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -47,7 +48,7 @@ export async function GET(
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Fetch audit error:', error);
+            logger.error('Fetch audit error:', error);
             return NextResponse.json({ success: false, message: 'Failed to fetch audit logs' }, { status: 500 });
         }
 
@@ -57,7 +58,7 @@ export async function GET(
         });
 
     } catch (error: any) {
-        console.error('Audit API Error:', error);
+        logger.error('Audit API Error:', error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

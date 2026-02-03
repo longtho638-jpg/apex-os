@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * IP Whitelist API
  * GET - List current admin's whitelisted IPs
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
             const { payload } = await jwtVerify(token, secret);
             adminId = payload.sub;
         } catch (err) {
-            console.error('JWT verification failed:', err);
+            logger.error('JWT verification failed:', err);
             return NextResponse.json(
                 { error: 'Unauthorized - Invalid token' },
                 { status: 401 }
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('IP whitelist GET error:', error);
+        logger.error('IP whitelist GET error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
             const { payload } = await jwtVerify(token, secret);
             userId = payload.sub;
         } catch (err) {
-            console.error('JWT verification failed:', err);
+            logger.error('JWT verification failed:', err);
             return NextResponse.json(
                 { error: 'Unauthorized - Invalid token' },
                 { status: 401 }
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('IP whitelist POST error:', error);
+        logger.error('IP whitelist POST error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -187,7 +188,7 @@ export async function DELETE(request: NextRequest) {
             const { payload } = await jwtVerify(token, secret);
             userId = payload.sub;
         } catch (err) {
-            console.error('JWT verification failed:', err);
+            logger.error('JWT verification failed:', err);
             return NextResponse.json(
                 { error: 'Unauthorized - Invalid token' },
                 { status: 401 }
@@ -238,7 +239,7 @@ export async function DELETE(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('IP whitelist DELETE error:', error);
+        logger.error('IP whitelist DELETE error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

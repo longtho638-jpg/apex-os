@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useApiClient } from '@/hooks/useApi';
 import { Activity, AlertCircle, CheckCircle, Clock } from 'lucide-react';
@@ -27,7 +28,7 @@ export default function AgentStatusDashboard() {
                 setAgents(response.data);
             }
         } catch (error) {
-            console.error('Failed to load agent status:', error);
+            logger.error('Failed to load agent status:', error);
         } finally {
             setLoading(false);
         }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Global pool manager
@@ -53,14 +54,14 @@ export async function monitorQuery<T>(
 
         // Log slow queries (> 500ms)
         if (duration > 500) {
-            console.warn(`[Slow Query] ${queryName} took ${duration.toFixed(2)}ms`);
+            logger.warn(`[Slow Query] ${queryName} took ${duration.toFixed(2)}ms`);
             // Todo: Send to monitoring service (Sentry/Datadog)
         }
 
         return result;
     } catch (err) {
         const duration = performance.now() - start;
-        console.error(`[Query Error] ${queryName} failed after ${duration.toFixed(2)}ms`, err);
+        logger.error(`[Query Error] ${queryName} failed after ${duration.toFixed(2)}ms`, err);
         throw err;
     }
 }

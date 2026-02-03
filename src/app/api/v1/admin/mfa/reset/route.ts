@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
             .eq('email', email);
 
         if (error) {
-            console.error('Error resetting MFA:', error);
+            logger.error('Error resetting MFA:', error);
             return NextResponse.json(
                 { error: 'Failed to reset MFA' },
                 { status: 500 }
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('MFA reset error:', error);
+        logger.error('MFA reset error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

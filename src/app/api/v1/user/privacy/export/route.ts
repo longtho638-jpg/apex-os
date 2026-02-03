@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { privacyService } from '@/lib/privacy';
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Privacy export error:', error);
+        logger.error('Privacy export error:', error);
         return NextResponse.json(
             { success: false, message: error.message || 'Export failed' },
             { status: 500 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import path from 'path';
@@ -9,7 +10,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-    console.error('❌ Missing Supabase configuration. Check .env.local');
+    logger.error('❌ Missing Supabase configuration. Check .env.local');
     process.exit(1);
 }
 
@@ -19,12 +20,12 @@ async function resetAdminPassword() {
     const email = process.argv[2] || 'verified_tester_1763873096775@apex.com';
     const newPassword = process.argv[3] || 'Admin123!@#';
 
-    console.log(`🔐 Starting password reset for: ${email}`);
+    logger.info(`🔐 Starting password reset for: ${email}`);
 
     try {
         // Strategy 1: O(1) Lookup via public.users table
         // This is much faster than scanning auth.users
-        console.log('🔍 Strategy 1: Checking public.users table...');
+        logger.info('🔍 Strategy 1: Checking public.users table...');
         const { data: publicUser } = await supabase
             .from('users')
             .select('user_id')
@@ -35,16 +36,16 @@ async function resetAdminPassword() {
 
         // Strategy 2: Fallback to Auth API Scan (if not in public.users)
         if (!userId) {
-            console.log('⚠️ User not found in public.users. Falling back to Auth API scan...');
+            logger.info('⚠️ User not found in public.users. Falling back to Auth API scan...');
             userId = await findUserInAuth(email);
         }
 
         if (!userId) {
-            console.error(`❌ User ${email} not found in system.`);
+            logger.error(`❌ User ${email} not found in system.`);
             return;
         }
 
-        console.log(`✅ User found. ID: ${userId}`);
+        logger.info(`✅ User found. ID: ${userId}`);
 
         // Update Password
         const { error: updateError } = await supabase.auth.admin.updateUserById(
@@ -56,18 +57,18 @@ async function resetAdminPassword() {
             throw new Error(`Failed to update password: ${updateError.message}`);
         }
 
-        console.log('✅ Password updated successfully.');
+        logger.info('✅ Password updated successfully.');
 
         // Grant Admin Privileges
         await grantAdminPrivileges(userId, email);
 
-        console.log('\n🎉 Success! Credentials:');
-        console.log(`   Email:    ${email}`);
-        console.log(`   Password: ${newPassword}`);
-        console.log(`   Login:    http://localhost:3000/login\n`);
+        logger.info('\n🎉 Success! Credentials:');
+        logger.info(`   Email:    ${email}`);
+        logger.info(`   Password: ${newPassword}`);
+        logger.info(`   Login:    http://localhost:3000/login\n`);
 
     } catch (error) {
-        console.error('❌ Operation failed:', error);
+        logger.error('❌ Operation failed:', error);
         process.exit(1);
     }
 }
@@ -84,7 +85,7 @@ async function findUserInAuth(email: string): Promise<string | null> {
         });
 
         if (error) {
-            console.error(`Error listing users (Page ${page}):`, error.message);
+            logger.error(`Error listing users (Page ${page}):`, error.message);
             return null;
         }
 
@@ -95,14 +96,14 @@ async function findUserInAuth(email: string): Promise<string | null> {
             hasMore = false;
         } else {
             page++;
-            console.log(`... scanned ${page * PER_PAGE} users ...`);
+            logger.info(`... scanned ${page * PER_PAGE} users ...`);
         }
     }
     return null;
 }
 
 async function grantAdminPrivileges(userId: string, email: string) {
-    console.log('�️  Granting admin privileges...');
+    logger.info('�️  Granting admin privileges...');
 
     // 1. Update public.users
     const { error: publicError } = await supabase
@@ -114,8 +115,8 @@ async function grantAdminPrivileges(userId: string, email: string) {
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' });
 
-    if (publicError) console.warn('⚠️ Failed to update public.users:', publicError.message);
-    else console.log('   - Updated public.users (is_admin=true)');
+    if (publicError) logger.warn('⚠️ Failed to update public.users:', publicError.message);
+    else logger.info('   - Updated public.users (is_admin=true)');
 
     // 2. Update admin_users (if table exists)
     const { error: adminError } = await supabase
@@ -130,10 +131,10 @@ async function grantAdminPrivileges(userId: string, email: string) {
     if (adminError) {
         // Ignore error if table doesn't exist, but log it
         if (!adminError.message.includes('relation "admin_users" does not exist')) {
-            console.warn('⚠️ Failed to update admin_users:', adminError.message);
+            logger.warn('⚠️ Failed to update admin_users:', adminError.message);
         }
     } else {
-        console.log('   - Updated admin_users (role=super_admin)');
+        logger.info('   - Updated admin_users (role=super_admin)');
     }
 }
 

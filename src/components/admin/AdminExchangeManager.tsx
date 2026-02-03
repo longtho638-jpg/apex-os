@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +61,7 @@ export default function AdminExchangeManager() {
                 setConfigs(configMap);
             }
         } catch (err) {
-            console.error('Failed to fetch configs', err);
+            logger.error('Failed to fetch configs', err);
         } finally {
             setLoading(false);
         }
@@ -109,7 +110,7 @@ export default function AdminExchangeManager() {
                 alert(data.message || t('error_save'));
             }
         } catch (err) {
-            console.error('Save error', err);
+            logger.error('Save error', err);
             alert(t('error_save'));
         } finally {
             setSaving(false);

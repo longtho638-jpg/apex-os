@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
 import { Shield, Plus, Trash2, Key } from 'lucide-react';
@@ -31,7 +32,7 @@ export default function SecurityKeyManager() {
                 setKeys(data.keys);
             }
         } catch (err) {
-            console.error('Failed to fetch keys', err);
+            logger.error('Failed to fetch keys', err);
         }
     };
 
@@ -77,7 +78,7 @@ export default function SecurityKeyManager() {
             }
 
         } catch (err: any) {
-            console.error(err);
+            logger.error("Error occurred", err);
             setError(err.message || 'An error occurred during registration');
         } finally {
             setIsLoading(false);
@@ -98,7 +99,7 @@ export default function SecurityKeyManager() {
                 alert('Failed to delete key');
             }
         } catch (err) {
-            console.error(err);
+            logger.error("Error occurred", err);
         }
     };
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
             const priceData = await priceRes.json();
             currentPrice = parseFloat(priceData.price);
         } catch (e) {
-            console.error('Failed to fetch Binance price', e);
+            logger.error('Failed to fetch Binance price', e);
             currentPrice = 50000; // Fallback
         }
 
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error) {
-        console.error('Analyze API Error:', error);
+        logger.error('Analyze API Error:', error);
         return NextResponse.json({ success: false, message: 'Analysis failed' }, { status: 500 });
     }
 }

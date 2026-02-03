@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * MFA Setup API
  * POST /api/v1/admin/mfa/setup
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
             .eq('email', email);
 
         if (updateError) {
-            console.error('Error updating admin MFA data:', updateError);
+            logger.error('Error updating admin MFA data:', updateError);
             return NextResponse.json(
                 { error: 'Failed to save MFA setup' },
                 { status: 500 }
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error) {
-        console.error('MFA setup error:', error);
+        logger.error('MFA setup error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

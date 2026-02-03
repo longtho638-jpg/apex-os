@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { decryptApiCredentials } from '@/lib/crypto/vault';
 
 export interface VerificationResult {
@@ -25,7 +26,7 @@ export async function verifyWithExchangeAPI(
     encryptedApiSecret: string | null
 ): Promise<VerificationResult> {
 
-    console.log(`[Verification] Starting verification for ${exchange} account ${userUid}`);
+    logger.info(`[Verification] Starting verification for ${exchange} account ${userUid}`);
 
     // Decrypt API credentials (skip in mock mode)
     let apiKey: string = '';
@@ -37,9 +38,9 @@ export async function verifyWithExchangeAPI(
             const decrypted = decryptApiCredentials(encryptedApiKey, encryptedApiSecret);
             apiKey = decrypted.apiKey;
             apiSecret = decrypted.apiSecret;
-            console.log(`[Verification] Successfully decrypted API credentials for ${exchange}`);
+            logger.info(`[Verification] Successfully decrypted API credentials for ${exchange}`);
         } catch (error) {
-            console.error(`[Verification] Failed to decrypt credentials:`, error);
+            logger.error(`[Verification] Failed to decrypt credentials:`, error);
             return {
                 verified: false,
                 status: 'failed',
@@ -51,7 +52,7 @@ export async function verifyWithExchangeAPI(
             };
         }
     } else {
-        console.log(`[Verification] Mock mode - skipping credential decryption`);
+        logger.info(`[Verification] Mock mode - skipping credential decryption`);
     }
 
     // SIMULATION MODE - Network Latency (2 seconds)
@@ -149,7 +150,7 @@ export async function verifyWithExchangeAPI(
         }
 
     } catch (error) {
-        console.error(`[Verification] API call failed:`, error);
+        logger.error(`[Verification] API call failed:`, error);
         return {
             verified: false,
             status: 'needs_relink',
@@ -213,7 +214,7 @@ export async function generateReferralLink(
         return defaultTemplates[exchange.toLowerCase()] || `https://${exchange}.com/register?ref=${config.partner_uuid}`;
 
     } catch (error) {
-        console.error('[generateReferralLink] Error:', error);
+        logger.error('[generateReferralLink] Error:', error);
         // Fallback
         return `https://${exchange}.com/register?ref=APEX_${exchange.toUpperCase()}`;
     }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Order creation error:', error);
+        logger.error('Order creation error:', error);
         return NextResponse.json({
             error: error.message || 'Failed to create order'
         }, { status: 500 });
@@ -75,10 +76,10 @@ export async function GET(request: NextRequest) {
         const { data: orders, error, count } = await query;
 
         if (error) {
-            console.error('[Trading Orders API] Supabase fetch error:', error);
+            logger.error('[Trading Orders API] Supabase fetch error:', error);
             // If table doesn't exist, return empty array instead of error
             if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
-                console.warn('[Trading Orders API] Orders table does not exist, returning empty array');
+                logger.warn('[Trading Orders API] Orders table does not exist, returning empty array');
                 return NextResponse.json({ success: true, orders: [], message: 'Orders table not found' });
             }
             throw error;
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, orders: orders || [] });
 
     } catch (error: any) {
-        console.error('[Trading Orders API] GET error:', error);
+        logger.error('[Trading Orders API] GET error:', error);
         return NextResponse.json({
             success: false,
             orders: [],

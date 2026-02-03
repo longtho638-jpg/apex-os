@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { BinanceClient } from './binance-client';
 import { createClient } from '@supabase/supabase-js';
 
@@ -53,10 +54,10 @@ export class DataPipeline {
 
             if (error) throw error;
 
-            console.log(`Stored ${rows.length} candles for ${symbol} ${interval}`);
+            logger.info(`Stored ${rows.length} candles for ${symbol} ${interval}`);
             return true;
         } catch (error) {
-            console.error(`Pipeline Error (${symbol}):`, error);
+            logger.error(`Pipeline Error (${symbol}):`, error);
             return false;
         }
     }
@@ -64,7 +65,7 @@ export class DataPipeline {
     async startRealtimeIngestion(symbols: string[]) {
         // This would typically be a websocket connection
         // For now, we'll just poll every minute
-        console.log(`Starting polling for ${symbols.join(', ')}...`);
+        logger.info(`Starting polling for ${symbols.join(', ')}...`);
         // Logic to be implemented in cron or separate worker
     }
 }

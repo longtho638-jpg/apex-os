@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { getSupabaseClientSide } from '@/lib/supabase';
 import { TierId } from '@/config/unified-tiers';
@@ -51,7 +52,7 @@ export function useUpgradeTier() {
             return data;
 
         } catch (err: any) {
-            console.error('Upgrade error:', err);
+            logger.error('Upgrade error:', err);
             setError(err.message || 'Failed to upgrade');
             return null;
         } finally {

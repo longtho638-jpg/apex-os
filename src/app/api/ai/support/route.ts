@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ answer });
 
   } catch (error) {
-    console.error('Support AI Error:', error);
+    logger.error('Support AI Error:', error);
     return NextResponse.json({ answer: "Sorry, I'm currently offline. Please email support." }, { status: 500 });
   }
 }

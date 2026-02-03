@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, post });
 
   } catch (error: any) {
-    console.error('Auto-Content Cron Error:', error);
+    logger.error('Auto-Content Cron Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

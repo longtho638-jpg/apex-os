@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
                 .gte('created_at', yesterday.toISOString());
 
             if (!countError && count !== null && count >= 3) {
-                console.warn(`[Anti-Fraud] Blocked signup from IP ${ip} (Count: ${count})`);
+                logger.warn(`[Anti-Fraud] Blocked signup from IP ${ip} (Count: ${count})`);
                 return NextResponse.json(
                     { success: false, message: 'Too many accounts created from this IP. Please try again later.' },
                     { status: 429 }
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
             },
         });
     } catch (error) {
-        console.error('Signup endpoint error:', error);
+        logger.error('Signup endpoint error:', error);
         return NextResponse.json(
             { success: false, message: 'Server error' },
             { status: 500 }

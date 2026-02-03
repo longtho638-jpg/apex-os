@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 // Binance WebSocket Price Feed Integration
 
 interface PriceUpdate {
@@ -22,7 +23,7 @@ export class BinancePriceFeed {
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
-                console.log(`[BinanceFeed] Connected to ${this.symbol}`);
+                logger.info(`[BinanceFeed] Connected to ${this.symbol}`);
             };
 
             this.ws.onmessage = (event) => {
@@ -37,16 +38,16 @@ export class BinancePriceFeed {
             };
 
             this.ws.onerror = (error) => {
-                console.error(`[BinanceFeed] Error:`, error);
+                logger.error(`[BinanceFeed] Error:`, error);
             };
 
             this.ws.onclose = () => {
-                console.log(`[BinanceFeed] Disconnected from ${this.symbol}`);
+                logger.info(`[BinanceFeed] Disconnected from ${this.symbol}`);
                 // Auto-reconnect after 5s
                 this.reconnectTimeout = setTimeout(() => this.connect(), 5000);
             };
         } catch (error) {
-            console.error(`[BinanceFeed] Failed to connect:`, error);
+            logger.error(`[BinanceFeed] Failed to connect:`, error);
         }
     }
 
@@ -87,7 +88,7 @@ export async function fetchBinanceOHLCV(symbol: string, interval: string = '1m',
             volume: parseFloat(candle[5]),
         }));
     } catch (error) {
-        console.error(`[Binance] Failed to fetch OHLCV:`, error);
+        logger.error(`[Binance] Failed to fetch OHLCV:`, error);
         return [];
     }
 }

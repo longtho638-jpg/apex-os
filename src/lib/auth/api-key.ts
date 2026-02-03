@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createHmac } from 'crypto';
@@ -58,7 +59,7 @@ export async function verifyApiKey(request: NextRequest) {
             secretKey = decrypt(secretKey);
         }
     } catch (e) {
-        console.error('Failed to decrypt API key:', e);
+        logger.error('Failed to decrypt API key:', e);
         return { success: false, error: 'Internal Server Error', status: 500 };
     }
 

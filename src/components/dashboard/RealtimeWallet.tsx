@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { getSupabaseClientSide } from '@/lib/supabase';
 import { useTranslations } from 'next-intl';
@@ -66,7 +67,7 @@ export function RealtimeWallet({ userId }: { userId: string }) {
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          console.log('Wallet Update:', payload);
+          logger.info('Wallet Update:', payload);
           setWallet({
             balance: payload.new.balance,
             total_earned: payload.new.total_earned
@@ -82,7 +83,7 @@ export function RealtimeWallet({ userId }: { userId: string }) {
           filter: `user_id=eq.${userId}`
         },
         (payload) => {
-          console.log('New Transaction:', payload);
+          logger.info('New Transaction:', payload);
           setRecentTx((prev) => [payload.new as Transaction, ...prev].slice(0, 5));
         }
       )

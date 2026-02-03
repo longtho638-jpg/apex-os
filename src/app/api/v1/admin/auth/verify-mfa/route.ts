@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyMFAToken, verifyRecoveryCode, decryptMFASecret } from '@/lib/mfa';
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error: any) {
-        console.error('MFA verification error:', error);
+        logger.error('MFA verification error:', error);
         return NextResponse.json(
             { error: error.message || 'MFA verification failed' },
             { status: 500 }

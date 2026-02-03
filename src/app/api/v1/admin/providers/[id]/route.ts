@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -108,7 +109,7 @@ export async function PATCH(
             .single();
 
         if (updateError) {
-            console.error('Provider update error:', updateError);
+            logger.error('Provider update error:', updateError);
             return NextResponse.json({
                 success: false,
                 message: updateError.message
@@ -123,7 +124,7 @@ export async function PATCH(
         });
 
     } catch (error) {
-        console.error('[ADMIN] Provider update error:', error);
+        logger.error('[ADMIN] Provider update error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'
@@ -190,7 +191,7 @@ export async function DELETE(
             .eq('id', providerId);
 
         if (deleteError) {
-            console.error('Provider delete error:', deleteError);
+            logger.error('Provider delete error:', deleteError);
             return NextResponse.json({
                 success: false,
                 message: deleteError.message
@@ -204,7 +205,7 @@ export async function DELETE(
         });
 
     } catch (error) {
-        console.error('[ADMIN] Provider delete error:', error);
+        logger.error('[ADMIN] Provider delete error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'

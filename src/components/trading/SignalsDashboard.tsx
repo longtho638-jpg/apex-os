@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,7 +36,7 @@ export function SignalsDashboard() {
                 setSignals(data.signals || []);
             }
         } catch (error) {
-            console.error('Failed to generate signals:', error);
+            logger.error('Failed to generate signals:', error);
         } finally {
             setLoading(false);
         }

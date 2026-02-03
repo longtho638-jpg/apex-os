@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * Database-Backed Rate Limiter for Apex-OS
  * 
@@ -50,7 +51,7 @@ export async function checkRateLimit(key: string, config: RateLimitConfig = LIMI
             .single();
 
         if (error && error.code !== 'PGRST116') {
-            console.error('Rate Limit Fetch Error:', error);
+            logger.error('Rate Limit Fetch Error:', error);
             // Fail open (allow request) if DB is down, to prevent blocking legit users during outage
             return { success: true, limit: config.limit, remaining: 1, reset: now };
         }
@@ -104,7 +105,7 @@ export async function checkRateLimit(key: string, config: RateLimitConfig = LIMI
         });
 
         if (rpcError) {
-            console.error('[Rate Limit] Atomic increment failed:', rpcError);
+            logger.error('[Rate Limit] Atomic increment failed:', rpcError);
             // Fail open (allow request) rather than fail closed on error
             return {
                 success: true,
@@ -133,7 +134,7 @@ export async function checkRateLimit(key: string, config: RateLimitConfig = LIMI
         };
 
     } catch (err) {
-        console.error('Rate Limit System Error:', err);
+        logger.error('Rate Limit System Error:', err);
         return { success: true, limit: config.limit, remaining: 1, reset: now };
     }
 }

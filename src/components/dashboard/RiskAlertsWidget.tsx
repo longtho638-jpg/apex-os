@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Activity, Droplets, Fish, ShieldAlert } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +28,7 @@ export function RiskAlertsWidget() {
                     setAlerts(data.data);
                 }
             } catch (error) {
-                console.error('Failed to fetch risk alerts:', error);
+                logger.error('Failed to fetch risk alerts:', error);
             } finally {
                 setLoading(false);
             }

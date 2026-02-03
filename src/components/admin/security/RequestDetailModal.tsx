@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState } from 'react';
 import { X, CheckCircle, XCircle, Shield, FileJson } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,7 +45,7 @@ export default function RequestDetailModal({ request, onClose, onComplete, curre
                 alert('Error: ' + err.error);
             }
         } catch (error) {
-            console.error(error);
+            logger.error("Operation failed", error);
             alert('Approve failed');
         } finally {
             setIsSubmitting(false);
@@ -73,7 +74,7 @@ export default function RequestDetailModal({ request, onClose, onComplete, curre
                 alert('Failed to reject request');
             }
         } catch (error) {
-            console.error(error);
+            logger.error("Operation failed", error);
             alert('Reject failed');
         } finally {
             setIsSubmitting(false);

@@ -26,7 +26,7 @@ export interface LinkedAccount {
         tier?: string;
         error_reason?: string;
         partner_uuid?: string;
-        [key: string]: any;
+        [key: string]: unknown;
     };
 }
 
@@ -37,5 +37,5 @@ export interface VerificationResult {
     message: string;
     needs_relink?: boolean;
     referral_link?: string | null;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
 }

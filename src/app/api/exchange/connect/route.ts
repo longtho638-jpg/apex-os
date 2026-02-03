@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { encrypt } from '@/lib/security/crypto';
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, message: 'Exchange connected successfully' });
 
     } catch (error: any) {
-        console.error('Connect Exchange Error:', error);
+        logger.error('Connect Exchange Error:', error);
         return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
     }
 }

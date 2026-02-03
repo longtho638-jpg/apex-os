@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 import { UNIFIED_TIERS, TierId } from '@/config/unified-tiers';
 
@@ -31,7 +32,7 @@ export class RateLimiter {
       .single();
 
     if (error && error.code !== 'PGRST116') { // PGRST116 is "Result contains 0 rows"
-      console.error('[RateLimiter] Error checking limit:', error);
+      logger.error('[RateLimiter] Error checking limit:', error);
     }
 
     const currentCount = data?.request_count || 0;
@@ -66,7 +67,7 @@ export class RateLimiter {
     });
 
     if (error) {
-      console.error('[RateLimiter] Error incrementing usage:', error);
+      logger.error('[RateLimiter] Error incrementing usage:', error);
       return 0;
     }
 

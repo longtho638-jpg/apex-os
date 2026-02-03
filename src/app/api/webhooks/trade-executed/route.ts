@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { processTradeCommission } from '@/lib/viral-economics/realtime-commission';
 
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Trade Execution Webhook Error:', error);
+    logger.error('Trade Execution Webhook Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

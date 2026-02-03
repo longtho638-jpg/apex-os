@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * IP Whitelist Helper Functions
  * Handles IP-based access control for admin accounts
@@ -64,7 +65,7 @@ export function isIPInCIDR(ip: string, cidr: string): boolean {
 
         return (ipInt & maskInt) === (rangeInt & maskInt);
     } catch (error) {
-        console.error('CIDR matching error:', error);
+        logger.error('CIDR matching error:', error);
         return false;
     }
 }
@@ -121,7 +122,7 @@ export async function checkIPWhitelist(adminId: string, clientIP: string): Promi
             .single();
 
         if (error || !admin) {
-            console.error('IP whitelist check error:', error);
+            logger.error('IP whitelist check error:', error);
             return true; // Fail-open: allow access on DB errors
         }
 
@@ -132,7 +133,7 @@ export async function checkIPWhitelist(adminId: string, clientIP: string): Promi
 
         // If no IPs whitelisted yet, block (except first setup)
         if (!admin.allowed_ips || admin.allowed_ips.length === 0) {
-            console.warn('IP whitelist enabled but no IPs configured for admin:', adminId);
+            logger.warn('IP whitelist enabled but no IPs configured for admin:', adminId);
             return true; // Fail-open to allow adding first IP
         }
 
@@ -149,7 +150,7 @@ export async function checkIPWhitelist(adminId: string, clientIP: string): Promi
         return false;
 
     } catch (error) {
-        console.error('IP whitelist check exception:', error);
+        logger.error('IP whitelist check exception:', error);
         return true; // Fail-open: allow access on exceptions
     }
 }
@@ -187,13 +188,13 @@ export async function addIPToWhitelist(adminId: string, ip: string): Promise<boo
             .eq('id', adminId);
 
         if (error) {
-            console.error('Error adding IP to whitelist:', error);
+            logger.error('Error adding IP to whitelist:', error);
             return false;
         }
 
         return true;
     } catch (error) {
-        console.error('Add IP exception:', error);
+        logger.error('Add IP exception:', error);
         return false;
     }
 }
@@ -221,13 +222,13 @@ export async function removeIPFromWhitelist(adminId: string, ip: string): Promis
             .eq('id', adminId);
 
         if (error) {
-            console.error('Error removing IP from whitelist:', error);
+            logger.error('Error removing IP from whitelist:', error);
             return false;
         }
 
         return true;
     } catch (error) {
-        console.error('Remove IP exception:', error);
+        logger.error('Remove IP exception:', error);
         return false;
     }
 }
@@ -253,7 +254,7 @@ export async function logSecurityEvent(event: {
                 metadata: event.metadata || {}
             });
     } catch (error) {
-        console.error('Error logging security event:', error);
+        logger.error('Error logging security event:', error);
         // Don't throw - logging failure shouldn't break app
     }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySignature } from '@/lib/security/signature';
 
@@ -39,7 +40,7 @@ export async function validateRequestSignature(request: NextRequest) {
             const clone = request.clone();
             bodyStr = await clone.text();
         } catch (e) {
-            console.error('Signature validation failed to read body', e);
+            logger.error('Signature validation failed to read body', e);
             return NextResponse.json({ success: false, message: 'Invalid request body' }, { status: 400 });
         }
     }

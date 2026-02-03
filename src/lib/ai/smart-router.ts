@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 // OpenRouter client
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
@@ -170,14 +171,14 @@ export class SmartRouter {
     try {
       // Primary: OpenRouter
       if (process.env.NODE_ENV === 'development') {
-        console.log(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
+        logger.info(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
       }
       return await this.callOpenRouter(model, messages);
 
     } catch (error) {
       // Fallback: Vertex AI
-      console.error('[SmartRouter] OpenRouter failed, falling back to Vertex AI:', error);
-      console.log('[SmartRouter] Using Vertex AI - Google Gemini Pro');
+      logger.error('[SmartRouter] OpenRouter failed, falling back to Vertex AI:', error);
+      logger.info('[SmartRouter] Using Vertex AI - Google Gemini Pro');
       return await this.callVertexAI(messages);
     }
   }

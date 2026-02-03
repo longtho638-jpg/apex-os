@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { CopyTradingEngine } from '@/lib/trading/CopyTradingEngine';
 import { NextResponse } from 'next/server';
 
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error) {
-        console.error('[Signal Webhook] Error:', error);
+        logger.error('[Signal Webhook] Error:', error);
         return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
     }
 }

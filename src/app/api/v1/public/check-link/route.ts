@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
         if (forceMockMode) {
             // MOCK LOGIC - For testing without real exchange API
-            console.log(`[PUBLIC CHECK] Mock mode - checking ${exchange} UID: ${sanitizedUid}`);
+            logger.info(`[PUBLIC CHECK] Mock mode - checking ${exchange} UID: ${sanitizedUid}`);
 
             // Simulate network delay
             await new Promise(resolve => setTimeout(resolve, 1500));
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('[PUBLIC CHECK] Error:', error);
+        logger.error('[PUBLIC CHECK] Error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error. Please try again later.'
@@ -163,7 +164,7 @@ async function generateReferralLink(
         return defaultTemplates[exchange.toLowerCase()] || `https://${exchange}.com/register?ref=${config.partner_uuid}`;
 
     } catch (error) {
-        console.error('[generateReferralLink] Error:', error);
+        logger.error('[generateReferralLink] Error:', error);
         // Fallback
         return `https://${exchange}.com/register?ref=APEX_${exchange.toUpperCase()}`;
     }

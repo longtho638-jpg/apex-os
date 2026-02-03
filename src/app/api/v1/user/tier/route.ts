@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
             .single();
 
         if (error) {
-            console.error('Error fetching user tier:', error);
+            logger.error('Error fetching user tier:', error);
             // If RLS blocks it, it means they don't own the row (good).
             // If row missing, return free.
             return NextResponse.json({
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
-        console.error('User tier endpoint error:', error);
+        logger.error('User tier endpoint error:', error);
         return NextResponse.json(
             { success: false, message: 'Server error' },
             { status: 500 }

@@ -8,6 +8,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { getApiUrl } from '@/lib/api/config';
+import { logger } from '@/lib/logger';
 
 // --- Types ---
 
@@ -68,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setUser(null);
                 }
             } catch (err) {
-                console.error('Auth check failed', err);
+                logger.error('Auth check failed', err);
                 setUser(null);
             } finally {
                 setLoading(false);
@@ -106,13 +107,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // Standard Flow
                 // Backend sets HttpOnly cookie. We just update state.
                 setUser(data.user);
-                console.log('✅ Login successful (HttpOnly cookie set by backend).');
+                logger.debug('Login successful (HttpOnly cookie set by backend).');
                 return true;
             }
 
             return false;
         } catch (error) {
-            console.error('Login error:', error);
+            logger.error('Login error:', error);
             return false;
         }
     }, []);
@@ -136,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             return false;
         } catch (error) {
-            console.error('Signup error:', error);
+            logger.error('Signup error:', error);
             return false;
         }
     }, []);
@@ -146,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const baseUrl = getApiUrl();
             await fetch(`${baseUrl}/auth/logout`, { method: 'POST' });
         } catch (e) {
-            console.error('Logout API call failed', e);
+            logger.error('Logout API call failed', e);
         } finally {
             setUser(null);
             // Optional: Clear any application specific state

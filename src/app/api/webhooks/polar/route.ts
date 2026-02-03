@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // CRITICAL SECURITY FIX: Strictly verify signature
     if (!verifyPolarWebhook(payload, signature)) {
-      console.error('Polar signature mismatch');
+      logger.error('Polar signature mismatch');
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -65,12 +66,12 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info(`Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Polar webhook error:', error);
+    logger.error('Polar webhook error:', error);
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }
@@ -94,7 +95,7 @@ async function handleCheckoutCompleted(data: any) {
     completed_at: new Date().toISOString()
   });
 
-  if (txError) console.error('Error inserting transaction:', txError);
+  if (txError) logger.error('Error inserting transaction:', txError);
 
   // Update user subscription
   const { error: subError } = await supabase.from('subscriptions').upsert({
@@ -107,14 +108,14 @@ async function handleCheckoutCompleted(data: any) {
     current_period_end: getNextBillingDate()
   }, { onConflict: 'user_id, status' }); // Note: Check your unique constraints
 
-  if (subError) console.error('Error updating subscription:', subError);
+  if (subError) logger.error('Error updating subscription:', subError);
 
   // Auto-claim any pending missed commissions (Grace Period Reward)
   const { error: claimError } = await supabase.rpc('claim_pending_vault_funds', {
     p_user_id: metadata.userId
   });
 
-  if (claimError) console.error('Error claiming pending funds:', claimError);
+  if (claimError) logger.error('Error claiming pending funds:', claimError);
 }
 
 async function handleSubscriptionCreated(data: any) {

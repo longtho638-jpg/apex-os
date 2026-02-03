@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Plus, Trash2, CreditCard, Wallet, Building2, Loader2 } from 'lucide-react';
@@ -29,7 +30,7 @@ export default function PaymentMethodsManager() {
             const data = await res.json();
             if (data.success) setMethods(data.methods);
         } catch (error) {
-            console.error('Failed to fetch payment methods', error);
+            logger.error('Failed to fetch payment methods', error);
         } finally {
             setLoading(false);
         }

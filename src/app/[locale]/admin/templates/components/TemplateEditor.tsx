@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Save, ArrowLeft, Layout, Eye, Code } from 'lucide-react';
@@ -42,7 +43,7 @@ export default function TemplateEditor({ templateId }: TemplateEditorProps) {
                 setFormData(data.template);
             }
         } catch (error) {
-            console.error('Fetch error:', error);
+            logger.error('Fetch error:', error);
         } finally {
             setLoading(false);
         }
@@ -74,7 +75,7 @@ export default function TemplateEditor({ templateId }: TemplateEditorProps) {
                 alert('Failed to save template');
             }
         } catch (error) {
-            console.error('Save error:', error);
+            logger.error('Save error:', error);
         } finally {
             setSaving(false);
         }

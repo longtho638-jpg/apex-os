@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState, useCallback, useRef } from 'react';
 import {
   ReactFlow,
@@ -173,7 +174,7 @@ function AlgoStudioContent() {
   const handleCompile = () => {
       // 1. Compile Logic (Mock)
       const strategy = compileStrategy(nodes, edges);
-      console.log('Strategy Logic:', strategy);
+      logger.info('Strategy Logic:', strategy);
 
       // 2. Run Simulation
       const marketData = generateMarketData();

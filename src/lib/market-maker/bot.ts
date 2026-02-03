@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 export class MarketMakerBot {
   private isRunning = false;
   private config = { spread: 0.002, orderSize: 1000 }; // 0.2% spread
@@ -5,13 +6,13 @@ export class MarketMakerBot {
   start() {
     if (this.isRunning) return;
     this.isRunning = true;
-    console.log('MM Bot Started');
+    logger.info('MM Bot Started');
     this.loop();
   }
 
   stop() {
     this.isRunning = false;
-    console.log('MM Bot Stopped');
+    logger.info('MM Bot Stopped');
   }
 
   private async loop() {
@@ -26,12 +27,12 @@ export class MarketMakerBot {
 
         // 3. Place Orders (Mock Log)
         // In prod: Call exchange API
-        console.log(`[MM] Placing BID @ ${buyPrice} | ASK @ ${sellPrice}`);
+        logger.info(`[MM] Placing BID @ ${buyPrice} | ASK @ ${sellPrice}`);
 
         // 4. Wait 1s
         await new Promise(r => setTimeout(r, 1000));
       } catch (e) {
-        console.error('MM Loop Error', e);
+        logger.error('MM Loop Error', e);
       }
     }
   }

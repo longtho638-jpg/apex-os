@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -28,7 +29,7 @@ export function usePositions() {
                 setPositions(data.positions);
             }
         } catch (error) {
-            console.error('Failed to fetch positions:', error);
+            logger.error('Failed to fetch positions:', error);
         } finally {
             setLoading(false);
         }

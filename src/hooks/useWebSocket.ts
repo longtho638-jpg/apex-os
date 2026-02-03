@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useEffect, useRef, useState } from 'react';
 import { create } from 'zustand';
 
@@ -67,7 +68,7 @@ export function useWebSocket(symbols: string[]) {
         wsRef.current = ws;
 
         ws.onopen = () => {
-            console.log('✅ WebSocket connected');
+            logger.info('✅ WebSocket connected');
             setConnected(true);
             setError(null);
 
@@ -88,17 +89,17 @@ export function useWebSocket(symbols: string[]) {
                     updatePrice(message.data.symbol, message.data);
                 }
             } catch (err) {
-                console.error('❌ WebSocket message error:', err);
+                logger.error('❌ WebSocket message error:', err);
             }
         };
 
         ws.onerror = (event) => {
-            console.error('❌ WebSocket error:', event);
+            logger.error('❌ WebSocket error:', event);
             setError('WebSocket connection error');
         };
 
         ws.onclose = () => {
-            console.log('❌ WebSocket disconnected');
+            logger.info('❌ WebSocket disconnected');
             setConnected(false);
         };
 

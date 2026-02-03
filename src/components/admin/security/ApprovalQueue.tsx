@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Clock, AlertTriangle, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,7 +42,7 @@ export default function ApprovalQueue() {
                 setRequests(data.data);
             }
         } catch (error) {
-            console.error('Failed to fetch approvals:', error);
+            logger.error('Failed to fetch approvals:', error);
         } finally {
             setIsLoading(false);
         }

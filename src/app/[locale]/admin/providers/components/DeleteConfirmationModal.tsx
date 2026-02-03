@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { X, AlertTriangle, Loader2 } from 'lucide-react';
 
@@ -31,7 +32,7 @@ export default function DeleteConfirmationModal({
             await onConfirm();
             onClose();
         } catch (error) {
-            console.error('Delete failed:', error);
+            logger.error('Delete failed:', error);
         } finally {
             setLoading(false);
         }

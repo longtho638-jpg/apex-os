@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -46,7 +47,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Paper Portfolio Error:', error);
+    logger.error('Paper Portfolio Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

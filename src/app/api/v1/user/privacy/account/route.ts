@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { privacyService } from '@/lib/privacy';
@@ -31,7 +32,7 @@ export async function DELETE(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Account deletion error:', error);
+        logger.error('Account deletion error:', error);
         return NextResponse.json(
             { success: false, message: error.message || 'Deletion failed' },
             { status: 500 }

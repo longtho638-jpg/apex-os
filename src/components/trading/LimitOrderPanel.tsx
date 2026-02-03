@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { usePriceStream } from '@/hooks/usePriceStream';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +60,7 @@ export function LimitOrderPanel({ userId }: LimitOrderPanelProps) {
                 setPendingOrders(data.orders || []);
             }
         } catch (err) {
-            console.error('Failed to fetch pending orders:', err);
+            logger.error('Failed to fetch pending orders:', err);
         }
     };
 

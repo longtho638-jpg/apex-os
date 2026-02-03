@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Wallet, Users, TrendingUp, Copy, Share2, QrCode,
@@ -134,7 +135,7 @@ export default function AffiliateDashboard() {
                 const data = await res.json();
                 setStats(data);
             } catch (error) {
-                console.error('Failed to fetch referral stats:', error);
+                logger.error('Failed to fetch referral stats:', error);
             } finally {
                 setLoading(false);
             }

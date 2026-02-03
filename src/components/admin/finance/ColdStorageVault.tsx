@@ -1,5 +1,6 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { Snowflake, ShieldCheck, ExternalLink, RefreshCw, ArrowRightLeft } from 'lucide-react';
 import { getSupabaseClientSide } from '@/lib/supabase';
@@ -37,7 +38,7 @@ export default function ColdStorageVault() {
 
             if (data) setWallets(data);
         } catch (error) {
-            console.error('Error fetching cold wallets:', error);
+            logger.error('Error fetching cold wallets:', error);
         } finally {
             setIsLoading(false);
         }

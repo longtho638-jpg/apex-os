@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
       parsedContent = JSON.parse(generatedContent);
     } catch (e) {
       // Fallback if model didn't return valid JSON (common with some models)
-      console.warn('Failed to parse JSON from AI, using raw content');
+      logger.warn('Failed to parse JSON from AI, using raw content');
       parsedContent = {
         title: topic,
         meta_description: `Learn about ${topic} with ApexOS AI trading insights.`,
@@ -97,14 +98,14 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Database Error:', error);
+      logger.error('Database Error:', error);
       return NextResponse.json({ error: 'Failed to save post' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, post });
 
   } catch (error: any) {
-    console.error('Content Generation Error:', error);
+    logger.error('Content Generation Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

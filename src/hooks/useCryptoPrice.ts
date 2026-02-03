@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 
 export function useCryptoPrice(symbol: string = 'bitcoin') {
@@ -19,7 +20,7 @@ export function useCryptoPrice(symbol: string = 'bitcoin') {
           setPrice(data[symbol].usd);
         }
       } catch (error) {
-        console.warn('Error fetching crypto price (likely rate limit or network issue):', error);
+        logger.warn('Error fetching crypto price (likely rate limit or network issue):', error);
         // Fallback for demo purposes if price is 0
         if (price === 0) {
           // Set a realistic fallback price for Bitcoin if it fails initially

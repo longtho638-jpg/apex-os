@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * MFA Check Helper
  * Determines if user requires MFA for admin login
@@ -24,13 +25,13 @@ export async function checkMFARequired(userId: string): Promise<boolean> {
             .single();
 
         if (error) {
-            console.error('MFA check error:', error);
+            logger.error('MFA check error:', error);
             return false; // Fail-safe: don't block login on DB errors
         }
 
         return data?.mfa_enabled || false;
     } catch (error) {
-        console.error('MFA check exception:', error);
+        logger.error('MFA check exception:', error);
         return false; // Fail-safe
     }
 }

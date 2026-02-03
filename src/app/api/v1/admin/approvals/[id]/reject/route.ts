@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { multiSigService } from '@/lib/security/multi-sig';
 
@@ -29,7 +30,7 @@ export async function POST(
         return NextResponse.json({ success: true });
 
     } catch (error) {
-        console.error('Reject request error:', error);
+        logger.error('Reject request error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

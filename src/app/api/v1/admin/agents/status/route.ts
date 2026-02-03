@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Agent status API error:', error);
+        logger.error('Agent status API error:', error);
         return NextResponse.json(
             { success: false, message: 'Failed to fetch agent status' },
             { status: 500 }

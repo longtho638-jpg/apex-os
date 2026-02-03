@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NotificationService } from './notifications';
 

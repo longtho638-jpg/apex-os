@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { ph } from '@/lib/posthog';
 
 export type AnalyticsEvent = 
@@ -47,7 +48,7 @@ export const analytics = {
         body: JSON.stringify({ event, properties, timestamp: new Date().toISOString() }),
       });
     } catch (err) {
-      console.error('Internal Analytics error:', err);
+      logger.error('Internal Analytics error:', err);
     }
   },
   

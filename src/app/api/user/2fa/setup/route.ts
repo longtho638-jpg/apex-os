@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import speakeasy from 'speakeasy';
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
   );
 
   if (error) {
-      console.error('2FA Setup Error:', error);
+      logger.error('2FA Setup Error:', error);
       return NextResponse.json({ error: 'Failed to save secret' }, { status: 500 });
   }
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { executeWithdrawal } from '@/lib/agents/execution-agent';
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
     return NextResponse.json(result);
 
   } catch (error: any) {
-    console.error('Admin Approval Error:', error);
+    logger.error('Admin Approval Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

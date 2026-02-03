@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySessionToken } from '@/lib/jwt';
@@ -59,7 +60,7 @@ export async function GET(
             .order('date', { ascending: true });
 
         if (error) {
-            console.error('Metrics fetch error:', error);
+            logger.error('Metrics fetch error:', error);
             return NextResponse.json({
                 success: false,
                 message: 'Failed to fetch metrics'
@@ -72,7 +73,7 @@ export async function GET(
         });
 
     } catch (error) {
-        console.error('[ADMIN] Metrics error:', error);
+        logger.error('[ADMIN] Metrics error:', error);
         return NextResponse.json({
             success: false,
             message: 'Server error'

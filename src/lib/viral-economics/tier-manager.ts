@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 import { UNIFIED_TIERS } from '@/config/unified-tiers';
 
@@ -41,7 +42,7 @@ export async function calculateUserTier(userId: string): Promise<string> {
     .single();
 
   if (error || !tierData) {
-    console.error('Error fetching user metrics for tier calc', error);
+    logger.error('Error fetching user metrics for tier calc', error);
     return 'FREE';
   }
 
@@ -104,7 +105,7 @@ export async function promoteTier(userId: string): Promise<boolean> {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Error promoting tier', error);
+        logger.error('Error promoting tier', error);
         return false;
       }
       return true;

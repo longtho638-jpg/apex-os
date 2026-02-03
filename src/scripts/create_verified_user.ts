@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
@@ -10,7 +11,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !serviceRoleKey) {
-    console.error('Missing Supabase keys');
+    logger.error('Missing Supabase keys');
     process.exit(1);
 }
 
@@ -21,8 +22,8 @@ async function createVerifiedUser() {
     const email = `verified_tester_${timestamp}@apex.com`;
     const password = 'password123';
 
-    console.log(`Creating user: ${email}`);
-    console.log(`URL: ${supabaseUrl}`);
+    logger.info(`Creating user: ${email}`);
+    logger.info(`URL: ${supabaseUrl}`);
 
     const { data, error } = await supabase.auth.admin.createUser({
         email,
@@ -32,10 +33,10 @@ async function createVerifiedUser() {
     });
 
     if (error) {
-        console.error('Error creating user:', error);
+        logger.error('Error creating user:', error);
     } else {
-        console.log('User created successfully:', data.user.id);
-        console.log('Credentials:', { email, password });
+        logger.info('User created successfully:', data.user.id);
+        logger.info('Credentials:', { email, password });
     }
 }
 

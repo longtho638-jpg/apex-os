@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -63,7 +64,7 @@ export async function PATCH(request: NextRequest) {
             .in('id', ids);
 
         if (error) {
-            console.error('Bulk update error:', error);
+            logger.error('Bulk update error:', error);
             return NextResponse.json({ success: false, message: error.message }, { status: 500 });
         }
 
@@ -73,7 +74,7 @@ export async function PATCH(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Bulk API Error:', error);
+        logger.error('Bulk API Error:', error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

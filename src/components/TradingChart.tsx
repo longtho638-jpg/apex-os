@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from '@/lib/logger';
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, IChartApi, ISeriesApi, CrosshairMode, LineStyle } from 'lightweight-charts';
 import { BinancePriceFeed, fetchBinanceOHLCV } from '@/lib/binance-feed';
@@ -44,7 +45,7 @@ export default function TradingChart({ symbol, basePrice, indicators }: TradingC
                 }
 
                 if (historicalData.length === 0) {
-                    console.error('[Chart] No data for', symbol);
+                    logger.error('[Chart] No data for', symbol);
                     setIsLoading(false);
                     isInitializingRef.current = false;
                     return;
@@ -157,7 +158,7 @@ export default function TradingChart({ symbol, basePrice, indicators }: TradingC
                 isInitializingRef.current = false;
 
             } catch (error) {
-                console.error('[Chart] Init failed:', error);
+                logger.error('[Chart] Init failed:', error);
                 setIsLoading(false);
                 isInitializingRef.current = false;
             }
@@ -189,7 +190,7 @@ export default function TradingChart({ symbol, basePrice, indicators }: TradingC
         try {
             updateIndicators(chartRef.current, historicalDataRef.current);
         } catch (error) {
-            console.error('[Chart] Indicators failed:', error);
+            logger.error('[Chart] Indicators failed:', error);
         }
     }, [indicators]);
 

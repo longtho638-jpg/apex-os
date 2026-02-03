@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyApiKey } from '@/lib/auth/api-key';
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('Institutional Trade Error:', error);
+        logger.error('Institutional Trade Error:', error);
         return NextResponse.json(
             { success: false, message: error.message || 'Internal Error' },
             { status: 500 }

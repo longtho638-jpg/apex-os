@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 import { upgradeTriggers } from '@/lib/upgrade-triggers';
 
@@ -23,7 +24,7 @@ export const vaultManager = {
       });
 
     if (error) {
-      console.error('Failed to capture missed commission:', error);
+      logger.error('Failed to capture missed commission:', error);
       return null;
     }
 
@@ -44,7 +45,7 @@ export const vaultManager = {
     });
 
     if (error) {
-      console.error('Failed to release vault funds:', error);
+      logger.error('Failed to release vault funds:', error);
       return 0;
     }
 

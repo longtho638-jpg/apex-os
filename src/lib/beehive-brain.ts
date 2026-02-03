@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { notificationService, NotificationType } from './notification-service';
 import { sendEmail } from './email-service';
 import { emailTemplates } from './email-templates';
@@ -125,7 +126,7 @@ export class BeehiveBrain {
         if (data.email && strategy.template) {
             // We need to map strategy.template to actual template function
             // This is a placeholder for the logic
-            console.log(`Sending email template ${strategy.template} to ${data.email}`);
+            logger.info(`Sending email template ${strategy.template} to ${data.email}`);
         }
     }
 }
