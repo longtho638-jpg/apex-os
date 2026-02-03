@@ -63,13 +63,13 @@ describe('Realtime Commission System', () => {
       symbol: 'BTC/USDT'
     });
 
-    // FREE tier rebate is 0.60 (60% of revenue)
-    // Revenue = 10000 * 0.0008 = 8
-    // Rebate = 8 * 0.60 = 4.8
-    
+    // FREE tier rebate is 0.05 (5% of revenue)
+    // Revenue = 10 (fee) * 0.4 (partner share) = 4
+    // Rebate = 4 * 0.05 = 0.2
+
     expect(mockRpc).toHaveBeenCalledWith('credit_user_balance_realtime', expect.objectContaining({
       p_user_id: 'user-1',
-      p_amount: 4.8,
+      p_amount: expect.closeTo(0.2, 5),
       p_source: 'trading_rebate'
     }));
   });
@@ -85,7 +85,7 @@ describe('Realtime Commission System', () => {
               eq: (col: string, val: string) => ({
                 single: async () => {
                   if (val === 'user-1') return { data: { tier: 'FREE' } }; // User
-                  if (val === 'ref-1') return { data: { tier: 'TRADER', current_commission_rate: 0.20 } }; // Referrer
+                  if (val === 'ref-1') return { data: { tier: 'TRADER', current_commission_rate: 0.25 } }; // Referrer
                   return { data: null };
                 }
               })
@@ -115,17 +115,16 @@ describe('Realtime Commission System', () => {
       symbol: 'BTC/USDT'
     });
 
-    // Revenue = 8
-    // User Rebate (FREE 0.6) = 4.8
-    // Remainder = 8 * (1 - 0.6) = 3.2
-    
-    // Referrer (TRADER 0.20) at L1 (1.0 mult)
-    // Commission = 3.2 * 0.20 * 1.0 = 0.64
-    
+    // Revenue = 4
+    // User Rebate (FREE 0.05) = 0.2
+
+    // Referrer (TRADER 0.25) at L1
+    // Commission = 4 * 0.25 = 1.0
+
     expect(mockRpc).toHaveBeenCalledTimes(3); // Self rebate + 1 referrer + volume update
     expect(mockRpc).toHaveBeenNthCalledWith(2, 'credit_user_balance_realtime', expect.objectContaining({
       p_user_id: 'ref-1',
-      p_amount: expect.closeTo(0.64),
+      p_amount: expect.closeTo(1.0, 5),
       p_source: 'l1_commission'
     }));
   });

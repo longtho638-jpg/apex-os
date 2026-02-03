@@ -618,6 +618,27 @@ const apiKey = process.env.OPENROUTER_API_KEY;
 const apiKey = 'sk_live_1234567890abcdef';
 ```
 
+### Webhook Security
+
+#### Signature Verification (Polar.sh / Stripe)
+All webhooks MUST verify the provider's signature using the raw request body.
+
+```typescript
+// ✅ Good: Verify signature with raw body
+import { Webhook } from '@polar-sh/sdk';
+
+const webhook = new Webhook(process.env.POLAR_WEBHOOK_SECRET!);
+const signature = headers.get('polar-webhook-signature');
+const body = await req.text(); // Get raw body
+
+try {
+  webhook.verify(body, signature!);
+  // Process event...
+} catch (err) {
+  return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+}
+```
+
 ---
 
 ## 14. Accessibility Standards

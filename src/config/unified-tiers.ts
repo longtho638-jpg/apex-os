@@ -267,8 +267,19 @@ export type PaymentTier = keyof typeof PAYMENT_TIERS;
 
 // Helper functions
 export function getTierById(tierId: string): UnifiedTier | null {
-    const normalized = tierId.toUpperCase() as TierId;
-    return UNIFIED_TIERS[normalized] || null;
+    const normalized = tierId.toUpperCase();
+
+    // Check main tiers (TierId)
+    if (normalized in UNIFIED_TIERS) {
+        return UNIFIED_TIERS[normalized as TierId];
+    }
+
+    // Check legacy aliases (PaymentTier)
+    if (normalized in PAYMENT_TIERS) {
+        return PAYMENT_TIERS[normalized as keyof typeof PAYMENT_TIERS];
+    }
+
+    return null;
 }
 
 export function getTierPrice(tierId: TierId, billingPeriod: 'monthly' | 'annual' = 'monthly'): number {

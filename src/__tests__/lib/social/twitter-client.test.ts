@@ -8,8 +8,8 @@ describe('TwitterSentimentClient', () => {
     beforeEach(() => {
         client = new TwitterSentimentClient({
             bearerToken: mockBearerToken,
-            maxRequestsPerWindow: 5, // Lower limit for testing
-            windowMs: 60000, // 1 minute for faster tests
+            maxRequestsPerWindow: 10, // Higher limit for testing to avoid timeouts
+            windowMs: 1000, // 1 second window for faster tests
             maxRetries: 2,
         });
 
@@ -49,8 +49,14 @@ describe('TwitterSentimentClient', () => {
         expect(result.meta.result_count).toBe(1);
 
         // Verify fetch was called with correct params
-        expect(global.fetch).toHaveBeenCalledWith(
-            expect.stringContaining('(BTC OR $BTC)'),
+        const fetchUrl = (global.fetch as any).mock.calls[0][0];
+        const fetchOptions = (global.fetch as any).mock.calls[0][1];
+
+        const urlObj = new URL(fetchUrl);
+        const queryParam = urlObj.searchParams.get('query');
+
+        expect(queryParam).toContain('(BTC OR $BTC)');
+        expect(fetchOptions).toEqual(
             expect.objectContaining({
                 headers: {
                     Authorization: `Bearer ${mockBearerToken}`,
@@ -145,7 +151,9 @@ describe('TwitterSentimentClient', () => {
 
         // Verify query includes min_faves
         const fetchCall = (global.fetch as any).mock.calls[0][0];
-        expect(fetchCall).toContain('min_faves:100');
+        const urlObj = new URL(fetchCall);
+        const queryParam = urlObj.searchParams.get('query');
+        expect(queryParam).toContain('min_faves:100');
     });
 
     it('should get rate limit status', async () => {

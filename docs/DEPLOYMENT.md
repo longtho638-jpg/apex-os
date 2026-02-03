@@ -33,6 +33,9 @@ NEXT_PUBLIC_WS_URL=wss://your-websocket-server.com
 
 # API Keys (optional for ML features)
 OPENAI_API_KEY=sk-...  # For future ML enhancements
+
+# Security
+POLAR_WEBHOOK_SECRET=whsec_... # Required for webhook signature verification
 ```
 
 ---

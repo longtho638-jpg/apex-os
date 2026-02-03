@@ -46,7 +46,21 @@ export class NotificationService {
     }
 
     static async sendAlert(alert: { title: string; message: string; level: string; metadata?: any }) {
-        logger.info(`[ALERT] ${alert.level.toUpperCase()}: ${alert.title} - ${alert.message}`, alert.metadata);
+        const logMsg = `[ALERT] ${alert.level.toUpperCase()}: ${alert.title} - ${alert.message}`;
+        switch (alert.level.toLowerCase()) {
+            case 'info':
+                logger.info(logMsg, alert.metadata);
+                break;
+            case 'warning':
+                logger.warn(logMsg, alert.metadata);
+                break;
+            case 'error':
+            case 'critical':
+                logger.error(logMsg, null, alert.metadata);
+                break;
+            default:
+                logger.info(logMsg, alert.metadata);
+        }
         // TODO: Implement actual alert dispatch (e.g. to admin users or external service)
     }
 }

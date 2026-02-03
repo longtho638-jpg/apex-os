@@ -1,5 +1,5 @@
 import { Polar } from '@polar-sh/sdk';
-import { PAYMENT_TIERS, PaymentTier } from '@/config/payment-tiers';
+import { getTierById, PaymentTier } from '@/config/payment-tiers';
 
 const polarClient = new Polar({
   accessToken: process.env.POLAR_ACCESS_TOKEN!,
@@ -8,7 +8,7 @@ const polarClient = new Polar({
 export interface CreateCheckoutParams {
   userId: string;
   userEmail: string;
-  tier: PaymentTier;
+  tier: PaymentTier | string;
 }
 
 export async function createPolarCheckout({
@@ -16,8 +16,12 @@ export async function createPolarCheckout({
   userEmail,
   tier
 }: CreateCheckoutParams) {
-  const tierConfig = PAYMENT_TIERS[tier];
-  
+  const tierConfig = getTierById(tier);
+
+  if (!tierConfig) {
+      throw new Error(`Invalid tier: ${tier}`);
+  }
+
   if (!tierConfig.polar) {
     throw new Error(`Tier ${tier} does not support Polar payments`);
   }

@@ -2,6 +2,7 @@
 
 import { logger } from '@/lib/logger';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { getTierById, getTierPrice, TierId, PaymentTier } from '@/config/unified-tiers';
 
@@ -21,6 +22,7 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
 
   // Get tier config (handles normalization)
   const tierConfig = getTierById(tier);
+  console.log('CheckoutModal render:', { tier, tierConfig });
 
   if (!tierConfig) {
       logger.error('Invalid tier ID:', tier);
@@ -28,7 +30,7 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
   }
 
   // Calculate price based on gateway and billing period
-  const tierPrice = getTierPrice(tier as TierId, billingPeriod);
+  const tierPrice = getTierPrice(tierConfig.id as TierId, billingPeriod);
 
   const basePrice = (gateway === 'nowpayments' && tierConfig.nowPayments)
     ? tierPrice * (1 - (tierConfig.nowPayments.cryptoDiscount || 0) / 100)
@@ -40,25 +42,42 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
   const handleCheckout = async () => {
     setLoading(true);
 
-    // MOCK PAYMENT FLOW (For Demo/UI Showcase)
-    // Simulate API latency
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier: tierConfig?.id,
+          gateway,
+          userEmail,
+          discountCode: discountApplied ? discountCode : undefined,
+          billingPeriod
+        }),
+      });
 
-    setLoading(false);
-    
-    // Show Success UI (Simple alert for now, can be upgraded to a Success Component later)
-    // In a real 'WOW' demo, we might want a confetti explosion here!
-    const successMessages = {
-        wallet: 'Transaction Confirmed! 🚀',
-        polar: 'Card Payment Successful! 💳',
-        nowpayments: 'Crypto Transfer Detected! 💎'
-    };
+      const data = await response.json();
 
-    alert(`${successMessages[gateway] || 'Payment Successful!'} \n\nWelcome to ${tierConfig?.name || 'ApexOS'}! Your account has been instantly upgraded.`);
-    
-    onClose();
-    // Optionally reload to show new tier status (if backend was actually updated)
-    // window.location.reload(); 
+      if (!response.ok) {
+        throw new Error(data.error || 'Checkout failed');
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      // Success for wallet or non-redirect flows
+      toast.success('Payment successful!');
+      onClose();
+
+    } catch (error) {
+      logger.error('Checkout error:', error);
+      toast.error('Checkout Failed', {
+        description: error instanceof Error ? error.message : 'Please try again',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const [walletBalance, setWalletBalance] = useState<number | null>(null);

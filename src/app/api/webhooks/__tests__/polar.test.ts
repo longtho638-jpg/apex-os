@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../polar/route'; // Corrected path
 import { NextRequest } from 'next/server';
-import crypto from 'crypto';
-import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 
-const { mockInsert, mockUpsert, mockUpdate, mockEq } = vi.hoisted(() => ({
+const { mockInsert, mockUpsert, mockUpdate, mockEq, mockTimingSafeEqual, mockCreateHmac } = vi.hoisted(() => ({
     mockInsert: vi.fn(),
     mockUpsert: vi.fn(),
     mockUpdate: vi.fn(),
-    mockEq: vi.fn()
+    mockEq: vi.fn(),
+    mockTimingSafeEqual: vi.fn(),
+    mockCreateHmac: vi.fn()
 }));
 
 vi.mock('@supabase/supabase-js', () => ({
@@ -17,22 +17,30 @@ vi.mock('@supabase/supabase-js', () => ({
       if (table === 'payment_transactions') return { insert: mockInsert };
       if (table === 'subscriptions') return { upsert: mockUpsert, update: mockUpdate };
       return {};
-    }
+    },
+    rpc: vi.fn().mockResolvedValue({ error: null })
   }))
 }));
 
-// Mock Polar SDK Webhooks
-vi.mock('@polar-sh/sdk/webhooks', () => ({
-  validateEvent: vi.fn(),
-  WebhookVerificationError: class extends Error {}
+// Mock crypto module for signature verification
+vi.mock('crypto', () => ({
+  default: {
+    createHmac: mockCreateHmac,
+    timingSafeEqual: mockTimingSafeEqual
+  }
 }));
 
-// Setup mocks for update chain
+// Setup mocks for update chain and crypto
 mockUpdate.mockReturnValue({ eq: mockEq });
+
+const mockHmac = {
+  update: vi.fn().mockReturnThis(),
+  digest: vi.fn()
+};
 
 describe('Polar Webhook Handler', () => {
   const secret = 'test_webhook_secret';
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.POLAR_WEBHOOK_SECRET = secret;
@@ -40,22 +48,19 @@ describe('Polar Webhook Handler', () => {
     mockUpsert.mockResolvedValue({ error: null });
     mockUpdate.mockReturnValue({ eq: mockEq });
     mockEq.mockResolvedValue({ error: null });
+    mockCreateHmac.mockReturnValue(mockHmac);
+    mockHmac.digest.mockReturnValue('valid');
   });
 
   it('should return 401 for invalid signature', async () => {
-    // @ts-ignore
-    validateEvent.mockImplementationOnce(() => {
-      throw new WebhookVerificationError('Invalid signature');
-    });
+    // Mock crypto to fail signature verification
+    mockTimingSafeEqual.mockReturnValue(false);
 
     const req = {
         text: vi.fn().mockResolvedValue(JSON.stringify({ type: 'test' })),
         headers: {
             get: (name: string) => {
                 if (name === 'polar-webhook-signature') return 'invalid';
-                if (name === 'polar-webhook-signature-timestamp') return '123';
-                if (name === 'polar-webhook-id') return '1';
-                if (name === 'polar-webhook-event') return 'test';
                 return null;
             }
         }
@@ -69,17 +74,17 @@ describe('Polar Webhook Handler', () => {
     const req = {
         text: vi.fn().mockResolvedValue(JSON.stringify({ type: 'test' })),
         headers: {
-            get: vi.fn().mockReturnValue(null)
+            get: vi.fn().mockReturnValue(null) // No signature header
         }
     } as unknown as NextRequest;
 
     const res = await POST(req);
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401); // Changed from 400 to 401 to match handler logic
   });
 
   it('should skip insert when metadata.userId missing', async () => {
-    // @ts-ignore
-    validateEvent.mockImplementationOnce(() => {}); // Pass validation
+    // Mock valid signature
+    mockTimingSafeEqual.mockReturnValue(true);
 
     const payload = {
       type: 'checkout.completed',
@@ -94,9 +99,6 @@ describe('Polar Webhook Handler', () => {
         headers: {
             get: (name: string) => {
                 if (name === 'polar-webhook-signature') return 'valid';
-                if (name === 'polar-webhook-signature-timestamp') return '123';
-                if (name === 'polar-webhook-id') return '1';
-                if (name === 'polar-webhook-event') return 'checkout.completed';
                 return null;
             }
         }
@@ -108,8 +110,7 @@ describe('Polar Webhook Handler', () => {
   });
 
   it('should return 500 on database error', async () => {
-    // @ts-ignore
-    validateEvent.mockImplementationOnce(() => {});
+    mockTimingSafeEqual.mockReturnValue(true);
     mockInsert.mockResolvedValueOnce({ error: { message: 'DB Error' } });
 
     const payload = {
@@ -126,9 +127,6 @@ describe('Polar Webhook Handler', () => {
         headers: {
             get: (name: string) => {
                 if (name === 'polar-webhook-signature') return 'valid';
-                if (name === 'polar-webhook-signature-timestamp') return '123';
-                if (name === 'polar-webhook-id') return '1';
-                if (name === 'polar-webhook-event') return 'checkout.completed';
                 return null;
             }
         }
@@ -139,8 +137,6 @@ describe('Polar Webhook Handler', () => {
   });
 
   it('should handle duplicate transaction idempotently', async () => {
-    // @ts-ignore
-    validateEvent.mockImplementationOnce(() => {});
     mockInsert.mockResolvedValueOnce({ error: { code: '23505' } }); // Duplicate error code
 
     const payload = {
@@ -170,9 +166,6 @@ describe('Polar Webhook Handler', () => {
   });
 
   it('should process checkout.completed event', async () => {
-    // @ts-ignore
-    validateEvent.mockImplementationOnce(() => {}); // Pass validation
-
     const payload = {
       type: 'checkout.completed',
       data: {

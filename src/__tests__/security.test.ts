@@ -75,7 +75,7 @@ describe('Security Middleware', () => {
 
     const createRequest = (path: string, headers: Record<string, string> = {}) => {
         const url = `http://localhost:3000${path}`;
-        return new NextRequest(new URL(url), { headers });
+        return new NextRequest(new URL(url), { headers: { host: 'localhost:3000', ...headers } });
     };
 
     it('should block unauthorized access to /api/admin', async () => {

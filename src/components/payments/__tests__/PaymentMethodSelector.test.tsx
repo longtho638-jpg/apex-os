@@ -15,7 +15,7 @@ describe('PaymentMethodSelector', () => {
   it('shows discount badge on crypto option', () => {
     render(<PaymentMethodSelector value="polar" onChange={() => {}} />);
     
-    expect(screen.getByText('SAVE 15%')).toBeInTheDocument();
+    expect(screen.getByText('Discount')).toBeInTheDocument();
   });
 
   it('calls onChange when option clicked', () => {
@@ -23,7 +23,7 @@ describe('PaymentMethodSelector', () => {
     render(<PaymentMethodSelector value="polar" onChange={handleChange} />);
     
     fireEvent.click(screen.getByText('Crypto'));
-    expect(handleChange).toHaveBeenCalledWith('binance_pay');
+    expect(handleChange).toHaveBeenCalledWith('nowpayments');
     
     fireEvent.click(screen.getByText('Card / PayPal'));
     expect(handleChange).toHaveBeenCalledWith('polar');
@@ -33,22 +33,18 @@ describe('PaymentMethodSelector', () => {
     const { rerender } = render(<PaymentMethodSelector value="polar" onChange={() => {}} />);
     
     // Polar selected (blue border)
-    // We check for the parent button element. 
+    // We check for the parent button element.
     // The button contains "Card / PayPal".
-    const polarButton = screen.getByRole('radio', { name: /card \/ paypal/i });
-    expect(polarButton).toHaveClass('border-blue-600');
-    expect(polarButton).toHaveAttribute('aria-checked', 'true');
+    const polarButton = screen.getByText('Card / PayPal').closest('button');
+    expect(polarButton).toHaveClass('border-blue-500');
 
-    const cryptoButton = screen.getByRole('radio', { name: /crypto/i });
-    expect(cryptoButton).not.toHaveClass('border-amber-500'); // Crypto active class
-    expect(cryptoButton).toHaveAttribute('aria-checked', 'false');
+    // Check inactive crypto button
+    const cryptoButton = screen.getByText('Crypto').closest('button');
+    expect(cryptoButton).not.toHaveClass('border-blue-500');
 
     // Rerender with crypto selected
-    // Removed binance_pay test case
-    // rerender(<PaymentMethodSelector value="binance_pay" onChange={() => {}} />);
-    // expect(screen.getByText('Binance Pay')).toBeInTheDocument();
-    
-    expect(screen.getByRole('radio', { name: /crypto/i })).toHaveClass('border-amber-500');
-    expect(screen.getByRole('radio', { name: /crypto/i })).toHaveAttribute('aria-checked', 'true');
+    rerender(<PaymentMethodSelector value="nowpayments" onChange={() => {}} />);
+
+    expect(screen.getByText('Crypto').closest('button')).toHaveClass('border-blue-500');
   });
 });

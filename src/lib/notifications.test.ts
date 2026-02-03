@@ -21,7 +21,7 @@ describe('NotificationService', () => {
         });
 
         expect(console.log).toHaveBeenCalledWith(expect.stringContaining('"level":"info"'));
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('"title":"Test Info"'));
+        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Test Info'));
     });
 
     it('logs warning alerts to console.warn', async () => {
@@ -31,7 +31,8 @@ describe('NotificationService', () => {
             level: 'warning'
         });
 
-        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('"level":"warning"'));
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('"level":"warn"'));
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Test Warning'));
     });
 
     it('logs error alerts to console.error', async () => {
@@ -42,6 +43,7 @@ describe('NotificationService', () => {
         });
 
         expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"level":"error"'));
+        expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Test Error'));
     });
 
     it('logs critical alerts to console.error', async () => {
@@ -51,7 +53,8 @@ describe('NotificationService', () => {
             level: 'critical'
         });
 
-        expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"level":"critical"'));
+        expect(console.error).toHaveBeenCalledWith(expect.stringContaining('"level":"error"'));
+        expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Test Critical'));
     });
 
     it('includes metadata in the log output', async () => {

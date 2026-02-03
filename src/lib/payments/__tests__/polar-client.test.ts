@@ -8,16 +8,12 @@ const { mockCreate, mockGet } = vi.hoisted(() => ({
 }));
 
 vi.mock('@polar-sh/sdk', () => {
-  return {
-    Polar: class {
-        checkouts = {
-            custom: {
-                create: mockCreate,
-                get: mockGet
-            }
-        }
-    }
+  const PolarMock = vi.fn();
+  PolarMock.prototype.checkouts = {
+    create: mockCreate,
+    get: mockGet
   };
+  return { Polar: PolarMock };
 });
 
 describe('Polar Client', () => {
@@ -36,15 +32,15 @@ describe('Polar Client', () => {
     const result = await createPolarCheckout({
       userId: 'user_123',
       userEmail: 'test@example.com',
-      tier: 'FOUNDERS'
+      tier: 'PRO'
     });
 
     expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({
-      productPriceId: expect.any(String),
-      customerEmail: 'test@example.com',
+      product_price_id: expect.any(String),
+      customer_email: 'test@example.com',
       metadata: expect.objectContaining({
         userId: 'user_123',
-        tier: 'FOUNDERS'
+        tier: 'PRO'
       })
     }));
 
@@ -77,7 +73,7 @@ describe('Polar Client', () => {
     await expect(createPolarCheckout({
       userId: 'user_123',
       userEmail: 'test@example.com',
-      tier: 'FOUNDERS'
+      tier: 'PRO'
     })).rejects.toThrow('API Error');
   });
 });

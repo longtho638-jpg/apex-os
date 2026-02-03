@@ -82,6 +82,11 @@ export async function POST(request: NextRequest) {
 async function handleCheckoutCompleted(data: any) {
   const { id, customer_email, metadata, amount, currency } = data;
 
+  if (!metadata?.userId) {
+    logger.warn('Missing userId in metadata, skipping processing');
+    return;
+  }
+
   // Create transaction record
   const { error: txError } = await supabase.from('payment_transactions').insert({
     user_id: metadata.userId,
@@ -95,7 +100,15 @@ async function handleCheckoutCompleted(data: any) {
     completed_at: new Date().toISOString()
   });
 
-  if (txError) logger.error('Error inserting transaction:', txError);
+  if (txError) {
+    // Ignore duplicate key errors (idempotency)
+    if (txError.code === '23505') {
+      logger.warn(`Duplicate transaction ignored: ${id}`);
+    } else {
+      logger.error('Error inserting transaction:', txError);
+      throw new Error('Failed to insert transaction');
+    }
+  }
 
   // Update user subscription
   const { error: subError } = await supabase.from('subscriptions').upsert({
@@ -108,7 +121,10 @@ async function handleCheckoutCompleted(data: any) {
     current_period_end: getNextBillingDate()
   }, { onConflict: 'user_id, status' }); // Note: Check your unique constraints
 
-  if (subError) logger.error('Error updating subscription:', subError);
+  if (subError) {
+    logger.error('Error updating subscription:', subError);
+    throw new Error('Failed to update subscription');
+  }
 
   // Auto-claim any pending missed commissions (Grace Period Reward)
   const { error: claimError } = await supabase.rpc('claim_pending_vault_funds', {
