@@ -21,6 +21,42 @@
       "trust_uptime": "99.9% 正常运行时间",
       "trust_global": "全球访问"
     },
+    "marketplace": {
+      "title": "策略市场",
+      "subtitle": "复制最佳策略。像巨鲸一样获利。",
+      "view_all": "查看所有策略",
+      "copy_strategy": "复制策略",
+      "win_rate": "胜率",
+      "followers": "关注者",
+      "roi_30d": "30天投资回报率"
+    },
+    "viral": {
+      "badge": "病毒式引擎 V4",
+      "title": "“金手铐”模型",
+      "description_1": "大多数平台在广告上花费数百万。我们把它花在",
+      "description_you": "你",
+      "description_2": "身上。我们的病毒式引擎将高达",
+      "description_revenue": "100% 的收入",
+      "description_3": "通过 4 级联属系统分发回社区。",
+      "benefit_1": "第 1 级：赚取 35% 直接佣金",
+      "benefit_2": "第 2-4 级：来自网络的被动收入",
+      "benefit_3": "通过智能合约自动每日支付",
+      "benefit_4": "基于层级的解锁系统（手铐）",
+      "cta": "计算您的收入",
+      "level_1": "等级 1",
+      "level_2": "等级 2",
+      "level_3_4": "等级 3 & 4",
+      "locked": "已锁定（需要升级）"
+    },
+    "smart_switch": {
+      "title": "停止支付全额费用",
+      "subtitle": "我们的 AI 分析数千种费用结构以找到您的最佳返佣。"
+    },
+    "final_cta": {
+      "title": "准备好统治了吗？",
+      "description": "加入已经升级到 ApexOS 的 12,000+ 交易者。今天就确保您在狼群中的位置。",
+      "cta": "立即开始"
+    },
     "features": {
       "title": "为何顶尖交易者选择 ApexOS",
       "subtitle": "专为严肃交易者设计的专业级工具",

@@ -50,25 +50,24 @@ export default function Homepage() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
-                            <span className="text-xs font-bold tracking-widest uppercase text-emerald-400">System Online • Viral Engine Active</span>
+                            <span className="text-xs font-bold tracking-widest uppercase text-emerald-400">{t('hero.badge')}</span>
                         </motion.div>
 
                         <h1 className="text-6xl sm:text-8xl font-black tracking-tighter mb-8 leading-[1.1]">
-                            Build Your <br />
-                            <GradientText className="animate-aurora bg-[length:200%_auto]">Trading Empire</GradientText>
+                            {t('hero.title_line1')} <br />
+                            <GradientText className="animate-aurora bg-[length:200%_auto]">{t('hero.title_line2')}</GradientText>
                         </h1>
 
                         <p className="text-xl sm:text-2xl text-zinc-400 mb-12 max-w-3xl mx-auto leading-relaxed">
-                            The world's first <strong>AI Operating System</strong> that pays you to trade.
-                            Automate strategies, earn rebates, and build a 4-level income stream.
+                            {t('hero.description')}
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <Button3D onClick={() => router.push('/signup')} className="px-10 py-4 text-lg">
-                                Start Your Empire <ChevronRight className="inline ml-2 w-5 h-5" />
+                                {t('hero.cta_primary')} <ChevronRight className="inline ml-2 w-5 h-5" />
                             </Button3D>
                             <Button3D variant="glass" onClick={() => router.push('/en/offer')} className="px-10 py-4 text-lg">
-                                View Income Potential
+                                {t('hero.cta_secondary')}
                             </Button3D>
                         </div>
 
@@ -86,14 +85,14 @@ export default function Homepage() {
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-end justify-between mb-12">
                         <div>
-                            <h2 className="text-3xl font-bold mb-2">Strategy Marketplace</h2>
-                            <p className="text-zinc-400">Copy the best. Profit like a Whale.</p>
+                            <h2 className="text-3xl font-bold mb-2">{t('marketplace.title')}</h2>
+                            <p className="text-zinc-400">{t('marketplace.subtitle')}</p>
                         </div>
                         <button
                             onClick={() => router.push('/en/dashboard/marketplace')}
                             className="text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-2 transition-colors"
                         >
-                            View All Strategies <ArrowRight className="w-4 h-4" />
+                            {t('marketplace.view_all')} <ArrowRight className="w-4 h-4" />
                         </button>
                     </div>
 
@@ -124,15 +123,15 @@ export default function Homepage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-white/5 rounded-xl">
                                     <div>
-                                        <div className="text-xs text-zinc-500">Win Rate</div>
+                                        <div className="text-xs text-zinc-500">{t('marketplace.win_rate')}</div>
                                         <div className="font-bold text-white">{strat.winRate}%</div>
                                     </div>
                                     <div>
-                                        <div className="text-xs text-zinc-500">Followers</div>
+                                        <div className="text-xs text-zinc-500">{t('marketplace.followers')}</div>
                                         <div className="font-bold text-white">{strat.followers}</div>
                                     </div>
                                 </div>
-                                <Button3D full variant="glass" className="text-sm">Copy Strategy</Button3D>
+                                <Button3D full variant="glass" className="text-sm">{t('marketplace.copy_strategy')}</Button3D>
                             </motion.div>
                         )) : (
                             // Skeleton Loaders
@@ -150,20 +149,20 @@ export default function Homepage() {
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-bold mb-6 border border-purple-500/20">
-                                <Users className="w-3 h-3" /> VIRAL ENGINE V4
+                                <Users className="w-3 h-3" /> {t('viral.badge')}
                             </div>
-                            <h2 className="text-4xl font-bold mb-6">The "Golden Handcuffs" Model</h2>
+                            <h2 className="text-4xl font-bold mb-6">{t('viral.title')}</h2>
                             <p className="text-lg text-zinc-400 mb-8 leading-relaxed">
-                                Most platforms spend millions on ads. We spend it on <span className="text-white font-bold">YOU</span>.
-                                Our viral engine distributes up to <span className="text-emerald-400 font-bold">100% of revenue</span> back to the community through a 4-level affiliate system.
+                                {t('viral.description_1')} <span className="text-white font-bold">{t('viral.description_you')}</span>.
+                                {t('viral.description_2')} <span className="text-emerald-400 font-bold">{t('viral.description_revenue')}</span> {t('viral.description_3')}
                             </p>
 
                             <ul className="space-y-4 mb-10">
                                 {[
-                                    "Level 1: Earn 35% direct commission",
-                                    "Level 2-4: Passive income from your network",
-                                    "Automatic daily payouts via Smart Contract",
-                                    "Tier-based unlocking system (The Handcuffs)"
+                                    t('viral.benefit_1'),
+                                    t('viral.benefit_2'),
+                                    t('viral.benefit_3'),
+                                    t('viral.benefit_4')
                                 ].map((item, i) => (
                                     <li key={i} className="flex items-center gap-3 text-zinc-300">
                                         <div className="p-1 rounded-full bg-emerald-500/20 text-emerald-400">
@@ -175,7 +174,7 @@ export default function Homepage() {
                             </ul>
 
                             <Button3D onClick={() => router.push('/en/offer')}>
-                                Calculate Your Income
+                                {t('viral.cta')}
                             </Button3D>
                         </div>
 
@@ -195,18 +194,18 @@ export default function Homepage() {
                                     <div className="absolute top-[20px] right-1/4 w-px h-4 bg-white/20" />
 
                                     <div className="p-4 bg-white/5 rounded-xl border border-white/10 text-center">
-                                        <div className="text-xs text-zinc-500 mb-1">Level 1</div>
+                                        <div className="text-xs text-zinc-500 mb-1">{t('viral.level_1')}</div>
                                         <div className="font-bold text-emerald-400">$4,200</div>
                                     </div>
                                     <div className="p-4 bg-white/5 rounded-xl border border-white/10 text-center">
-                                        <div className="text-xs text-zinc-500 mb-1">Level 2</div>
+                                        <div className="text-xs text-zinc-500 mb-1">{t('viral.level_2')}</div>
                                         <div className="font-bold text-blue-400">$2,100</div>
                                     </div>
                                 </div>
                                 <div className="p-4 bg-white/5 rounded-xl border border-white/10 text-center mt-4 opacity-50">
-                                    <div className="text-xs text-zinc-500 mb-1">Level 3 & 4</div>
+                                    <div className="text-xs text-zinc-500 mb-1">{t('viral.level_3_4')}</div>
                                     <div className="font-bold text-zinc-400 flex items-center justify-center gap-2">
-                                        <LockKeyhole className="w-3 h-3" /> Locked (Upgrade Required)
+                                        <LockKeyhole className="w-3 h-3" /> {t('viral.locked')}
                                     </div>
                                 </div>
                             </div>
@@ -220,8 +219,8 @@ export default function Homepage() {
                 <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5" />
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold mb-4">Stop Paying Full Fees</h2>
-                        <p className="text-zinc-400">Our AI analyzes thousands of fee structures to find your optimal rebate.</p>
+                        <h2 className="text-3xl font-bold mb-4">{t('smart_switch.title')}</h2>
+                        <p className="text-zinc-400">{t('smart_switch.subtitle')}</p>
                     </div>
                     <SmartSwitchWizard />
                 </div>
@@ -232,14 +231,13 @@ export default function Homepage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/20 to-black" />
                 <div className="container mx-auto px-4 relative z-10 text-center">
                     <h2 className="text-4xl md:text-5xl font-black mb-8">
-                        Ready to Rule?
+                        {t('final_cta.title')}
                     </h2>
                     <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto">
-                        Join 12,000+ traders who have already upgraded to ApexOS.
-                        Secure your spot in the Wolf Pack today.
+                        {t('final_cta.description')}
                     </p>
                     <Button3D onClick={() => router.push('/signup')} className="px-12 py-6 text-xl shadow-2xl shadow-emerald-500/30">
-                        Get Started Now
+                        {t('final_cta.cta')}
                     </Button3D>
                 </div>
             </section>

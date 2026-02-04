@@ -21,6 +21,42 @@
       "trust_uptime": "99.9% Uptime",
       "trust_global": "Global Access"
     },
+    "marketplace": {
+      "title": "Strategy Marketplace",
+      "subtitle": "Copy the best. Profit like a Whale.",
+      "view_all": "View All Strategies",
+      "copy_strategy": "Copy Strategy",
+      "win_rate": "Win Rate",
+      "followers": "Followers",
+      "roi_30d": "30d ROI"
+    },
+    "viral": {
+      "badge": "VIRAL ENGINE V4",
+      "title": "The \"Golden Handcuffs\" Model",
+      "description_1": "Most platforms spend millions on ads. We spend it on",
+      "description_you": "YOU",
+      "description_2": "Our viral engine distributes up to",
+      "description_revenue": "100% of revenue",
+      "description_3": "back to the community through a 4-level affiliate system.",
+      "benefit_1": "Level 1: Earn 35% direct commission",
+      "benefit_2": "Level 2-4: Passive income from your network",
+      "benefit_3": "Automatic daily payouts via Smart Contract",
+      "benefit_4": "Tier-based unlocking system (The Handcuffs)",
+      "cta": "Calculate Your Income",
+      "level_1": "Level 1",
+      "level_2": "Level 2",
+      "level_3_4": "Level 3 & 4",
+      "locked": "Locked (Upgrade Required)"
+    },
+    "smart_switch": {
+      "title": "Stop Paying Full Fees",
+      "subtitle": "Our AI analyzes thousands of fee structures to find your optimal rebate."
+    },
+    "final_cta": {
+      "title": "Ready to Rule?",
+      "description": "Join 12,000+ traders who have already upgraded to ApexOS. Secure your spot in the Wolf Pack today.",
+      "cta": "Get Started Now"
+    },
     "features": {
       "title": "Why Leading Traders Choose ApexOS",
       "subtitle": "Professional-grade tools designed for serious traders",

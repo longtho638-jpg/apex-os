@@ -21,6 +21,42 @@
       "trust_uptime": "99.9% 가동률",
       "trust_global": "글로벌 액세스"
     },
+    "marketplace": {
+      "title": "전략 마켓플레이스",
+      "subtitle": "최고를 복사하세요. 고래처럼 수익을 내세요.",
+      "view_all": "모든 전략 보기",
+      "copy_strategy": "전략 복사",
+      "win_rate": "승률",
+      "followers": "팔로워",
+      "roi_30d": "30일 ROI"
+    },
+    "viral": {
+      "badge": "바이럴 엔진 V4",
+      "title": "\"황금 수갑\" 모델",
+      "description_1": "대부분의 플랫폼은 광고에 수백만을 씁니다. 우리는 그것을",
+      "description_you": "당신",
+      "description_2": "에게 씁니다. 우리의 바이럴 엔진은 수익의 최대",
+      "description_revenue": "100%",
+      "description_3": "를 4단계 제휴 시스템을 통해 커뮤니티에 환원합니다.",
+      "benefit_1": "레벨 1: 직접 커미션 35% 획득",
+      "benefit_2": "레벨 2-4: 네트워크에서 발생하는 수동 소득",
+      "benefit_3": "스마트 계약을 통한 자동 일일 지급",
+      "benefit_4": "티어 기반 잠금 해제 시스템 (수갑)",
+      "cta": "수입 계산하기",
+      "level_1": "레벨 1",
+      "level_2": "레벨 2",
+      "level_3_4": "레벨 3 & 4",
+      "locked": "잠김 (업그레이드 필요)"
+    },
+    "smart_switch": {
+      "title": "수수료 전액 지불을 멈추세요",
+      "subtitle": "AI가 수천 개의 수수료 구조를 분석하여 최적의 리베이트를 찾아냅니다."
+    },
+    "final_cta": {
+      "title": "지배할 준비가 되셨나요?",
+      "description": "이미 ApexOS로 업그레이드한 12,000명 이상의 트레이더와 함께하세요. 오늘 울프 팩에서 자리를 확보하세요.",
+      "cta": "지금 시작하기"
+    },
     "features": {
       "title": "선도적인 트레이더들이 ApexOS를 선택하는 이유",
       "subtitle": "진지한 트레이더를 위해 설계된 전문가급 도구",

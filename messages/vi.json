@@ -21,6 +21,42 @@
       "trust_uptime": "Uptime 99.9%",
       "trust_global": "Truy cập toàn cầu"
     },
+    "marketplace": {
+      "title": "Chợ Chiến Lược",
+      "subtitle": "Sao chép chiến lược tốt nhất. Lợi nhuận như cá mập.",
+      "view_all": "Xem Tất Cả Chiến Lược",
+      "copy_strategy": "Sao Chép Chiến Lược",
+      "win_rate": "Tỷ Lệ Thắng",
+      "followers": "Người Theo Dõi",
+      "roi_30d": "ROI 30 Ngày"
+    },
+    "viral": {
+      "badge": "HỆ THỐNG LAN TRUYỀN V4",
+      "title": "Mô Hình \"Còng Tay Vàng\"",
+      "description_1": "Hầu hết nền tảng chi hàng triệu cho quảng cáo. Chúng tôi chi cho",
+      "description_you": "BẠN",
+      "description_2": "Hệ thống lan truyền phân phối tới",
+      "description_revenue": "100% doanh thu",
+      "description_3": "trở lại cộng đồng qua hệ thống liên kết 4 cấp.",
+      "benefit_1": "Cấp 1: Kiếm 35% hoa hồng trực tiếp",
+      "benefit_2": "Cấp 2-4: Thu nhập thụ động từ mạng lưới của bạn",
+      "benefit_3": "Thanh toán tự động hàng ngày qua Hợp Đồng Thông Minh",
+      "benefit_4": "Hệ thống mở khóa theo cấp (Còng Tay)",
+      "cta": "Tính Thu Nhập Của Bạn",
+      "level_1": "Cấp 1",
+      "level_2": "Cấp 2",
+      "level_3_4": "Cấp 3 & 4",
+      "locked": "Đã khóa (Cần nâng cấp)"
+    },
+    "smart_switch": {
+      "title": "Ngừng Trả Phí Đầy Đủ",
+      "subtitle": "AI của chúng tôi phân tích hàng nghìn cấu trúc phí để tìm hoàn tiền tối ưu cho bạn."
+    },
+    "final_cta": {
+      "title": "Sẵn Sàng Thống Trị?",
+      "description": "Tham gia 12.000+ trader đã nâng cấp lên ApexOS. Giành chỗ của bạn trong Bầy Sói ngay hôm nay.",
+      "cta": "Bắt Đầu Ngay"
+    },
     "features": {
       "title": "Tại sao Top Trader chọn ApexOS",
       "subtitle": "Công cụ chuyên nghiệp cho trader nghiêm túc",

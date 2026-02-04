@@ -21,6 +21,42 @@
       "trust_uptime": "Uptime 99.9%",
       "trust_global": "Akses Global"
     },
+    "marketplace": {
+      "title": "Pasar Strategi",
+      "subtitle": "Salin yang terbaik. Untung seperti Paus.",
+      "view_all": "Lihat Semua Strategi",
+      "copy_strategy": "Salin Strategi",
+      "win_rate": "Tingkat Kemenangan",
+      "followers": "Pengikut",
+      "roi_30d": "ROI 30h"
+    },
+    "viral": {
+      "badge": "MESIN VIRAL V4",
+      "title": "Model \"Borgol Emas\"",
+      "description_1": "Sebagian besar platform menghabiskan jutaan untuk iklan. Kami menghabiskannya untuk",
+      "description_you": "ANDA",
+      "description_2": "Mesin viral kami mendistribusikan hingga",
+      "description_revenue": "100% dari pendapatan",
+      "description_3": "kembali ke komunitas melalui sistem afiliasi 4 level.",
+      "benefit_1": "Level 1: Dapatkan komisi langsung 35%",
+      "benefit_2": "Level 2-4: Pendapatan pasif dari jaringan Anda",
+      "benefit_3": "Pembayaran harian otomatis melalui Smart Contract",
+      "benefit_4": "Sistem pembukaan kunci berbasis tingkat (Borgol)",
+      "cta": "Hitung Pendapatan Anda",
+      "level_1": "Level 1",
+      "level_2": "Level 2",
+      "level_3_4": "Level 3 & 4",
+      "locked": "Terkunci (Perlu Peningkatan)"
+    },
+    "smart_switch": {
+      "title": "Berhenti Membayar Biaya Penuh",
+      "subtitle": "AI kami menganalisis ribuan struktur biaya untuk menemukan rabat optimal Anda."
+    },
+    "final_cta": {
+      "title": "Siap untuk Memerintah?",
+      "description": "Bergabunglah dengan 12.000+ trader yang telah meningkatkan ke ApexOS. Amankan tempat Anda di Wolf Pack hari ini.",
+      "cta": "Mulai Sekarang"
+    },
     "features": {
       "title": "Mengapa Trader Terkemuka Memilih ApexOS",
       "subtitle": "Alat tingkat profesional yang dirancang untuk trader serius",
