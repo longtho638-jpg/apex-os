@@ -8,7 +8,11 @@ export function JsonLdProvider() {
   );
 }
 
-// Specific Components
+// Helper to safely serialize JSON-LD, preventing XSS via </script> injection
+const safeJsonLd = (data: any) => {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+};
+
 export function OrganizationJsonLd() {
   const schema = {
     "@context": "https://schema.org",
@@ -26,7 +30,7 @@ export function OrganizationJsonLd() {
       "contactType": "customer service"
     }
   };
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />;
 }
 
 export function SoftwareAppJsonLd() {
@@ -47,7 +51,7 @@ export function SoftwareAppJsonLd() {
       "ratingCount": "1200"
     }
   };
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />;
 }
 
 export function FAQPageJsonLd() {
@@ -70,5 +74,5 @@ export function FAQPageJsonLd() {
       }
     }]
   };
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }} />;
 }

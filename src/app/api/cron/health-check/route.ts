@@ -13,14 +13,12 @@ export async function GET(request: NextRequest) {
         const authHeader = request.headers.get('authorization');
         const cronSecret = process.env.CRON_SECRET;
 
-        // Allow if CRON_SECRET matches (for Vercel Cron) OR if Bearer token is present (for manual testing)
-        // For now, we'll be lenient for manual testing if CRON_SECRET is not set, 
-        // but in production, this should be strict.
-        const isAuthorized =
-            (cronSecret && authHeader === `Bearer ${cronSecret}`) ||
-            (authHeader?.startsWith('Bearer ')); // We assume the middleware/logic handles user auth for manual triggers
-
-        // Note: For a real cron job, we'd strictly check process.env.CRON_SECRET
+        // STRICT SECURITY CHECK
+        // Only allow requests with the correct CRON_SECRET
+        if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+            logger.warn('Unauthorized health check attempt');
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;

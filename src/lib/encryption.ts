@@ -1,6 +1,16 @@
 import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || process.env.SUPABASE_JWT_SECRET || 'default-key-32-bytes-length-required!!'; // Must be 256 bits (32 characters)
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || process.env.SUPABASE_JWT_SECRET;
+
+if (!ENCRYPTION_KEY) {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('CRITICAL SECURITY ERROR: ENCRYPTION_KEY or SUPABASE_JWT_SECRET is not set in production environment.');
+    } else {
+        console.warn('WARNING: ENCRYPTION_KEY not set. Using unsafe default for development only.');
+    }
+}
+
+const SAFE_KEY = ENCRYPTION_KEY || 'development-only-unsafe-key-do-not-use-in-prod!!'; // Must be 256 bits (32 characters)
 const IV_LENGTH = 16; // For AES, this is always 16
 
 function getEncryptionKey(): Buffer {

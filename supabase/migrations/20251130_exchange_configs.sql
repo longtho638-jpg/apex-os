@@ -30,7 +30,10 @@ ALTER TABLE exchange_configs ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public read config" ON exchange_configs FOR SELECT TO authenticated, anon USING (true);
 CREATE POLICY "Admin update config" ON exchange_configs FOR ALL TO authenticated USING (
-    -- Giả sử có role admin hoặc check email
-    auth.jwt() ->> 'email' IN ('admin@apexos.com', 'founder@apexos.com') 
-    -- Hoặc dùng function check_admin() nếu đã có
+    -- Check for admin role in app_metadata
+    (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+    OR
+    (auth.jwt() -> 'app_metadata' ->> 'role') = 'service_role'
+    OR
+    (auth.jwt() -> 'app_metadata' ->> 'role') = 'super_admin'
 );

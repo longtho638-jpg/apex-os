@@ -10,4 +10,20 @@ class Database:
         else:
             print("Warning: Supabase credentials not found. DB features will be disabled.")
 
+    def query(self, table: str, filters: dict = None, select: str = "*"):
+        """
+        Execute a query against Supabase
+        """
+        if not self.client:
+            return []
+
+        query = self.client.table(table).select(select)
+
+        if filters:
+            for key, value in filters.items():
+                query = query.eq(key, value)
+
+        result = query.execute()
+        return result.data
+
 db = Database()

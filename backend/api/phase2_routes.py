@@ -2,23 +2,28 @@
 Wolf Pack, Referral, and Payment API endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict, Optional
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from core.database import db
+from core.auth import get_current_user
 
 router = APIRouter()
 
 # ============== WOLF PACK ENDPOINTS ==============
 
 @router.get("/wolf-pack/status")
-async def get_wolf_pack_status(user_id: str):
+async def get_wolf_pack_status(user_id: str, current_user: dict = Depends(get_current_user)):
     """
     Get Wolf Pack community status for a user.
-    
+
     Returns pack membership info, collaboration metrics, and shared rebates.
     """
+    # Authorization Check
+    if current_user['user_id'] != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to user data")
+
     try:
         # Query wolf_pack_members table
         result = db.query(
@@ -89,12 +94,16 @@ async def get_wolf_pack_status(user_id: str):
 # The Single Source of Truth is the 'referral_codes' table in Supabase.
 
 @router.get("/referral/stats")
-async def get_referral_stats(user_id: str):
+async def get_referral_stats(user_id: str, current_user: dict = Depends(get_current_user)):
     """
     Get referral program statistics for a user.
-    
+
     Returns referral link, total referrals, and commission earned.
     """
+    # Authorization Check
+    if current_user['user_id'] != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to user data")
+
     try:
         # Query user_referrals table
         referrals = db.query(
@@ -147,12 +156,16 @@ async def get_referral_stats(user_id: str):
 # ============== PAYMENT/BILLING ENDPOINTS ==============
 
 @router.get("/billing/subscription")
-async def get_subscription_info(user_id: str):
+async def get_subscription_info(user_id: str, current_user: dict = Depends(get_current_user)):
     """
     Get user subscription and billing information.
-    
+
     Returns current plan, usage metrics, payment history.
     """
+    # Authorization Check
+    if current_user['user_id'] != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to user data")
+
     try:
         # Get user tier from users table
         user_data = db.query(

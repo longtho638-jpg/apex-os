@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 
 from api.routes import router as api_router
 # from api.verification_routes import router as verification_router
-# from api.phase2_routes import router as phase2_router
+from api.phase2_routes import router as phase2_router
 # from api.settings_routes import router as settings_router
 
 # Load environment variables
@@ -51,7 +51,7 @@ app.add_middleware(
 
 app.include_router(api_router, prefix="/api/v1")
 # app.include_router(verification_router, prefix="/api/v1")
-# app.include_router(phase2_router, prefix="/api/v1")
+app.include_router(phase2_router, prefix="/api/v1")
 # app.include_router(settings_router)
 
 @app.get("/")

@@ -33,16 +33,12 @@ export async function generateMFASecret(email: string, issuer: string = 'ApexOS'
     });
 
     const secret = totp.secret.base32;
-    // console.log('[MFA Setup] Plain secret generated:', secret); // redacted
 
     const uri = totp.toString();
     const qrCode = await QRCode.toDataURL(uri);
 
     // Encrypt secret for storage
-    // console.log('[MFA Setup] Calling encrypt function...'); // redacted
     const encryptedSecret = await encrypt(secret);
-    // console.log('[MFA Setup] Encrypted secret:', encryptedSecret.substring(0, 50) + '...'); // redacted
-    // console.log('[MFA Setup] Encrypted parts:', encryptedSecret.split(':').length); // redacted
 
     // Generate recovery codes
     const recoveryCodes = generateRecoveryCodes();
