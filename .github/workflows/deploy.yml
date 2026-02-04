@@ -27,7 +27,7 @@ jobs:
           cd backend
           # python -m pytest tests/
           # Uncomment above when tests are ready. For now, we fail if syntax error.
-          python -m compileall .
+          python -m compileall -x 'venv.*' .
 
   test-frontend:
     runs-on: ubuntu-latest
