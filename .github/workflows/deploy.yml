@@ -11,21 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-          
+
       - name: Install backend dependencies
         run: |
           cd backend
           pip install -r requirements.txt
-          
+
       - name: Run backend tests
         run: |
           cd backend
-          # python -m pytest tests/ 
+          # python -m pytest tests/
           # Uncomment above when tests are ready. For now, we fail if syntax error.
           python -m compileall .
 
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: '20'
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
       - name: Lint
         run: npm run lint
       - name: Build Check
@@ -61,13 +61,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Deploy to Railway
         uses: bervProject/railway-deploy@main
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN }}
           service: apex-backend
-          
+
       - name: Deploy Worker to Railway
         uses: bervProject/railway-deploy@main
         with:
@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
