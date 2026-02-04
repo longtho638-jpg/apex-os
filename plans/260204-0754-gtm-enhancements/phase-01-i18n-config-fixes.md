@@ -2,7 +2,7 @@
 
 **Context**: [i18n Research Report](../reports/researcher-i18n.md)
 **Priority**: CRITICAL (Blocks Phase 05)
-**Status**: Pending
+**Status**: Completed
 
 ## Overview
 Currently, `next-intl` is configured but `layout.tsx` hardcodes locales to only English/Vietnamese, or limits scalability. We need to refactor the locale configuration to be dynamic and robust, enabling easy addition of new languages.
@@ -14,7 +14,7 @@ Currently, `next-intl` is configured but `layout.tsx` hardcodes locales to only 
 
 ## Requirements
 ### Functional
-- Support dynamic locale routing (en, vi, jp, cn, kr).
+- Support dynamic locale routing (en, vi, ja, zh, ko, th, id).
 - Ensure default locale fallback works correctly.
 - Fix any hydration mismatches caused by locale switching.
 
@@ -29,27 +29,27 @@ Currently, `next-intl` is configured but `layout.tsx` hardcodes locales to only 
 
 ## Related Code Files
 - Modify: `src/middleware.ts`
-- Modify: `src/i18n.ts` (or `src/i18n/request.ts`)
+- Modify: `src/i18n/request.ts`
 - Modify: `src/app/[locale]/layout.tsx`
 - Create: `src/config/locales.ts`
 
 ## Implementation Steps
 1.  **Centralize Config**: Create `src/config/locales.ts` exporting `locales`, `defaultLocale`, and locale metadata.
-2.  **Update Request Config**: Update `src/i18n.ts` to use the shared config for validation.
+2.  **Update Request Config**: Update `src/i18n/request.ts` to use the shared config for validation.
 3.  **Refactor Middleware**: Ensure `middleware.ts` imports locales from config and handles redirects properly.
 4.  **Fix Layout**: Update root layout to use `unstable_setRequestLocale` (if using static rendering) or proper param validation.
 5.  **Verify Routing**: specific test cases for switching between languages.
 
 ## Todo List
-- [ ] Create `src/config/locales.ts`
-- [ ] Refactor `src/i18n.ts`
-- [ ] Update `src/middleware.ts` matchers
-- [ ] Fix `src/app/[locale]/layout.tsx`
-- [ ] Test locale switching manually
+- [x] Create `src/config/locales.ts`
+- [x] Refactor `src/i18n/request.ts`
+- [x] Update `src/middleware.ts` matchers
+- [x] Fix `src/app/[locale]/layout.tsx`
+- [x] Test locale switching manually
 
 ## Success Criteria
-- User can navigate to `/en`, `/vi`, `/jp` without 404s (even if content is missing, route works).
-- `next-intl` throws no console warnings about locale mismatch.
+- [x] User can navigate to `/en`, `/vi`, `/ja` without 404s (even if content is missing, route works).
+- [x] `next-intl` throws no console warnings about locale mismatch.
 
 ## Risk Assessment
 - **Risk**: Infinite redirect loops in middleware.

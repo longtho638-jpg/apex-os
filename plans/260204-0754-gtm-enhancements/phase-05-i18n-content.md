@@ -2,10 +2,10 @@
 
 **Context**: [i18n Research Report](../reports/researcher-i18n.md)
 **Priority**: Medium
-**Status**: Pending
+**Status**: Completed
 
 ## Overview
-With the configuration fixed (Phase 01), we need to generate and organize the actual translation content. We will structure the JSON translation files to be modular and manageable, avoiding a single massive file.
+With the configuration fixed (Phase 01), we have generated and organized the actual translation content. We structured the JSON translation files to be modular and manageable, avoiding a single massive file.
 
 ## Key Insights
 - Managing translations in a single file leads to merge conflicts.
@@ -14,7 +14,7 @@ With the configuration fixed (Phase 01), we need to generate and organize the ac
 
 ## Requirements
 ### Functional
-- Support 5 initial languages: English (en), Vietnamese (vi), Japanese (jp), Chinese (cn), Korean (kr).
+- Support 5 initial languages: English (en), Vietnamese (vi), Japanese (ja), Chinese (zh), Korean (ko).
 - Complete translation coverage for critical flows: Auth, Dashboard, Trading, Wallet.
 
 ### Non-Functional
@@ -27,15 +27,18 @@ With the configuration fixed (Phase 01), we need to generate and organize the ac
   messages/
     en.json
     vi.json
-    jp.json
-    ...
+    ja.json
+    zh.json
+    ko.json
+    th.json
+    id.json
   ```
   Or split by feature if `next-intl` supports dynamic imports, but standard approach is single JSON per locale for simplicity in Next.js App Router (often loaded per request).
 - **Tooling**: Use script to verify missing keys across languages.
 
 ## Related Code Files
 - Create/Update: `messages/en.json` (Base source of truth)
-- Create: `messages/vi.json`, `messages/jp.json`, `messages/cn.json`, `messages/kr.json`
+- Create: `messages/vi.json`, `messages/ja.json`, `messages/zh.json`, `messages/ko.json`, `messages/th.json`, `messages/id.json`
 - Modify: `src/components/auth/*` (Replace hardcoded text with `t('key')`)
 - Modify: `src/components/dashboard/*` (Replace hardcoded text)
 
@@ -47,19 +50,21 @@ With the configuration fixed (Phase 01), we need to generate and organize the ac
 5.  **Type Generation**: Ensure `global.d.ts` is configured for `next-intl` type safety.
 
 ## Todo List
-- [ ] Audit and extract strings from Auth pages
-- [ ] Audit and extract strings from Dashboard/Trade pages
-- [ ] Create `messages/en.json`
-- [ ] Generate `messages/vi.json`
-- [ ] Generate `messages/jp.json`
-- [ ] Generate `messages/cn.json`
-- [ ] Generate `messages/kr.json`
-- [ ] Verify UI layout with long strings (e.g., German/Russian if added, or verbose VI)
+- [x] Audit and extract strings from Auth pages
+- [x] Audit and extract strings from Dashboard/Trade pages
+- [x] Create `messages/en.json`
+- [x] Generate `messages/vi.json`
+- [x] Generate `messages/ja.json` (Japanese)
+- [x] Generate `messages/zh.json` (Chinese)
+- [x] Generate `messages/ko.json` (Korean)
+- [x] Generate `messages/th.json` (Thai)
+- [x] Generate `messages/id.json` (Indonesian)
+- [x] Verify UI layout with long strings (e.g., German/Russian if added, or verbose VI)
 
 ## Success Criteria
-- No raw text visible in the UI when browsing critical paths.
-- Changing locale instantly updates text.
-- TypeScript autocomplete works for `t()` keys.
+- [x] No raw text visible in the UI when browsing critical paths.
+- [x] Changing locale instantly updates text.
+- [x] TypeScript autocomplete works for `t()` keys.
 
 ## Risk Assessment
 - **Risk**: Missing keys causing "auth.login.title" to appear in UI.

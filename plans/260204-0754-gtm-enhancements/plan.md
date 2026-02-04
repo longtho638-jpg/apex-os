@@ -11,7 +11,7 @@ It addresses findings from research on Onboarding, Compliance, Payments, and Int
 ## Phases
 
 ### [Phase 01: i18n Configuration Fixes](./phase-01-i18n-config-fixes.md)
-**Priority**: CRITICAL | **Status**: Pending
+**Priority**: CRITICAL | **Status**: Completed
 Fix `next-intl` configuration and `layout.tsx` hardcoded locales to enable proper multi-language support. Blocks Phase 05.
 
 ### [Phase 02: Compliance Foundation](./phase-02-compliance-foundation.md)
@@ -27,7 +27,7 @@ Create an interactive "First Trade" tour using `react-joyride` and a paper tradi
 Add withdrawal UI components and invoice generation for the existing Polar/NOWPayments integration.
 
 ### [Phase 05: i18n Content](./phase-05-i18n-content.md)
-**Priority**: Medium | **Status**: Pending
+**Priority**: Medium | **Status**: Completed
 Create and populate translation files for supported languages (EN, VI, etc.) based on Phase 01 structure.
 
 ### [Phase 06: Testing & Documentation](./phase-06-testing-documentation.md)
