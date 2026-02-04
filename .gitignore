@@ -43,3 +43,9 @@ backend/venv
 .gemini/payment_credentials_template.txt
 # backend/
 *.dylib
+.env*.local
+
+# Large output files
+repomix-output.xml
+test_output.txt
+test_results.txt

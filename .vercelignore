@@ -55,3 +55,4 @@ npm-debug.log*
 *~
 backend/
 src/app/api/v1/trading/
+repomix-output.xml

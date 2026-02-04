@@ -57,14 +57,21 @@ const nextConfig = {
     ];
   },
   async rewrites() {
+    // Only add Supabase rewrites if URL is defined (fixes build error)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) {
+      console.warn('⚠️ NEXT_PUBLIC_SUPABASE_URL not set - skipping Supabase auth rewrites');
+      return [];
+    }
+
     return [
       {
         source: '/:locale/auth/v1/:path*',
-        destination: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/:path*`,
+        destination: `${supabaseUrl}/auth/v1/:path*`,
       },
       {
         source: '/auth/v1/:path*',
-        destination: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/:path*`,
+        destination: `${supabaseUrl}/auth/v1/:path*`,
       },
     ];
   },

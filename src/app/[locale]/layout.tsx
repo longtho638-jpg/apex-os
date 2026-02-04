@@ -9,9 +9,7 @@ import { cn } from '@/lib/utils';
 import "../globals.css";
 import { Toaster } from 'sonner';
 import { NotificationsProvider } from '@/components/providers/NotificationsProvider';
-
-// Supported locales
-const locales = ['en', 'vi'] as const;
+import { locales, isValidLocale } from '@/config/locales';
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -37,7 +35,7 @@ async function ApexLayout({ children, params }: Props) {
     // Get locale and validate
     const { locale } = await params;
 
-    if (!locales.includes(locale as any)) {
+    if (!isValidLocale(locale)) {
         notFound();
     }
 

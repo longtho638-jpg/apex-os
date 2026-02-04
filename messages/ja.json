@@ -1,0 +1,968 @@
+{
+  "Homepage": {
+    "title": "ApexOS - AI Trading Operations",
+    "subtitle": "Automate your crypto trading with institutional-grade AI signals.",
+    "nav": {
+      "features": "Features",
+      "how_it_works": "How It Works",
+      "pricing": "Pricing",
+      "resources": "Resources",
+      "signin": "Sign In",
+      "get_started": "Get Started"
+    },
+    "hero": {
+      "badge": "Institutional Grade AI Trading Platform",
+      "title_line1": "Agentic Trade Intelligence",
+      "title_line2": "Built for Professionals",
+      "description": "The world's first self-improving trading OS. AI agents that learn your style, execute 24/7, and compound your edge—while you sleep.",
+      "cta_primary": "Start Free Trial",
+      "cta_secondary": "Watch Demo",
+      "trust_security": "Bank-Level Security",
+      "trust_uptime": "99.9% Uptime",
+      "trust_global": "Global Access"
+    },
+    "features": {
+      "title": "Why Leading Traders Choose ApexOS",
+      "subtitle": "Professional-grade tools designed for serious traders",
+      "security_title": "Institutional Security",
+      "security_desc": "Bank-grade encryption and READ-ONLY API access. We never touch your funds.",
+      "execution_title": "Real-Time Execution",
+      "execution_desc": "AI agents monitor and execute 24/7 with microsecond precision.",
+      "performance_title": "Proven Performance",
+      "performance_desc": "Average user recovers $500/month in optimized rebates and fees.",
+      "multi_exchange_title": "Multi-Exchange",
+      "multi_exchange_desc": "Connect Binance, OKX, Bybit, and 10+ major exchanges seamlessly."
+    },
+    "footer": {
+      "company_desc": "Professional trading intelligence powered by AI.",
+      "product": "Product",
+      "resources": "Resources",
+      "legal": "Legal",
+      "rights": "All rights reserved.",
+      "risk_disclosure": "Risk Disclosure: Trading cryptocurrencies involves substantial risk of loss. ApexOS provides tools and analytics but does not guarantee profits. Past performance does not indicate future results. Trade responsibly and only with capital you can afford to lose."
+    }
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "login": "Login"
+  },
+  "AlphaDashboard": {
+    "tabs": {
+      "scanner": "Scanner",
+      "arbitrage": "Arbitrage"
+    },
+    "card": {
+      "ai_strategy": "AI STRATEGY",
+      "rec_lev": "Rec: {lev}x",
+      "entry": "Entry",
+      "stop": "Stop",
+      "target": "Target",
+      "waiting": "Waiting for setup..."
+    },
+    "status": {
+      "connecting": "CONNECTING",
+      "watching": "WATCHING",
+      "buy": "BUY",
+      "sell": "SELL"
+    },
+    "insights": {
+      "watching_title": "🔍 GENERAL'S WAIT ({timeframe})",
+      "watching_desc": "Macro Trend: {trend} • Micro RSI: {rsi}. Strategy: Hold positions. Wait for trend alignment.",
+      "buy_title": "⚔️ AMBUSH SIGNAL (Long)",
+      "buy_desc": "Setup: {setup}. Flow: {intensity} Inflow ({delta}). Execution: Strike at {price}.",
+      "sell_title": "🏹 TACTICAL SHORT",
+      "sell_desc": "Setup: {setup}. Flow: {intensity} Outflow ({delta}). Execution: Short at {price}.",
+      "initializing": "Initializing Neural Net...",
+      "analyzing": "Analyzing Order Flow...",
+      "updated": "Insight Updated"
+    },
+    "execution": {
+      "leverage": "Leverage",
+      "tp": "TP ($)",
+      "sl": "SL ($)",
+      "execute": "EXECUTE",
+      "wait": "Wait for Signal"
+    },
+    "arbitrage": {
+      "spread": "Spread",
+      "profit_10k": "Profit/10k",
+      "auto_execute": "AUTO-EXECUTE",
+      "atomic_title": "ATOMIC EXECUTION",
+      "routing": "Routing via Smart Contract...",
+      "step_locking": "Locking Price",
+      "step_hedging": "Hedging",
+      "step_executing": "Executing Orders",
+      "profit_secured": "Profit Secured",
+      "market_price": "Market Price",
+      "buy_on": "Buy on {exchange}",
+      "sell_on": "Sell on {exchange}"
+    }
+  },
+  "TradingTerminal": {
+    "header": {
+      "system_online": "SYSTEM: ONLINE",
+      "config": "Config",
+      "tactical_view": "TACTICAL VIEW",
+      "return": "Return"
+    },
+    "intel": {
+      "title": "Intel Feed",
+      "market_sentiment": "Market Sentiment",
+      "extreme_greed": "EXTREME GREED",
+      "whale_accumulation": "Whale Accumulation",
+      "extreme_fear": "EXTREME FEAR",
+      "panic_selling": "Panic Selling"
+    },
+    "radar": {
+      "target_locked": "Target Locked",
+      "whale_detected": "WHALE DETECTED"
+    },
+    "command": {
+      "deck": "Command Deck",
+      "live_exec": "LIVE EXECUTION",
+      "long": "Long",
+      "short": "Short",
+      "leverage": "Leverage",
+      "risk_reward": "Risk / Reward",
+      "margin": "Margin"
+    },
+    "trigger": {
+      "arming": "ARMING...",
+      "hold_to_exec": "HOLD TO EXECUTE",
+      "initiate_long": "INITIATE LONG",
+      "initiate_short": "INITIATE SHORT",
+      "protected": "Protected by ApexGuard™"
+    },
+    "setup": {
+      "title": "SYSTEM CONFIGURATION",
+      "exchange_api": "Exchange API",
+      "automation": "Automation Engine"
+    }
+  },
+  "AssetVault": {
+    "header": {
+      "title": "ASSET VAULT",
+      "subtitle": "Secure institutional-grade asset management.",
+      "deposit": "Deposit",
+      "withdraw": "Withdraw"
+    },
+    "card": {
+      "total_balance": "Total Balance",
+      "card_holder": "Card Holder",
+      "tier_status": "Tier Status",
+      "member": "MEMBER"
+    },
+    "stats": {
+      "asset_growth": "Asset Growth (30d)",
+      "available": "Available",
+      "locked": "Locked / Staking",
+      "total_profit": "Total Profit"
+    },
+    "history": {
+      "title": "Recent Transactions",
+      "view_all": "View All",
+      "deposit": "DEPOSIT",
+      "withdrawal": "WITHDRAWAL"
+    }
+  },
+  "AffiliateCosmos": {
+    "hero": {
+      "available_comm": "Available Commission",
+      "this_week": "this week",
+      "lifetime": "Lifetime",
+      "withdraw": "Withdraw Funds",
+      "history": "Payout History",
+      "your_tier": "YOUR TIER",
+      "max_unlocked": "Max Commission Unlocked",
+      "upgrade_msg": "Upgrade to unlock deeper levels",
+      "next_tier": "Next Tier Progress"
+    },
+    "link": {
+      "your_link": "Your Invite Link",
+      "copy": "Copy Link",
+      "copied": "Copied!"
+    },
+    "visualizer": {
+      "title": "Apex Viral Cosmos",
+      "simulate": "Simulate Viral Growth",
+      "stop": "Stop Growth",
+      "active_nodes": "Active Nodes",
+      "flow_rate": "Flow Rate"
+    },
+    "stats": {
+      "level": "Level {level}",
+      "earnings": "Earnings",
+      "locked": "LOCKED"
+    },
+    "table": {
+      "title": "Active Referrals",
+      "search": "Search users...",
+      "col_user": "User",
+      "col_tier": "Tier",
+      "col_vol": "Volume (30d)",
+      "col_comm": "Commission",
+      "col_joined": "Joined",
+      "col_action": "Action",
+      "view_details": "View Details",
+      "view_all": "View All Referrals"
+    }
+  },
+  "AdminRisk": {
+    "title": "Risk Management",
+    "subtitle": "Real-time risk monitoring and automated intervention systems"
+  },
+  "AdminSidebar": {
+    "overview": "Dashboard",
+    "pricing": "Pricing",
+    "risk": "Risk Guardian",
+    "trading": "Trading Engine",
+    "users": "User Management",
+    "security": "Security",
+    "ip_whitelist": "IP Whitelist",
+    "mfa_setup": "MFA Setup",
+    "audit_logs": "Audit Logs",
+    "security_alerts": "Security Alerts",
+    "agent_status": "Agent Status",
+    "exchanges": "Exchange Config",
+    "strategy": "Strategy",
+    "system": "System",
+    "analytics": "Analytics",
+    "dashboard": "Dashboard",
+    "ab_tests": "A/B Tests",
+    "growth": "Growth",
+    "viral": "Viral",
+    "liquidity": "Liquidity",
+    "system_online": "SYSTEM ONLINE",
+    "cpu_load": "CPU Load",
+    "memory": "Memory",
+    "back_to_app": "Back to App",
+    "disconnect": "Disconnect"
+  },
+  "AdminPricing": {
+    "title": "Pricing Engine",
+    "subtitle": "Rebate Tier Management & Optimization",
+    "ai_optimization": "AI Optimization",
+    "new": "NEW",
+    "suggestions": {
+      "1": "Increase Bybit rebate to 48% to capture high-volume scalpers.",
+      "2": "Lower Binance rebate for Tier 1 users (churn risk low)."
+    },
+    "projected_impact": "Projected Impact",
+    "configuration_title": "Tier Configuration",
+    "rebate_share": "Rebate Share",
+    "est_daily_profit": "Est. Daily Profit",
+    "guide": {
+      "title": "Operational Guide",
+      "formula_title": "Profit Formula",
+      "formula_desc": "Profit = Volume * (Fee - Rebate)",
+      "elasticity_title": "Volume Elasticity",
+      "elasticity_desc": "Higher rebates attract more volume. Our AI models predict a 5% volume increase for every 10% rebate hike.",
+      "workflow_title": "Optimization Workflow",
+      "workflow_step_1": "Analyze",
+      "workflow_step_1_desc": "AI scans market rates",
+      "workflow_step_2": "Predict",
+      "workflow_step_2_desc": "Forecast volume impact",
+      "workflow_step_3": "Adjust",
+      "workflow_step_3_desc": "Tweak rebate tiers",
+      "workflow_step_4": "Monitor",
+      "workflow_step_4_desc": "Track real-time profit",
+      "workflow_step_5": "Optimize",
+      "workflow_step_5_desc": "Continuous improvement",
+      "ai_role_title": "AI Role",
+      "ai_role_desc": "Our AI agents continuously monitor market conditions to suggest optimal rebate rates.",
+      "ai_point_1": "**Real-time Analysis**: Scans competitor rates 24/7.",
+      "ai_point_2": "**Predictive Modeling**: Forecasts user behavior.",
+      "ai_point_3": "**Automated Adjustments**: Suggests changes to maximize net profit.",
+      "strategy_title": "Strategy",
+      "strategy_desc": "Balance high rebates for growth with sustainable margins for profitability."
+    },
+    "reset_default": "Reset to Default",
+    "apply_changes": "Apply Changes"
+  },
+  "Dashboard": {
+    "title": "Dashboard Overview",
+    "subtitle": "Welcome back! Here's your trading performance summary.",
+    "loading": "Initializing AI Core...",
+    "metrics": {
+      "total_earnings": "Total Earnings",
+      "active_referrals": "Active Referrals",
+      "win_rate": "Win Rate",
+      "ai_signals": "AI Signals"
+    },
+    "quick_actions": {
+      "ai_trading_signals": "AI Trading Signals",
+      "view_signals": "View real-time AI-powered trading signals",
+      "referral_program": "Referral Program",
+      "earn_commissions": "Earn commissions by referring traders"
+    },
+    "system_online": "SYSTEM ONLINE",
+    "upgrade_banner": "Upgrade to Founders",
+    "total_pnl_30d": "TOTAL PNL (30D)",
+    "total_pnl_all_time": "TOTAL PNL (ALL-TIME)",
+    "fees_saved": "FEES SAVED",
+    "referral_earnings": "REFERRAL EARNINGS",
+    "win_rate": "Win Rate",
+    "ai_auditor_active": "AI Auditor Active",
+    "active_refs": "{count} Active Refs → View Dashboard",
+    "est_monthly": "Est. $47/month",
+    "commission": "20% commission",
+    "unlock_premium": "Unlock Premium Features",
+    "feature_sync": "Real-time Auto-Sync",
+    "feature_auditor": "AI Fee Auditor",
+    "feature_guardian": "24/7 Risk Guardian",
+    "feature_referral": "20% Referral Income",
+    "upgrade_button": "Upgrade to Founders for $99",
+    "wolf_pack": "Wolf Pack Status",
+    "guardian_alerts": "Guardian Alerts",
+    "agent_activity": "Agent Activity"
+  },
+  "TradingPage": {
+    "title": "Trading Terminal",
+    "setup": "Setup",
+    "auto": "Auto"
+  },
+  "DashboardComponents": {
+    "SmartSwitch": {
+      "live_demo": "LIVE DEMO",
+      "title_prefix": "See ApexOS AI in",
+      "title_suffix": "Action",
+      "description": "Interactive demo: Select your trading parameters and watch our AI find the best rebate opportunity",
+      "your_exchange": "Your Exchange",
+      "trading_pair": "Trading Pair",
+      "daily_volume": "Daily Volume",
+      "analyze_button": "Analyze My Rebates",
+      "no_signup": "No signup required • Instant results",
+      "analyzing_title": "AI Analysis Running...",
+      "analyzing_desc": "Comparing {exchanges} exchanges • Analyzing {pair} rates • Calculating optimal path",
+      "complete": "Complete",
+      "optimization_found": "Optimization Found! 🎉",
+      "optimization_desc": "Here's how to maximize your rebates",
+      "recommended": "RECOMMENDED",
+      "best_for": "Best for {pair}",
+      "monthly_savings": "MONTHLY SAVINGS",
+      "vs_exchange": "vs {exchange}",
+      "improvement": "IMPROVEMENT",
+      "better_rate": "Better rebate rate",
+      "why_better": "Why OKX is Better",
+      "try_another": "Try Another Scenario",
+      "start_trial_arrow": "Start Free Trial →",
+      "conversion_text": "Want this level of optimization for <b>YOUR</b> actual trades?",
+      "start_trial_setup": "Start Free Trial - Setup in 2 Minutes",
+      "trial_benefits": "✓ No credit card required • ✓ 7-day free trial • ✓ Cancel anytime",
+      "breakdown": {
+        "tier": "Higher rebate tier",
+        "maker_fees": "Lower maker fees",
+        "vip": "VIP qualification",
+        "bonus": "Monthly bonus program"
+      }
+    },
+    "Zen": {
+      "title": "APEX_IDENTITY_ENGINE",
+      "behavioral_metrics": "BEHAVIORAL_METRICS",
+      "digital_feng_shui": "DIGITAL_FENG_SHUI",
+      "revenge_trading": "Revenge Trading Detected",
+      "overtrading_risk": "Overtrading Risk",
+      "optimal": "Optimal",
+      "labels": {
+        "discipline": "DISCIPLINE",
+        "risk_appetite": "RISK_APPETITE",
+        "consistency": "CONSISTENCY",
+        "win_rate": "WIN_RATE",
+        "alpha_window": "ALPHA_WINDOW",
+        "behavioral_bias": "BEHAVIORAL_BIAS",
+        "worst_performer": "WORST_PERFORMER",
+        "primary_element": "PRIMARY_ELEMENT",
+        "active": "ACTIVE",
+        "nemesis_element": "NEMESIS_ELEMENT",
+        "nemesis_pair": "NEMESIS_PAIR"
+      },
+      "hidden_view": {
+        "profit_hidden": "// PROFIT_DISPLAY: HIDDEN",
+        "emotional_override": "// EMOTIONAL_OVERRIDE: ACTIVE",
+        "focus_strategy": "// FOCUS: STRATEGY_ONLY"
+      }
+    },
+    "ConnectExchange": {
+      "connect_account": "Connect Exchange Account",
+      "select_exchange": "Select Exchange",
+      "enter_uid": "Enter UID",
+      "enter_api_key": "Enter API Key",
+      "enter_api_secret": "Enter API Secret",
+      "connect_button": "Connect",
+      "connecting": "Connecting...",
+      "success": "Connected successfully!",
+      "uplink": "UPLINK ESTABLISHED",
+      "protocol": "SECURE PROTOCOL V4",
+      "system_online": "SYSTEM ONLINE",
+      "verify_link": "Verify & Link",
+      "verifying": "Verifying...",
+      "link_exchange": "Link {exchange}",
+      "verified": "Verified",
+      "tier": "Tier",
+      "close": "Close",
+      "user_uid": "User UID",
+      "error_format": "Invalid UID format",
+      "error_network": "Network error"
+    },
+    "UpgradeBanner": {
+      "message": "Upgrade to Founders Edition",
+      "cta": "Get Founders Access",
+      "limited_offer": "Limited Time Offer",
+      "spots_left": "Only 13/100 spots left",
+      "feature_sync": "Real-time Sync",
+      "feature_auditor": "AI Fee Auditor",
+      "feature_guardian": "Risk Guardian",
+      "feature_ref": "20% Referral Income",
+      "price": "$99 One-time",
+      "guarantee": "30-Day Guarantee",
+      "activation": "Instant Activation"
+    },
+    "SignalFilters": {
+      "assets": "Assets",
+      "timeframe": "Timeframe",
+      "min_confidence": "Min Confidence",
+      "reset": "Reset Filters"
+    },
+    "AgentLog": {
+      "risk_calc": "Calculating portfolio risk exposure...",
+      "risk_check": "Running pre-trade risk checks...",
+      "risk_vol": "Volatility spike detected. Adjusting position sizing.",
+      "quant_pattern": "Pattern recognition: Bullish Divergence detected.",
+      "quant_depth": "Analyzing order book depth...",
+      "exec_order": "Order placed: BUY BTC/USDT",
+      "exec_fill": "Order filled: 0.5 BTC @ $64,200",
+      "sys_sync": "Syncing with exchange API...",
+      "sys_latency": "Checking network latency..."
+    },
+    "ActiveFarming": {
+      "title": "Active Farming",
+      "total_staked": "Total Staked",
+      "yield_earned": "Yield Earned",
+      "apr": "APR",
+      "ends_in": "Ends in",
+      "start": "Start Farming",
+      "stop": "Stop Farming",
+      "standby": "STANDBY",
+      "connect_msg": "Connect wallet to start farming",
+      "log_executing": "Executing strategy...",
+      "log_harvested": "Harvested yields",
+      "log_rebalancing": "Rebalancing portfolio...",
+      "log_scanning": "Scanning high-yield pools..."
+    }
+  },
+  "Wallet": {
+    "title": "Wallet",
+    "current_balance": "Current Balance",
+    "realtime": "Realtime",
+    "total_earned": "Total Earned",
+    "withdraw": "Withdraw",
+    "recent_earnings": "Recent Earnings",
+    "no_activity": "No recent activity",
+    "please_login": "Please log in to view your wallet."
+  },
+  "DAO": {
+    "title": "Governance",
+    "subtitle": "Shape the future of ApexOS.",
+    "vote_for": "Vote For",
+    "vote_against": "Vote Against",
+    "ends": "Ends",
+    "for": "For",
+    "against": "Against"
+  },
+  "Onboarding": {
+    "setup_guide": "Setup Guide",
+    "completed": "Completed",
+    "connect_wallet": "Connect Wallet",
+    "view_signal": "View a Signal",
+    "run_backtest": "Run Backtest",
+    "join_telegram": "Join Telegram",
+    "claim_reward": "Claim 24h Elite Trial",
+    "task_completed": "Task Completed!",
+    "reward_claimed": "Reward Claimed! 24h Elite Trial Activated."
+  },
+  "AI": {
+    "core_title": "Apex AI Core",
+    "connecting": "Connecting..."
+  },
+  "Login": {
+    "title": "Welcome back",
+    "subtitle": "Enter your credentials to access the system",
+    "email_placeholder": "name@example.com",
+    "password_placeholder": "Enter your password",
+    "submit": "Sign In",
+    "loading": "Authenticating...",
+    "error": "Invalid credentials",
+    "no_account": "Don't have an account?",
+    "signup_link": "Sign up"
+  },
+  "Signup": {
+    "title": "Create Account",
+    "subtitle": "Join ApexOS to start trading",
+    "email_placeholder": "Email Address",
+    "password_placeholder": "Password (min 8 chars)",
+    "confirm_password_placeholder": "Confirm Password",
+    "submit": "Create Account",
+    "loading": "Creating Account...",
+    "success": "Account created! Redirecting...",
+    "error_match": "Passwords do not match",
+    "error_length": "Password must be at least 8 characters",
+    "has_account": "Already have an account?",
+    "login_link": "Sign In"
+  },
+  "Trade": {
+    "title": "Trading Terminal",
+    "subtitle": "Advanced Agentic Trading Interface",
+    "system_active": "SYSTEM ACTIVE",
+    "history_title": "Trade History",
+    "col_time": "Time",
+    "col_symbol": "Symbol",
+    "col_side": "Side",
+    "col_price": "Price",
+    "col_amount": "Amount",
+    "no_trades": "No trades found. Sync to populate.",
+    "market_status": "Market Status",
+    "volatility": "Volatility",
+    "spread": "Spread",
+    "agent_controls": "Agent Controls",
+    "risk_level": "Risk Level",
+    "risk_moderate": "Moderate",
+    "sync_button": "SYNC_TRADES",
+    "syncing": "SYNCING...",
+    "sync_success": "Sync triggered successfully",
+    "sync_fail": "Failed to trigger sync"
+  },
+  "Admin": {
+    "title": "APEX GOD MODE",
+    "subtitle": "System Administration Console",
+    "systemOperational": "System Operational",
+    "col_joined": "Joined",
+    "col_actions": "Actions",
+    "grant_founder": "Grant Founder",
+    "revoke_founder": "Revoke Founder",
+    "reconcile_all": "Reconcile All",
+    "calculate_rebates": "Calculate Rebates"
+  },
+  "Sidebar": {
+    "dashboard": "Dashboard",
+    "trade": "Trade",
+    "copy-trading": "Copy Trading",
+    "pnl": "PnL Tracker",
+    "wolfpack": "Wolf Pack",
+    "rebates": "Rebates",
+    "risk": "Risk Guardian",
+    "referrals": "Referrals",
+    "reports": "Reports",
+    "billing": "Payment",
+    "resources": "Resources",
+    "settings": "Settings",
+    "admin": "Admin Panel",
+    "logout": "Logout",
+    "platform": "Platform",
+    "upgrade_to_founders": "Upgrade to Founders",
+    "processing": "Processing...",
+    "welcome_founder": "Welcome Founder!",
+    "spots_left": "13/100 spots left • $99",
+    "loading_menu": "Loading menu...",
+    "signals": "AI Signals",
+    "marketplace": "Marketplace",
+    "wallet": "Wallet",
+    "studio": "Algo Studio",
+    "launchpad": "Launchpad",
+    "dao": "DAO Governance",
+    "affiliate": "Partner Program",
+    "rewards": "Rewards"
+  },
+  "Reports": {
+    "title": "Reports Center",
+    "generate_new": "Generate New Report",
+    "generating": "Generating...",
+    "founders_only_title": "Advanced Reports are Founders Only",
+    "founders_only_desc": "Free tier is limited to basic CSV exports. Upgrade to unlock:",
+    "feature_pdf": "Professional PDF performance reports",
+    "feature_tax": "Tax-compliant summary reports (IRS/ATO ready)",
+    "feature_excel": "Excel exports with pivot tables",
+    "feature_custom_date": "Custom date range selection",
+    "upgrade_button": "Upgrade to Unlock Premium Reports",
+    "quick_performance_title": "Performance Report",
+    "quick_performance_desc": "Detailed trading analysis with charts",
+    "quick_tax_title": "Tax Summary",
+    "quick_tax_desc": "IRS-compliant tax documentation",
+    "quick_fee_title": "Fee Breakdown",
+    "quick_fee_desc": "Complete fee audit trail",
+    "history_title": "Report History",
+    "col_id": "Report ID",
+    "col_type": "Type",
+    "col_period": "Period",
+    "col_generated": "Generated",
+    "col_format": "Format",
+    "col_action": "Action",
+    "founders_only_badge": "Founders Only",
+    "download": "Download",
+    "more_reports": "{count} more reports available for Founders members",
+    "demo_alert": "{type} report generated! (Demo mode)"
+  },
+  "PnL": {
+    "title": "PnL Tracking",
+    "subtitle": "Profit & Loss Analysis",
+    "7d": "7 Days",
+    "30d": "30 Days",
+    "90d": "90 Days",
+    "1y": "1 Year",
+    "error_loading": "Error loading PnL data",
+    "retry": "Retry",
+    "total_pnl": "Total PnL",
+    "win_rate": "Win Rate",
+    "total_trades": "Total Trades",
+    "chart_title": "PnL Over Time",
+    "breakdown_title": "Performance by Symbol",
+    "col_symbol": "Symbol",
+    "col_pnl": "PnL",
+    "col_trades": "Trades",
+    "col_win_rate": "Win Rate",
+    "best_performer": "Best Performer",
+    "worst_performer": "Worst Performer",
+    "no_trades_title": "No Trades Yet",
+    "no_trades_desc": "You haven't made any trades in this period."
+  },
+  "Rebates": {
+    "title": "Rebates",
+    "subtitle": "Earn & Withdraw",
+    "withdraw_btn": "Withdraw Funds",
+    "total_earned": "Total Rebates Earned",
+    "from_last_month": "from last month",
+    "available_balance": "Available Balance",
+    "ready_withdraw": "Ready to withdraw",
+    "calculator_title": "Quick Calculator",
+    "volume_label": "Volume (USD)",
+    "est_rebate": "Est. Rebate",
+    "chart_title": "Rebate Performance",
+    "recent_activity": "Recent Activity",
+    "view_all": "View All",
+    "col_date": "Date",
+    "col_exchange": "Exchange",
+    "col_trades": "Trades",
+    "col_amount": "Amount"
+  },
+  "Risk": {
+    "title": "Risk Management",
+    "subtitle": "Guardian Risk Monitor"
+  },
+  "WolfPack": {
+    "title": "Wolf Pack",
+    "subtitle": "Community & Collaboration"
+  },
+  "Referral": {
+    "title": "Referral Program",
+    "subtitle": "Invite & Earn Commission",
+    "your_link": "Your Referral Link",
+    "copy_link": "Copy Link",
+    "copied": "Copied!",
+    "your_code_label": "Your Code:",
+    "total_refs": "Total Referrals",
+    "total_commission": "Total Commission",
+    "this_month": "This Month",
+    "your_referrals": "Your Referrals",
+    "referee_id": "Referee ID",
+    "signup_date": "Signup Date",
+    "volume": "Volume",
+    "commission": "Commission",
+    "status": "Status",
+    "page_info": "Page {current} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "no_referrals_title": "No Referrals Yet",
+    "no_referrals_desc": "Share your link to start earning commissions!",
+    "how_it_works": "How It Works",
+    "step1_title": "Share Your Link",
+    "step1_desc": "Send your referral link to friends and colleagues.",
+    "step2_title": "They Sign Up",
+    "step2_desc": "Your referrals create an account and start trading.",
+    "step3_title": "You Earn 20%",
+    "step3_desc": "Earn 20% commission on their trading fees forever.",
+    "error_loading": "Error Loading Referral Data",
+    "retry": "Retry"
+  },
+  "Payment": {
+    "title": "Payment & Billing",
+    "subtitle": "Subscription Management"
+  },
+  "Settings": {
+    "title": "Settings",
+    "subtitle": "Account Configuration",
+    "tab_profile": "Profile",
+    "tab_connections": "Connections",
+    "tab_payment": "Payment Methods",
+    "tab_api_keys": "API Keys",
+    "tab_preferences": "Preferences",
+    "tab_security": "Security",
+    "profile_info": "Profile Information",
+    "display_name_label": "Display Name",
+    "email_label": "Email",
+    "save_changes": "Save Changes",
+    "saving": "Saving...",
+    "add_key": "Add Key",
+    "add_key_modal_title": "Add API Key",
+    "exchange": "Exchange",
+    "select_exchange": "Select Exchange",
+    "api_key_label": "API Key",
+    "api_key_placeholder": "Enter API Key",
+    "api_secret_label": "API Secret",
+    "api_secret_placeholder": "Enter API Secret",
+    "label_optional": "Label (Optional)",
+    "label_placeholder": "e.g. Trading Account",
+    "adding": "Adding...",
+    "cancel": "Cancel",
+    "no_keys": "No API keys added yet.",
+    "confirm_delete_key": "Are you sure you want to delete this API key?",
+    "email_notif": "Email Notifications",
+    "email_notif_desc": "Receive updates via email.",
+    "language": "Language",
+    "en": "English",
+    "vi": "Vietnamese",
+    "security_settings": "Security Settings",
+    "change_password": "Change Password",
+    "change_password_desc": "Update your account password.",
+    "2fa": "Two-Factor Authentication",
+    "2fa_desc": "Enable 2FA for enhanced security.",
+    "success_profile": "Profile updated successfully!",
+    "error_profile": "Failed to update profile.",
+    "success_key_add": "API Key added successfully!",
+    "error_key_add": "Failed to add API Key.",
+    "success_key_delete": "API Key deleted successfully!",
+    "error_key_delete": "Failed to delete API Key.",
+    "error_prefs": "Failed to update preferences."
+  },
+  "Resources": {
+    "title": "Resources",
+    "subtitle": "Knowledge Hub",
+    "searchPlaceholder": "Search resources...",
+    "categories": {
+      "gettingStarted": "Getting Started",
+      "tradingGuides": "Trading Guides",
+      "apiDocs": "API Documentation",
+      "community": "Community"
+    },
+    "items": {
+      "platform_overview": "Platform Overview",
+      "account_setup": "Account Setup",
+      "security_best_practices": "Security Best Practices",
+      "understanding_rebates": "Understanding Rebates",
+      "risk_management_101": "Risk Management 101",
+      "wolf_pack_strategies": "Wolf Pack Strategies",
+      "api_reference": "API Reference",
+      "websocket_streams": "WebSocket Streams",
+      "rate_limits": "Rate Limits",
+      "discord_server": "Discord Server",
+      "telegram_group": "Telegram Group",
+      "feature_requests": "Feature Requests"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "How are rebates calculated?",
+      "a1": "Rebates are calculated daily based on your trading volume and the specific tier rates of your connected exchanges. Payouts are processed automatically at the end of each month.",
+      "q2": "Is my API key secure?",
+      "a2": "Yes. We use industry-standard encryption (Fernet) to store your API keys. We never store your API secrets in plain text and only request read/trade permissions, never withdrawal permissions.",
+      "q3": "How do I upgrade my tier?",
+      "a3": "Tier upgrades are automatic based on your 30-day trading volume. You can check your current progress on the Dashboard overview page."
+    },
+    "support": {
+      "title": "Need more help?",
+      "subtitle": "Our support team is available 24/7 to assist you.",
+      "button": "Contact Support"
+    }
+  },
+  "Common": {
+    "loading": "Loading..."
+  },
+  "MFA": {
+    "title": "Two-Factor Authentication",
+    "subtitle": "Enter the code from your authenticator app",
+    "logging_in_as": "Logging in as",
+    "authenticator_tab": "Authenticator",
+    "recovery_tab": "Recovery Code",
+    "code_label": "6-Digit Code",
+    "recovery_label": "Recovery Code",
+    "placeholder_code": "000000",
+    "placeholder_recovery": "XXXX-XXXX",
+    "verify_button": "Verify & Login",
+    "verifying": "Verifying...",
+    "back_to_login": "Back to Login",
+    "error_invalid": "Please enter a valid code"
+  },
+  "AISignals": {
+    "title": "Alpha Intelligence",
+    "export_csv": "Export CSV",
+    "active_signals": "Active Signals",
+    "entry": "Entry",
+    "confidence": "Confidence",
+    "price_ai": "Price AI",
+    "sentiment": "Sentiment",
+    "vol_whale": "Vol & Whale",
+    "generated": "Generated",
+    "ago": "ago",
+    "no_signals_message": "No active signals matching your filters.",
+    "performance": "Performance",
+    "win_rate": "Win Rate",
+    "total_profit": "Total Profit",
+    "market_context": "Market Context"
+  },
+  "Landing": {
+    "hero": {
+      "title": "Stop Losing Money on Crypto Rebates",
+      "subtitle": "Track Every Rebate Automatically. Maximize your Profits.",
+      "cta": "Start Free Trial - No Credit Card Required",
+      "warning": "Warning: You are losing money RIGHT NOW",
+      "loss_label": "Average Monthly Loss Detected",
+      "no_card": "No credit card required"
+    },
+    "problem": {
+      "title": "Don't let manual tracking drain your alpha.",
+      "miss_deadlines": "Miss rebate deadlines",
+      "miss_deadlines_desc": "Rebate claims expire. If you forget to check one week, that money is gone forever.",
+      "lose_track": "Lose track across exchanges",
+      "lose_track_desc": "Logging into 5 exchanges, downloading CSVs, and reconciling manually takes 10+ hours.",
+      "no_visibility": "No visibility into what you're owed",
+      "no_visibility_desc": "Exchanges often \"forget\" to pay referral fees. Without tracking, you never know.",
+      "waste_hours": "Waste hours reconciling",
+      "loss_label": "Est. Loss"
+    },
+    "solution": {
+      "title": "ApexOS Auto-Pilot",
+      "auto_connect": "Auto-connects to your exchanges",
+      "real_time": "Tracks every rebate in real-time",
+      "shows_owed": "Shows exactly what you're owed",
+      "alerts": "Alerts you before deadlines",
+      "setup": "Setup in 3 minutes. Save money forever.",
+      "activate_cta": "Activate Auto-Pilot",
+      "total_recovered": "Total Recovered"
+    },
+    "testimonials": {
+      "title": "What Traders Say",
+      "subtitle": "Trusted by 2,000+ Pro Traders",
+      "quote1": "Saved $500 in first month. ApexOS paid for itself 10x over!",
+      "author1": "John D., Day Trader",
+      "quote2": "Finally I can see all my rebates in one place. Game changer.",
+      "author2": "Sarah M., Crypto Investor",
+      "quote3": "The ROI is insane. Why did I track this manually before?",
+      "author3": "Mike K., Algo Trader"
+    },
+    "features": {
+      "title": "Everything You Need",
+      "dashboard": "Multi-exchange dashboard",
+      "tracking": "Real-time rebate tracking",
+      "history": "Historical analysis",
+      "export": "Export reports",
+      "mobile": "Mobile app (coming soon)"
+    },
+    "pricing": {
+      "title": "Start free. Upgrade when you see the value.",
+      "cta": "Start Free Trial",
+      "no_card": "No credit card required. Cancel anytime."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "Is my data safe?",
+      "a1": "Bank-level encryption. We never access your funds.",
+      "q2": "Which exchanges do you support?",
+      "a2": "Binance, OKX, Bybit, Gate.io, and 10+ more.",
+      "q3": "What if I don't like it?",
+      "a3": "7-day money-back guarantee. No questions asked.",
+      "q4": "Do I need to give API access?",
+      "a4": "Only READ-ONLY access. We can't trade or withdraw."
+    }
+  },
+  "Pricing": {
+    "hero": {
+      "title": "Stop Losing Money on Crypto Rebates",
+      "subtitle": "Track every rebate automatically. Maximize your profits.",
+      "cta": "Start Free Trial - No Credit Card Required"
+    },
+    "calculator": {
+      "volume": "Monthly Volume",
+      "recovered": "Est. Rebates Recovered",
+      "claim": "Claim This"
+    },
+    "tiers": {
+      "free": {
+        "name": "FREE",
+        "price": "$0",
+        "period": "forever",
+        "features": [
+          "1 exchange",
+          "Basic tracking",
+          "7-day history"
+        ]
+      },
+      "basic": {
+        "name": "BASIC",
+        "price": "$29",
+        "period": "per month",
+        "annual_save": "Save $58",
+        "features": [
+          "3 exchanges",
+          "Full history",
+          "Export data",
+          "Email support"
+        ]
+      },
+      "trader": {
+        "name": "TRADER",
+        "price": "$97",
+        "period": "per month",
+        "badge": "MOST POPULAR",
+        "annual_save": "Save $194",
+        "features": [
+          "10 exchanges",
+          "Unlimited history",
+          "Advanced analytics",
+          "Priority support",
+          "Mobile app"
+        ]
+      },
+      "pro": {
+        "name": "PRO",
+        "price": "$297",
+        "period": "per month",
+        "annual_save": "Save $594",
+        "features": [
+          "Unlimited exchanges",
+          "API access",
+          "Custom reports",
+          "White-glove support",
+          "Early access to features"
+        ]
+      },
+      "elite": {
+        "name": "ELITE",
+        "price": "$997",
+        "period": "per month",
+        "annual_save": "Save $1,994",
+        "features": [
+          "Everything in PRO",
+          "Dedicated account manager",
+          "Custom integration",
+          "SLA guarantee",
+          "24/7 phone support"
+        ]
+      }
+    },
+    "trust": {
+      "users": "200+ traders already tracking rebates",
+      "savings": "Average user saves $500/month",
+      "guarantee": "7-day money-back guarantee"
+    },
+    "urgency": {
+      "limited": "First 100 users get LIFETIME 50% off",
+      "spots": "Only X spots left at this price"
+    }
+  },
+  "Offer": {
+    "limited_time": "Limited Time Offer",
+    "title": "Upgrade to",
+    "subtitle": "Unlock the full potential of your trading with AI-powered tools.",
+    "current_plan": "Current Plan",
+    "upgrade_now": "Upgrade Now"
+  }
+}

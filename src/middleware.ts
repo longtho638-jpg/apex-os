@@ -7,6 +7,7 @@ import { validateRequestSignature } from '@/middleware/signature';
 import { handleCsrf, injectCsrfToken } from '@/middleware/csrf';
 import { enterpriseAuthMiddleware } from '@/middleware/enterprise-auth';
 import { logger } from '@/lib/logger';
+import { locales, defaultLocale, isValidLocale } from '@/config/locales';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -17,11 +18,10 @@ const JWT_SECRET = new TextEncoder().encode(
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Initialize next-intl middleware
-const locales = ['en', 'vi', 'th', 'id', 'ko', 'ja', 'zh'];
+// Initialize next-intl middleware with centralized config
 const intlMiddleware = createMiddleware({
-  locales,
-  defaultLocale: 'en',
+  locales: [...locales],
+  defaultLocale,
   localePrefix: 'always'
 });
 
@@ -217,9 +217,8 @@ export async function middleware(request: NextRequest) {
     logger.debug('[i18n Debug] Processing path:', { path: request.nextUrl.pathname });
 
     // Check if path already has a locale prefix
-    const supportedLocales = locales;
     const pathSegments = request.nextUrl.pathname.split('/').filter(Boolean);
-    const hasLocalePrefix = pathSegments.length > 0 && supportedLocales.includes(pathSegments[0]);
+    const hasLocalePrefix = pathSegments.length > 0 && isValidLocale(pathSegments[0]);
 
     logger.debug('[i18n Debug] Path info:', { segments: pathSegments, hasPrefix: hasLocalePrefix });
 
