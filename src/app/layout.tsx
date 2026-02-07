@@ -58,6 +58,8 @@ export const metadata: Metadata = {
 
 import { TelegramProvider } from '@/components/providers/TelegramProvider';
 import { Web3Provider } from '@/components/providers/Web3Provider';
+import { LazyMotionProvider } from '@/components/motion/lazy-motion-provider';
+import { PageTransition } from '@/components/motion/page-transition';
 
 // ... imports
 
@@ -76,7 +78,11 @@ export default function RootLayout({
                 <Web3Provider>
                     <ClientOnly>
                         <TelegramProvider>
-                            {children}
+                            <LazyMotionProvider>
+                                <PageTransition>
+                                    {children}
+                                </PageTransition>
+                            </LazyMotionProvider>
                         </TelegramProvider>
                     </ClientOnly>
                 </Web3Provider>
