@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import "../globals.css";
 import { Toaster } from 'sonner';
 import { NotificationsProvider } from '@/components/providers/NotificationsProvider';
+import { PageTransition } from '@/components/ui/page-transition';
 import { locales, isValidLocale } from '@/config/locales';
 
 const geistSans = Geist({
@@ -47,7 +48,9 @@ async function ApexLayout({ children, params }: Props) {
             <WagmiProvider>
                 <AuthProvider>
                     <NotificationsProvider>
-                        {children}
+                        <PageTransition>
+                            {children}
+                        </PageTransition>
                         <Toaster position="top-center" richColors theme="dark" />
                     </NotificationsProvider>
                 </AuthProvider>
