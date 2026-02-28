@@ -26,8 +26,8 @@ export async function GET(req: NextRequest) {
 
     const { data: churnedUsers } = await supabase
       .from('users')
-      .select('id, email, name, subscription_tier')
-      .eq('subscription_status', 'canceled')
+      .select('id, email, name')
+      .eq('status', 'inactive')
       .gte('canceled_at', `${targetDateStr}T00:00:00`)
       .lt('canceled_at', `${targetDateStr}T23:59:59`);
 

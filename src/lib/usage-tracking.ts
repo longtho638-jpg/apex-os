@@ -11,41 +11,32 @@ async function trackEvent(params: any) {
 
 export const usageTracker = {
   /**
-   * Track usage of a paid feature (e.g. signal)
-   * If user is on Pay-Per-Signal tier, this creates a charge.
+   * Track signal usage — RaaS model: signals included in tier, tracked for analytics
    */
   trackSignalUsage: async (userId: string, signalId: string) => {
     const supabase = getSupabaseClient();
 
-    // Check user tier
-    const { data: user } = await supabase
-      .from('users')
-      .select('subscription_tier')
-      .eq('id', userId)
+    // Check user tier for AI request limits
+    const { data: tierData } = await supabase
+      .from('user_tiers')
+      .select('tier')
+      .eq('user_id', userId)
       .single();
 
-    if (user?.subscription_tier === 'PAY_PER_SIGNAL' || user?.subscription_tier === 'pay_per_signal') {
-      // Create a charge
-      const { error } = await supabase.from('usage_charges').insert({
-        user_id: userId,
-        charge_type: 'signal_used',
-        amount: 5.0,
-        signal_id: signalId,
-        charged_at: new Date().toISOString(),
-      });
+    // Log usage for analytics (RaaS: no per-signal charges)
+    await supabase.from('usage_charges').insert({
+      user_id: userId,
+      charge_type: 'signal_used',
+      amount: 0,
+      signal_id: signalId,
+      charged_at: new Date().toISOString(),
+    });
 
-      if (error) {
-          logger.error('Failed to create usage charge:', error);
-          return;
-      }
-
-      // Track event
-      await trackEvent({
-        event_name: 'usage_charge_created',
-        user_id: userId,
-        metadata: { amount: 5, type: 'signal', signalId },
-      });
-    }
+    await trackEvent({
+      event_name: 'signal_used',
+      user_id: userId,
+      metadata: { tier: tierData?.tier || 'EXPLORER', signalId },
+    });
   },
 
   /**

@@ -1,39 +1,35 @@
 /**
- * Billing/Payment API client and TypeScript types
+ * RaaS Billing API — zero subscription, volume-based tiers
  */
 
 import { get } from './client';
 import { TierId } from '@/config/unified-tiers';
 
-export interface SubscriptionInfo {
+export interface RaaSBillingInfo {
     current_tier: TierId;
-    plan_name: string;
-    price: number;
-    billing_cycle: 'monthly' | 'yearly';
-    next_billing_date: string;
+    tier_name: string;
+    monthly_volume: number;
+    spread_rate: number;
+    self_rebate_rate: number;
+    agent_slots: number;
+    volume_to_next_tier: number;
     features: string[];
-    usage: {
-        api_calls: number;
-        api_limit: number;
-        storage_gb: number;
-        storage_limit: number;
-    };
-    payment_history: Array<{
+    earning_history: Array<{
         date: string;
         amount: number;
-        status: 'completed' | 'pending' | 'failed';
+        type: 'self_rebate' | 'referral_l1' | 'referral_l2' | 'referral_l3' | 'referral_l4';
         description: string;
     }>;
 }
 
 /**
- * Fetch subscription and billing information
+ * Fetch RaaS billing and tier information
  */
-export async function fetchSubscriptionInfo(
+export async function fetchBillingInfo(
     userId: string,
     token?: string
-): Promise<SubscriptionInfo> {
-    return get<SubscriptionInfo>('/billing/subscription', {
+): Promise<RaaSBillingInfo> {
+    return get<RaaSBillingInfo>('/billing/tier-info', {
         params: { user_id: userId },
         token,
     });

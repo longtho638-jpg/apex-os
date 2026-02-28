@@ -1,310 +1,310 @@
 /**
- * UNIFIED PRICING TIERS - SINGLE SOURCE OF TRUTH
- * 
- * STRATEGY: VIRAL 4-LEVEL "GOLDEN HANDCUFFS"
- * 
- * Logic:
- * - Base tiers (FREE) get a taste of L1 commission to incentivize sharing.
- * - Middle tiers (PRO, TRADER) unlock deeper levels (L2, L3).
- * - Top tiers (ELITE, WHALE) unlock full depth (L4) and maximum Self-Rebate.
- * 
- * This structure creates a "Lock-in" effect where leaders MUST maintain 
- * their subscription to keep earning from their deep downline.
+ * UNIFIED TIERS — RaaS AGI MODEL (Revenue-as-a-Service)
+ *
+ * PARADIGM SHIFT: Zero subscription fees. Revenue from exchange spread.
+ *
+ * How it works:
+ * 1. Users trade for FREE — no monthly/annual subscription
+ * 2. Apex earns from exchange spread (0.05% - 0.3% per trade)
+ * 3. Users earn rebates on THEIR OWN spread (self-rebate)
+ * 4. Referral commissions paid from Apex's spread share
+ * 5. Higher volume = higher tier (auto-upgrade via agentic system)
+ *
+ * Tier progression is VOLUME-BASED, not payment-based:
+ * - EXPLORER: 0 - $10K monthly volume
+ * - OPERATOR: $10K - $100K monthly volume
+ * - ARCHITECT: $100K - $1M monthly volume
+ * - SOVEREIGN: $1M+ monthly volume
  */
 
+export const RAAS_CONFIG = {
+  /** Base exchange spread Apex charges on every trade */
+  baseSpreadBps: 30, // 0.30% (30 basis points)
+  /** Minimum spread (floor) */
+  minSpreadBps: 5, // 0.05%
+  /** Crypto payment gate supported chains */
+  cryptoGate: {
+    chains: ['ethereum', 'bsc', 'polygon', 'solana', 'tron'] as const,
+    stablecoins: ['USDT', 'USDC', 'DAI', 'BUSD'] as const,
+    nativeTokens: ['ETH', 'BNB', 'SOL', 'MATIC', 'TRX'] as const,
+    settlementTime: '< 30s',
+  },
+  /** Agentic onboarding config */
+  agenticOnboarding: {
+    steps: ['profile', 'risk-assessment', 'agent-config', 'funding'] as const,
+    autoTierDetection: true,
+    aiRiskProfiling: true,
+  },
+  /** Multi-org config */
+  multiOrg: {
+    enabled: true,
+    maxOrgsPerUser: 5,
+    volumePooling: true, // Org members' volume contributes to org tier
+    sharedAgents: true, // Org members can share agent slots
+  },
+} as const;
+
 export const UNIFIED_TIERS = {
-    FREE: {
-        id: 'FREE',
-        name: 'Free',
-        price: 0,
-        monthlyPrice: 0,
-        annualPrice: 0,
-        currency: 'USD',
+  EXPLORER: {
+    id: 'EXPLORER',
+    name: 'Explorer',
+    price: 0,
+    monthlyPrice: 0,
+    annualPrice: 0,
+    currency: 'USD',
 
-        // AI Limits
-        aiRequestsPerDay: 10,
-        tradingSignalsPerMonth: 3,
+    // Volume threshold for auto-upgrade
+    volumeThreshold: 0, // Entry level
+    monthlyVolumeMax: 10_000, // Up to $10K/mo
 
-        // FINANCIAL ENGINE (The Hook)
-        selfRebateRate: 0.05, // 5% of Apex share returned to user
-        commissionRates: {
-            l1: 0.10,    // 10% direct referrals (Teaser)
-            l2: 0,       // Locked
-            l3: 0,       // Locked
-            l4: 0,       // Locked
-            total: 0.15, // Total Payout
-        },
+    // AI Limits
+    aiRequestsPerDay: 25,
+    tradingSignalsPerMonth: 10,
 
-        // Features
-        features: [
-            'Basic trading features',
-            '10 AI requests per day',
-            '3 trading signals per month',
-            'Earn 10% commission on referrals',
-            '5% Self-Rebate on trades',
-        ],
-
-        polar: null,
-        nowPayments: null,
+    // RaaS FINANCIAL ENGINE
+    spreadBps: 30, // 0.30% spread
+    selfRebateRate: 0.10, // 10% of spread returned
+    commissionRates: {
+      l1: 0.10,
+      l2: 0,
+      l3: 0,
+      l4: 0,
+      total: 0.20,
     },
 
-    PRO: {
-        id: 'PRO',
-        name: 'Pro',
-        price: 29,
-        monthlyPrice: 29,
-        annualPrice: 290,
-        currency: 'USD',
+    // Agent allocation
+    agentSlots: 1, // 1 trading agent
+    agentTypes: ['signal-follower'] as const,
 
-        // AI Limits
-        aiRequestsPerDay: 100,
-        tradingSignalsPerMonth: Infinity,
+    features: [
+      'Zero trading fees — spread only (0.3%)',
+      '25 AI requests per day',
+      '10 trading signals per month',
+      '1 AI trading agent',
+      '10% spread rebate on your trades',
+      'Earn 10% referral commission',
+      'Crypto deposits & withdrawals',
+    ],
 
-        // FINANCIAL ENGINE (The Builder)
-        selfRebateRate: 0.10, // 10% Self-Rebate
-        commissionRates: {
-            l1: 0.20,   // 20% direct (Double the Free tier)
-            l2: 0.05,   // Unlocks Level 2
-            l3: 0,      // Locked
-            l4: 0,      // Locked
-            total: 0.35
-        },
+    polar: null,
+    nowPayments: null,
+  },
 
-        features: [
-            '🚀 100 AI requests per day',
-            '✨ Unlimited trading signals',
-            '🔓 Unlocks Level 2 Commissions',
-            '💰 10% Self-Rebate',
-            '📊 Advanced technical analysis',
-            '🔔 Real-time price alerts',
-            '📱 Mobile app access',
-        ],
+  OPERATOR: {
+    id: 'OPERATOR',
+    name: 'Operator',
+    price: 0,
+    monthlyPrice: 0,
+    annualPrice: 0,
+    currency: 'USD',
 
-        highlight: 'Starter',
+    volumeThreshold: 10_000,
+    monthlyVolumeMax: 100_000,
 
-        polar: {
-            productPriceId: process.env.POLAR_PRO_PRICE_ID || 'price_pro_monthly',
-        },
-        nowPayments: {
-            price_amount: 29,
-            price_currency: 'usd',
-            cryptoDiscount: 10,
-        },
+    aiRequestsPerDay: 200,
+    tradingSignalsPerMonth: Infinity,
+
+    // Tighter spread for higher volume
+    spreadBps: 20, // 0.20%
+    selfRebateRate: 0.20,
+    commissionRates: {
+      l1: 0.20,
+      l2: 0.05,
+      l3: 0,
+      l4: 0,
+      total: 0.45,
     },
 
-    TRADER: {
-        id: 'TRADER',
-        name: 'Trader',
-        price: 97,
-        monthlyPrice: 97,
-        annualPrice: 970,
-        currency: 'USD',
+    agentSlots: 3,
+    agentTypes: ['signal-follower', 'dca-bot', 'grid-trader'] as const,
 
-        // AI Limits
-        aiRequestsPerDay: 500,
-        tradingSignalsPerMonth: Infinity,
+    features: [
+      'Reduced spread (0.2%)',
+      '200 AI requests per day',
+      'Unlimited trading signals',
+      '3 AI trading agents',
+      '20% spread rebate',
+      'Level 2 referral commissions',
+      'Advanced technical analysis',
+      'Real-time price alerts',
+    ],
 
-        // FINANCIAL ENGINE (The Sweet Spot)
-        selfRebateRate: 0.20, // 20% Self-Rebate
-        commissionRates: {
-            l1: 0.25,   // 25% Direct
-            l2: 0.10,   // 10% L2
-            l3: 0.05,   // Unlocks Level 3
-            l4: 0,      // Locked
-            total: 0.60
-        },
+    highlight: 'Auto-Unlock',
 
-        features: [
-            '⚡ 500 AI requests per day',
-            '🔓 Unlocks Level 3 Commissions',
-            '💰 20% Self-Rebate (Double Pro)',
-            '🧠 DeepQuant Neural Core',
-            '🤖 AI-powered auto-trading',
-            '🔥 Copy trading from top traders',
-            '💎 Exclusive trading strategies',
-            '⏰ Instant support (1h response)',
-        ],
+    polar: null,
+    nowPayments: null,
+  },
 
-        highlight: 'Best Value',
+  ARCHITECT: {
+    id: 'ARCHITECT',
+    name: 'Architect',
+    price: 0,
+    monthlyPrice: 0,
+    annualPrice: 0,
+    currency: 'USD',
 
-        polar: {
-            productPriceId: process.env.POLAR_TRADER_PRICE_ID || 'price_trader_monthly',
-        },
-        nowPayments: {
-            price_amount: 97,
-            price_currency: 'usd',
-            cryptoDiscount: 15,
-        },
+    volumeThreshold: 100_000,
+    monthlyVolumeMax: 1_000_000,
+
+    aiRequestsPerDay: 1000,
+    tradingSignalsPerMonth: Infinity,
+
+    spreadBps: 12, // 0.12%
+    selfRebateRate: 0.30,
+    commissionRates: {
+      l1: 0.25,
+      l2: 0.10,
+      l3: 0.05,
+      l4: 0,
+      total: 0.70,
     },
 
-    ELITE: {
-        id: 'ELITE',
-        name: 'Elite',
-        price: 297,
-        monthlyPrice: 297,
-        annualPrice: 2970,
-        currency: 'USD',
+    agentSlots: 7,
+    agentTypes: ['signal-follower', 'dca-bot', 'grid-trader', 'arbitrage', 'copy-leader', 'market-maker', 'portfolio-rebalancer'] as const,
 
-        // AI Limits
-        aiRequestsPerDay: Infinity,
-        tradingSignalsPerMonth: Infinity,
+    features: [
+      'Low spread (0.12%)',
+      '1,000 AI requests per day',
+      '7 AI trading agents',
+      '30% spread rebate',
+      'Level 3 referral commissions',
+      'DeepQuant Neural Core',
+      'AI-powered auto-trading',
+      'Copy trading leader status',
+    ],
 
-        // FINANCIAL ENGINE (The Leader)
-        selfRebateRate: 0.30, // 30% Self-Rebate
-        commissionRates: {
-            l1: 0.30,   // 30% Direct
-            l2: 0.15,   // 15% L2
-            l3: 0.10,   // 10% L3
-            l4: 0.05,   // Unlocks Level 4 (Full Depth)
-            total: 0.90 // High payout to attract leaders
-        },
+    highlight: 'Best Value',
 
-        features: [
-            '♾️ Unlimited AI requests',
-            '👑 Unlocks Full Level 4 Commissions',
-            '💰 30% Self-Rebate',
-            '🧠 Real-time DeepQuant Signals',
-            '🏆 Dedicated account manager',
-            '🔐 Private trading signals',
-            '🎯 Custom AI models',
-            '🌟 VIP community access',
-        ],
+    polar: null,
+    nowPayments: null,
+  },
 
-        highlight: 'For Leaders',
+  SOVEREIGN: {
+    id: 'SOVEREIGN',
+    name: 'Sovereign',
+    price: 0,
+    monthlyPrice: 0,
+    annualPrice: 0,
+    currency: 'USD',
 
-        polar: {
-            productPriceId: process.env.POLAR_ELITE_PRICE_ID || 'price_elite_monthly',
-        },
-        nowPayments: {
-            price_amount: 297,
-            price_currency: 'usd',
-            cryptoDiscount: 20,
-        },
+    volumeThreshold: 1_000_000,
+    monthlyVolumeMax: Infinity,
+
+    aiRequestsPerDay: Infinity,
+    tradingSignalsPerMonth: Infinity,
+
+    spreadBps: 5, // 0.05% — near-zero
+    selfRebateRate: 0.50, // 50% of spread back
+    commissionRates: {
+      l1: 0.30,
+      l2: 0.15,
+      l3: 0.10,
+      l4: 0.05,
+      total: 1.10, // Burn strategy for growth
     },
 
-    WHALE: {
-        id: 'WHALE',
-        name: 'Whale',
-        price: 997,
-        monthlyPrice: 997,
-        annualPrice: 9997,
-        currency: 'USD',
+    agentSlots: Infinity,
+    agentTypes: ['signal-follower', 'dca-bot', 'grid-trader', 'arbitrage', 'copy-leader', 'market-maker', 'portfolio-rebalancer', 'custom-strategy'] as const,
 
-        // AI Limits
-        aiRequestsPerDay: Infinity,
-        tradingSignalsPerMonth: Infinity,
+    features: [
+      'Near-zero spread (0.05%)',
+      'Unlimited AI requests & agents',
+      '50% spread rebate',
+      'Full Level 4 commissions',
+      'Custom AI models',
+      'White-label exchange',
+      'Governance voting power',
+      'Direct access to core team',
+    ],
 
-        // FINANCIAL ENGINE (God Mode)
-        selfRebateRate: 0.35, // 35% Self-Rebate
-        commissionRates: {
-            l1: 0.35,   // 35% Direct
-            l2: 0.20,   // 20% L2
-            l3: 0.15,   // 15% L3
-            l4: 0.10,   // 10% L4
-            total: 1.15 // Burn Strategy: We pay out > 100% of our share to grow fast
-        },
+    highlight: 'Legendary',
 
-        features: [
-            '👑 GOD MODE ACCESS',
-            '💰 Max Comms & Rebates',
-            '🏛️ Governance Voting Power (10x)',
-            '🤝 Direct Access to Core Team',
-            '💼 White Label Solutions',
-            '🌐 Global Partner Status',
-            '🔑 API Limit Bypass',
-        ],
-
-        highlight: 'Legendary',
-
-        polar: null,
-        nowPayments: null,
-    },
-
-    PAY_PER_SIGNAL: {
-        id: 'PAY_PER_SIGNAL',
-        name: 'Pay Per Signal',
-        price: 0,
-        monthlyPrice: 0,
-        annualPrice: 0,
-        currency: 'USD',
-        pricePerSignal: 5,
-
-        aiRequestsPerDay: 10,
-        tradingSignalsPerMonth: Infinity,
-
-        selfRebateRate: 0,
-        commissionRates: {
-            l1: 0, l2: 0, l3: 0, l4: 0, total: 0
-        },
-
-        features: [
-            'No monthly commitment',
-            'Pay only $5 per signal used',
-            'Access to all signal types',
-            'Cancel anytime',
-            'Perfect for casual traders'
-        ],
-
-        highlight: 'Flexible',
-        polar: null,
-        nowPayments: null,
-    },
+    polar: null,
+    nowPayments: null,
+  },
 } as const;
 
 // Type exports
 export type TierId = keyof typeof UNIFIED_TIERS;
+export type LegacyTierId = 'FREE' | 'PRO' | 'TRADER' | 'ELITE' | 'WHALE' | 'PAY_PER_SIGNAL';
+export type AnyTierId = TierId | LegacyTierId;
 export type UnifiedTier = typeof UNIFIED_TIERS[TierId];
 
-// Backward compatibility aliases
+// Legacy compatibility — map old names to new
 export const PAYMENT_TIERS = {
-    FREE: UNIFIED_TIERS.FREE,
-    FOUNDERS: UNIFIED_TIERS.WHALE,
-    PREMIUM: UNIFIED_TIERS.TRADER,
-    PAY_PER_SIGNAL: UNIFIED_TIERS.PAY_PER_SIGNAL
+  FREE: UNIFIED_TIERS.EXPLORER,
+  FOUNDERS: UNIFIED_TIERS.SOVEREIGN,
+  PREMIUM: UNIFIED_TIERS.ARCHITECT,
+  PAY_PER_SIGNAL: UNIFIED_TIERS.EXPLORER,
 } as const;
 
 export type PaymentTier = keyof typeof PAYMENT_TIERS;
 
 // Helper functions
 export function getTierById(tierId: string): UnifiedTier | null {
-    const normalized = tierId.toUpperCase();
+  const normalized = tierId.toUpperCase();
 
-    // Check main tiers (TierId)
-    if (normalized in UNIFIED_TIERS) {
-        return UNIFIED_TIERS[normalized as TierId];
-    }
+  if (normalized in UNIFIED_TIERS) {
+    return UNIFIED_TIERS[normalized as TierId];
+  }
 
-    // Check legacy aliases (PaymentTier)
-    if (normalized in PAYMENT_TIERS) {
-        return PAYMENT_TIERS[normalized as keyof typeof PAYMENT_TIERS];
-    }
+  if (normalized in PAYMENT_TIERS) {
+    return PAYMENT_TIERS[normalized as keyof typeof PAYMENT_TIERS];
+  }
 
-    return null;
+  // Legacy tier name mapping (backward compatibility)
+  const legacyMap: Record<string, TierId> = {
+    PRO: 'OPERATOR',
+    TRADER: 'ARCHITECT',
+    ELITE: 'SOVEREIGN',
+    WHALE: 'SOVEREIGN',
+  };
+
+  if (normalized in legacyMap) {
+    return UNIFIED_TIERS[legacyMap[normalized]];
+  }
+
+  return null;
 }
 
-export function getTierPrice(tierId: TierId, billingPeriod: 'monthly' | 'annual' = 'monthly'): number {
-    const tier = UNIFIED_TIERS[tierId];
-    return billingPeriod === 'annual' ? tier.annualPrice : tier.monthlyPrice;
+export function getTierPrice(_tierId: TierId, _billingPeriod: 'monthly' | 'annual' = 'monthly'): number {
+  return 0; // RaaS = zero subscription fees
 }
 
 export function getCommissionRate(tierId: TierId, level: 1 | 2 | 3 | 4): number {
-    const tier = UNIFIED_TIERS[tierId];
-    const key = `l${level}` as keyof typeof tier.commissionRates;
-    return tier.commissionRates[key];
+  const tier = UNIFIED_TIERS[tierId];
+  const key = `l${level}` as keyof typeof tier.commissionRates;
+  return tier.commissionRates[key];
 }
 
 export function getSelfRebateRate(tierId: TierId): number {
-    return UNIFIED_TIERS[tierId].selfRebateRate || 0;
+  return UNIFIED_TIERS[tierId].selfRebateRate || 0;
+}
+
+export function getSpreadBps(tierId: TierId): number {
+  return UNIFIED_TIERS[tierId].spreadBps;
 }
 
 export function getAILimit(tierId: TierId): number {
-    return UNIFIED_TIERS[tierId].aiRequestsPerDay;
+  return UNIFIED_TIERS[tierId].aiRequestsPerDay;
 }
 
-export const TIER_ORDER: TierId[] = ['FREE', 'PRO', 'TRADER', 'ELITE', 'WHALE'];
+export function getAgentSlots(tierId: TierId): number {
+  return UNIFIED_TIERS[tierId].agentSlots;
+}
+
+/** Determine tier based on 30-day trading volume */
+export function getTierByVolume(monthlyVolume: number): TierId {
+  if (monthlyVolume >= 1_000_000) return 'SOVEREIGN';
+  if (monthlyVolume >= 100_000) return 'ARCHITECT';
+  if (monthlyVolume >= 10_000) return 'OPERATOR';
+  return 'EXPLORER';
+}
+
+export const TIER_ORDER: TierId[] = ['EXPLORER', 'OPERATOR', 'ARCHITECT', 'SOVEREIGN'];
 
 export function canUpgrade(currentTier: TierId, targetTier: TierId): boolean {
-    const currentIndex = TIER_ORDER.indexOf(currentTier);
-    const targetIndex = TIER_ORDER.indexOf(targetTier);
-    return targetIndex > currentIndex;
+  const currentIndex = TIER_ORDER.indexOf(currentTier);
+  const targetIndex = TIER_ORDER.indexOf(targetTier);
+  return targetIndex > currentIndex;
 }

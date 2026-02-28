@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     .from('users')
     .select('id, email, name')
     .lt('created_at', sevenDaysAgo.toISOString())
-    .eq('subscription_status', 'active')
+    .eq('status', 'active')
     .limit(50); // Batch limit
 
   let emailsSent = 0;
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
             subject: '💰 Earn 30% Commission - Share ApexOS',
             html: `
                     <h1>Want to trade for free?</h1>
-                    <p>Invite just 3 friends and your subscription pays for itself.</p>
+                    <p>Invite 3 friends and earn up to 30% commission on their trading volume.</p>
                     <p>Your referral link: https://apexrebate.com/r/${code}</p>
                     <a href="https://apexrebate.com/dashboard/referrals">Go to Referral Dashboard</a>
                 `

@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchSubscriptionInfo, SubscriptionInfo } from '@/lib/api/billing';
+import { fetchBillingInfo, RaaSBillingInfo } from '@/lib/api/billing';
 
 interface UseSubscriptionResult {
-    data: SubscriptionInfo | null;
+    data: RaaSBillingInfo | null;
     loading: boolean;
     error: Error | null;
     refetch: () => void;
 }
 
 /**
- * Hook to fetch subscription/billing information
+ * Hook to fetch RaaS billing/tier information
  */
 export function useSubscription(): UseSubscriptionResult {
     const { user, token } = useAuth();
-    const [data, setData] = useState<SubscriptionInfo | null>(null);
+    const [data, setData] = useState<RaaSBillingInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
@@ -29,7 +29,7 @@ export function useSubscription(): UseSubscriptionResult {
         try {
             setLoading(true);
             setError(null);
-            const info = await fetchSubscriptionInfo(user.id, token);
+            const info = await fetchBillingInfo(user.id, token);
             setData(info);
         } catch (err) {
             setError(err as Error);

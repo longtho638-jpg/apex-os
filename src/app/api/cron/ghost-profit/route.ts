@@ -13,14 +13,8 @@ export async function GET(request: NextRequest) {
 
         const supabase = getSupabaseClient();
 
-        // 1. Get all "Free" users (Larva Stage)
-        // Assuming 'tier' is stored in profiles or we check subscription status.
-        // For MVP, we'll just check all users who are not 'pro'.
-        // We need to fetch users from our database.
-        // Since we don't have a 'profiles' table with tier clearly defined in the snippets,
-        // we will assume we can query crm_pipelines where stage is 'LEAD_WARM' or similar.
-
-        // Let's fetch from crm_pipelines where stage is NOT 'CUSTOMER_VIP' or 'CUSTOMER_PRO'
+        // 1. Get Explorer-tier users (lowest volume tier) for ghost-profit nudge
+        // Query CRM pipelines for users not yet at high-volume tiers
         const { data: pipelines, error } = await supabase
             .from('crm_pipelines')
             .select('user_id, metadata')

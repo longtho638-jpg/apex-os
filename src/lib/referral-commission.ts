@@ -2,15 +2,12 @@ import 'server-only';
 import { getSupabaseClient } from '@/lib/supabase';
 import { TierId } from '@/config/unified-tiers';
 
-// Simplified tiered commission structure
-// L1 = Direct Referral
+// RaaS commission structure — L1 = Direct Referral
 const COMMISSION_RATES: Record<TierId, number> = {
-  'FREE': 0,
-  'PRO': 0.20,    // 20%
-  'TRADER': 0.25, // 25%
-  'ELITE': 0.30,  // 30%
-  'WHALE': 0.40,  // 40%
-  'PAY_PER_SIGNAL': 0
+  'EXPLORER': 0.10,   // 10%
+  'OPERATOR': 0.20,   // 20%
+  'ARCHITECT': 0.25,  // 25%
+  'SOVEREIGN': 0.30,  // 30%
 };
 
 function getCommissionRate(tier: TierId): number {
@@ -19,38 +16,38 @@ function getCommissionRate(tier: TierId): number {
 
 export async function calculateCommission(
   referredUserId: string,
-  subscriptionAmount: number
+  tradeRevenue: number
 ) {
   const supabase = getSupabaseClient();
 
   // 1. Find direct referrer via conversion table
   const { data: conversion } = await supabase
     .from('referral_conversions')
-    .select('*, referrer:referrer_id(subscription_tier)') // Join manually if needed or fetch separate
+    .select('*')
     .eq('referred_user_id', referredUserId)
     .single();
 
   if (!conversion) return null;
 
-  // Fetch referrer tier separately if join syntax varies or simple relation
-  const { data: referrerUser } = await supabase
-    .from('users')
-    .select('subscription_tier')
-    .eq('id', conversion.referrer_id)
+  // Fetch referrer tier (RaaS volume-based)
+  const { data: referrerTier } = await supabase
+    .from('user_tiers')
+    .select('tier')
+    .eq('user_id', conversion.referrer_id)
     .single();
 
-  const referrerTier = (referrerUser?.subscription_tier || 'FREE').toUpperCase() as TierId;
+  const tier = (referrerTier?.tier || 'EXPLORER').toUpperCase() as TierId;
 
-  // 2. Calculate L1 Commission
-  const rate = getCommissionRate(referrerTier);
-  const commissionAmount = subscriptionAmount * rate;
+  // 2. Calculate L1 Commission from trade revenue (spread-based)
+  const rate = getCommissionRate(tier);
+  const commissionAmount = tradeRevenue * rate;
 
   // 3. Update conversion record
   if (commissionAmount > 0) {
     await supabase
       .from('referral_conversions')
       .update({
-        subscription_revenue: subscriptionAmount,
+        trade_revenue: tradeRevenue,
         commission_amount: commissionAmount,
       })
       .eq('id', conversion.id);
