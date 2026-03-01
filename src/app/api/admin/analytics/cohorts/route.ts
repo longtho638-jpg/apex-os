@@ -8,7 +8,8 @@ interface CohortData {
   day1_active: number;
   day7_active: number;
   day30_active: number;
-  revenue: number;
+  spread_revenue: number;
+  total_volume: number;
   day1_retention?: string;
   day7_retention?: string;
   day30_retention?: string;
@@ -28,9 +29,10 @@ export async function GET() {
 
   // Get all users with signup date
   // Note: Assuming 'users' table exists and syncs with auth.users or is the main user profile table
+  // RaaS: Cohort analytics by volume, not subscription price
   const { data: users, error } = await supabase
     .from('users')
-    .select('id, created_at, subscription_tier, subscription_price')
+    .select('id, created_at, subscription_tier, monthly_volume')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -56,17 +58,19 @@ export async function GET() {
         day1_active: 0,
         day7_active: 0,
         day30_active: 0,
-        revenue: 0,
+        spread_revenue: 0,
+        total_volume: 0,
       });
     }
 
     const cohort = cohorts.get(weekKey)!;
     cohort.signups++;
-    
-    // Revenue aggregation
-    if (user.subscription_price) {
-      cohort.revenue += parseFloat(user.subscription_price.toString());
-    }
+
+    // RaaS: Aggregate trading volume and estimate spread revenue
+    const volume = parseFloat((user.monthly_volume || 0).toString());
+    cohort.total_volume += volume;
+    // Estimate spread revenue at avg 20bps
+    cohort.spread_revenue += volume * 0.002;
     
     // Simplified retention simulation for demonstration
     // In production, perform a join with analytics_events

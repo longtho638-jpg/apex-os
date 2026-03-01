@@ -9,11 +9,15 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { DollarSign, Users, Activity, TrendingUp } from 'lucide-react';
 
 interface RevenueMetrics {
-  mrr: number;
-  arr: number;
-  churnRate: number;
-  ltv: number;
-  activeSubscribers: number;
+  totalVolume30d: number;
+  grossSpreadRevenue: number;
+  netRevenue: number;
+  monthlyRunRate: number;
+  annualRunRate: number;
+  activeTraders: number;
+  arpt: number;
+  revenuePerMillion: number;
+  avgSpreadBps: number;
 }
 
 interface FunnelStep {
@@ -68,50 +72,50 @@ export default function AnalyticsDashboard() {
             <p className="text-zinc-400">Real-time revenue and conversion tracking</p>
           </header>
 
-          {/* Revenue Metrics */}
+          {/* RaaS Revenue Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <GlassCard className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-zinc-400 text-sm">MRR</p>
-                  <h3 className="text-2xl font-bold text-emerald-400">${metrics?.mrr.toLocaleString()}</h3>
+                  <p className="text-zinc-400 text-sm">Net Revenue</p>
+                  <h3 className="text-2xl font-bold text-emerald-400">${metrics?.netRevenue.toLocaleString()}</h3>
                 </div>
                 <DollarSign className="w-6 h-6 text-emerald-500" />
               </div>
-              <p className="text-xs text-zinc-500">Monthly Recurring Revenue</p>
+              <p className="text-xs text-zinc-500">30-Day Spread Revenue (Net)</p>
             </GlassCard>
 
             <GlassCard className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-zinc-400 text-sm">ARR</p>
-                  <h3 className="text-2xl font-bold text-blue-400">${metrics?.arr.toLocaleString()}</h3>
+                  <p className="text-zinc-400 text-sm">Volume (30d)</p>
+                  <h3 className="text-2xl font-bold text-blue-400">${metrics?.totalVolume30d.toLocaleString()}</h3>
                 </div>
                 <TrendingUp className="w-6 h-6 text-blue-500" />
               </div>
-              <p className="text-xs text-zinc-500">Annual Run Rate</p>
+              <p className="text-xs text-zinc-500">Total Trading Volume</p>
             </GlassCard>
 
             <GlassCard className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-zinc-400 text-sm">Churn Rate</p>
-                  <h3 className="text-2xl font-bold text-red-400">{metrics?.churnRate.toFixed(1)}%</h3>
+                  <p className="text-zinc-400 text-sm">Active Traders</p>
+                  <h3 className="text-2xl font-bold text-cyan-400">{metrics?.activeTraders.toLocaleString()}</h3>
                 </div>
-                <Activity className="w-6 h-6 text-red-500" />
+                <Activity className="w-6 h-6 text-cyan-500" />
               </div>
-              <p className="text-xs text-zinc-500">Last 30 Days</p>
+              <p className="text-xs text-zinc-500">Traders with Volume &gt; 0</p>
             </GlassCard>
 
             <GlassCard className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-zinc-400 text-sm">LTV</p>
-                  <h3 className="text-2xl font-bold text-purple-400">${metrics?.ltv.toFixed(0)}</h3>
+                  <p className="text-zinc-400 text-sm">ARPT</p>
+                  <h3 className="text-2xl font-bold text-purple-400">${metrics?.arpt.toFixed(0)}</h3>
                 </div>
                 <Users className="w-6 h-6 text-purple-500" />
               </div>
-              <p className="text-xs text-zinc-500">Lifetime Value</p>
+              <p className="text-xs text-zinc-500">Avg Revenue Per Trader</p>
             </GlassCard>
           </div>
 

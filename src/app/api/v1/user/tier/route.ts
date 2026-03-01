@@ -1,10 +1,10 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getTierByVolume, getTierById, UNIFIED_TIERS } from '@/config/unified-tiers';
 
 export async function GET(request: NextRequest) {
     try {
-        // 1. Extract Token
         const authHeader = request.headers.get('authorization');
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return NextResponse.json(
@@ -15,8 +15,6 @@ export async function GET(request: NextRequest) {
 
         const token = authHeader.substring(7);
 
-        // 2. Initialize Supabase with USER TOKEN (Enforces RLS)
-        // CRITICAL SECURITY FIX: Do not use Service Role Key here for user data
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
         const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -28,7 +26,6 @@ export async function GET(request: NextRequest) {
             }
         });
 
-        // 3. Get User (Verifies token & gets user ID)
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !user) {
@@ -39,47 +36,42 @@ export async function GET(request: NextRequest) {
         }
 
         const userId = user.id;
-        const email = user.email;
 
-        // 4. Check if user is admin (Optional: Keep this if you want to return special admin tier)
-        // Note: For pure RLS, you might just query the 'users' table and let RLS decide.
-        // But since we have a separate 'admin_users' table, we might need a separate check or Service Role for that specific check ONLY.
-        // However, to be safe, let's stick to the user's perspective.
-        // If the user is an admin, they should have a row in 'users' table too?
-        // Let's keep the logic but use the USER client for the main query.
-
-        // Checking admin status might still require Service Role if 'admin_users' is not readable by everyone.
-        // But for the "User Tier" endpoint, we primarily want the user's own tier.
-
-        // Let's check the public 'users' table using the USER client.
+        // RaaS: Fetch user profile + 30-day trading volume
         const { data, error } = await supabase
             .from('users')
-            .select('subscription_tier, created_at')
-            .eq('user_id', userId) // Ensure we query by user_id
+            .select('subscription_tier, created_at, monthly_volume')
+            .eq('user_id', userId)
             .single();
 
         if (error) {
             logger.error('Error fetching user tier:', error);
-            // If RLS blocks it, it means they don't own the row (good).
-            // If row missing, return free.
             return NextResponse.json({
-                tier: 'free',
-                slot_number: null,
-                joined_at: null
+                tier: 'EXPLORER',
+                tierName: UNIFIED_TIERS.EXPLORER.name,
+                monthlyVolume: 0,
+                spreadBps: UNIFIED_TIERS.EXPLORER.spreadBps,
+                selfRebateRate: UNIFIED_TIERS.EXPLORER.selfRebateRate,
+                agentSlots: UNIFIED_TIERS.EXPLORER.agentSlots,
+                joined_at: null,
             });
         }
 
-        // Check if they are an admin (Logic preserved but simplified)
-        // We can check if the user has a specific claim or just return the DB value.
-        // If the DB says 'admin', trust it (assuming only admins can write to that column via RLS/Triggers).
+        // Determine tier from volume (RaaS model — tiers unlock by trading volume)
+        const monthlyVolume = data.monthly_volume || 0;
+        const volumeTierId = getTierByVolume(monthlyVolume);
 
-        // If we really need to check the admin_users table, we should do it via a separate secure function or assume the 'tier' in 'users' table is the source of truth.
-        // For now, let's trust the 'users' table data which should be synced.
+        // Legacy DB field may still hold old tier name; prefer volume-based calc
+        const tierConfig = getTierById(volumeTierId) ?? UNIFIED_TIERS.EXPLORER;
 
         return NextResponse.json({
-            tier: data.subscription_tier || 'free',
-            slot_number: null,
-            joined_at: data.created_at
+            tier: volumeTierId,
+            tierName: tierConfig.name,
+            monthlyVolume,
+            spreadBps: tierConfig.spreadBps,
+            selfRebateRate: tierConfig.selfRebateRate,
+            agentSlots: tierConfig.agentSlots,
+            joined_at: data.created_at,
         });
 
     } catch (error) {

@@ -16,7 +16,7 @@ const MODEL_COSTS: Record<string, number> = {
 };
 
 export interface SmartRouterConfig {
-  userTier: 'free' | 'pro' | 'trader' | 'elite';
+  userTier: 'EXPLORER' | 'OPERATOR' | 'ARCHITECT' | 'SOVEREIGN' | string;
   maxCostPerRequest?: number; // USD
   preferredProvider?: 'openrouter' | 'vertex';
 }
@@ -65,14 +65,14 @@ export class SmartRouter {
    * 兵法: 集中兵力 (Use right force for right task)
    */
   private selectModel(complexity: 'simple' | 'medium' | 'complex'): string {
-    // Free users get cheapest models
-    if (this.config.userTier === 'free') {
+    // Explorer tier gets cheapest models
+    if (this.config.userTier === 'EXPLORER' || this.config.userTier === 'free') {
       return complexity === 'simple'
         ? 'deepseek/deepseek-chat'          // $0.14/1M
         : 'meta-llama/llama-3-8b-instruct'; // $0.06/1M
     }
 
-    // Pro+ users get better models
+    // Operator+ tiers get better models
     if (complexity === 'simple') {
       return 'meta-llama/llama-3-8b-instruct'; // $0.06/1M
     } else if (complexity === 'medium') {

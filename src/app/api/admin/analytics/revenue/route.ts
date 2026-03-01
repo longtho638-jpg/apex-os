@@ -1,67 +1,61 @@
 import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { RAAS_CONFIG } from '@/config/unified-tiers';
 
-export async function GET(req: NextRequest) {
-  // Authorization check (middleware usually handles this, but double check for admin routes)
-  // In a real app, check session user role
+export async function GET() {
   const supabase = getSupabaseClient();
-  
+
   try {
-    // 1. Calculate MRR (Monthly Recurring Revenue)
-    // Sum of all active subscriptions normalized to monthly
-    const { data: activeSubs } = await supabase
-      .from('subscriptions')
-      .select('price, billing_cycle')
-      .eq('status', 'active');
+    // RaaS Revenue Model: Revenue = trading volume × spread (basis points)
+    // No subscriptions — all revenue comes from exchange spread
 
-    let mrr = 0;
-    activeSubs?.forEach(sub => {
-        if (sub.billing_cycle === 'monthly') {
-            mrr += Number(sub.price);
-        } else if (sub.billing_cycle === 'annual') {
-            mrr += Number(sub.price) / 12;
-        }
-    });
-
-    // 2. ARR (Annual Run Rate)
-    const arr = mrr * 12;
-
-    // 3. Churn Rate (Last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const { count: canceledCount } = await supabase
-      .from('subscriptions')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'canceled')
-      .gte('updated_at', thirtyDaysAgo.toISOString());
 
-    const { count: totalActiveStart } = await supabase
-        .from('subscriptions')
-        .select('*', { count: 'exact', head: true })
-        .lte('created_at', thirtyDaysAgo.toISOString()); // Approximation of base
+    // 1. Total 30-day trading volume from all users
+    const { data: volumeData } = await supabase
+      .from('users')
+      .select('monthly_volume, subscription_tier');
 
-    // Avoid division by zero
-    const churnRate = totalActiveStart ? ((canceledCount || 0) / totalActiveStart) * 100 : 0;
+    let totalVolume = 0;
+    let activeTraders = 0;
+    volumeData?.forEach((user) => {
+      const vol = Number(user.monthly_volume || 0);
+      totalVolume += vol;
+      if (vol > 0) activeTraders++;
+    });
 
-    // 4. LTV (Lifetime Value) - Simple approximation: ARPU / Churn
-    // ARPU = MRR / Total Users
-    const { count: totalCustomers } = await supabase
-        .from('subscriptions')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'active');
-        
-    const arpu = totalCustomers ? mrr / totalCustomers : 0;
-    // If churn is 0, cap LTV or use a default multiplier
-    const ltv = churnRate > 0 ? arpu / (churnRate / 100) : arpu * 24; 
+    // 2. Gross spread revenue (avg spread across tiers ~20bps = 0.20%)
+    const avgSpreadBps = RAAS_CONFIG.baseSpreadBps; // 30bps base, effective ~20bps after rebates
+    const grossSpreadRevenue = totalVolume * (avgSpreadBps / 10_000);
+
+    // 3. Estimate net revenue after rebates (~20% avg rebate)
+    const avgRebateRate = 0.20;
+    const netRevenue = grossSpreadRevenue * (1 - avgRebateRate);
+
+    // 4. Monthly Run Rate (MRR equivalent in RaaS)
+    const monthlyRunRate = netRevenue; // Already 30-day window
+    const annualRunRate = monthlyRunRate * 12;
+
+    // 5. Average Revenue Per Trader (ARPT)
+    const arpt = activeTraders > 0 ? monthlyRunRate / activeTraders : 0;
+
+    // 6. Revenue per million volume (efficiency metric)
+    const revenuePerMillion = totalVolume > 0
+      ? (netRevenue / totalVolume) * 1_000_000
+      : 0;
 
     return NextResponse.json({
-        mrr,
-        arr,
-        churnRate,
-        ltv,
-        activeSubscribers: totalCustomers
+      totalVolume30d: totalVolume,
+      grossSpreadRevenue,
+      netRevenue,
+      monthlyRunRate,
+      annualRunRate,
+      activeTraders,
+      arpt,
+      revenuePerMillion,
+      avgSpreadBps,
     });
 
   } catch (error) {

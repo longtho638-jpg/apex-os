@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email-service';
+import { getTierByVolume, UNIFIED_TIERS } from '@/config/unified-tiers';
 
+/**
+ * RaaS Volume Milestone Nudge
+ * Replaces SaaS upsell-tenure cron. Instead of pushing monthly→annual,
+ * we nudge users who are close to the next tier threshold.
+ */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -10,54 +16,64 @@ export async function GET(req: NextRequest) {
 
   const supabase = getSupabaseClient();
 
-  // Find users active > 30 days on Monthly plan
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
+  // Find users approaching next tier threshold (within 20% of upgrade)
   const { data: users } = await supabase
-    .from('subscriptions')
-    .select('user_id, users(email, name)')
-    .eq('billing_cycle', 'monthly')
-    .eq('status', 'active')
-    .lt('created_at', thirtyDaysAgo.toISOString())
-    .limit(50); // Batch processing
+    .from('users')
+    .select('user_id, email, full_name, monthly_volume, subscription_tier')
+    .gt('monthly_volume', 0)
+    .limit(100);
 
   let sentCount = 0;
 
   if (users) {
-    for (const sub of users) {
-      // Check if upsell already sent
+    for (const user of users) {
+      const volume = Number(user.monthly_volume || 0);
+      const currentTier = getTierByVolume(volume);
+      const tierConfig = UNIFIED_TIERS[currentTier];
+
+      // Skip Sovereign (already max tier)
+      if (currentTier === 'SOVEREIGN') continue;
+
+      const nextThreshold = tierConfig.monthlyVolumeMax;
+      const progress = volume / nextThreshold;
+
+      // Nudge when user is 80%+ toward next tier
+      if (progress < 0.80) continue;
+
+      // Check if nudge already sent this month
       const { data: log } = await supabase
         .from('email_logs')
         .select('id')
-        .eq('user_id', sub.user_id)
-        .eq('email_type', 'upsell_annual')
+        .eq('user_id', user.user_id)
+        .eq('email_type', 'volume_milestone_nudge')
+        .gte('sent_at', new Date(new Date().setDate(1)).toISOString())
         .single();
 
-      if (!log && sub.users) {
-        const user: any = sub.users;
-        // Send Upsell Email
-        // Note: We'll define the template inline here for simplicity or use emailTemplates lib
-        await sendEmail({
-          to: user.email,
-          subject: '🎁 Special Offer: Save 17% on ApexOS Annual',
-          html: `
-                    <h1>Happy 1st Month, ${user.name || 'Trader'}!</h1>
-                    <p>You've been crushing it with ApexOS Pro.</p>
-                    <p>Switch to the Annual plan today and get <strong>2 months FREE</strong> (save ~17%).</p>
-                    <a href="https://apexrebate.com/pricing?upgrade=annual">Claim Offer</a>
-                `
-        });
+      if (log) continue;
 
-        // Log it
-        await supabase.from('email_logs').insert({
-          user_id: sub.user_id,
-          email_type: 'upsell_annual',
-          sent_at: new Date().toISOString()
-        });
+      const remaining = nextThreshold - volume;
+      const nextTierName = currentTier === 'EXPLORER' ? 'Operator'
+        : currentTier === 'OPERATOR' ? 'Architect' : 'Sovereign';
 
-        sentCount++;
-      }
+      await sendEmail({
+        to: user.email,
+        subject: `You're ${Math.round(progress * 100)}% to ${nextTierName} — unlock lower spreads`,
+        html: `
+          <h1>Almost there, ${user.full_name || 'Trader'}!</h1>
+          <p>Your 30-day volume: <strong>$${volume.toLocaleString()}</strong></p>
+          <p>Just <strong>$${remaining.toLocaleString()}</strong> more to unlock <strong>${nextTierName}</strong> tier.</p>
+          <p>Benefits: Lower spread, higher rebates, more AI agents.</p>
+          <a href="https://apexrebate.com/trading">Keep Trading →</a>
+        `
+      });
+
+      await supabase.from('email_logs').insert({
+        user_id: user.user_id,
+        email_type: 'volume_milestone_nudge',
+        sent_at: new Date().toISOString()
+      });
+
+      sentCount++;
     }
   }
 

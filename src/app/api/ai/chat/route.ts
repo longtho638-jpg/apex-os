@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { createSmartRouter } from '@/lib/ai/smart-router';
 import { RateLimiter } from '@/lib/ai/rate-limiter';
+import { getTierByVolume } from '@/config/unified-tiers';
 // import { trackEvent } from '@/lib/analytics';
 
 // Simple mock for trackEvent until analytics module is fully integrated or imported correctly
@@ -23,19 +24,18 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get user tier
+    // RaaS: Determine tier from trading volume
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('subscription_tier')
+      .select('subscription_tier, monthly_volume')
       .eq('id', userId)
       .single();
 
     if (userError || !user) {
-      // For development/testing without full user seeding, assume free tier if user not found
-      // return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      // For development/testing without full user seeding, assume Explorer tier
     }
 
-    const userTier = (user?.subscription_tier || 'free') as 'free' | 'pro' | 'trader' | 'elite';
+    const userTier = getTierByVolume(Number(user?.monthly_volume || 0));
 
     // Check rate limit
     const limitCheck = await RateLimiter.checkLimit(userId, userTier);
