@@ -1,9 +1,25 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import { getTierByVolume, UNIFIED_TIERS } from '@apex-os/vibe-payment';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     // RaaS Model: Zero subscription fees, volume-based tiers
-    const monthlyVolume = 45_000; // TODO: Fetch from user's actual 30-day volume
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Fetch actual 30-day volume from user_tiers
+    const { data: tierData } = await supabase
+        .from('user_tiers')
+        .select('monthly_volume, tier')
+        .eq('user_id', user.id)
+        .single();
+
+    const monthlyVolume = tierData?.monthly_volume || 0;
     const currentTier = getTierByVolume(monthlyVolume);
     const tier = UNIFIED_TIERS[currentTier];
 

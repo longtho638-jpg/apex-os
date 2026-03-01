@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { symbol, side, amount, leverage, entryPrice } = body;
+  const { symbol, side, amount, leverage, entryPrice, orgId } = body;
 
   const supabase = getSupabaseClient();
 
@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     .from('positions')
     .insert({
       user_id: userId,
+      org_id: orgId || null,
       symbol: symbol,
       side: side.toUpperCase(),
       entry_price: entryPrice,

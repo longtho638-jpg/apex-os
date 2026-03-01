@@ -104,8 +104,9 @@ export async function GET(request: NextRequest) {
             referrals: formattedReferrals
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal error';
         logger.error('Referral Stats Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

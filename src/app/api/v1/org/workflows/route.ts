@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { getAgentSlots, type TierId } from '@apex-os/vibe-payment';
+import { checkOrgRole } from '@/lib/org/org-role-guard';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,6 +14,14 @@ export async function GET(request: NextRequest) {
     }
 
     const orgId = request.nextUrl.searchParams.get('orgId');
+
+    // RBAC: verify user has at least viewer role in org
+    if (orgId) {
+      const role = await checkOrgRole(user.id, orgId, 'viewer');
+      if (!role) {
+        return NextResponse.json({ error: 'Forbidden: no access to this org' }, { status: 403 });
+      }
+    }
 
     const query = supabase
       .from('agent_workflows')
@@ -48,6 +57,14 @@ export async function POST(request: NextRequest) {
 
     if (!agentType || !name) {
       return NextResponse.json({ error: 'agentType and name are required' }, { status: 400 });
+    }
+
+    // RBAC: creating workflows requires at least trader role in org
+    if (orgId) {
+      const role = await checkOrgRole(user.id, orgId, 'trader');
+      if (!role) {
+        return NextResponse.json({ error: 'Forbidden: trader role required to create workflows' }, { status: 403 });
+      }
     }
 
     // Check agent slot limit based on tier

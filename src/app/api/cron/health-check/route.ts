@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { NotificationService } from '@/lib/notifications';
+import { checkAgentHealth } from '@/lib/agents/agent-health-monitor';
 
 // Prevent Vercel from caching this route
 export const dynamic = 'force-dynamic';
@@ -133,7 +134,7 @@ export async function GET(request: NextRequest) {
                     });
                 }
 
-            } catch (error: any) {
+            } catch (error: unknown) {
                 result.status = 'error';
                 logger.error(`Health check failed for ${provider.provider_code}:`, error);
             }
@@ -141,13 +142,22 @@ export async function GET(request: NextRequest) {
             results.push(result);
         }
 
+        // Agent health check — detect dead/stale agents
+        const agentHealth = await checkAgentHealth();
+
         return NextResponse.json({
             success: true,
-            results
+            results,
+            agents: {
+              healthy: agentHealth.healthy,
+              unhealthy: agentHealth.unhealthy,
+              dead: agentHealth.dead,
+            },
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal error';
         logger.error('Cron Job Error:', error);
-        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+        return NextResponse.json({ success: false, message }, { status: 500 });
     }
 }

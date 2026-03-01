@@ -51,10 +51,19 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'OCO orders coming soon' }, { status: 501 });
         }
 
+        // Resolve org context if user belongs to an org
+        const { data: membership } = await supabase
+            .from('org_members')
+            .select('org_id')
+            .eq('user_id', user.id)
+            .limit(1)
+            .single();
+
         const { data: order, error: dbError } = await supabase
             .from('orders')
             .insert({
                 user_id: user.id,
+                org_id: membership?.org_id || null,
                 symbol: orderData.symbol,
                 side: orderData.side,
                 type: orderData.type,
@@ -81,10 +90,11 @@ export async function POST(request: NextRequest) {
             order_id: order.id
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
         logger.error('Order placement error:', error);
         return NextResponse.json(
-            { success: false, message: error.message || 'Internal Server Error' },
+            { success: false, message },
             { status: 500 }
         );
     }
