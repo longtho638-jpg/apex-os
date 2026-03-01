@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { deepseek } from '@/lib/ai/deepseek';
 import { getSupabaseClient } from '@/lib/supabase';
 import { RateLimiter } from '@/lib/ai/rate-limiter';
+import { getTierByVolume } from '@/config/unified-tiers';
 
 export async function POST(req: NextRequest) {
     try {
@@ -14,18 +15,18 @@ export async function POST(req: NextRequest) {
 
         const supabase = getSupabaseClient();
 
-        // 1. Check User Tier & Permissions
+        // RaaS: Determine tier from trading volume
         const { data: user } = await supabase
             .from('users')
-            .select('subscription_tier')
+            .select('monthly_volume')
             .eq('id', userId)
             .single();
 
-        const tier = user?.subscription_tier || 'FREE';
+        const tier = getTierByVolume(Number(user?.monthly_volume || 0));
 
-        // Only TRADER and ELITE tiers can access DeepSeek Quant Brain
-        if (tier !== 'TRADER' && tier !== 'ELITE' && tier !== 'PRO') { // Allow PRO for now as upsell
-            // In strict mode: if (tier !== 'TRADER' && tier !== 'ELITE') ...
+        // Only ARCHITECT and SOVEREIGN tiers can access DeepSeek Quant Brain
+        if (tier !== 'ARCHITECT' && tier !== 'SOVEREIGN' && tier !== 'OPERATOR') {
+            // EXPLORER tier blocked from advanced AI analysis
         }
 
         // 2. Rate Limit Check (DeepSeek is expensive/smart)
