@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { deepseek } from '@/lib/ai/deepseek';
 import { getSupabaseClient } from '@/lib/supabase';
 import { RateLimiter } from '@/lib/ai/rate-limiter';
-import { getTierByVolume } from '@/config/unified-tiers';
+import { getTierByVolume } from '@apex-os/vibe-payment';
 
 export async function POST(req: NextRequest) {
     try {

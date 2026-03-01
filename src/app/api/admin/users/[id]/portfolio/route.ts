@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { getTierByVolume } from '@/config/unified-tiers';
+import { getTierByVolume } from '@apex-os/vibe-payment';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   // 1. Security Check (Middleware handles basic auth, here we check role)

@@ -7,6 +7,7 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   /* config options here */
   reactCompiler: true,
+  transpilePackages: ['@apex-os/vibe-payment'],
   images: {
     domains: ['ryvpqbuftmlsynmajecx.supabase.co'], // Supabase Storage
     formats: ['image/avif', 'image/webp'],
@@ -83,7 +84,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
   org: "apex-os",
-  project: "apex-os-saas",
+  project: "apex-os",
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

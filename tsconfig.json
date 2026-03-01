@@ -20,7 +20,9 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@backend/*": ["./backend/*"]
+      "@backend/*": ["./backend/*"],
+      "@apex-os/vibe-payment": ["./packages/vibe-payment/src/index.ts"],
+      "@apex-os/vibe-payment/*": ["./packages/vibe-payment/src/*"]
     }
   },
   "include": [
@@ -31,5 +33,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "mobile", "scripts", "backend", "supabase", "claudekit-docs"]
+  "exclude": ["node_modules", "mobile", "scripts", "backend", "supabase", "claudekit-docs", "packages/*/node_modules"]
 }

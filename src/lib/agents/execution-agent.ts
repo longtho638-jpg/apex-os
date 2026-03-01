@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { nowPayments } from '@/lib/payments/nowpayments-client';
+import { nowPayments } from '@apex-os/vibe-payment';
 import crypto from 'crypto';
 
 export async function executeWithdrawal(withdrawalId: string) {

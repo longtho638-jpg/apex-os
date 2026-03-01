@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
-import { RAAS_CONFIG } from '@/config/unified-tiers';
+import { RAAS_CONFIG } from '@apex-os/vibe-payment';
 
 export async function GET() {
   const supabase = getSupabaseClient();

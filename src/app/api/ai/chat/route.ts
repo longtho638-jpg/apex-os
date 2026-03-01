@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { createSmartRouter } from '@/lib/ai/smart-router';
 import { RateLimiter } from '@/lib/ai/rate-limiter';
-import { getTierByVolume } from '@/config/unified-tiers';
+import { getTierByVolume } from '@apex-os/vibe-payment';
 // import { trackEvent } from '@/lib/analytics';
 
 // Simple mock for trackEvent until analytics module is fully integrated or imported correctly

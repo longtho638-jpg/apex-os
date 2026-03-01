@@ -7,7 +7,7 @@ import {
     ArrowUpRight, ChevronRight, Search, Filter, Download,
     Crown, Lock, Zap, Globe, Play, Rocket
 } from 'lucide-react';
-import { UNIFIED_TIERS } from '@/config/unified-tiers';
+import { UNIFIED_TIERS } from '@apex-os/vibe-payment';
 import { useUserTier } from '@/hooks/useUserTier';
 import { Badge } from '@/components/ui/badge';
 import { Button3D } from '@/components/marketing/Button3D';
@@ -201,8 +201,8 @@ export default function AffiliateDashboard() {
     const viralStats = [
         { level: 1, users: stats?.total_referrals || 0, volume: 450000, commission: 0.20, earnings: 450, locked: false },
         { level: 2, users: 45, volume: 1200000, commission: 0.10, earnings: 1200, locked: false },
-        { level: 3, users: 128, volume: 3500000, commission: 0.05, earnings: 3500, locked: tier === 'FREE' },
-        { level: 4, users: 512, volume: 12000000, commission: 0.02, earnings: 12000, locked: tier === 'FREE' },
+        { level: 3, users: 128, volume: 3500000, commission: 0.05, earnings: 3500, locked: tier === 'EXPLORER' },
+        { level: 4, users: 512, volume: 12000000, commission: 0.02, earnings: 12000, locked: tier === 'EXPLORER' },
     ];
 
     const handleCopy = () => {

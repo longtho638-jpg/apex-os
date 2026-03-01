@@ -1,35 +1,35 @@
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { UNIFIED_TIERS } from '@/config/unified-tiers';
+import { UNIFIED_TIERS } from '@apex-os/vibe-payment';
 
-// Tier configuration with commission rates from UNIFIED_TIERS
+// RaaS tier config — volume-based auto-upgrade (no subscription required)
 const TIER_CONFIG = {
-  FREE: {
-    commission: UNIFIED_TIERS.FREE.commissionRates.total,
-    rebate: UNIFIED_TIERS.FREE.selfRebateRate,
+  EXPLORER: {
+    commission: UNIFIED_TIERS.EXPLORER.commissionRates.total,
+    rebate: UNIFIED_TIERS.EXPLORER.selfRebateRate,
     requirements: { referrals: 0, volume: 0 }
   },
-  PRO: {
-    commission: UNIFIED_TIERS.PRO.commissionRates.total,
-    rebate: UNIFIED_TIERS.PRO.selfRebateRate,
-    requirements: { referrals: 20, volume: 50000 }
+  OPERATOR: {
+    commission: UNIFIED_TIERS.OPERATOR.commissionRates.total,
+    rebate: UNIFIED_TIERS.OPERATOR.selfRebateRate,
+    requirements: { referrals: 5, volume: 10000 }
   },
-  TRADER: {
-    commission: UNIFIED_TIERS.TRADER.commissionRates.total,
-    rebate: UNIFIED_TIERS.TRADER.selfRebateRate,
-    requirements: { referrals: 20, volume: 50000 }
+  ARCHITECT: {
+    commission: UNIFIED_TIERS.ARCHITECT.commissionRates.total,
+    rebate: UNIFIED_TIERS.ARCHITECT.selfRebateRate,
+    requirements: { referrals: 20, volume: 100000 }
   },
-  ELITE: {
-    commission: UNIFIED_TIERS.ELITE.commissionRates.total,
-    rebate: UNIFIED_TIERS.ELITE.selfRebateRate,
-    requirements: { referrals: 100, volume: 500000 }
+  SOVEREIGN: {
+    commission: UNIFIED_TIERS.SOVEREIGN.commissionRates.total,
+    rebate: UNIFIED_TIERS.SOVEREIGN.selfRebateRate,
+    requirements: { referrals: 50, volume: 1000000 }
   },
 } as const;
 
 export const EXCHANGE_AVG_REBATE_RATE = 0.0008;
-export const TIERS = TIER_CONFIG; // Backward compatibility alias
+export const TIERS = TIER_CONFIG;
 
-const TIER_ORDER = ['FREE', 'PRO', 'TRADER', 'ELITE'];
+const TIER_ORDER = ['EXPLORER', 'OPERATOR', 'ARCHITECT', 'SOVEREIGN'];
 
 export async function calculateUserTier(userId: string): Promise<string> {
   const supabase = getSupabaseClient();
@@ -43,11 +43,11 @@ export async function calculateUserTier(userId: string): Promise<string> {
 
   if (error || !tierData) {
     logger.error('Error fetching user metrics for tier calc', error);
-    return 'FREE';
+    return 'EXPLORER';
   }
 
-  const { active_referrals, monthly_volume, tier: currentTier } = tierData;
-  let newTier = 'FREE';
+  const { active_referrals, monthly_volume } = tierData;
+  let newTier = 'EXPLORER';
 
   // Find highest eligible tier
   for (const tier of TIER_ORDER) {
@@ -85,7 +85,7 @@ export async function promoteTier(userId: string): Promise<boolean> {
     .eq('user_id', userId)
     .single();
 
-  const currentTier = currentData?.tier || 'FREE';
+  const currentTier = currentData?.tier || 'EXPLORER';
 
   // Only update if tier changed
   if (calculatedTier !== currentTier) {

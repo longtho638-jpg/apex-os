@@ -1,6 +1,6 @@
 import 'server-only';
 import { getSupabaseClient } from '@/lib/supabase';
-import { TierId } from '@/config/unified-tiers';
+import { TierId } from '@apex-os/vibe-payment';
 
 // RaaS commission structure — L1 = Direct Referral
 const COMMISSION_RATES: Record<TierId, number> = {

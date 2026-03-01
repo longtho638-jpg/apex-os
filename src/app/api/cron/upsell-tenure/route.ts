@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email-service';
-import { getTierByVolume, UNIFIED_TIERS } from '@/config/unified-tiers';
+import { getTierByVolume, UNIFIED_TIERS } from '@apex-os/vibe-payment';
 
 /**
  * RaaS Volume Milestone Nudge

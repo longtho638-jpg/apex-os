@@ -1,39 +1,35 @@
 import { NextResponse } from 'next/server';
+import { getTierByVolume, UNIFIED_TIERS } from '@apex-os/vibe-payment';
 
 export async function GET() {
-    // Mock data for Subscription Info
+    // RaaS Model: Zero subscription fees, volume-based tiers
+    const monthlyVolume = 45_000; // TODO: Fetch from user's actual 30-day volume
+    const currentTier = getTierByVolume(monthlyVolume);
+    const tier = UNIFIED_TIERS[currentTier];
+
     return NextResponse.json({
-        current_tier: "PRO",
-        plan_name: "Pro Trader",
-        price: 29.00,
-        billing_cycle: "monthly",
-        next_billing_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days from now
-        features: [
-            "Unlimited Trading Pairs",
-            "Advanced AI Indicators",
-            "Real-time Risk Guardian",
-            "Priority Support",
-            "API Access"
-        ],
+        model: 'RaaS',
+        current_tier: currentTier,
+        tier_name: tier.name,
+        price: 0,
+        billing_cycle: 'none',
+        monthly_volume: monthlyVolume,
+        volume_threshold: tier.volumeThreshold,
+        next_tier_threshold: tier.monthlyVolumeMax === Infinity ? null : tier.monthlyVolumeMax,
+        spread_bps: tier.spreadBps,
+        self_rebate_rate: tier.selfRebateRate,
+        agent_slots: tier.agentSlots,
+        commission_rates: tier.commissionRates,
+        features: tier.features,
         usage: {
-            api_calls: 15420,
-            api_limit: 100000,
-            storage_gb: 2.5,
-            storage_limit: 10.0
+            ai_requests_today: 42,
+            ai_requests_limit: tier.aiRequestsPerDay,
+            agents_deployed: 1,
+            agents_limit: tier.agentSlots,
         },
-        payment_history: [
-            {
-                date: "2024-03-01T10:00:00Z",
-                amount: 29.00,
-                status: "completed",
-                description: "Pro Trader - Monthly"
-            },
-            {
-                date: "2024-02-01T10:00:00Z",
-                amount: 29.00,
-                status: "completed",
-                description: "Pro Trader - Monthly"
-            }
-        ]
+        volume_history: [
+            { month: '2026-02', volume: 38_000 },
+            { month: '2026-01', volume: 52_000 },
+        ],
     });
 }

@@ -1,4 +1,4 @@
-import { UNIFIED_TIERS, getTierById } from '@/config/unified-tiers';
+import { UNIFIED_TIERS, getTierById } from '@apex-os/vibe-payment';
 
 interface TradeEvent {
     userId: string;
@@ -34,7 +34,7 @@ export class ViralEngine {
         
         // 1. Get User Info
         const userProfile = await getUserProfile(trade.userId);
-        const tier = getTierById(userProfile.tier) || UNIFIED_TIERS.FREE;
+        const tier = getTierById(userProfile.tier) || UNIFIED_TIERS.EXPLORER;
 
         // 2. Calculate Self-Rebate
         // Formula: TradeFee * ApexShare (40%) * UserSelfRebateRate
@@ -60,8 +60,8 @@ export class ViralEngine {
 
         // 3. Viral Commissions (L1 - L4)
         // Logic: Recursively check upline
-        let currentMemberId = trade.userId;
-        let currentLevel = 1;
+        const currentMemberId = trade.userId;
+        const currentLevel = 1;
 
         // Mock Upline Traversal (In real app, we loop DB queries)
         // For demo engine, we stop at Self-Rebate to ensure type safety without DB

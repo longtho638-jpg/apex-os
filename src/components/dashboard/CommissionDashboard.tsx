@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { UNIFIED_TIERS, TierId } from '@/config/unified-tiers';
+import { UNIFIED_TIERS, TierId } from '@apex-os/vibe-payment';
 import { Crown, TrendingUp, Users, DollarSign } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -12,7 +12,7 @@ interface CommissionDashboardProps {
 }
 
 export function CommissionDashboard({
-    currentTier = 'FREE',
+    currentTier = 'EXPLORER',
     totalReferrals = 0,
     totalEarnings = 0,
 }: CommissionDashboardProps) {
@@ -113,51 +113,51 @@ export function CommissionDashboard({
             </div>
 
             {/* Upgrade Incentive */}
-            {currentTier !== 'ELITE' && (
+            {currentTier !== 'SOVEREIGN' && (
                 <Card className="p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/20">
                     <div className="flex items-start gap-4">
                         <Crown className="w-8 h-8 text-purple-400 flex-shrink-0" />
                         <div className="flex-1">
                             <h4 className="font-bold text-lg mb-2">{t('upgrade_title')}</h4>
                             <p className="text-sm text-zinc-400 mb-4">
-                                {currentTier === 'FREE' && t('upgrade_desc_free')}
-                                {currentTier === 'PRO' && t('upgrade_desc_pro')}
-                                {currentTier === 'TRADER' && t('upgrade_desc_trader')}
+                                {currentTier === 'EXPLORER' && 'Trade $10K+/mo to unlock Operator tier with 20% rebate'}
+                                {currentTier === 'OPERATOR' && 'Trade $100K+/mo to unlock Architect tier with 30% rebate'}
+                                {currentTier === 'ARCHITECT' && 'Trade $1M+/mo to unlock Sovereign tier with 50% rebate'}
                             </p>
                             <div className="flex gap-4 text-sm">
-                                {currentTier === 'FREE' && (
+                                {currentTier === 'EXPLORER' && (
                                     <>
                                         <div>
                                             <span className="text-zinc-500">{t('current')}</span>{' '}
-                                            <span className="font-bold text-red-400">0%</span>
+                                            <span className="font-bold text-red-400">10%</span>
                                         </div>
                                         <div>
-                                            <span className="text-zinc-500">PRO:</span>{' '}
-                                            <span className="font-bold text-emerald-400">35%</span>
+                                            <span className="text-zinc-500">Operator:</span>{' '}
+                                            <span className="font-bold text-emerald-400">20%</span>
                                         </div>
                                     </>
                                 )}
-                                {currentTier === 'PRO' && (
+                                {currentTier === 'OPERATOR' && (
                                     <>
                                         <div>
                                             <span className="text-zinc-500">{t('current')}</span>{' '}
-                                            <span className="font-bold">35%</span>
+                                            <span className="font-bold">20%</span>
                                         </div>
                                         <div>
-                                            <span className="text-zinc-500">TRADER:</span>{' '}
-                                            <span className="font-bold text-emerald-400">55%</span>
+                                            <span className="text-zinc-500">Architect:</span>{' '}
+                                            <span className="font-bold text-emerald-400">30%</span>
                                         </div>
                                     </>
                                 )}
-                                {currentTier === 'TRADER' && (
+                                {currentTier === 'ARCHITECT' && (
                                     <>
                                         <div>
                                             <span className="text-zinc-500">{t('current')}</span>{' '}
-                                            <span className="font-bold">55%</span>
+                                            <span className="font-bold">30%</span>
                                         </div>
                                         <div>
-                                            <span className="text-zinc-500">ELITE:</span>{' '}
-                                            <span className="font-bold text-purple-400">75%</span>
+                                            <span className="text-zinc-500">Sovereign:</span>{' '}
+                                            <span className="font-bold text-purple-400">50%</span>
                                         </div>
                                     </>
                                 )}

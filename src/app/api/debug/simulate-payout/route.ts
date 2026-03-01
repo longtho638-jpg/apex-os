@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { UNIFIED_TIERS, getTierById } from '@/config/unified-tiers';
+import { UNIFIED_TIERS, getTierById } from '@apex-os/vibe-payment';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { volume = 10000, tierId = 'FREE' } = body;
+        const { volume = 10000, tierId = 'EXPLORER' } = body;
 
         // Constants for Simulation
         const EXCHANGE_FEE_RATE = 0.0005; // 0.05% taker fee
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
         const totalFee = volume * EXCHANGE_FEE_RATE;
         const revenuePool = totalFee * APEX_SHARE;
 
-        const tier = getTierById(tierId) || UNIFIED_TIERS.FREE;
+        const tier = getTierById(tierId) || UNIFIED_TIERS.EXPLORER;
 
         // Simulation Result
         const result = {

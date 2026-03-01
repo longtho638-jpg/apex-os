@@ -3,23 +3,23 @@
 import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Globe, Shield, Zap, TrendingUp, ChevronRight, Activity, Users, Crown, Wallet, Check, ArrowRight, LockKeyhole } from 'lucide-react';
+import { ChevronRight, Users, Crown, Check, ArrowRight, LockKeyhole, Bot, Coins } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { Button3D } from '@/components/marketing/Button3D';
-import { AnimatedNumber } from '@/components/marketing/AnimatedNumber';
 import { ParticleBackground } from '@/components/marketing/ParticleBackground';
 import { GradientText } from '@/components/marketing/GradientText';
 import { SiteHeader } from '@/components/marketing/SiteHeader';
 import { SiteFooter } from '@/components/marketing/SiteFooter';
-import SmartSwitchWizard from '@/components/dashboard/SmartSwitchWizard';
+import { AgenticOnboardingWizard } from '@/components/onboarding/agentic-onboarding-wizard';
 import { LiveStats } from '@/components/marketing/LiveStats';
 import { MouseGlow } from '@/components/ui/mouse-glow';
+import { UNIFIED_TIERS, TIER_ORDER } from '@apex-os/vibe-payment';
 
 export default function Homepage() {
     const router = useRouter();
     const t = useTranslations('Homepage');
-    const [strategies, setStrategies] = useState<any[]>([]);
+    const [strategies, setStrategies] = useState<{ id: string; name: string; author: string; roi: number; winRate: number; followers: number }[]>([]);
 
     useEffect(() => {
         // Fetch top strategies for social proof
@@ -214,19 +214,77 @@ export default function Homepage() {
                 </div>
             </section>
 
-            {/* 4. SMART SWITCH (UTILITY) */}
-            <section id="how-it-works" className="py-32 bg-black relative overflow-hidden">
+            {/* 4. RaaS ZERO-FEE MODEL */}
+            <section className="py-32 bg-black relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5" />
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold mb-4">{t('smart_switch.title')}</h2>
-                        <p className="text-zinc-400">{t('smart_switch.subtitle')}</p>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-bold mb-6 border border-cyan-500/20">
+                            <Coins className="w-3 h-3" /> {t('raas.badge')}
+                        </div>
+                        <h2 className="text-4xl font-bold mb-4">{t('raas.title')}</h2>
+                        <p className="text-lg text-zinc-400 max-w-2xl mx-auto">{t('raas.subtitle')}</p>
                     </div>
-                    <SmartSwitchWizard />
+
+                    {/* RaaS Tier Cards — Volume-based, zero-fee */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                        {TIER_ORDER.map((tierId, i) => {
+                            const tier = UNIFIED_TIERS[tierId];
+                            return (
+                                <motion.div
+                                    key={tierId}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className={`relative p-6 rounded-2xl border transition-all ${
+                                        tierId === 'ARCHITECT'
+                                            ? 'bg-emerald-900/10 border-emerald-500/50 scale-105 z-10'
+                                            : 'bg-white/5 border-white/10 hover:border-white/20'
+                                    }`}
+                                >
+                                    {tierId === 'ARCHITECT' && (
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
+                                    )}
+                                    <h3 className="text-xl font-bold text-white mb-1">{tier.name}</h3>
+                                    <div className="flex items-baseline gap-1 mb-4">
+                                        <span className="text-3xl font-black text-emerald-400">$0</span>
+                                        <span className="text-zinc-500 text-sm">/mo</span>
+                                    </div>
+                                    <div className="text-xs text-zinc-500 mb-4 p-2 bg-white/5 rounded-lg">
+                                        Spread: <span className="text-white font-bold">{tier.spreadBps / 100}%</span>
+                                        {' · '}Agents: <span className="text-white font-bold">{tier.agentSlots === Infinity ? '∞' : tier.agentSlots}</span>
+                                    </div>
+                                    <ul className="space-y-2">
+                                        {tier.features.slice(0, 4).map((f, j) => (
+                                            <li key={j} className="flex items-start gap-2 text-xs text-zinc-300">
+                                                <Check className="w-3 h-3 text-emerald-500 mt-0.5 shrink-0" />
+                                                <span>{f}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
                 </div>
             </section>
 
-            {/* 5. FINAL CTA */}
+            {/* 5. AGENTIC ONBOARDING */}
+            <section id="how-it-works" className="py-32 relative overflow-hidden">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 text-violet-400 text-xs font-bold mb-6 border border-violet-500/20">
+                            <Bot className="w-3 h-3" /> {t('onboarding.badge')}
+                        </div>
+                        <h2 className="text-4xl font-bold mb-4">{t('onboarding.title')}</h2>
+                        <p className="text-lg text-zinc-400 max-w-2xl mx-auto">{t('onboarding.subtitle')}</p>
+                    </div>
+                    <AgenticOnboardingWizard />
+                </div>
+            </section>
+
+            {/* 6. FINAL CTA */}
             <section className="py-24 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/20 to-black" />
                 <div className="container mx-auto px-4 relative z-10 text-center">

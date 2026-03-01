@@ -1,13 +1,18 @@
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { UNIFIED_TIERS, TierId } from '@/config/unified-tiers';
+import { UNIFIED_TIERS, TierId } from '@apex-os/vibe-payment';
 
-// Get AI limits from unified tiers
+// Get AI limits from unified tiers (RaaS model)
 const TIER_LIMITS: Record<string, number> = {
-  free: UNIFIED_TIERS.FREE.aiRequestsPerDay,
-  pro: UNIFIED_TIERS.PRO.aiRequestsPerDay,
-  trader: UNIFIED_TIERS.TRADER.aiRequestsPerDay,
-  elite: UNIFIED_TIERS.ELITE.aiRequestsPerDay === Infinity ? 999999 : UNIFIED_TIERS.ELITE.aiRequestsPerDay,
+  explorer: UNIFIED_TIERS.EXPLORER.aiRequestsPerDay,
+  operator: UNIFIED_TIERS.OPERATOR.aiRequestsPerDay,
+  architect: UNIFIED_TIERS.ARCHITECT.aiRequestsPerDay,
+  sovereign: UNIFIED_TIERS.SOVEREIGN.aiRequestsPerDay === Infinity ? 999999 : UNIFIED_TIERS.SOVEREIGN.aiRequestsPerDay,
+  // Legacy tier mappings
+  free: UNIFIED_TIERS.EXPLORER.aiRequestsPerDay,
+  pro: UNIFIED_TIERS.OPERATOR.aiRequestsPerDay,
+  trader: UNIFIED_TIERS.ARCHITECT.aiRequestsPerDay,
+  elite: UNIFIED_TIERS.SOVEREIGN.aiRequestsPerDay === Infinity ? 999999 : UNIFIED_TIERS.SOVEREIGN.aiRequestsPerDay,
 };
 
 export class RateLimiter {

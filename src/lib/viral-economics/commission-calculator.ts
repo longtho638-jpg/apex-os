@@ -1,6 +1,6 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import { EXCHANGE_AVG_REBATE_RATE } from './tier-manager';
-import { getCommissionRate, TierId } from '@/config/unified-tiers';
+import { getCommissionRate, TierId } from '@apex-os/vibe-payment';
 
 interface CommissionResult {
   totalDistributed: number;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { executeWithdrawal } from '@/lib/agents/execution-agent';
-import { nowPayments } from '@/lib/payments/nowpayments-client';
+import { nowPayments } from '@apex-os/vibe-payment';
 import crypto from 'crypto';
 
 // Mock Supabase

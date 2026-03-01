@@ -1,14 +1,12 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { createPolarCheckout } from '@/lib/payments/polar-client';
-import { createNOWPaymentsInvoice } from '@/lib/payments/nowpayments-client';
+import { createPolarCheckout, createNOWPaymentsInvoice, PAYMENT_TIERS, PaymentTier, getTierPrice, TierId } from '@apex-os/vibe-payment';
 import { applyDiscount } from '@/lib/discount-engine';
-import { PAYMENT_TIERS, PaymentTier, getTierPrice, TierId } from '@/config/payment-tiers';
 import { z } from 'zod';
 import { redis } from '@/lib/redis';
 
 const checkoutSchema = z.object({
-  tier: z.enum(['FREE', 'PRO', 'TRADER', 'ELITE']),
+  tier: z.enum(['EXPLORER', 'OPERATOR', 'ARCHITECT', 'SOVEREIGN']),
   gateway: z.enum(['polar', 'nowpayments', 'wallet']),
   userEmail: z.string().email(),
   discountCode: z.string().optional().nullable(),
@@ -46,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get base price based on billing period
-    let originalPrice = getTierPrice(tier as TierId, billingPeriod);
+    const originalPrice = getTierPrice(tier as TierId, billingPeriod);
 
     // Apply discount if provided
     let finalPrice = originalPrice;

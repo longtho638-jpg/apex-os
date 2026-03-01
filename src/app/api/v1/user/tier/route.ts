@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getTierByVolume, getTierById, UNIFIED_TIERS } from '@/config/unified-tiers';
+import { getTierByVolume, getTierById, UNIFIED_TIERS } from '@apex-os/vibe-payment';
 
 export async function GET(request: NextRequest) {
     try {

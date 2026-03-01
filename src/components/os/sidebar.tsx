@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { useUserTier, type MenuId } from '@/hooks/useUserTier';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from 'next-intl';
-import { TierId } from '@/config/unified-tiers';
+import { TierId } from '@apex-os/vibe-payment';
 import { useGamification } from '@/hooks/useGamification';
 
 import { NAV_ITEMS } from '@/config/navigation';

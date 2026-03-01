@@ -4,21 +4,17 @@ import { logger } from '@/lib/logger';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
-import { getTierById, getTierPrice, TierId, PaymentTier } from '@/config/unified-tiers';
+import { getTierById, getTierPrice, TierId, PaymentTier } from '@apex-os/vibe-payment';
 
 interface CheckoutModalProps {
   tier: PaymentTier | TierId;
   userEmail: string;
   onClose: () => void;
-  billingPeriod?: 'monthly' | 'annual';
-  initialDiscountCode?: string;
 }
 
-export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'monthly', initialDiscountCode }: CheckoutModalProps) {
+export function CheckoutModal({ tier, userEmail, onClose }: CheckoutModalProps) {
   const [gateway, setGateway] = useState<'polar' | 'nowpayments' | 'wallet'>('polar');
   const [loading, setLoading] = useState(false);
-  const [discountCode, setDiscountCode] = useState(initialDiscountCode || 'TRIAL20');
-  const [discountApplied, setDiscountApplied] = useState(false);
 
   // Get tier config (handles normalization)
   const tierConfig = getTierById(tier);
@@ -29,15 +25,9 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
       return null; 
   }
 
-  // Calculate price based on gateway and billing period
-  const tierPrice = getTierPrice(tierConfig.id as TierId, billingPeriod);
-
-  const basePrice = (gateway === 'nowpayments' && tierConfig.nowPayments)
-    ? tierPrice * (1 - (tierConfig.nowPayments.cryptoDiscount || 0) / 100)
-    : tierPrice;
-
-  const discountMultiplier = discountApplied ? 0.8 : 1; // 20% off if applied
-  const price = basePrice * discountMultiplier;
+  // RaaS model: $0 subscription, revenue from spread only
+  const tierPrice = getTierPrice(tierConfig.id as TierId);
+  const price = tierPrice; // Always $0 for RaaS model
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -50,8 +40,6 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
           tier: tierConfig?.id,
           gateway,
           userEmail,
-          discountCode: discountApplied ? discountCode : undefined,
-          billingPeriod
         }),
       });
 
@@ -118,54 +106,24 @@ export function CheckoutModal({ tier, userEmail, onClose, billingPeriod = 'month
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full">
         <h2 className="text-2xl font-bold mb-4">
-          Subscribe to {tierConfig.name} ({billingPeriod === 'annual' ? 'Yearly' : 'Monthly'})
+          Activate {tierConfig.name} Tier
         </h2>
 
         <PaymentMethodSelector value={gateway} onChange={setGateway} />
 
         <div className="bg-gray-50 rounded-xl p-4 mb-6">
           <div className="flex justify-between mb-2">
-            <span>{billingPeriod === 'annual' ? 'Annual Price' : 'Monthly Price'}</span>
-            <span className="font-semibold">${tierPrice}</span>
+            <span>Subscription Fee</span>
+            <span className="font-semibold text-emerald-600">$0 Forever</span>
           </div>
-
-          {gateway === 'nowpayments' && tierConfig.nowPayments && (
-            <div className="flex justify-between mb-2 text-green-600">
-              <span>Crypto Discount ({tierConfig.nowPayments.cryptoDiscount}%)</span>
-              <span>-${(tierPrice - basePrice).toFixed(2)}</span>
-            </div>
-          )}
-
-          {/* Discount Code Input */}
-          <div className="mb-4 pt-2 border-t">
-            <label className="block text-sm font-medium mb-2">Discount Code (Optional)</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={discountCode}
-                onChange={(e) => {
-                  setDiscountCode(e.target.value.toUpperCase());
-                  setDiscountApplied(false);
-                }}
-                placeholder="TRIAL20"
-                className="w-full bg-gray-100 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-emerald-400 text-black"
-              />
-              <button
-                onClick={() => setDiscountApplied(discountCode === 'TRIAL20')}
-                className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium"
-                type="button"
-              >
-                Apply
-              </button>
-            </div>
-            {discountApplied && (
-              <p className="text-emerald-600 text-sm mt-1 font-medium">✅ 20% discount applied!</p>
-            )}
+          <div className="flex justify-between mb-2 text-gray-500 text-sm">
+            <span>Revenue Model</span>
+            <span>Exchange Spread ({tierConfig.name})</span>
           </div>
 
           <div className="border-t pt-2 flex justify-between text-lg font-bold">
             <span>Total</span>
-            <span>${price.toFixed(2)}/{billingPeriod === 'annual' ? 'yr' : 'mo'}</span>
+            <span className="text-emerald-600">FREE</span>
           </div>
 
           {gateway === 'wallet' && (

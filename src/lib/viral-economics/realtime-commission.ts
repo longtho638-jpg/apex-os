@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 import { TIERS, EXCHANGE_AVG_REBATE_RATE } from './tier-manager';
-import { getCommissionRate, TierId } from '@/config/unified-tiers';
+import { getCommissionRate, TierId } from '@apex-os/vibe-payment';
 
 interface TradeExecution {
   user_id: string;
@@ -30,21 +30,21 @@ export async function processTradeCommission(trade: TradeExecution) {
     const userTier = (userTierData?.tier || 'FREE') as keyof typeof TIERS;
     const tierConfig = TIERS[userTier];
 
-    // CRITICAL FIX: Use actual fee from exchange if available.
-    // Zero-fee trades (e.g. BTC/FDUSD) must generate ZERO revenue.
-    // If we use volume * avg_rate, we pay out money we didn't earn -> Bankruptcy.
-
-    // We assume we get ~40% of the trading fee as commission from the exchange.
+    // CRITICAL: Use actual fee from exchange. Zero-fee pairs = ZERO revenue.
+    // If we use volume * avg_rate on zero-fee pairs, we pay out money we didn't earn.
     const PARTNER_COMMISSION_SHARE = 0.4;
 
     let revenueGenerated = 0;
 
-    if (typeof trade.fee === 'number') {
+    if (typeof trade.fee === 'number' && trade.fee > 0) {
       revenueGenerated = trade.fee * PARTNER_COMMISSION_SHARE;
+    } else if (typeof trade.fee === 'number' && trade.fee === 0) {
+      // Zero-fee pair (e.g. BTC/FDUSD) — no revenue, no commissions
+      logger.info(`[Commission] Zero-fee trade ${trade_id} on ${symbol}. No commission generated.`);
+      return; // Early exit — nothing to distribute
     } else {
-      // Fallback only if fee is missing (should not happen with proper sync)
-      // Log warning in production
-      logger.warn(`[Commission] Missing fee for trade ${trade_id}, using volume estimation. Risk of overpayment.`);
+      // Fee missing — use conservative estimation with warning
+      logger.warn(`[Commission] Missing fee for trade ${trade_id}, using volume estimation.`);
       revenueGenerated = volume * EXCHANGE_AVG_REBATE_RATE;
     }
 
@@ -145,25 +145,21 @@ export async function processTradeCommission(trade: TradeExecution) {
         p_user_id: user_id,
         p_volume: volume
       });
-    } catch (error) {
-      // Fallback if RPC doesn't exist (it might not yet)
-      // We'll just do a standard update or ignore for now as per task scope (Commission & Payout)
-      // But accurate volume is needed for Tier calculation.
-      // Let's try to update simply.
-      // Actually, `credit_user_balance_realtime` doesn't update volume.
-      // We should probably add that logic or a separate call.
-      // For now, I will assume volume tracking is handled by another service or I should do it here.
-      // I will add a simple update.
+    } catch {
+      // Fallback: direct update if RPC not available
+      const { data: existing } = await supabase
+        .from('user_tiers')
+        .select('monthly_volume, total_volume')
+        .eq('user_id', user_id)
+        .single();
 
-
-      /* 
-      const { data: existing } = await supabase.from('user_tiers').select('monthly_volume').eq('user_id', user_id).single();
       if (existing) {
-         await supabase.from('user_tiers').update({ 
-           monthly_volume: existing.monthly_volume + volume 
-         }).eq('user_id', user_id);
+        await supabase.from('user_tiers').update({
+          monthly_volume: (existing.monthly_volume || 0) + volume,
+          total_volume: (existing.total_volume || 0) + volume,
+          updated_at: new Date().toISOString()
+        }).eq('user_id', user_id);
       }
-      */
     }
 
   } catch (error) {
