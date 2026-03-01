@@ -6,9 +6,9 @@
  * Manages Terms of Service and Privacy Policy acceptance state
  */
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useCallback, useEffect, useState } from 'react';
 import { needsComplianceUpdate } from '@/config/compliance';
+import { createClient } from '@/lib/supabase/client';
 
 export interface ComplianceStatus {
   needsAcceptance: boolean;
@@ -25,15 +25,10 @@ export function useComplianceCheck() {
     loading: true,
   });
 
-  useEffect(() => {
-    checkCompliance();
-  }, []);
-
-  const checkCompliance = async () => {
+  const checkCompliance = useCallback(async () => {
     try {
       const supabase = createClient();
 
-      // Get current user
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -48,17 +43,13 @@ export function useComplianceCheck() {
         return;
       }
 
-      // Get user's compliance status
       const { data: profile } = await supabase
         .from('users')
         .select('tos_accepted_version, privacy_accepted_version')
         .eq('id', user.id)
         .single();
 
-      const needsUpdate = needsComplianceUpdate(
-        profile?.tos_accepted_version,
-        profile?.privacy_accepted_version
-      );
+      const needsUpdate = needsComplianceUpdate(profile?.tos_accepted_version, profile?.privacy_accepted_version);
 
       setStatus({
         needsAcceptance: needsUpdate,
@@ -66,11 +57,14 @@ export function useComplianceCheck() {
         privacyVersion: profile?.privacy_accepted_version || null,
         loading: false,
       });
-    } catch (error) {
-      console.error('[ComplianceCheck] Error:', error);
+    } catch (_error) {
       setStatus((prev) => ({ ...prev, loading: false }));
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    checkCompliance();
+  }, [checkCompliance]);
 
   const acceptTerms = async (): Promise<void> => {
     const response = await fetch('/api/v1/user/accept-terms', {
@@ -81,7 +75,6 @@ export function useComplianceCheck() {
       throw new Error('Failed to accept terms');
     }
 
-    // Refresh status
     await checkCompliance();
   };
 
