@@ -106,7 +106,6 @@ jobs:
 
   deploy-frontend:
     needs: [test-frontend, security-scan]
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -125,7 +124,16 @@ jobs:
       - name: Build Next.js
         run: pnpm run build
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Staging
+        if: github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy .next --project-name=apex-os --branch=staging --commit-dirty=true
+
+      - name: Deploy to Cloudflare Production
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
