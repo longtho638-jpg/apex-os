@@ -1,22 +1,22 @@
 'use client';
 
-import AlgoStudioEditor from '@/components/studio/AlgoStudioEditor';
+import { Lock, UploadCloud } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Sidebar } from '@/components/os/sidebar';
+import AlgoStudioEditor from '@/components/studio/AlgoStudioEditor';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { useUserTier } from '@/hooks/useUserTier';
-import { Lock, UploadCloud } from 'lucide-react';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const { tier, canUseAgent } = useUserTier();
   const router = useRouter();
 
   const handlePublish = () => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), {
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
       loading: 'Compiling Strategy...',
       success: 'Strategy Published to Marketplace! 🚀',
-      error: 'Compilation Failed'
+      error: 'Compilation Failed',
     });
   };
 
@@ -25,7 +25,9 @@ export default function Page() {
       <div className="flex h-screen w-full bg-[#030303] text-white font-sans">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center relative overflow-hidden">
-          <AuroraBackground className="absolute inset-0 z-0 pointer-events-none"><div /></AuroraBackground>
+          <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
+            <div />
+          </AuroraBackground>
           <div className="z-10 text-center p-8 glass-card max-w-md">
             <Lock className="w-12 h-12 text-zinc-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Access Restricted</h2>

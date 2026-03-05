@@ -1,11 +1,11 @@
 'use client';
 
+import { BarChart2, Beaker, Pause, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { Button3D } from '@/components/marketing/Button3D';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Beaker, Plus, Play, Pause, BarChart2 } from 'lucide-react';
-import { Button3D } from '@/components/marketing/Button3D';
-import Link from 'next/link';
 
 export default function ABTestsPage() {
   return (
@@ -15,7 +15,7 @@ export default function ABTestsPage() {
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
         </AuroraBackground>
-        
+
         <div className="relative z-10 h-full flex flex-col overflow-y-auto">
           <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
             <div className="flex items-center justify-between">
@@ -46,7 +46,7 @@ export default function ABTestsPage() {
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                         Active
                       </span>
-                      <span className="text-xs text-zinc-500 font-mono">ID: EXP-{100+i}</span>
+                      <span className="text-xs text-zinc-500 font-mono">ID: EXP-{100 + i}</span>
                     </div>
                     <h3 className="font-bold text-lg">Homepage Hero CTA</h3>
                   </div>
@@ -54,7 +54,7 @@ export default function ABTestsPage() {
                     <Pause className="w-4 h-4" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-3 my-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-zinc-400">Variant A (Control)</span>
@@ -63,7 +63,7 @@ export default function ABTestsPage() {
                   <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                     <div className="h-full bg-zinc-500 w-[12%]" />
                   </div>
-                  
+
                   <div className="flex justify-between text-sm">
                     <span className="text-zinc-400">Variant B</span>
                     <span className="font-mono text-emerald-400">15.8% CR</span>

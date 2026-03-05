@@ -1,12 +1,11 @@
-"use client";
+'use client';
 
 /**
  * Parameterized tier-upgrade hook — accepts supabaseClient instead of importing getSupabaseClientSide.
  */
 
 import { useState } from 'react';
-import type { TierId } from '../types/billing-types';
-import type { UseUpgradeTierParams } from '../types/billing-types';
+import type { TierId, UseUpgradeTierParams } from '../types/billing-types';
 
 export function useUpgradeTier({ supabaseClient }: UseUpgradeTierParams) {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +19,9 @@ export function useUpgradeTier({ supabaseClient }: UseUpgradeTierParams) {
 
     try {
       if (!supabaseClient) {
-        throw new Error('Supabase not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local');
+        throw new Error(
+          'Supabase not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local',
+        );
       }
 
       const mockTxId = `tx_${Math.random().toString(36).substring(7)}`;
@@ -30,7 +31,7 @@ export function useUpgradeTier({ supabaseClient }: UseUpgradeTierParams) {
           user_id: userId,
           tier: targetTier,
           tx_id: mockTxId,
-        }
+        },
       });
 
       if (funcError) throw funcError;
@@ -41,8 +42,9 @@ export function useUpgradeTier({ supabaseClient }: UseUpgradeTierParams) {
 
       setSuccess(true);
       return data;
-    } catch (err: any) {
-      setError(err.message || 'Failed to upgrade');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to upgrade';
+      setError(message);
       return null;
     } finally {
       setIsLoading(false);

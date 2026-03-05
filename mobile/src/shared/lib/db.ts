@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Global pool manager
-let poolInstance: SupabaseClient | null = null;
+const poolInstance: SupabaseClient | null = null;
 
 /**
  * Get a singleton Supabase client configured for connection pooling (Supavisor)

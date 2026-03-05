@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import Joyride, { CallBackProps, STATUS } from 'react-joyride';
+import Joyride, { type CallBackProps, STATUS } from 'react-joyride';
 import { ONBOARDING_STEPS, TOUR_OPTIONS } from '@/config/onboarding-tour';
 
 export interface OnboardingTourProps {
@@ -48,12 +48,5 @@ export function OnboardingTour({ hasCompletedOnboarding, onComplete }: Onboardin
   // Don't render if already completed
   if (hasCompletedOnboarding) return null;
 
-  return (
-    <Joyride
-      steps={ONBOARDING_STEPS}
-      run={run}
-      callback={handleJoyrideCallback}
-      {...TOUR_OPTIONS}
-    />
-  );
+  return <Joyride steps={ONBOARDING_STEPS} run={run} callback={handleJoyrideCallback} {...TOUR_OPTIONS} />;
 }

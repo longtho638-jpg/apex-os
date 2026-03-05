@@ -1,8 +1,8 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, Clock, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, ArrowRight, Clock } from 'lucide-react';
 import { UpgradeModal } from '@/components/checkout/UpgradeModal';
 import { upgradeTriggers } from '@/lib/upgrade-triggers';
 
@@ -19,13 +19,13 @@ export function MissedCommissionBanner({ userId }: { userId: string }) {
     // In production: fetch(`/api/user/vault?userId=${userId}`)
     // For demo purposes, let's say there's $50 pending if we are in a certain state
     // or just random for visual confirmation
-    const randomPending = Math.random() > 0.5 ? 52.50 : 0;
+    const randomPending = Math.random() > 0.5 ? 52.5 : 0;
     setPendingAmount(randomPending);
 
     // Set 24h countdown simulation
     const deadline = new Date();
     deadline.setHours(deadline.getHours() + 24);
-    
+
     const timer = setInterval(() => {
       const now = new Date();
       const diff = deadline.getTime() - now.getTime();
@@ -40,7 +40,7 @@ export function MissedCommissionBanner({ userId }: { userId: string }) {
     }, 60000); // Update every minute
 
     return () => clearInterval(timer);
-  }, [userId]);
+  }, []);
 
   if (pendingAmount <= 0) return null;
 
@@ -67,12 +67,10 @@ export function MissedCommissionBanner({ userId }: { userId: string }) {
                     <Clock className="w-3 h-3" /> {timeLeft}
                   </span>
                 </h3>
-                <p className="text-sm text-white/90">
-                  Grace Period Active! Upgrade to claim this immediately.
-                </p>
+                <p className="text-sm text-white/90">Grace Period Active! Upgrade to claim this immediately.</p>
               </div>
             </div>
-            
+
             <button
               onClick={() => setShowUpgradeModal(true)}
               className="px-6 py-2 bg-white text-orange-600 font-bold rounded-lg hover:bg-orange-50 transition-colors flex items-center gap-2 whitespace-nowrap shadow-lg"
@@ -83,14 +81,14 @@ export function MissedCommissionBanner({ userId }: { userId: string }) {
         </motion.div>
       </AnimatePresence>
 
-      <UpgradeModal 
+      <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         trigger={{
-            type: trigger.type,
-            message: trigger.message,
-            urgency: trigger.urgency,
-            discount: trigger.discount
+          type: trigger.type,
+          message: trigger.message,
+          urgency: trigger.urgency,
+          discount: trigger.discount,
         }}
         userId={userId}
       />

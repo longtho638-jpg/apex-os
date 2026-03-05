@@ -1,9 +1,8 @@
 'use client';
 
-import { GlassCard } from '@/components/ui/glass-card';
 import { Sidebar } from '@/components/os/sidebar';
-import { AuroraBackground } from '@/components/ui/aurora-background';
 import { CopyTradingLeaderboard } from '@/components/trading/CopyTradingLeaderboard';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function PaperTradingLeaderboardPage() {
@@ -26,7 +25,9 @@ export default function PaperTradingLeaderboardPage() {
 
             <div className="inline-flex items-center gap-8 px-8 py-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl backdrop-blur-sm">
               <div className="text-center">
-                <div className="text-xs text-yellow-500 uppercase tracking-widest font-bold mb-1">Weekly Prize Pool</div>
+                <div className="text-xs text-yellow-500 uppercase tracking-widest font-bold mb-1">
+                  Weekly Prize Pool
+                </div>
                 <div className="text-3xl font-black text-white">$5,000 USDT</div>
               </div>
               <div className="w-px h-10 bg-white/10" />

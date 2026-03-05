@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { rateLimit } from '../rate-limit';
 
 // Mock ioredis
@@ -11,7 +11,7 @@ vi.mock('../redis', () => ({
     incr: (...args: any[]) => mockIncr(...args),
     expire: (...args: any[]) => mockExpire(...args),
     ttl: (...args: any[]) => mockTtl(...args),
-  }
+  },
 }));
 
 describe('Rate Limiter', () => {
@@ -23,7 +23,7 @@ describe('Rate Limiter', () => {
   it('should allow requests within limit', async () => {
     mockIncr.mockResolvedValue(1);
     const result = await rateLimit('test-user', { limit: 10, window: 60 });
-    
+
     expect(result.success).toBe(true);
     expect(result.remaining).toBe(9);
     expect(mockIncr).toHaveBeenCalledWith('rate_limit:test-user');
@@ -33,7 +33,7 @@ describe('Rate Limiter', () => {
   it('should block requests exceeding limit', async () => {
     mockIncr.mockResolvedValue(11);
     const result = await rateLimit('test-user', { limit: 10, window: 60 });
-    
+
     expect(result.success).toBe(false);
     expect(result.remaining).toBe(0);
   });
@@ -41,7 +41,7 @@ describe('Rate Limiter', () => {
   it('should fail open (allow) if Redis errors', async () => {
     mockIncr.mockRejectedValue(new Error('Redis connection failed'));
     const result = await rateLimit('test-user');
-    
+
     expect(result.success).toBe(true); // Fails open
     expect(result.remaining).toBe(1);
   });

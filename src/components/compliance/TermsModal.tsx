@@ -6,9 +6,9 @@
  * Forces users to accept updated terms before accessing the platform
  */
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { COMPLIANCE_CONFIG } from '@/config/compliance';
 
 export interface TermsModalProps {
@@ -35,11 +35,11 @@ export function TermsModal({ isOpen, onAccept, userEmail }: TermsModalProps) {
 
     try {
       await onAccept();
-    } catch (err) {
+    } catch (_err) {
       setError(
         t('errorGeneric', {
           defaultValue: 'Failed to save acceptance. Please try again.',
-        })
+        }),
       );
     } finally {
       setLoading(false);
@@ -61,8 +61,7 @@ export function TermsModal({ isOpen, onAccept, userEmail }: TermsModalProps) {
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 {t('subtitle', {
-                  defaultValue:
-                    'We have updated our terms. Please review and accept to continue.',
+                  defaultValue: 'We have updated our terms. Please review and accept to continue.',
                 })}
               </p>
             </div>
@@ -101,9 +100,7 @@ export function TermsModal({ isOpen, onAccept, userEmail }: TermsModalProps) {
                 >
                   {t('tosLink', { defaultValue: 'Terms of Service' })}
                 </a>{' '}
-                <span className="text-gray-500 dark:text-gray-400">
-                  (v{COMPLIANCE_CONFIG.tos.version})
-                </span>
+                <span className="text-gray-500 dark:text-gray-400">(v{COMPLIANCE_CONFIG.tos.version})</span>
               </span>
             </label>
           </div>
@@ -129,9 +126,7 @@ export function TermsModal({ isOpen, onAccept, userEmail }: TermsModalProps) {
                 >
                   {t('privacyLink', { defaultValue: 'Privacy Policy' })}
                 </a>{' '}
-                <span className="text-gray-500 dark:text-gray-400">
-                  (v{COMPLIANCE_CONFIG.privacy.version})
-                </span>
+                <span className="text-gray-500 dark:text-gray-400">(v{COMPLIANCE_CONFIG.privacy.version})</span>
               </span>
             </label>
           </div>

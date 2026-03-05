@@ -1,8 +1,14 @@
-import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
-import { createPolarCheckout, createNOWPaymentsInvoice, PAYMENT_TIERS, PaymentTier, getTierPrice, TierId } from '@apex-os/vibe-payment';
-import { applyDiscount } from '@/lib/discount-engine';
+import {
+  createNOWPaymentsInvoice,
+  createPolarCheckout,
+  getTierPrice,
+  type PaymentTier,
+  type TierId,
+} from '@apex-os/vibe-payment';
+import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { applyDiscount } from '@/lib/discount-engine';
+import { logger } from '@/lib/logger';
 import { redis } from '@/lib/redis';
 
 const checkoutSchema = z.object({
@@ -10,7 +16,7 @@ const checkoutSchema = z.object({
   gateway: z.enum(['polar', 'nowpayments', 'wallet']),
   userEmail: z.string().email(),
   discountCode: z.string().optional().nullable(),
-  billingPeriod: z.enum(['monthly', 'annual']).optional().default('monthly')
+  billingPeriod: z.enum(['monthly', 'annual']).optional().default('monthly'),
 });
 
 export async function POST(request: NextRequest) {
@@ -61,16 +67,13 @@ export async function POST(request: NextRequest) {
     if (gateway === 'wallet') {
       // Call RPC to pay with wallet
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
       const { data, error } = await supabase.rpc('pay_with_wallet', {
         p_user_id: userId,
         p_amount: finalPrice,
         p_tier: tier,
-        p_billing_period: billingPeriod
+        p_billing_period: billingPeriod,
       });
 
       if (error) {
@@ -81,42 +84,43 @@ export async function POST(request: NextRequest) {
       const result = data as any;
 
       if (!result || !result.success) {
-        return NextResponse.json({ error: result?.message || 'Insufficient balance or payment failed' }, { status: 400 });
+        return NextResponse.json(
+          { error: result?.message || 'Insufficient balance or payment failed' },
+          { status: 400 },
+        );
       }
 
       responseData = {
         success: true,
         finalPrice,
         saved: savedAmount,
-        message: 'Payment successful'
+        message: 'Payment successful',
       };
-
     } else if (gateway === 'polar') {
       const checkout = await createPolarCheckout({
         userId,
         userEmail,
-        tier: tier as PaymentTier
+        tier: tier as PaymentTier,
       });
 
       responseData = {
         checkoutUrl: checkout.url,
         checkoutId: checkout.id,
         finalPrice,
-        saved: savedAmount
+        saved: savedAmount,
       };
-
     } else {
       const invoice = await createNOWPaymentsInvoice({
         userId,
         tier: tier as PaymentTier,
-        amountOverride: finalPrice
+        amountOverride: finalPrice,
       });
 
       responseData = {
         checkoutUrl: invoice.invoice_url,
         orderId: invoice.order_id,
         finalPrice,
-        saved: savedAmount
+        saved: savedAmount,
       };
     }
 
@@ -124,12 +128,8 @@ export async function POST(request: NextRequest) {
     await redis.set(`idempotency:${idempotencyKey}`, JSON.stringify(responseData), 'EX', 86400); // 24 hours
 
     return NextResponse.json(responseData);
-
   } catch (error) {
     logger.error('Checkout error:', error);
-    return NextResponse.json(
-      { error: 'Checkout failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Checkout failed' }, { status: 500 });
   }
 }

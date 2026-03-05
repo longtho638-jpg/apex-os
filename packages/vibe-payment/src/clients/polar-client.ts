@@ -4,18 +4,14 @@
  */
 
 import { Polar } from '@polar-sh/sdk';
-import type { CreateCheckoutParams } from '../types/billing-types';
 import { getTierById } from '../config/unified-tiers';
+import type { CreateCheckoutParams } from '../types/billing-types';
 
 const polarClient = new Polar({
-  accessToken: process.env.POLAR_ACCESS_TOKEN!,
+  accessToken: process.env.POLAR_ACCESS_TOKEN ?? '',
 });
 
-export async function createPolarCheckout({
-  userId,
-  userEmail,
-  tier
-}: CreateCheckoutParams) {
+export async function createPolarCheckout({ userId, userEmail, tier }: CreateCheckoutParams) {
   const tierConfig = getTierById(tier);
 
   if (!tierConfig) {
@@ -34,15 +30,15 @@ export async function createPolarCheckout({
     metadata: {
       userId,
       tier,
-      source: 'apexos'
-    }
-  } as any);
+      source: 'apexos',
+    },
+  });
 
   return checkout;
 }
 
 export async function getPolarCheckout(checkoutId: string) {
-  return await polarClient.checkouts.get({ id: checkoutId } as any);
+  return await polarClient.checkouts.get({ id: checkoutId });
 }
 
 export { polarClient };

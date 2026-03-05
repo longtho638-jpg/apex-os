@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
+import { type NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email-service'; // Mock function from previous phase
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
   // Verify cron secret
@@ -37,7 +37,6 @@ export async function GET(req: NextRequest) {
 
       // If no code or 0 referrals, send reminder
       if (!refCode || refCode.total_referrals === 0) {
-
         // Check if already sent reminder recently (email_logs)
         const { data: sent } = await supabase
           .from('email_logs')
@@ -57,13 +56,13 @@ export async function GET(req: NextRequest) {
                     <p>Invite 3 friends and earn up to 30% commission on their trading volume.</p>
                     <p>Your referral link: https://apexrebate.com/r/${code}</p>
                     <a href="https://apexrebate.com/dashboard/referrals">Go to Referral Dashboard</a>
-                `
+                `,
           });
 
           await supabase.from('email_logs').insert({
             user_id: user.id,
             email_type: 'referral_reminder',
-            sent_at: new Date().toISOString()
+            sent_at: new Date().toISOString(),
           });
 
           emailsSent++;

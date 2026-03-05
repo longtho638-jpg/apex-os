@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { authenticateRequest } from '@/lib/viral-economics/auth';
 import { getSupabaseClient } from '@/lib/supabase';
+import { authenticateRequest } from '@/lib/viral-economics/auth';
 
 export async function POST(request: Request) {
   const userId = await authenticateRequest(request);
@@ -14,11 +14,7 @@ export async function POST(request: Request) {
   const supabase = getSupabaseClient();
 
   // 1. Check Balance
-  const { data: wallet } = await supabase
-    .from('user_wallets')
-    .select('balance')
-    .eq('user_id', userId)
-    .single();
+  const { data: wallet } = await supabase.from('user_wallets').select('balance').eq('user_id', userId).single();
 
   if (!wallet || wallet.balance < amount) {
     return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 });
@@ -36,7 +32,7 @@ export async function POST(request: Request) {
       current_price: entryPrice,
       size: amount * leverage,
       leverage: leverage,
-      status: 'OPEN'
+      status: 'OPEN',
     })
     .select()
     .single();

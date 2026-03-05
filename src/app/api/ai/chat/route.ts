@@ -1,17 +1,18 @@
-import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
-import { createSmartRouter } from '@/lib/ai/smart-router';
-import { RateLimiter } from '@/lib/ai/rate-limiter';
 import { getTierByVolume } from '@apex-os/vibe-payment';
+import { type NextRequest, NextResponse } from 'next/server';
+import { RateLimiter } from '@/lib/ai/rate-limiter';
+import { createSmartRouter } from '@/lib/ai/smart-router';
+import { logger } from '@/lib/logger';
+import { getSupabaseClient } from '@/lib/supabase';
+
 // import { trackEvent } from '@/lib/analytics';
 
 // Simple mock for trackEvent until analytics module is fully integrated or imported correctly
 async function trackEvent(params: any) {
-    // This would normally call the analytics service
-    if (process.env.NODE_ENV === 'development') {
-        logger.info('[Analytics Track]', params);
-    }
+  // This would normally call the analytics service
+  if (process.env.NODE_ENV === 'development') {
+    logger.info('[Analytics Track]', params);
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -41,13 +42,16 @@ export async function POST(req: NextRequest) {
     const limitCheck = await RateLimiter.checkLimit(userId, userTier);
 
     if (!limitCheck.allowed) {
-      return NextResponse.json({
-        error: 'Rate limit exceeded',
-        code: 'RATE_LIMIT_EXCEEDED',
-        limit: limitCheck.limit,
-        remaining: 0,
-        upgradeRequired: true,
-      }, { status: 429 });
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded',
+          code: 'RATE_LIMIT_EXCEEDED',
+          limit: limitCheck.limit,
+          remaining: 0,
+          upgradeRequired: true,
+        },
+        { status: 429 },
+      );
     }
 
     // Create smart router
@@ -57,13 +61,7 @@ export async function POST(req: NextRequest) {
     const response = await router.complete(messages);
 
     // Increment usage
-    await RateLimiter.incrementUsage(
-        userId, 
-        response.tokens, 
-        response.cost,
-        response.model,
-        response.provider
-    );
+    await RateLimiter.incrementUsage(userId, response.tokens, response.cost, response.model, response.provider);
 
     // Track analytics
     await trackEvent({
@@ -91,12 +89,14 @@ export async function POST(req: NextRequest) {
         remaining: limitCheck.remaining - 1,
       },
     });
-
   } catch (error) {
     logger.error('[AI Chat] Error:', error);
-    return NextResponse.json({
-      error: 'AI request failed',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'AI request failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
   }
 }

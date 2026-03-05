@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import type React from 'react';
 import { cn } from '@/lib/utils';
 
 interface AuroraBackgroundProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -11,10 +10,7 @@ interface AuroraBackgroundProps extends React.HTMLAttributes<HTMLDivElement> {
 export function AuroraBackground({ className, children, ...props }: AuroraBackgroundProps) {
   return (
     <div
-      className={cn(
-        "relative w-full h-full bg-black text-slate-950 transition-bg overflow-hidden",
-        className
-      )}
+      className={cn('relative w-full h-full bg-black text-slate-950 transition-bg overflow-hidden', className)}
       {...props}
     >
       <div className="absolute inset-0 overflow-hidden">
@@ -33,7 +29,7 @@ export function AuroraBackground({ className, children, ...props }: AuroraBackgr
             after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
             pointer-events-none
             absolute -inset-[10px] opacity-50 will-change-transform`,
-            "dark:[background-image:var(--dark-gradient),var(--aurora)]"
+            'dark:[background-image:var(--dark-gradient),var(--aurora)]',
           )}
         ></div>
       </div>

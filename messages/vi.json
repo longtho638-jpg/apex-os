@@ -11,12 +11,12 @@
       "get_started": "Bắt đầu ngay"
     },
     "hero": {
-      "badge": "Nền tảng Trading AI Chuẩn Tổ Chức",
-      "title_line1": "Trí Tuệ Giao Dịch",
-      "title_line2": "Dành Cho Chuyên Gia",
-      "description": "Hệ điều hành trading tự học đầu tiên trên thế giới. AI agent học phong cách của bạn, thực thi 24/7 và gia tăng lợi nhuận—ngay cả khi bạn ngủ.",
-      "cta_primary": "Dùng thử miễn phí",
-      "cta_secondary": "Xem Demo",
+      "badge": "Nền Tảng Trading RaaS AGI",
+      "title_line1": "Sàn Giao Dịch Miễn Phí",
+      "title_line2": "Hệ Điều Hành Agentic",
+      "description": "Nền tảng trading AI zero-fee đầu tiên trên thế giới. Doanh thu từ spread, không phải đăng ký. AI agents giao dịch 24/7 trong khi bạn ngủ.",
+      "cta_primary": "Khởi Động AI Agents",
+      "cta_secondary": "Xem Cách Hoạt Động",
       "trust_security": "Bảo mật cấp ngân hàng",
       "trust_uptime": "Uptime 99.9%",
       "trust_global": "Truy cập toàn cầu"
@@ -48,14 +48,24 @@
       "level_3_4": "Cấp 3 & 4",
       "locked": "Đã khóa (Cần nâng cấp)"
     },
+    "raas": {
+      "badge": "Doanh Thu Như Dịch Vụ",
+      "title": "Miễn Phí Đăng Ký. Mãi Mãi.",
+      "subtitle": "Cấp bậc được xác định bởi khối lượng giao dịch, không phải ví tiền. Giao dịch nhiều hơn, spread thấp hơn."
+    },
+    "onboarding": {
+      "badge": "Onboarding Thông Minh",
+      "title": "AI Triển Khai Trading Agents",
+      "subtitle": "Thiết lập 30 giây. Không form. Chỉ cần trade."
+    },
     "smart_switch": {
       "title": "Ngừng Trả Phí Đầy Đủ",
       "subtitle": "AI của chúng tôi phân tích hàng nghìn cấu trúc phí để tìm hoàn tiền tối ưu cho bạn."
     },
     "final_cta": {
-      "title": "Sẵn Sàng Thống Trị?",
-      "description": "Tham gia 12.000+ trader đã nâng cấp lên ApexOS. Giành chỗ của bạn trong Bầy Sói ngay hôm nay.",
-      "cta": "Bắt Đầu Ngay"
+      "title": "Sẵn Sàng Trade Miễn Phí?",
+      "description": "Tham gia 12.000+ trader trên sàn giao dịch agentic zero-fee đầu tiên thế giới. AI agents đang chờ bạn.",
+      "cta": "Khởi Động Agents"
     },
     "features": {
       "title": "Tại sao Top Trader chọn ApexOS",
@@ -516,7 +526,47 @@
     "join_telegram": "Tham gia Telegram",
     "claim_reward": "Nhận Dùng thử Elite 24h",
     "task_completed": "Nhiệm vụ hoàn thành!",
-    "reward_claimed": "Đã nhận thưởng! Kích hoạt Dùng thử Elite 24h."
+    "reward_claimed": "Đã nhận thưởng! Kích hoạt Dùng thử Elite 24h.",
+    "steps": {
+      "profile": {
+        "title": "AI Quét Hồ Sơ",
+        "subtitle": "AI phân tích phong cách giao dịch trong 30 giây"
+      },
+      "risk-assessment": {
+        "title": "Chuẩn Hóa Rủi Ro",
+        "subtitle": "Đánh giá rủi ro tự động — không form, chỉ câu hỏi"
+      },
+      "agent-config": {
+        "title": "Triển Khai Agent",
+        "subtitle": "Các agent giao dịch đang được cấu hình"
+      },
+      "funding": {
+        "title": "Nạp & Khởi Chạy",
+        "subtitle": "Nạp crypto — không phí, thanh toán tức thì"
+      }
+    },
+    "profile": {
+      "experience": "Kinh nghiệm giao dịch",
+      "monthly_volume": "Volume hàng tháng dự kiến (USD)"
+    },
+    "risk": {
+      "detected": "AI Phát Hiện: Hạng {tier}",
+      "qualify": "Dựa trên volume {volume}/tháng, bạn đủ điều kiện spread {spread} với {agents} AI agents.",
+      "tolerance": "Mức chấp nhận rủi ro"
+    },
+    "agents": {
+      "live": "HOẠT ĐỘNG"
+    },
+    "funding": {
+      "zero_fee": "Không phí nạp tiền",
+      "networks": "Mạng Được Hỗ Trợ"
+    },
+    "actions": {
+      "continue": "Tiếp Tục",
+      "deploy_agents": "Triển Khai Agents",
+      "fund_and_trade": "Nạp & Bắt Đầu Giao Dịch",
+      "start_trading": "Bắt Đầu — Không Phí"
+    }
   },
   "AI": {
     "core_title": "Apex AI Core",
@@ -911,88 +961,89 @@
   },
   "Pricing": {
     "hero": {
-      "title": "Ngừng Mất Tiền Vào Phí Giao Dịch",
-      "subtitle": "Theo dõi mọi khoản hoàn phí tự động. Tối đa hóa lợi nhuận.",
-      "cta": "Dùng thử miễn phí - Không cần thẻ tín dụng"
+      "title": "Không Phí. Giao Dịch Không Giới Hạn.",
+      "badge": "RaaS AGI — Giao Dịch Không Phí Với AI",
+      "subtitle": "Đa tổ chức. Không phí. Crypto gốc. AI agents giao dịch thay bạn — bạn kiếm từ mỗi lệnh trong mạng lưới.",
+      "cta": "Bắt Đầu Giao Dịch Miễn Phí"
+    },
+    "raas": {
+      "badge": "Mô Hình RaaS",
+      "volume_based": "Xếp Hạng Theo Khối Lượng",
+      "spread_label": "Spread",
+      "rebate_label": "Hoàn Phí",
+      "agents_label": "Agents",
+      "volume_required": "Khối Lượng Yêu Cầu",
+      "current_tier": "Hạng Hiện Tại",
+      "auto_upgrade": "Tự động nâng hạng theo khối lượng",
+      "zero_fee": "$0/tháng",
+      "vs_saas_title": "SaaS vs RaaS",
+      "vs_saas_old": "SaaS Truyền Thống",
+      "vs_saas_new": "Apex RaaS",
+      "volume_explorer": "Dưới $10K/tháng",
+      "volume_operator": "$10K – $100K/tháng",
+      "volume_architect": "$100K – $1M/tháng",
+      "volume_sovereign": "Trên $1M/tháng"
     },
     "calculator": {
       "volume": "Volume Hàng Tháng",
-      "recovered": "Hoàn phí ước tính thu hồi",
+      "recovered": "Hoàn phí ước tính",
       "claim": "Nhận Ngay"
     },
     "tiers": {
-      "free": {
-        "name": "MIỄN PHÍ",
-        "price": "$0",
-        "period": "mãi mãi",
-        "features": [
-          "1 sàn giao dịch",
-          "Theo dõi cơ bản",
-          "Lịch sử 7 ngày"
-        ]
-      },
-      "basic": {
-        "name": "CƠ BẢN",
-        "price": "$29",
-        "period": "mỗi tháng",
-        "annual_save": "Tiết kiệm $58",
-        "features": [
-          "3 sàn giao dịch",
-          "Lịch sử đầy đủ",
-          "Xuất dữ liệu",
-          "Hỗ trợ qua Email"
-        ]
-      },
-      "trader": {
-        "name": "TRADER",
-        "price": "$97",
-        "period": "mỗi tháng",
-        "badge": "PHỔ BIẾN NHẤT",
-        "annual_save": "Tiết kiệm $194",
-        "features": [
-          "10 sàn giao dịch",
-          "Lịch sử không giới hạn",
-          "Phân tích nâng cao",
-          "Hỗ trợ ưu tiên",
-          "Ứng dụng di động"
-        ]
-      },
-      "pro": {
-        "name": "PRO",
-        "price": "$297",
-        "period": "mỗi tháng",
-        "annual_save": "Tiết kiệm $594",
-        "features": [
-          "Không giới hạn sàn",
-          "Truy cập API",
-          "Báo cáo tùy chỉnh",
-          "Hỗ trợ đặc biệt",
-          "Truy cập sớm tính năng"
-        ]
-      },
-      "elite": {
-        "name": "ELITE",
-        "price": "$997",
-        "period": "mỗi tháng",
-        "annual_save": "Tiết kiệm $1,994",
-        "features": [
-          "Tất cả tính năng PRO",
-          "Quản lý tài khoản riêng",
-          "Tích hợp tùy chỉnh",
-          "Cam kết SLA",
-          "Hỗ trợ điện thoại 24/7"
-        ]
-      }
+      "section_subtitle": "Xếp hạng theo khối lượng — tự động mở khóa qua quy trình AI",
+      "section_title": "AI Agents + Đa Tổ Chức + Crypto = Giao Dịch Không Phí",
+      "most_popular": "Phổ Biến Nhất",
+      "start_trading": "Giao Dịch Miễn Phí"
+    },
+    "comparison": {
+      "title": "SaaS vs RaaS AGI — Bước Chuyển Mô Hình",
+      "subtitle": "Quy trình AI crypto đa tổ chức không phí thay thế thuê bao truyền thống",
+      "saas_title": "Mô Hình SaaS Cũ",
+      "raas_title": "Mô Hình RaaS Mới",
+      "saas_1": "Trả $97–$997/tháng dù có trade hay không",
+      "saas_2": "Nền tảng lời ngay cả khi bạn thua",
+      "saas_3": "Tính năng bị khóa sau các hạng cao hơn",
+      "saas_4": "Bẫy thanh toán hàng năm, không hoàn tiền",
+      "saas_5": "Không động lực giúp bạn thành công",
+      "raas_1": "$0/tháng — không phí thuê bao mãi mãi",
+      "raas_2": "Đa tổ chức: tạo team, chia sẻ agents, gộp volume",
+      "raas_3": "Crypto gốc: nạp/rút USDT trên 5+ chain",
+      "raas_4": "AI agents tự trade 24/7 — kiếm tiền khi bạn ngủ",
+      "raas_5": "Hạng tự mở khóa theo volume AI"
     },
     "trust": {
-      "users": "200+ trader đang theo dõi hoàn phí",
-      "savings": "Người dùng trung bình tiết kiệm $500/tháng",
-      "guarantee": "Đảm bảo hoàn tiền 7 ngày"
+      "users": "12.000+ trader trên sàn không phí",
+      "savings": "Trung bình thu hồi $500/tháng hoàn phí",
+      "guarantee": "Không cam kết — giao dịch miễn phí mãi"
     },
     "urgency": {
-      "limited": "100 người dùng đầu tiên giảm giá 50% TRỌN ĐỜI",
-      "spots": "Chỉ còn X suất giá này"
+      "limited": "Truy Cập Sớm — Thưởng Khối Lượng Đang Hoạt Động",
+      "spots": "Tham gia cuộc cách mạng không phí"
     }
+  },
+  "AgenticWorkflow": {
+    "title": "Quy Trình Tác Nhân AI",
+    "pipeline": "Quy Trình Giao Dịch",
+    "signal_detection": "Phát Hiện Tín Hiệu",
+    "risk_assessment": "Đánh Giá Rủi Ro",
+    "execution": "Thực Thi",
+    "tier_progress": "Tiến Độ Hạng",
+    "deployed_agents": "Tác Nhân Đã Triển Khai",
+    "agent_active": "Hoạt Động",
+    "agent_idle": "Chờ",
+    "agent_error": "Lỗi"
+  },
+  "Exchange": {
+    "zero_fee_badge": "Không Phí Giao Dịch",
+    "spread_breakdown": "Chi Tiết Spread",
+    "trade_amount": "Giá Trị Giao Dịch",
+    "spread_rate": "Tỷ Lệ Spread",
+    "spread_cost": "Chi Phí Spread",
+    "your_rebate": "Hoàn Lại Của Bạn",
+    "net_cost": "Chi Phí Ròng",
+    "settlement": "Thanh Toán",
+    "supported_chains": "Chuỗi Hỗ Trợ",
+    "swap_success": "Swap hoàn tất thành công!"
   },
   "Offer": {
     "limited_time": "Ưu đãi có hạn",

@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
+import { type NextRequest, NextResponse } from 'next/server';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const WEB_APP_URL = 'https://apexrebate.com'; // Replace with actual URL
@@ -22,7 +21,7 @@ export async function POST(req: NextRequest) {
       // Check for referral code: /start ref_123
       const args = text.split(' ')[1];
       let referralCode = null;
-      if (args && args.startsWith('ref_')) {
+      if (args?.startsWith('ref_')) {
         referralCode = args.replace('ref_', '');
         // Store referral intent temporarily or handle on WebApp launch
         // For this implementation, we pass it as a start_param to the Web App
@@ -31,19 +30,17 @@ export async function POST(req: NextRequest) {
       const startParam = referralCode ? `?start_param=${referralCode}` : '';
 
       await sendMessage(chatId, {
-        text: "🚀 Welcome to ApexOS!\n\nInstitutional-grade AI trading signals in your pocket.\n\n👇 Click below to start trading:",
+        text: '🚀 Welcome to ApexOS!\n\nInstitutional-grade AI trading signals in your pocket.\n\n👇 Click below to start trading:',
         reply_markup: {
-          inline_keyboard: [[
-            { text: "Open ApexOS 📱", web_app: { url: `${WEB_APP_URL}${startParam}` } }
-          ]]
-        }
+          inline_keyboard: [[{ text: 'Open ApexOS 📱', web_app: { url: `${WEB_APP_URL}${startParam}` } }]],
+        },
       });
     }
 
     // Handle /help
     else if (text.startsWith('/help')) {
       await sendMessage(chatId, {
-        text: "Need help? Contact support@apexos.com or join our community channel."
+        text: 'Need help? Contact support@apexos.com or join our community channel.',
       });
     }
   }
@@ -57,6 +54,6 @@ async function sendMessage(chatId: number | string, payload: any) {
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, ...payload })
+    body: JSON.stringify({ chat_id: chatId, ...payload }),
   });
 }

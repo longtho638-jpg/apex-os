@@ -1,12 +1,12 @@
 'use client';
 
+import { Calculator, DollarSign, Percent, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
-import { Calculator, TrendingUp, DollarSign, Percent } from 'lucide-react';
 import { AnimatedNumber } from '@/components/marketing/AnimatedNumber';
 
 export function PricingCalculator() {
   const [volume, setVolume] = useState(100000);
-  const [rebateRate, setRebateRate] = useState(0.05); // 0.05% avg rebate
+  const [rebateRate, _setRebateRate] = useState(0.05); // 0.05% avg rebate
 
   const monthlySavings = volume * (rebateRate / 100);
   const annualSavings = monthlySavings * 12;
@@ -52,7 +52,7 @@ export function PricingCalculator() {
               $<AnimatedNumber value={monthlySavings} />
             </div>
           </div>
-          
+
           <div className="p-4 bg-black/40 rounded-xl border border-white/5">
             <div className="text-xs text-zinc-500 mb-1 flex items-center gap-1">
               <TrendingUp size={12} /> Annual Value

@@ -1,13 +1,12 @@
 'use client';
 
+import { DollarSign, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { ExitCalculator } from '@/components/admin/ExitCalculator';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
-import { Users, DollarSign, PieChart as PieChartIcon } from 'lucide-react';
-
-import { ExitCalculator } from '@/components/admin/ExitCalculator';
+import { GlassCard } from '@/components/ui/glass-card';
 
 interface Stakeholder {
   id: string;
@@ -20,24 +19,24 @@ const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export default function CapTablePage() {
   const [holders, setHolders] = useState<Stakeholder[]>([]);
-  const [valuation, setValuation] = useState(10000000);
-  const [totalShares, setTotalShares] = useState(10000000);
+  const [valuation, _setValuation] = useState(10000000);
+  const [totalShares, _setTotalShares] = useState(10000000);
 
   useEffect(() => {
     // Mock fetch - in prod fetch from API
     // We will use the seed data from migration for visual
     const mockData = [
-        { id: '1', name: 'Founder', role: 'founder', shares_owned: 6000000 },
-        { id: '2', name: 'Co-Founder', role: 'founder', shares_owned: 2000000 },
-        { id: '3', name: 'Seed Investor', role: 'investor', shares_owned: 1000000 },
-        { id: '4', name: 'ESOP Pool', role: 'employee', shares_owned: 1000000 },
+      { id: '1', name: 'Founder', role: 'founder', shares_owned: 6000000 },
+      { id: '2', name: 'Co-Founder', role: 'founder', shares_owned: 2000000 },
+      { id: '3', name: 'Seed Investor', role: 'investor', shares_owned: 1000000 },
+      { id: '4', name: 'ESOP Pool', role: 'employee', shares_owned: 1000000 },
     ];
     setHolders(mockData);
   }, []);
 
-  const chartData = holders.map(h => ({
-      name: h.name,
-      value: h.shares_owned
+  const chartData = holders.map((h) => ({
+    name: h.name,
+    value: h.shares_owned,
   }));
 
   return (
@@ -62,7 +61,7 @@ export default function CapTablePage() {
                 <p className="text-zinc-400 text-sm">Valuation</p>
                 <DollarSign className="w-5 h-5 text-emerald-400" />
               </div>
-              <h3 className="text-2xl font-bold">${(valuation/1000000).toFixed(1)}M</h3>
+              <h3 className="text-2xl font-bold">${(valuation / 1000000).toFixed(1)}M</h3>
             </GlassCard>
 
             <GlassCard className="p-6">
@@ -70,7 +69,7 @@ export default function CapTablePage() {
                 <p className="text-zinc-400 text-sm">Share Price</p>
                 <DollarSign className="w-5 h-5 text-blue-400" />
               </div>
-              <h3 className="text-2xl font-bold">${(valuation/totalShares).toFixed(2)}</h3>
+              <h3 className="text-2xl font-bold">${(valuation / totalShares).toFixed(2)}</h3>
             </GlassCard>
 
             <GlassCard className="p-6">
@@ -97,11 +96,11 @@ export default function CapTablePage() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {chartData.map((entry, index) => (
+                    {chartData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a' }}
                     itemStyle={{ color: '#fff' }}
                   />
@@ -113,30 +112,30 @@ export default function CapTablePage() {
               <h3 className="text-lg font-bold mb-4">Cap Table Detail</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                    <thead>
-                        <tr className="text-left text-zinc-500 border-b border-white/10">
-                            <th className="pb-2">Name</th>
-                            <th className="pb-2">Role</th>
-                            <th className="pb-2 text-right">Shares</th>
-                            <th className="pb-2 text-right">%</th>
-                            <th className="pb-2 text-right">Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {holders.map((h, i) => (
-                            <tr key={i} className="border-b border-white/5">
-                                <td className="py-3 font-bold">{h.name}</td>
-                                <td className="py-3 capitalize text-zinc-400">{h.role}</td>
-                                <td className="py-3 text-right font-mono">{h.shares_owned.toLocaleString()}</td>
-                                <td className="py-3 text-right text-zinc-400">
-                                    {((h.shares_owned/totalShares)*100).toFixed(1)}%
-                                </td>
-                                <td className="py-3 text-right text-emerald-400">
-                                    ${((h.shares_owned/totalShares)*valuation).toLocaleString()}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
+                  <thead>
+                    <tr className="text-left text-zinc-500 border-b border-white/10">
+                      <th className="pb-2">Name</th>
+                      <th className="pb-2">Role</th>
+                      <th className="pb-2 text-right">Shares</th>
+                      <th className="pb-2 text-right">%</th>
+                      <th className="pb-2 text-right">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {holders.map((h, i) => (
+                      <tr key={i} className="border-b border-white/5">
+                        <td className="py-3 font-bold">{h.name}</td>
+                        <td className="py-3 capitalize text-zinc-400">{h.role}</td>
+                        <td className="py-3 text-right font-mono">{h.shares_owned.toLocaleString()}</td>
+                        <td className="py-3 text-right text-zinc-400">
+                          {((h.shares_owned / totalShares) * 100).toFixed(1)}%
+                        </td>
+                        <td className="py-3 text-right text-emerald-400">
+                          ${((h.shares_owned / totalShares) * valuation).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </table>
               </div>
             </GlassCard>

@@ -11,12 +11,12 @@
       "get_started": "Get Started"
     },
     "hero": {
-      "badge": "Institutional Grade AI Trading Platform",
-      "title_line1": "Agentic Trade Intelligence",
-      "title_line2": "Built for Professionals",
-      "description": "The world's first self-improving trading OS. AI agents that learn your style, execute 24/7, and compound your edge—while you sleep.",
-      "cta_primary": "Start Free Trial",
-      "cta_secondary": "Watch Demo",
+      "badge": "RaaS AGI Trading Platform",
+      "title_line1": "Zero-Fee Exchange",
+      "title_line2": "Agentic Trading OS",
+      "description": "The world's first zero-fee, AI-native trading platform. Revenue from spread, not subscriptions. Your agents trade 24/7 while you sleep.",
+      "cta_primary": "Launch Trading Agents",
+      "cta_secondary": "See How It Works",
       "trust_security": "Bank-Level Security",
       "trust_uptime": "99.9% Uptime",
       "trust_global": "Global Access"
@@ -48,14 +48,24 @@
       "level_3_4": "Level 3 & 4",
       "locked": "Locked (Upgrade Required)"
     },
+    "raas": {
+      "badge": "Revenue-as-a-Service",
+      "title": "Zero Subscription Fees. Forever.",
+      "subtitle": "Your tier is determined by trading volume, not your wallet. Trade more, pay less spread."
+    },
+    "onboarding": {
+      "badge": "Agentic Onboarding",
+      "title": "AI Deploys Your Trading Agents",
+      "subtitle": "30-second setup. No forms. Just trade."
+    },
     "smart_switch": {
       "title": "Stop Paying Full Fees",
       "subtitle": "Our AI analyzes thousands of fee structures to find your optimal rebate."
     },
     "final_cta": {
-      "title": "Ready to Rule?",
-      "description": "Join 12,000+ traders who have already upgraded to ApexOS. Secure your spot in the Wolf Pack today.",
-      "cta": "Get Started Now"
+      "title": "Ready to Trade Free?",
+      "description": "Join 12,000+ traders on the world's first zero-fee agentic exchange. Your AI agents are waiting.",
+      "cta": "Launch My Agents"
     },
     "features": {
       "title": "Why Leading Traders Choose ApexOS",
@@ -516,7 +526,47 @@
     "join_telegram": "Join Telegram",
     "claim_reward": "Claim 24h Elite Trial",
     "task_completed": "Task Completed!",
-    "reward_claimed": "Reward Claimed! 24h Elite Trial Activated."
+    "reward_claimed": "Reward Claimed! 24h Elite Trial Activated.",
+    "steps": {
+      "profile": {
+        "title": "AI Profile Scan",
+        "subtitle": "Our AI analyzes your trading style in 30 seconds"
+      },
+      "risk-assessment": {
+        "title": "Risk Calibration",
+        "subtitle": "Autonomous risk profiling — no forms, just questions"
+      },
+      "agent-config": {
+        "title": "Agent Deployment",
+        "subtitle": "Your personal trading agents are being configured"
+      },
+      "funding": {
+        "title": "Fund & Launch",
+        "subtitle": "Deposit crypto — zero fees, instant settlement"
+      }
+    },
+    "profile": {
+      "experience": "Trading experience",
+      "monthly_volume": "Expected monthly volume (USD)"
+    },
+    "risk": {
+      "detected": "AI Detected: {tier} Tier",
+      "qualify": "Based on your volume of {volume}/mo, you qualify for {spread} spread with {agents} AI agents.",
+      "tolerance": "Risk tolerance"
+    },
+    "agents": {
+      "live": "LIVE"
+    },
+    "funding": {
+      "zero_fee": "Zero deposit fee",
+      "networks": "Supported Networks"
+    },
+    "actions": {
+      "continue": "Continue",
+      "deploy_agents": "Deploy My Agents",
+      "fund_and_trade": "Fund & Start Trading",
+      "start_trading": "Start Trading — Zero Fees"
+    }
   },
   "AI": {
     "core_title": "Apex AI Core",
@@ -911,9 +961,28 @@
   },
   "Pricing": {
     "hero": {
-      "title": "Stop Losing Money on Crypto Rebates",
-      "subtitle": "Track every rebate automatically. Maximize your profits.",
-      "cta": "Start Free Trial - No Credit Card Required"
+      "title": "Zero Fees. Unlimited Trading.",
+      "badge": "RaaS AGI — Zero-Fee Agentic Trading",
+      "subtitle": "Multi-org. Zero fees. Crypto-native. AI agents trade for you — you earn from every trade in your network.",
+      "cta": "Start Trading Free"
+    },
+    "raas": {
+      "badge": "RaaS Model",
+      "volume_based": "Volume-Based Tiers",
+      "spread_label": "Spread",
+      "rebate_label": "Rebate",
+      "agents_label": "Agents",
+      "volume_required": "Volume Required",
+      "current_tier": "Current Tier",
+      "auto_upgrade": "Auto-upgrade with volume",
+      "zero_fee": "$0/mo",
+      "vs_saas_title": "SaaS vs RaaS",
+      "vs_saas_old": "Traditional SaaS",
+      "vs_saas_new": "Apex RaaS",
+      "volume_explorer": "Up to $10K/mo volume",
+      "volume_operator": "$10K – $100K/mo volume",
+      "volume_architect": "$100K – $1M/mo volume",
+      "volume_sovereign": "$1M+/mo volume"
     },
     "calculator": {
       "volume": "Monthly Volume",
@@ -921,78 +990,60 @@
       "claim": "Claim This"
     },
     "tiers": {
-      "free": {
-        "name": "FREE",
-        "price": "$0",
-        "period": "forever",
-        "features": [
-          "1 exchange",
-          "Basic tracking",
-          "7-day history"
-        ]
-      },
-      "basic": {
-        "name": "BASIC",
-        "price": "$29",
-        "period": "per month",
-        "annual_save": "Save $58",
-        "features": [
-          "3 exchanges",
-          "Full history",
-          "Export data",
-          "Email support"
-        ]
-      },
-      "trader": {
-        "name": "TRADER",
-        "price": "$97",
-        "period": "per month",
-        "badge": "MOST POPULAR",
-        "annual_save": "Save $194",
-        "features": [
-          "10 exchanges",
-          "Unlimited history",
-          "Advanced analytics",
-          "Priority support",
-          "Mobile app"
-        ]
-      },
-      "pro": {
-        "name": "PRO",
-        "price": "$297",
-        "period": "per month",
-        "annual_save": "Save $594",
-        "features": [
-          "Unlimited exchanges",
-          "API access",
-          "Custom reports",
-          "White-glove support",
-          "Early access to features"
-        ]
-      },
-      "elite": {
-        "name": "ELITE",
-        "price": "$997",
-        "period": "per month",
-        "annual_save": "Save $1,994",
-        "features": [
-          "Everything in PRO",
-          "Dedicated account manager",
-          "Custom integration",
-          "SLA guarantee",
-          "24/7 phone support"
-        ]
-      }
+      "section_subtitle": "Volume-based tiers — unlock automatically via agentic workflows",
+      "section_title": "AI Agents + Multi-Org + Crypto = Zero-Fee Trading",
+      "most_popular": "Most Popular",
+      "start_trading": "Start Trading Free"
+    },
+    "comparison": {
+      "title": "SaaS vs RaaS AGI — The Paradigm Shift",
+      "subtitle": "Multi-org zero-fee crypto agentic workflows replace legacy subscriptions",
+      "saas_title": "Old SaaS Model",
+      "raas_title": "New RaaS Model",
+      "saas_1": "Pay $97–$997/mo whether you trade or not",
+      "saas_2": "Platform profits even when you lose",
+      "saas_3": "Locked features behind higher tiers",
+      "saas_4": "Annual billing traps with no refunds",
+      "saas_5": "Zero incentive to help you succeed",
+      "raas_1": "$0/mo — zero subscription fees forever",
+      "raas_2": "Multi-org: create teams, share agents, pool volume",
+      "raas_3": "Crypto-native: deposit/withdraw USDT on 5+ chains",
+      "raas_4": "AI agents auto-trade 24/7 — you earn while you sleep",
+      "raas_5": "Tiers unlock automatically via agentic volume"
     },
     "trust": {
-      "users": "200+ traders already tracking rebates",
-      "savings": "Average user saves $500/month",
-      "guarantee": "7-day money-back guarantee"
+      "users": "12,000+ traders on zero-fee exchange",
+      "savings": "Average user recovers $500/month in rebates",
+      "guarantee": "Zero commitment — trade free forever"
     },
     "urgency": {
-      "limited": "First 100 users get LIFETIME 50% off",
-      "spots": "Only X spots left at this price"
+      "limited": "Early Access — Volume Bonuses Active",
+      "spots": "Join the zero-fee revolution"
     }
+  },
+  "AgenticWorkflow": {
+    "title": "Agentic Workflow",
+    "pipeline": "Trading Pipeline",
+    "signal_detection": "Signal Detection",
+    "risk_assessment": "Risk Assessment",
+    "execution": "Execution",
+    "tier_progress": "Tier Progress",
+    "deployed_agents": "Deployed Agents",
+    "agent_active": "Active",
+    "agent_idle": "Idle",
+    "agent_error": "Error"
+  },
+  "Exchange": {
+    "zero_fee_badge": "Zero Trading Fees",
+    "spread_breakdown": "Spread Breakdown",
+    "trade_amount": "Trade Amount",
+    "spread_rate": "Spread Rate",
+    "spread_cost": "Spread Cost",
+    "your_rebate": "Your Rebate",
+    "net_cost": "Net Cost",
+    "settlement": "Settlement",
+    "supported_chains": "Supported Chains",
+    "swap_success": "Swap completed successfully!"
   },
   "Offer": {
     "limited_time": "Limited Time Offer",

@@ -4,22 +4,17 @@
 export type PricingVariant = 'control' | 'variant_a' | 'variant_b';
 
 // Always return control until unified pricing is ready
-export function getPricingVariant(userId?: string): PricingVariant {
+export function getPricingVariant(_userId?: string): PricingVariant {
   return 'control';
 }
 
-export function getPricingForVariant(variant: PricingVariant) {
+export function getPricingForVariant(_variant: PricingVariant) {
   // Return default Pro tier pricing
   return {
     id: 'control',
     monthly: 29,
     annual: 290,
     name: 'Pro',
-    features: [
-      'Unlimited AI signals',
-      'Real-time alerts',
-      'Portfolio tracking',
-      'Premium support',
-    ],
+    features: ['Unlimited AI signals', 'Real-time alerts', 'Portfolio tracking', 'Premium support'],
   };
 }

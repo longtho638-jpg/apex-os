@@ -1,11 +1,11 @@
 'use client';
 
+import { ClipboardList } from 'lucide-react';
 import { Sidebar } from '@/components/os/sidebar';
+import { QuickTradePanel } from '@/components/trading/QuickTradePanel';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { QuickTradePanel } from '@/components/trading/QuickTradePanel';
 import { useAuth } from '@/contexts/AuthContext';
-import { ClipboardList } from 'lucide-react';
 
 export default function LimitOrdersPage() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export default function LimitOrdersPage() {
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
         </AuroraBackground>
-        
+
         <div className="relative z-10 h-full flex flex-col overflow-y-auto">
           <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
             <div className="flex items-center gap-4">
@@ -34,7 +34,7 @@ export default function LimitOrdersPage() {
 
           <div className="p-6 max-w-2xl mx-auto w-full">
             <GlassCard className="p-6">
-                <QuickTradePanel userId={userId} />
+              <QuickTradePanel userId={userId} />
             </GlassCard>
           </div>
         </div>

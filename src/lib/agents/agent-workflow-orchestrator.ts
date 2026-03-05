@@ -1,10 +1,10 @@
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { subscribe, publish, createEvent, AGENT_EVENTS } from './agent-event-bus';
-import { processTradeCommission } from '@/lib/viral-economics/realtime-commission';
-import { promoteTier } from '@/lib/viral-economics/tier-manager';
 import { checkBadgeEligibility } from '@/lib/viral-economics/gamification';
+import { processTradeCommission } from '@/lib/viral-economics/realtime-commission';
 import { updateRefereeMetrics } from '@/lib/viral-economics/referral-manager';
+import { promoteTier } from '@/lib/viral-economics/tier-manager';
+import { AGENT_EVENTS, createEvent, publish, subscribe } from './agent-event-bus';
 
 /**
  * Agent Workflow Orchestrator — RaaS zero-fee financial engine.
@@ -40,17 +40,19 @@ export function initAgentOrchestrator(): void {
         trade_id: tradeId,
       });
 
-      await publish(createEvent(
-        AGENT_EVENTS.TRADE_COMMISSION_CALCULATED,
-        'orchestrator',
-        { userId, volume, fee },
-        {
-          orgId: event.orgId,
-          userId,
-          deduplicationId: `commission_${tradeId}`,
-          retryConfig: { maxRetries: 3, delays: [1000, 3000, 10000] },
-        }
-      ));
+      await publish(
+        createEvent(
+          AGENT_EVENTS.TRADE_COMMISSION_CALCULATED,
+          'orchestrator',
+          { userId, volume, fee },
+          {
+            orgId: event.orgId,
+            userId,
+            deduplicationId: `commission_${tradeId}`,
+            retryConfig: { maxRetries: 3, delays: [1000, 3000, 10000] },
+          },
+        ),
+      );
     } catch (error) {
       logger.error('[Orchestrator] Commission processing failed:', error);
     }
@@ -63,12 +65,9 @@ export function initAgentOrchestrator(): void {
     try {
       const upgraded = await promoteTier(userId);
       if (upgraded) {
-        await publish(createEvent(
-          AGENT_EVENTS.TIER_UPGRADED,
-          'orchestrator',
-          { userId },
-          { orgId: event.orgId, userId }
-        ));
+        await publish(
+          createEvent(AGENT_EVENTS.TIER_UPGRADED, 'orchestrator', { userId }, { orgId: event.orgId, userId }),
+        );
       }
 
       await checkBadgeEligibility(userId);
@@ -125,21 +124,25 @@ export function initAgentOrchestrator(): void {
       workflowId: string;
     };
     const supabase = getSupabaseClient();
-    await supabase.from('agent_heartbeats').upsert({
-      agent_id: event.agentId,
-      agent_type: agentType,
-      status: 'running',
-      workflow_id: workflowId,
-      org_id: event.orgId || null,
-      last_heartbeat: new Date().toISOString(),
-    }, { onConflict: 'agent_id' });
+    await supabase.from('agent_heartbeats').upsert(
+      {
+        agent_id: event.agentId,
+        agent_type: agentType,
+        status: 'running',
+        workflow_id: workflowId,
+        org_id: event.orgId || null,
+        last_heartbeat: new Date().toISOString(),
+      },
+      { onConflict: 'agent_id' },
+    );
     logger.info(`[Orchestrator] Agent ${event.agentId} started (${agentType})`);
   });
 
   // AGENT STOPPED → Mark inactive
   subscribe(AGENT_EVENTS.AGENT_STOPPED, async (event) => {
     const supabase = getSupabaseClient();
-    await supabase.from('agent_heartbeats')
+    await supabase
+      .from('agent_heartbeats')
       .update({ status: 'stopped', last_heartbeat: new Date().toISOString() })
       .eq('agent_id', event.agentId);
     logger.info(`[Orchestrator] Agent ${event.agentId} stopped`);
@@ -152,7 +155,8 @@ export function initAgentOrchestrator(): void {
       severity: 'warn' | 'critical';
     };
     const supabase = getSupabaseClient();
-    await supabase.from('agent_heartbeats')
+    await supabase
+      .from('agent_heartbeats')
       .update({ status: 'error', last_heartbeat: new Date().toISOString() })
       .eq('agent_id', event.agentId);
     logger.error(`[Orchestrator] Agent ${event.agentId} error (${severity}): ${agentError}`);
@@ -165,18 +169,12 @@ export function initAgentOrchestrator(): void {
     const supabase = getSupabaseClient();
     try {
       // Aggregate all member volumes for this org
-      const { data: members } = await supabase
-        .from('org_members')
-        .select('user_id')
-        .eq('org_id', event.orgId);
+      const { data: members } = await supabase.from('org_members').select('user_id').eq('org_id', event.orgId);
 
       if (!members || members.length === 0) return;
 
       const userIds = members.map((m) => m.user_id);
-      const { data: tiers } = await supabase
-        .from('user_tiers')
-        .select('monthly_volume')
-        .in('user_id', userIds);
+      const { data: tiers } = await supabase.from('user_tiers').select('monthly_volume').in('user_id', userIds);
 
       const totalOrgVolume = tiers?.reduce((sum, t) => sum + (t.monthly_volume || 0), 0) || 0;
 

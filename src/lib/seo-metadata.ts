@@ -1,8 +1,9 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'ApexOS - AI-Powered Crypto Trading Signals | 68% Win Rate',
-  description: 'Join 1,000+ traders using AI-powered signals. Real-time alerts, portfolio tracking, and proven 68% win rate. Start your free 7-day trial today.',
+  description:
+    'Join 1,000+ traders using AI-powered agents. Zero fees forever — AI trades 24/7, auto-rebate on every trade, 68% win rate.',
   keywords: 'crypto trading signals, AI trading bot, trading signals, portfolio tracking, crypto alerts',
   openGraph: {
     title: 'ApexOS - AI-Powered Crypto Trading Signals',

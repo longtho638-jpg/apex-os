@@ -24,7 +24,7 @@ const ROLE_HIERARCHY: Record<OrgRole, number> = {
 export async function checkOrgRole(
   userId: string,
   orgId: string,
-  requiredRole: OrgRole = 'member'
+  requiredRole: OrgRole = 'member',
 ): Promise<OrgRole | null> {
   const supabase = getSupabaseClient();
 
@@ -49,12 +49,7 @@ export async function checkOrgRole(
 export async function getUserDefaultOrg(userId: string): Promise<string | null> {
   const supabase = getSupabaseClient();
 
-  const { data } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', userId)
-    .limit(1)
-    .single();
+  const { data } = await supabase.from('org_members').select('org_id').eq('user_id', userId).limit(1).single();
 
   return data?.org_id || null;
 }

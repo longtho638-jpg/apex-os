@@ -1,5 +1,5 @@
+import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
-import { useState, useEffect } from 'react';
 
 export function useCryptoPrice(symbol: string = 'bitcoin') {
   const [price, setPrice] = useState<number>(0);
@@ -35,7 +35,7 @@ export function useCryptoPrice(symbol: string = 'bitcoin') {
     const interval = setInterval(fetchPrice, 30000); // Update every 30s to avoid rate limit
 
     return () => clearInterval(interval);
-  }, [symbol]);
+  }, [symbol, price]);
 
   return { price, loading };
 }

@@ -1,5 +1,5 @@
+import { type NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 // Helper to generate slug from title
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://apexrebate.com',
         'X-Title': 'ApexOS Content Gen',
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: model,
         messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' } // Force JSON if model supports it, else parse
+        response_format: { type: 'json_object' }, // Force JSON if model supports it, else parse
       }),
     });
 
@@ -55,19 +55,19 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json();
-    let generatedContent = data.choices[0].message.content;
+    const generatedContent = data.choices[0].message.content;
 
     // Attempt to parse JSON
     let parsedContent;
     try {
       parsedContent = JSON.parse(generatedContent);
-    } catch (e) {
+    } catch (_e) {
       // Fallback if model didn't return valid JSON (common with some models)
       logger.warn('Failed to parse JSON from AI, using raw content');
       parsedContent = {
         title: topic,
         meta_description: `Learn about ${topic} with ApexOS AI trading insights.`,
-        content: generatedContent
+        content: generatedContent,
       };
     }
 
@@ -75,11 +75,7 @@ export async function POST(req: NextRequest) {
     const slug = generateSlug(parsedContent.title);
 
     // Check for duplicate slug
-    const { data: existing } = await supabase
-      .from('blog_posts')
-      .select('id')
-      .eq('slug', slug)
-      .single();
+    const { data: existing } = await supabase.from('blog_posts').select('id').eq('slug', slug).single();
 
     const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
 
@@ -92,7 +88,7 @@ export async function POST(req: NextRequest) {
         seo_keywords: keywords || [],
         meta_description: parsedContent.meta_description,
         status: 'draft', // Auto-draft for safety
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -103,7 +99,6 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, post });
-
   } catch (error: any) {
     logger.error('Content Generation Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

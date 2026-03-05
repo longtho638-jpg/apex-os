@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { AnimatePresence, m as motion } from "framer-motion";
-import type { Variants } from "framer-motion";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import type { Variants } from 'framer-motion';
+import { AnimatePresence, m as motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import type { ReactNode } from 'react';
 
 const pageVariants: Variants = {
   initial: {

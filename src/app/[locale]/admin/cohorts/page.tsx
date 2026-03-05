@@ -1,10 +1,10 @@
 'use client';
 
-import { logger } from '@/lib/logger';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
+import { GlassCard } from '@/components/ui/glass-card';
+import { logger } from '@/lib/logger';
 
 interface CohortData {
   week: string;
@@ -21,14 +21,14 @@ export default function CohortsPage() {
 
   useEffect(() => {
     fetch('/api/admin/analytics/cohorts')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setCohorts(data.cohorts || []);
         setLoading(false);
       })
-      .catch(err => {
-          logger.error("Failed to fetch cohorts", err);
-          setLoading(false);
+      .catch((err) => {
+        logger.error('Failed to fetch cohorts', err);
+        setLoading(false);
       });
   }, []);
 
@@ -65,22 +65,28 @@ export default function CohortsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {cohorts.map(cohort => (
+                      {cohorts.map((cohort) => (
                         <tr key={cohort.week} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                           <td className="p-3 font-mono text-sm">{cohort.week}</td>
                           <td className="text-right p-3">{cohort.signups}</td>
                           <td className="text-right p-3">
-                            <span className={`${parseFloat(cohort.day1_retention) > 50 ? 'text-emerald-400' : 'text-zinc-300'}`}>
+                            <span
+                              className={`${parseFloat(cohort.day1_retention) > 50 ? 'text-emerald-400' : 'text-zinc-300'}`}
+                            >
                               {cohort.day1_retention}%
                             </span>
                           </td>
                           <td className="text-right p-3">
-                            <span className={`${parseFloat(cohort.day7_retention) > 20 ? 'text-emerald-400' : 'text-zinc-300'}`}>
+                            <span
+                              className={`${parseFloat(cohort.day7_retention) > 20 ? 'text-emerald-400' : 'text-zinc-300'}`}
+                            >
                               {cohort.day7_retention}%
                             </span>
                           </td>
                           <td className="text-right p-3">
-                            <span className={`${parseFloat(cohort.day30_retention) > 10 ? 'text-emerald-400' : 'text-zinc-300'}`}>
+                            <span
+                              className={`${parseFloat(cohort.day30_retention) > 10 ? 'text-emerald-400' : 'text-zinc-300'}`}
+                            >
                               {cohort.day30_retention}%
                             </span>
                           </td>

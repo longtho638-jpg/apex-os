@@ -1,12 +1,9 @@
-import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
+import { type NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,32 +20,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Server config error' }, { status: 500 });
     }
 
-    // Verify Signature
-    // Sort keys alphabetically and stringify
+    // Verify signature (SHA-512 HMAC with sorted keys)
     const sortedKeys = Object.keys(body).sort();
     const hmac = crypto.createHmac('sha512', secret);
     hmac.update(JSON.stringify(body, sortedKeys));
     const generatedSignature = hmac.digest('hex');
 
     if (generatedSignature !== signature) {
-      logger.error('Signature mismatch', { expected: generatedSignature, received: signature });
+      logger.error('NOWPayments signature mismatch');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     const { order_id, payment_status, price_amount } = body;
 
-    // order_id format: TIER_USERID_TIMESTAMP
+    // order_id format: TYPE_USERID_TIMESTAMP
     const parts = order_id.split('_');
     if (parts.length < 3) {
       logger.error('Invalid order_id format:', order_id);
       return NextResponse.json({ received: true });
     }
 
-    const tier = parts[0];
+    const depositType = parts[0]; // e.g. 'DEPOSIT', 'TRADE_CAPITAL'
     const userId = parts[1];
 
     if (payment_status === 'finished' || payment_status === 'confirmed') {
-      // Create Transaction
+      // Record payment transaction
       await supabase.from('payment_transactions').insert({
         user_id: userId,
         gateway: 'nowpayments',
@@ -56,40 +52,30 @@ export async function POST(request: NextRequest) {
         amount: price_amount,
         currency: 'USD',
         status: 'completed',
-        product_name: `${tier} Plan`,
+        product_name: `crypto_deposit_${depositType.toLowerCase()}`,
         metadata: { webhook_data: body },
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
       });
 
-      // Update Subscription
-      await supabase.from('subscriptions').upsert({
-        user_id: userId,
-        tier: tier,
-        status: 'active',
-        gateway: 'nowpayments',
-        gateway_subscription_id: order_id,
-        current_period_start: new Date().toISOString(),
-        current_period_end: getNextBillingDate()
-      }, { onConflict: 'user_id, status' }); // Note: using composite key logic implicitly or explicit constraint
+      // RaaS: Credit user wallet directly (no subscription)
+      await supabase.rpc('credit_user_balance_realtime', {
+        p_user_id: userId,
+        p_amount: price_amount,
+        p_source: 'nowpayments_deposit',
+        p_metadata: { gateway_tx_id: body.payment_id, type: depositType },
+      });
 
-      // Auto-claim any pending missed commissions (Grace Period Reward)
+      // Auto-claim any pending vault funds
       const { error: claimError } = await supabase.rpc('claim_pending_vault_funds', {
-        p_user_id: userId
+        p_user_id: userId,
       });
 
       if (claimError) logger.error('Error claiming pending funds:', claimError);
     }
 
     return NextResponse.json({ received: true });
-
   } catch (error) {
     logger.error('NOWPayments webhook error:', error);
     return NextResponse.json({ error: 'Internal Error' }, { status: 500 });
   }
-}
-
-function getNextBillingDate(): string {
-  const date = new Date();
-  date.setMonth(date.getMonth() + 1);
-  return date.toISOString();
 }

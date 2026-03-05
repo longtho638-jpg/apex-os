@@ -1,5 +1,5 @@
+import { type NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://apexrebate.com',
       },
@@ -57,7 +57,10 @@ export async function GET(req: NextRequest) {
     const aiData = await response.json();
     const content = aiData.choices?.[0]?.message?.content || 'Content generation failed.';
     const title = `The Ultimate Guide to ${topic}`;
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
 
     // 3. Save to DB
     const { data: post, error } = await supabase
@@ -69,7 +72,7 @@ export async function GET(req: NextRequest) {
         status: 'draft', // Draft for safety, or 'published' if confident
         seo_keywords: [topic, 'crypto', 'trading'],
         meta_description: `Deep dive into ${topic} and how it affects your trading portfolio.`,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       })
       .select()
       .single();
@@ -77,7 +80,6 @@ export async function GET(req: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, post });
-
   } catch (error: any) {
     logger.error('Auto-Content Cron Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -5,7 +5,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-let supabaseServerInstance: SupabaseClient | null = null;
+const supabaseServerInstance: SupabaseClient | null = null;
 let supabaseClientInstance: SupabaseClient | null = null;
 
 /**

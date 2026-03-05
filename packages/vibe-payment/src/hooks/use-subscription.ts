@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 /**
  * Parameterized subscription hook — accepts auth deps instead of importing AuthContext.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { RaaSBillingInfo, UseSubscriptionParams } from '../types/billing-types';
 
 interface UseSubscriptionResult {
@@ -14,16 +14,12 @@ interface UseSubscriptionResult {
   refetch: () => void;
 }
 
-export function useSubscription({
-  userId,
-  token,
-  fetchBillingInfo
-}: UseSubscriptionParams): UseSubscriptionResult {
+export function useSubscription({ userId, token, fetchBillingInfo }: UseSubscriptionParams): UseSubscriptionResult {
   const [data, setData] = useState<RaaSBillingInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!userId || !token) {
       setLoading(false);
       return;
@@ -39,11 +35,11 @@ export function useSubscription({
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, token, fetchBillingInfo]);
 
   useEffect(() => {
     fetchData();
-  }, [userId, token]);
+  }, [fetchData]);
 
   return { data, loading, error, refetch: fetchData };
 }

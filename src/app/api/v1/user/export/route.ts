@@ -4,9 +4,9 @@
  * Allows users to download all their personal data
  */
 
-import { createClient } from '@/lib/supabase/server';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { logDataExportRequest } from '@/lib/services/audit-service';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,24 +30,19 @@ export async function GET(request: NextRequest) {
     await logDataExportRequest(user.id, ipAddress, userAgent);
 
     // Aggregate user data from various tables
-    const [
-      { data: profile },
-      { data: wallets },
-      { data: orders },
-      { data: positions },
-      { data: auditLogs },
-    ] = await Promise.all([
-      supabase.from('users').select('*').eq('id', user.id).single(),
-      supabase.from('wallets').select('*').eq('user_id', user.id),
-      supabase.from('orders').select('*').eq('user_id', user.id).limit(1000),
-      supabase.from('positions').select('*').eq('user_id', user.id),
-      supabase
-        .from('audit_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(100),
-    ]);
+    const [{ data: profile }, { data: wallets }, { data: orders }, { data: positions }, { data: auditLogs }] =
+      await Promise.all([
+        supabase.from('users').select('*').eq('id', user.id).single(),
+        supabase.from('wallets').select('*').eq('user_id', user.id),
+        supabase.from('orders').select('*').eq('user_id', user.id).limit(1000),
+        supabase.from('positions').select('*').eq('user_id', user.id),
+        supabase
+          .from('audit_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(100),
+      ]);
 
     // Build export data
     const exportData = {
@@ -71,11 +66,7 @@ export async function GET(request: NextRequest) {
         'Content-Disposition': `attachment; filename="apex-os-data-export-${user.id}-${Date.now()}.json"`,
       },
     });
-  } catch (error) {
-    console.error('[DataExport] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to export data' },
-      { status: 500 }
-    );
+  } catch (_error) {
+    return NextResponse.json({ error: 'Failed to export data' }, { status: 500 });
   }
 }

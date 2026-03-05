@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, LIMITS } from '@/lib/rateLimit';
 
 // Add Institutional Limit to the shared config (or locally here if preferred, but cleaner there)
@@ -10,42 +10,40 @@ const INSTITUTIONAL_LIMIT = { limit: 50, windowMs: 1000 }; // 50 requests per se
  * Can be used inside src/middleware.ts
  */
 export async function applyRateLimit(request: NextRequest) {
-    // Only apply to API routes
-    if (!request.nextUrl.pathname.startsWith('/api/')) {
-        return null;
-    }
+  // Only apply to API routes
+  if (!request.nextUrl.pathname.startsWith('/api/')) {
+    return null;
+  }
 
-    const ip = request.headers.get('x-forwarded-for') ||
-        request.headers.get('x-real-ip') ||
-        'unknown';
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
 
-    const path = request.nextUrl.pathname;
+  const path = request.nextUrl.pathname;
 
-    // Determine Limit Config
-    let config = LIMITS.API_STANDARD;
-    let keyPrefix = 'api';
+  // Determine Limit Config
+  let config = LIMITS.API_STANDARD;
+  let keyPrefix = 'api';
 
-    if (path.startsWith('/api/v1/institutional')) {
-        config = INSTITUTIONAL_LIMIT; // High throughput
-        keyPrefix = 'inst';
-    }
+  if (path.startsWith('/api/v1/institutional')) {
+    config = INSTITUTIONAL_LIMIT; // High throughput
+    keyPrefix = 'inst';
+  }
 
-    // Use GLOBAL limits for general API endpoints
-    const limitResult = await checkRateLimit(`${keyPrefix}:${ip}`, config);
+  // Use GLOBAL limits for general API endpoints
+  const limitResult = await checkRateLimit(`${keyPrefix}:${ip}`, config);
 
-    if (!limitResult.success) {
-        return NextResponse.json(
-            { success: false, message: 'Too many requests' },
-            {
-                status: 429,
-                headers: {
-                    'X-RateLimit-Limit': limitResult.limit.toString(),
-                    'X-RateLimit-Remaining': limitResult.remaining.toString(),
-                    'X-RateLimit-Reset': limitResult.reset.toString()
-                }
-            }
-        );
-    }
+  if (!limitResult.success) {
+    return NextResponse.json(
+      { success: false, message: 'Too many requests' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': limitResult.limit.toString(),
+          'X-RateLimit-Remaining': limitResult.remaining.toString(),
+          'X-RateLimit-Reset': limitResult.reset.toString(),
+        },
+      },
+    );
+  }
 
-    return null; // Allowed
+  return null; // Allowed
 }

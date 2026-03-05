@@ -35,38 +35,52 @@ export const emailTemplates = {
 
   welcome: {
     subject: 'Welcome to the Elite • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>Welcome, ${name}.</p>
       <p>You have successfully secured your access to <span class="highlight">ApexOS</span>, the institutional-grade financial operating system.</p>
       <p>Your journey to financial dominance begins now. Access your dashboard to configure your strategy.</p>
       <a href="${actionUrl}" class="btn">Access Dashboard</a>
-    `, 'Protocol Initiated'),
+    `,
+        'Protocol Initiated',
+      ),
   },
 
   verification: {
     subject: 'Verify Your Identity • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>Security protocol initiated.</p>
       <p>To ensure the integrity of your account, please verify your email address. This link is valid for 24 hours.</p>
       <a href="${actionUrl}" class="btn">Verify Identity</a>
       <p style="margin-top: 24px; font-size: 12px; color: #666;">If you did not request this, please ignore this transmission.</p>
-    `, 'Verify Identity'),
+    `,
+        'Verify Identity',
+      ),
   },
 
   resetPassword: {
     subject: 'Reset Your Password • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>We received a request to reset your password.</p>
       <p>Click the button below to set a new password:</p>
       <a href="${actionUrl}" class="btn">Reset Password</a>
       <p style="margin-top: 24px; font-size: 12px; color: #666;">If you did not request this, you can safely ignore this email.</p>
       <p style="margin-top: 12px; font-size: 12px; color: #444;">Link not working? Copy this URL into your browser:<br/>${actionUrl}</p>
-    `, 'Reset Password'),
+    `,
+        'Reset Password',
+      ),
   },
 
   featureHighlight: {
     subject: 'Intelligence Update • ApexOS',
-    html: (name: string) => emailTemplates.base(`
+    html: (_name: string) =>
+      emailTemplates.base(
+        `
       <p>System analysis indicates you have not fully utilized the <span class="highlight">AI Signal Engine</span>.</p>
       <p>Current Performance Metrics:</p>
       <ul style="list-style: none; padding: 0; margin: 24px 0;">
@@ -78,121 +92,170 @@ export const emailTemplates = {
         </li>
       </ul>
       <a href="https://apexrebate.com/signals" class="btn">Activate Signals</a>
-    `, 'Intelligence Update'),
+    `,
+        'Intelligence Update',
+      ),
   },
 
   trialEnding: {
     subject: 'Access Expiring • ApexOS',
-    html: (name: string) => emailTemplates.base(`
+    html: (_name: string) =>
+      emailTemplates.base(
+        `
       <p>Your trial access expires in <span class="highlight">24 hours</span>.</p>
       <p>Do not lose your edge. Upgrade now to maintain uninterrupted access to institutional tools.</p>
       <a href="https://apexrebate.com/pricing" class="btn">Secure Access</a>
-    `, 'Critical Alert'),
+    `,
+        'Critical Alert',
+      ),
   },
 
   winBack: {
     subject: 'We Miss Your Edge • ApexOS',
-    html: (name: string, days: number, profitMissed: number, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, days: number, profitMissed: number, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>It's been ${days} days.</p>
       <p>The market hasn't stopped. In your absence, opportunities worth approximately <strong>$${profitMissed.toFixed(2)}</strong> were identified by our algorithms.</p>
       <p>Return to the arena.</p>
       <a href="${actionUrl}" class="btn">Reactivate Account</a>
-    `, 'Return to Apex'),
+    `,
+        'Return to Apex',
+      ),
   },
 
   winningStreak: {
     subject: '🔥 You Are On Fire • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>System analysis detects a <strong>Winning Streak</strong>.</p>
       <p>You have executed 3 profitable trades in a row. Your market synchronization is peaking.</p>
       <p>Do not cap your potential. Upgrade to <strong>Apex Pro</strong> to unlock unlimited signals and leverage this momentum.</p>
       <a href="${actionUrl}" class="btn">Scale Up Now</a>
-    `, 'Momentum Detected'),
+    `,
+        'Momentum Detected',
+      ),
   },
 
   stopLossGuide: {
     subject: '🛡️ Tactical Pause Recommended • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>Market turbulence detected in your recent performance.</p>
       <p>Even the best traders take tactical pauses. We have unlocked a premium guide on <strong>Risk Management & Stop Loss Strategy</strong> for you.</p>
       <p>Regroup. Re-arm. Re-enter.</p>
       <a href="${actionUrl}" class="btn">Read Strategy Guide</a>
-    `, 'Risk Alert'),
+    `,
+        'Risk Alert',
+      ),
   },
 
   paperTradingReport: {
     subject: 'Simulation Report: Week 1 • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>Your simulation results are in.</p>
       <p>You have executed your first trades in the sandbox. Analyze your performance metrics to refine your strategy before deploying real capital.</p>
       <a href="${actionUrl}" class="btn">View Report</a>
-    `, 'Simulation Data'),
+    `,
+        'Simulation Data',
+      ),
   },
 
   upgradeOffer: {
     subject: 'Capital Deployment Ready • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>System analysis confirms you are ready.</p>
       <p>Your win rate in simulation exceeds 60%. It is time to deploy real capital and harvest actual market yields.</p>
       <p>Upgrade to Live Trading now.</p>
       <a href="${actionUrl}" class="btn">Deploy Capital</a>
-    `, 'Upgrade Status'),
+    `,
+        'Upgrade Status',
+      ),
   },
 
   socialSignal: {
     subject: 'New Signal Detected • ApexOS',
-    html: (name: string, traderName: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, traderName: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>Trader <strong>${traderName}</strong> has executed a new position.</p>
       <p>Follow the signal immediately to mirror this move.</p>
       <a href="${actionUrl}" class="btn">View Signal</a>
-    `, 'Signal Alert'),
+    `,
+        'Signal Alert',
+      ),
   },
 
   privateWealthInvite: {
     subject: 'Private Wealth Invitation • ApexOS',
-    html: (name: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>You have crossed the threshold.</p>
       <p>Your portfolio value qualifies you for the <strong>Private Wealth</strong> tier. Access exclusive OTC deals and institutional-grade support.</p>
       <a href="${actionUrl}" class="btn">Accept Invitation</a>
-    `, 'Elite Access'),
+    `,
+        'Elite Access',
+      ),
   },
 
   launchDayAccess: {
     subject: 'Launch Day Access Code • ApexOS',
-    html: (name: string, code: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, code: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>The protocol is live.</p>
       <p>Your exclusive access code is: <span class="highlight">${code}</span></p>
       <p>Enter the arena before the public floodgates open.</p>
       <a href="${actionUrl}" class="btn">Enter Arena</a>
-    `, 'Launch Access'),
+    `,
+        'Launch Access',
+      ),
   },
 
   apiLimitIncreased: {
     subject: 'API Limit Increased • ApexOS',
-    html: (name: string, limit: string) => emailTemplates.base(`
+    html: (_name: string, limit: string) =>
+      emailTemplates.base(
+        `
       <p>Power User status confirmed.</p>
       <p>Your API rate limit has been increased to <strong>${limit} requests/min</strong> to support your high-frequency operations.</p>
       <p>Execute without friction.</p>
-    `, 'System Upgrade'),
+    `,
+        'System Upgrade',
+      ),
   },
 
   referralSuccess: {
     subject: 'Commission Earned • ApexOS',
-    html: (name: string, amount: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, amount: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>A new operative has joined via your link.</p>
       <p>You have earned <strong>${amount}</strong> in commission. The hive grows stronger.</p>
       <a href="${actionUrl}" class="btn">View Wallet</a>
-    `, 'Commission Alert'),
+    `,
+        'Commission Alert',
+      ),
   },
 
   discountOffer: {
     subject: 'Secret Access Granted • ApexOS',
-    html: (name: string, discount: string, actionUrl: string) => emailTemplates.base(`
+    html: (_name: string, discount: string, actionUrl: string) =>
+      emailTemplates.base(
+        `
       <p>We noticed you observing the Pro tier.</p>
       <p>For the next 60 minutes, access is granted at <strong>${discount} off</strong>.</p>
       <p>Do not hesitate. Opportunities decay quickly.</p>
       <a href="${actionUrl}" class="btn">Claim Access</a>
-    `, 'Limited Offer'),
+    `,
+        'Limited Offer',
+      ),
   },
 };
-

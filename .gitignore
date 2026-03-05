@@ -40,6 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 backend/venv
+backend/venv_new
 .gemini/payment_credentials_template.txt
 # backend/
 *.dylib

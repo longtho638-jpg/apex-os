@@ -1,7 +1,7 @@
-import { getSupabaseClient } from '@/lib/supabase';
+import { ArrowRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -32,24 +32,23 @@ export default async function BlogPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => (
-            <GlassCard key={post.id} className="flex flex-col h-full hover:scale-[1.02] transition-transform duration-300">
+            <GlassCard
+              key={post.id}
+              className="flex flex-col h-full hover:scale-[1.02] transition-transform duration-300"
+            >
               <div className="p-6 flex-1 flex flex-col">
                 <div className="flex items-center gap-2 text-sm text-emerald-400 mb-4">
                   <Calendar className="w-4 h-4" />
                   {new Date(post.published_at || post.created_at).toLocaleDateString()}
                 </div>
-                
+
                 <h2 className="text-xl font-bold mb-3 line-clamp-2 hover:text-emerald-400 transition-colors">
-                  <Link href={`/blog/${post.slug}`}>
-                    {post.title}
-                  </Link>
+                  <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                 </h2>
-                
-                <p className="text-zinc-400 mb-6 line-clamp-3 flex-1">
-                  {post.meta_description}
-                </p>
-                
-                <Link 
+
+                <p className="text-zinc-400 mb-6 line-clamp-3 flex-1">{post.meta_description}</p>
+
+                <Link
                   href={`/blog/${post.slug}`}
                   className="inline-flex items-center gap-2 text-white font-medium hover:gap-3 transition-all"
                 >
@@ -61,9 +60,9 @@ export default async function BlogPage() {
         </div>
 
         {posts.length === 0 && (
-            <div className="text-center py-20">
-                <p className="text-zinc-500 text-lg">No articles found yet. Check back soon!</p>
-            </div>
+          <div className="text-center py-20">
+            <p className="text-zinc-500 text-lg">No articles found yet. Check back soon!</p>
+          </div>
         )}
       </div>
     </div>

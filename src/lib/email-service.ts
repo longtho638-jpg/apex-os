@@ -1,5 +1,5 @@
-import { logger } from '@/lib/logger';
 import { Resend } from 'resend';
+import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
 
 const resend = new Resend((process.env.RESEND_API_KEY || 're_missing_key_dev_mode').trim());
@@ -12,7 +12,13 @@ export interface EmailOptions {
   templateId?: string; // Optional: Track which template was sent
 }
 
-export async function sendEmail({ to, subject, html, userId, templateId }: EmailOptions): Promise<{ success: boolean; error?: string }> {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  userId,
+  templateId,
+}: EmailOptions): Promise<{ success: boolean; error?: string }> {
   if (!process.env.RESEND_API_KEY) {
     logger.error('[Email] Missing RESEND_API_KEY');
     return { success: false, error: 'Server configuration error' };
@@ -55,7 +61,7 @@ async function logEmailToCRM(userId: string, email: string, templateId: string, 
       email_to: email,
       template_id: templateId,
       status,
-      metadata
+      metadata,
     });
 
     // Also track as a generic CRM event
@@ -63,7 +69,7 @@ async function logEmailToCRM(userId: string, email: string, templateId: string, 
       user_id: userId,
       event_type: 'EMAIL_SENT',
       metadata: { ...metadata, templateId, status },
-      severity: status === 'SENT' ? 'SUCCESS' : 'WARN'
+      severity: status === 'SENT' ? 'SUCCESS' : 'WARN',
     });
   } catch (e) {
     logger.error('[Email] Failed to log to CRM:', e);

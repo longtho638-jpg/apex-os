@@ -1,19 +1,19 @@
+import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
-import { useState, useEffect } from 'react';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
 export function usePushNotifications() {
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [_subscription, setSubscription] = useState<PushSubscription | null>(null);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && (window as any).workbox !== undefined) {
       // run only in browser
-      navigator.serviceWorker.ready.then(reg => {
+      navigator.serviceWorker.ready.then((reg) => {
         setRegistration(reg);
-        reg.pushManager.getSubscription().then(sub => {
+        reg.pushManager.getSubscription().then((sub) => {
           if (sub && !(sub.expirationTime && Date.now() > sub.expirationTime - 5 * 60 * 1000)) {
             setSubscription(sub);
             setIsSubscribed(true);

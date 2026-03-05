@@ -1,14 +1,14 @@
 'use client';
 
+import { Activity, Check, Copy, DollarSign, Key, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { toast } from 'sonner';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Key, Activity, AlertCircle, DollarSign, Lock, Copy, Check } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
 import { useUserTier } from '@/hooks/useUserTier';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 interface UsageMetric {
   time: string;
@@ -19,7 +19,7 @@ interface UsageMetric {
 
 export default function EnterpriseDashboardPage() {
   const [usageData, setUsageData] = useState<UsageMetric[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const { isElite, isWhale, loading: tierLoading } = useUserTier();
   const router = useRouter();
   const [apiKey, setApiKey] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export default function EnterpriseDashboardPage() {
   }, []);
 
   const generateKey = () => {
-    const key = 'sk_live_' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 36).toString(36)).join('');
+    const key = `sk_live_${Array.from({ length: 32 }, () => Math.floor(Math.random() * 36).toString(36)).join('')}`;
     setApiKey(key);
     toast.success('New API Key Generated');
   };
@@ -56,7 +56,9 @@ export default function EnterpriseDashboardPage() {
   if (!isElite && !isWhale) {
     return (
       <div className="flex h-screen w-full bg-[#030303] text-white font-sans items-center justify-center relative overflow-hidden">
-        <AuroraBackground className="absolute inset-0 z-0 pointer-events-none"><div /></AuroraBackground>
+        <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
+          <div />
+        </AuroraBackground>
         <GlassCard className="p-12 max-w-lg text-center z-10 border-purple-500/30">
           <Lock className="w-16 h-16 text-purple-500 mx-auto mb-6" />
           <h1 className="text-3xl font-bold mb-4">Enterprise Access Required</h1>

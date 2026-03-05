@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET() {
   const results: any = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    checks: {}
+    checks: {},
   };
 
   // 1. Check Database (Supabase)
@@ -16,16 +16,16 @@ export async function GET() {
   results.checks.database = {
     status: dbError ? 'degraded' : 'operational',
     latency: Date.now() - startDb,
-    error: dbError?.message
+    error: dbError?.message,
   };
 
   // 2. Check Email Service (Resend)
-  const startEmail = Date.now();
+  const _startEmail = Date.now();
   try {
     // Ping Resend by getting account info (or dummy check)
     // Assuming RESEND_API_KEY is valid
-    const resend = new Resend(process.env.RESEND_API_KEY || 're_123'); // Mock key prevents crash in dev
-    // No direct "ping" method, but instantiation is cheap. 
+    const _resend = new Resend(process.env.RESEND_API_KEY || 're_123'); // Mock key prevents crash in dev
+    // No direct "ping" method, but instantiation is cheap.
     // Real check would involve sending a test email or checking quota if API supported it.
     // We'll assume operational if key exists.
     if (!process.env.RESEND_API_KEY) throw new Error('Missing API Key');
@@ -38,13 +38,13 @@ export async function GET() {
   const startAi = Date.now();
   try {
     const aiRes = await fetch('https://openrouter.ai/api/v1/models', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}` }
+      method: 'GET',
+      headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` },
     });
     results.checks.ai = {
-        status: aiRes.ok ? 'operational' : 'degraded',
-        latency: Date.now() - startAi,
-        statusCode: aiRes.status
+      status: aiRes.ok ? 'operational' : 'degraded',
+      latency: Date.now() - startAi,
+      statusCode: aiRes.status,
     };
   } catch (e: any) {
     results.checks.ai = { status: 'down', error: e.message };

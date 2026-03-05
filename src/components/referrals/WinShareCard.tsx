@@ -1,8 +1,7 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Share2, Download } from 'lucide-react';
+import { Download, Share2 } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 interface WinCardProps {
   pair: string;
@@ -46,7 +45,6 @@ export function WinShareCard({ pair, roi, referralCode }: WinCardProps) {
     ctx.fillStyle = '#ffffff';
     ctx.font = '16px Arial';
     ctx.fillText(`Start trading with AI: apexrebate.com/r/${referralCode}`, 40, 290);
-
   }, [pair, roi, referralCode]);
 
   const downloadImage = () => {
@@ -74,9 +72,7 @@ export function WinShareCard({ pair, roi, referralCode }: WinCardProps) {
         >
           <Download className="w-4 h-4" /> Download
         </button>
-        <button
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#1DA1F2] hover:bg-[#1DA1F2]/90 text-white rounded-lg transition"
-        >
+        <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#1DA1F2] hover:bg-[#1DA1F2]/90 text-white rounded-lg transition">
           <Share2 className="w-4 h-4" /> Tweet
         </button>
       </div>

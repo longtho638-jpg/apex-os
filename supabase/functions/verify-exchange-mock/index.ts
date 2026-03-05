@@ -26,7 +26,7 @@ serve(async (req) => {
 
     // 3. MOCK LOGIC (Cheat Codes)
     let newStatus = 'verified'
-    let metadata = { ...record.metadata, checked_at: new Date().toISOString() }
+    const metadata = { ...record.metadata, checked_at: new Date().toISOString() }
 
     const uid = record.user_uid || ""
 

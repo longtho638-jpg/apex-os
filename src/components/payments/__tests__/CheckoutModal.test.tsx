@@ -1,9 +1,7 @@
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CheckoutModal } from '../CheckoutModal';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { toast } from 'sonner';
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -19,12 +17,14 @@ vi.mock('sonner', () => ({
   },
 }));
 
+import { toast } from 'sonner';
+
 describe('CheckoutModal', () => {
+  // RaaS: Use OPERATOR tier (was PRO), no isOpen prop
   const defaultProps = {
-    tier: 'PRO' as const,
+    tier: 'OPERATOR' as const,
     userEmail: 'test@example.com',
     onClose: vi.fn(),
-    isOpen: true,
   };
 
   beforeEach(() => {
@@ -39,36 +39,15 @@ describe('CheckoutModal', () => {
     vi.resetAllMocks();
   });
 
-  it('displays tier name and price correctly', () => {
+  it('displays tier name correctly', () => {
     render(<CheckoutModal {...defaultProps} />);
 
-    expect(screen.getByRole('heading', { name: /Subscribe to Pro/i })).toBeInTheDocument();
+    // RaaS model: OPERATOR tier, price = $0 (zero-fee model)
+    expect(screen.getByRole('heading', { name: /Activate Operator Tier/i })).toBeInTheDocument();
 
-    // Check for monthly price "$29"
-    // We look for elements containing "$29" that don't have "/" (to exclude the total line)
-    const priceElements = screen.getAllByText((content, element) => {
-      return content.includes('$29') && element?.tagName.toLowerCase() === 'span';
-    });
-    expect(priceElements.length).toBeGreaterThan(0);
-
-    // Check for total line "$29.00/mo"
-    expect(screen.getByText((content) => content.includes('$29.00') && content.includes('/mo'))).toBeInTheDocument();
-  });
-
-  it('shows crypto discount when crypto selected', () => {
-    render(<CheckoutModal {...defaultProps} />);
-
-    // Click Crypto button
-    const cryptoButton = screen.getByText('Crypto');
-    fireEvent.click(cryptoButton);
-
-    // Check for discount label
-    expect(screen.getByText(/Crypto Discount/i)).toBeInTheDocument();
-
-    // Pro price 29, 10% discount -> 2.90 discount -> 26.10 final
-    // Match partial text for flexibility
-    expect(screen.getByText((content) => content.includes('2.90'))).toBeInTheDocument();
-    expect(screen.getByText((content) => content.includes('26.10'))).toBeInTheDocument();
+    // RaaS: All tiers are $0 — zero-fee volume-based model
+    const zeroElements = screen.getAllByText((content) => content.includes('$0'));
+    expect(zeroElements.length).toBeGreaterThan(0);
   });
 
   it('calls /api/checkout on checkout button click', async () => {
@@ -81,20 +60,27 @@ describe('CheckoutModal', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tier: 'PRO',
+        tier: 'OPERATOR',
         gateway: 'polar',
         userEmail: 'test@example.com',
-        billingPeriod: 'monthly',
       }),
     });
   });
 
   it('shows loading state during API call', async () => {
-    // Mock slow fetch
-    mockFetch.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve({
-        ok: true,
-        json: async () => ({ checkoutUrl: 'url' })
-    }), 100)));
+    mockFetch.mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                ok: true,
+                json: async () => ({ checkoutUrl: 'url' }),
+              }),
+            100,
+          ),
+        ),
+    );
 
     render(<CheckoutModal {...defaultProps} />);
 
@@ -128,10 +114,5 @@ describe('CheckoutModal', () => {
 
     fireEvent.click(screen.getByText('Cancel'));
     expect(defaultProps.onClose).toHaveBeenCalled();
-  });
-
-  it('does not render when isOpen is false', () => {
-      render(<CheckoutModal {...defaultProps} isOpen={false} />);
-      expect(screen.queryByText('Subscribe to Pro')).not.toBeInTheDocument();
   });
 });

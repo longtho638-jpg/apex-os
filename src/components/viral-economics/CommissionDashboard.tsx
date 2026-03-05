@@ -1,5 +1,4 @@
-import React from 'react';
-import { DollarSign, PieChart, Download } from 'lucide-react';
+import { DollarSign, Download, PieChart } from 'lucide-react';
 
 interface CommissionDashboardProps {
   totalEarned: number;
@@ -18,7 +17,7 @@ export function CommissionDashboard({ totalEarned, pending, history }: Commissio
           </div>
           <div className="text-3xl font-bold">${totalEarned.toLocaleString()}</div>
         </div>
-        
+
         <div className="p-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-2 text-gray-400 mb-2">
             <PieChart className="w-4 h-4 text-blue-500" />
@@ -28,12 +27,10 @@ export function CommissionDashboard({ totalEarned, pending, history }: Commissio
         </div>
 
         <div className="flex items-center justify-center">
-          <button 
+          <button
             disabled={pending < 50}
             className={`px-6 py-3 rounded-lg font-bold w-full ${
-              pending >= 50 
-                ? 'bg-emerald-600 hover:bg-emerald-500' 
-                : 'bg-gray-700 cursor-not-allowed text-gray-500'
+              pending >= 50 ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-gray-700 cursor-not-allowed text-gray-500'
             }`}
           >
             {pending >= 50 ? 'Withdraw Funds' : 'Min. $50 to Withdraw'}
@@ -58,9 +55,11 @@ export function CommissionDashboard({ totalEarned, pending, history }: Commissio
                 <td className="py-3">{item.month}</td>
                 <td className="py-3 font-mono">${item.amount.toFixed(2)}</td>
                 <td className="py-3">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    item.status === 'paid' ? 'bg-emerald-900 text-emerald-400' : 'bg-yellow-900 text-yellow-400'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      item.status === 'paid' ? 'bg-emerald-900 text-emerald-400' : 'bg-yellow-900 text-yellow-400'
+                    }`}
+                  >
                     {item.status.toUpperCase()}
                   </span>
                 </td>

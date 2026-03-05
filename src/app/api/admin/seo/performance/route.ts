@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const supabase = getSupabaseClient();
 
   // 1. Get top posts by views
@@ -13,10 +13,8 @@ export async function GET(req: NextRequest) {
     .limit(10);
 
   // 2. Calculate aggregate stats
-  const { data: allPosts } = await supabase
-    .from('blog_posts')
-    .select('views');
-    
+  const { data: allPosts } = await supabase.from('blog_posts').select('views');
+
   const totalViews = allPosts?.reduce((sum, post) => sum + (post.views || 0), 0) || 0;
   const totalPosts = allPosts?.length || 0;
   const avgViews = totalPosts > 0 ? Math.round(totalViews / totalPosts) : 0;
@@ -33,8 +31,8 @@ export async function GET(req: NextRequest) {
     overview: {
       totalViews,
       totalPosts,
-      avgViews
+      avgViews,
     },
-    keywordRankings
+    keywordRankings,
   });
 }

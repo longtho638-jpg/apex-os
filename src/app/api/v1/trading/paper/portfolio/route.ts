@@ -1,37 +1,33 @@
+import { type NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
   const supabase = getSupabaseClient();
-  
+
   // In a real app, we'd get user from session
   // const { data: { user } } = await supabase.auth.getUser();
   // For CLI demo, assume user ID is passed in header or mock it
   const userId = req.headers.get('x-user-id');
 
   if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+    return NextResponse.json({ error: 'User ID required' }, { status: 400 });
   }
 
   try {
     // 1. Get Wallet
-    let { data: wallet } = await supabase
-      .from('virtual_wallets')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    let { data: wallet } = await supabase.from('virtual_wallets').select('*').eq('user_id', userId).single();
 
     // Create if not exists
     if (!wallet) {
-        const { data: newWallet, error } = await supabase
-            .from('virtual_wallets')
-            .insert({ user_id: userId, balance: 100000.00 })
-            .select()
-            .single();
-            
-        if (error) throw error;
-        wallet = newWallet;
+      const { data: newWallet, error } = await supabase
+        .from('virtual_wallets')
+        .insert({ user_id: userId, balance: 100000.0 })
+        .select()
+        .single();
+
+      if (error) throw error;
+      wallet = newWallet;
     }
 
     // 2. Get Open Positions
@@ -42,10 +38,9 @@ export async function GET(req: NextRequest) {
       .eq('status', 'OPEN');
 
     return NextResponse.json({
-        wallet,
-        positions: positions || []
+      wallet,
+      positions: positions || [],
     });
-
   } catch (error: any) {
     logger.error('Paper Portfolio Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -53,42 +48,42 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    // Reset Wallet Logic
-    const supabase = getSupabaseClient();
-    const { userId } = await req.json();
+  // Reset Wallet Logic
+  const supabase = getSupabaseClient();
+  const { userId } = await req.json();
 
-    if (!userId) return NextResponse.json({ error: 'User ID required' }, { status: 400 });
+  if (!userId) return NextResponse.json({ error: 'User ID required' }, { status: 400 });
 
-    try {
-        // Fetch current reset count first
-        const { data: currentWallet } = await supabase
-            .from('virtual_wallets')
-            .select('reset_count')
-            .eq('user_id', userId)
-            .single();
+  try {
+    // Fetch current reset count first
+    const { data: currentWallet } = await supabase
+      .from('virtual_wallets')
+      .select('reset_count')
+      .eq('user_id', userId)
+      .single();
 
-        const newResetCount = (currentWallet?.reset_count || 0) + 1;
+    const newResetCount = (currentWallet?.reset_count || 0) + 1;
 
-        const { error } = await supabase
-            .from('virtual_wallets')
-            .update({ 
-                balance: 100000.00, 
-                reset_count: newResetCount,
-                updated_at: new Date().toISOString() 
-            })
-            .eq('user_id', userId);
+    const { error } = await supabase
+      .from('virtual_wallets')
+      .update({
+        balance: 100000.0,
+        reset_count: newResetCount,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId);
 
-        if (error) throw error;
+    if (error) throw error;
 
-        // Close all positions
-        await supabase
-            .from('virtual_positions')
-            .update({ status: 'CLOSED', closed_at: new Date().toISOString() })
-            .eq('user_id', userId)
-            .eq('status', 'OPEN');
+    // Close all positions
+    await supabase
+      .from('virtual_positions')
+      .update({ status: 'CLOSED', closed_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .eq('status', 'OPEN');
 
-        return NextResponse.json({ success: true, message: 'Wallet reset to $100k' });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    return NextResponse.json({ success: true, message: 'Wallet reset to $100k' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }

@@ -1,22 +1,16 @@
 {
-    "compilerOptions": {
-        "target": "ES2018",
-        "module": "commonjs",
-        "lib": [
-            "esnext"
-        ],
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "outDir": "./dist"
-    },
-    "include": [
-        "backend/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "commonjs",
+    "lib": ["esnext"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "outDir": "./dist"
+  },
+  "include": ["backend/**/*.ts"],
+  "exclude": ["node_modules"]
 }

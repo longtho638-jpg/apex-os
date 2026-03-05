@@ -1,156 +1,160 @@
 'use client';
 
-import { logger } from '@/lib/logger';
 import { useEffect, useRef, useState } from 'react';
 import { create } from 'zustand';
+import { logger } from '@/lib/logger';
 
 interface PriceData {
-    symbol: string;
-    price: number;
-    bid: number;
-    ask: number;
-    timestamp: number;
+  symbol: string;
+  price: number;
+  bid: number;
+  ask: number;
+  timestamp: number;
 }
 
 interface PriceStore {
-    prices: Map<string, PriceData>;
-    connected: boolean;
-    updatePrice: (symbol: string, data: PriceData) => void;
-    setConnected: (status: boolean) => void;
-    getPrice: (symbol: string) => PriceData | undefined;
+  prices: Map<string, PriceData>;
+  connected: boolean;
+  updatePrice: (symbol: string, data: PriceData) => void;
+  setConnected: (status: boolean) => void;
+  getPrice: (symbol: string) => PriceData | undefined;
 }
 
 export const usePriceStore = create<PriceStore>((set, get) => ({
-    prices: new Map(),
-    connected: false,
-    updatePrice: (symbol, data) =>
-        set((state) => {
-            const newPrices = new Map(state.prices);
-            newPrices.set(symbol, data);
-            return { prices: newPrices };
-        }),
-    setConnected: (connected) => set({ connected }),
-    getPrice: (symbol) => get().prices.get(symbol),
+  prices: new Map(),
+  connected: false,
+  updatePrice: (symbol, data) =>
+    set((state) => {
+      const newPrices = new Map(state.prices);
+      newPrices.set(symbol, data);
+      return { prices: newPrices };
+    }),
+  setConnected: (connected) => set({ connected }),
+  getPrice: (symbol) => get().prices.get(symbol),
 }));
 
 interface UsePriceStreamOptions {
-    symbols: string[];
-    autoConnect?: boolean;
+  symbols: string[];
+  autoConnect?: boolean;
 }
 
 export function usePriceStream({ symbols, autoConnect = true }: UsePriceStreamOptions) {
-    const wsRef = useRef<WebSocket | null>(null);
-    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const { updatePrice, setConnected, connected, prices } = usePriceStore();
-    const [error, setError] = useState<string | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { updatePrice, setConnected, connected, prices } = usePriceStore();
+  const [error, setError] = useState<string | null>(null);
 
-    const connect = () => {
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080';
+  const connect = () => {
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080';
 
+    try {
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        logger.info('✅ WebSocket connected');
+        setConnected(true);
+        setError(null);
+
+        // Subscribe to symbols
+        ws.send(
+          JSON.stringify({
+            type: 'SUBSCRIBE',
+            symbols,
+          }),
+        );
+
+        // Start heartbeat
+        const heartbeat = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'PING' }));
+          }
+        }, 30000); // Ping every 30 seconds
+
+        ws.addEventListener('close', () => {
+          clearInterval(heartbeat);
+        });
+      };
+
+      ws.onmessage = (event) => {
         try {
-            const ws = new WebSocket(wsUrl);
-            wsRef.current = ws;
+          const message = JSON.parse(event.data);
 
-            ws.onopen = () => {
-                logger.info('✅ WebSocket connected');
-                setConnected(true);
-                setError(null);
-
-                // Subscribe to symbols
-                ws.send(JSON.stringify({
-                    type: 'SUBSCRIBE',
-                    symbols
-                }));
-
-                // Start heartbeat
-                const heartbeat = setInterval(() => {
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify({ type: 'PING' }));
-                    }
-                }, 30000); // Ping every 30 seconds
-
-                ws.addEventListener('close', () => {
-                    clearInterval(heartbeat);
-                });
-            };
-
-            ws.onmessage = (event) => {
-                try {
-                    const message = JSON.parse(event.data);
-
-                    if (message.type === 'PRICE_UPDATE') {
-                        updatePrice(message.data.symbol, message.data);
-                    } else if (message.type === 'SUBSCRIBED') {
-                        logger.info('✅ Subscribed to:', message.symbols);
-                    } else if (message.type === 'PONG') {
-                        // Heartbeat response
-                    }
-                } catch (err) {
-                    logger.error('❌ WebSocket message error:', err);
-                }
-            };
-
-            ws.onerror = (event) => {
-                logger.error('❌ WebSocket error:', event);
-                setError('WebSocket connection error');
-            };
-
-            ws.onclose = () => {
-                logger.info('❌ WebSocket disconnected');
-                setConnected(false);
-
-                // Auto-reconnect after 3 seconds
-                if (autoConnect) {
-                    reconnectTimeoutRef.current = setTimeout(() => {
-                        logger.info('🔄 Reconnecting...');
-                        connect();
-                    }, 3000);
-                }
-            };
+          if (message.type === 'PRICE_UPDATE') {
+            updatePrice(message.data.symbol, message.data);
+          } else if (message.type === 'SUBSCRIBED') {
+            logger.info('✅ Subscribed to:', message.symbols);
+          } else if (message.type === 'PONG') {
+            // Heartbeat response
+          }
         } catch (err) {
-            logger.error('❌ Failed to create WebSocket:', err);
-            setError('Failed to connect to WebSocket server');
+          logger.error('❌ WebSocket message error:', err);
         }
-    };
+      };
 
-    const disconnect = () => {
-        if (reconnectTimeoutRef.current) {
-            clearTimeout(reconnectTimeoutRef.current);
-            reconnectTimeoutRef.current = null;
-        }
+      ws.onerror = (event) => {
+        logger.error('❌ WebSocket error:', event);
+        setError('WebSocket connection error');
+      };
 
-        if (wsRef.current) {
-            // Unsubscribe before closing
-            if (wsRef.current.readyState === WebSocket.OPEN) {
-                wsRef.current.send(JSON.stringify({
-                    type: 'UNSUBSCRIBE',
-                    symbols
-                }));
-            }
-            wsRef.current.close();
-            wsRef.current = null;
-        }
-    };
+      ws.onclose = () => {
+        logger.info('❌ WebSocket disconnected');
+        setConnected(false);
 
-    useEffect(() => {
+        // Auto-reconnect after 3 seconds
         if (autoConnect) {
+          reconnectTimeoutRef.current = setTimeout(() => {
+            logger.info('🔄 Reconnecting...');
             connect();
+          }, 3000);
         }
+      };
+    } catch (err) {
+      logger.error('❌ Failed to create WebSocket:', err);
+      setError('Failed to connect to WebSocket server');
+    }
+  };
 
-        return () => {
-            disconnect();
-        };
-    }, [symbols.join(',')]); // Reconnect if symbols change
+  const disconnect = () => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
-    return {
-        connected,
-        error,
-        prices: Array.from(prices.entries()).map(([sym, data]) => ({
-            ...data,
-            symbol: sym
-        })),
-        getPrice: (symbol: string) => usePriceStore.getState().getPrice(symbol),
-        connect,
-        disconnect
+    if (wsRef.current) {
+      // Unsubscribe before closing
+      if (wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(
+          JSON.stringify({
+            type: 'UNSUBSCRIBE',
+            symbols,
+          }),
+        );
+      }
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (autoConnect) {
+      connect();
+    }
+
+    return () => {
+      disconnect();
     };
+  }, [autoConnect, connect, disconnect]); // Reconnect if symbols change
+
+  return {
+    connected,
+    error,
+    prices: Array.from(prices.entries()).map(([sym, data]) => ({
+      ...data,
+      symbol: sym,
+    })),
+    getPrice: (symbol: string) => usePriceStore.getState().getPrice(symbol),
+    connect,
+    disconnect,
+  };
 }

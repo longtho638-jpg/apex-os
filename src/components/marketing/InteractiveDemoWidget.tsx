@@ -1,8 +1,8 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
+import { Activity, AlertTriangle, Search, Sparkles, TrendingUp, Wallet } from 'lucide-react';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Sparkles, AlertTriangle, TrendingUp, Activity, Wallet } from 'lucide-react';
 import { Button3D } from './Button3D';
 
 interface AnalysisResult {
@@ -21,17 +21,17 @@ export function InteractiveDemoWidget() {
   const handleAnalyze = async () => {
     if (!symbol) return;
     setLoading(true);
-    
+
     // Simulate API call time
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     // Mock result (replace with real API later)
     setResult({
       symbol: symbol.toUpperCase(),
       prediction: Math.random() > 0.4 ? 'BUY' : 'SELL',
       confidence: 70 + Math.floor(Math.random() * 28),
       sentiment: Math.random() * 2 - 1, // -1 to 1
-      whales: Math.floor(Math.random() * 5)
+      whales: Math.floor(Math.random() * 5),
     });
     setLoading(false);
   };
@@ -39,19 +39,15 @@ export function InteractiveDemoWidget() {
   return (
     <div className="w-full max-w-md mx-auto bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 shadow-2xl shadow-emerald-900/20 relative overflow-hidden">
       {/* Scanning Grid Effect */}
-      {loading && (
-        <div className="absolute inset-0 z-0 bg-[url('/grid-pattern.svg')] opacity-20 animate-pulse" />
-      )}
-      
+      {loading && <div className="absolute inset-0 z-0 bg-[url('/grid-pattern.svg')] opacity-20 animate-pulse" />}
+
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-emerald-400" />
             <h3 className="font-bold text-white">Live AI Analysis</h3>
           </div>
-          <div className="text-[10px] font-mono text-zinc-500 bg-white/5 px-2 py-1 rounded">
-            v2.4.0 Active
-          </div>
+          <div className="text-[10px] font-mono text-zinc-500 bg-white/5 px-2 py-1 rounded">v2.4.0 Active</div>
         </div>
 
         <div className="flex gap-2 mb-6">
@@ -66,11 +62,7 @@ export function InteractiveDemoWidget() {
               onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
             />
           </div>
-          <Button3D 
-            onClick={handleAnalyze} 
-            disabled={loading || !symbol}
-            className="min-w-[100px] !py-0"
-          >
+          <Button3D onClick={handleAnalyze} disabled={loading || !symbol} className="min-w-[100px] !py-0">
             {loading ? '...' : 'Scan'}
           </Button3D>
         </div>
@@ -88,9 +80,7 @@ export function InteractiveDemoWidget() {
                 <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full" />
                 <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
               </div>
-              <div className="text-sm text-emerald-400 font-mono animate-pulse">
-                Scanning Order Flow...
-              </div>
+              <div className="text-sm text-emerald-400 font-mono animate-pulse">Scanning Order Flow...</div>
             </motion.div>
           ) : result ? (
             <motion.div
@@ -100,15 +90,19 @@ export function InteractiveDemoWidget() {
               className="space-y-4"
             >
               <div className="grid grid-cols-2 gap-4">
-                <div className={`p-4 rounded-xl border ${
-                  result.prediction === 'BUY' 
-                    ? 'bg-emerald-500/10 border-emerald-500/30' 
-                    : 'bg-red-500/10 border-red-500/30'
-                }`}>
+                <div
+                  className={`p-4 rounded-xl border ${
+                    result.prediction === 'BUY'
+                      ? 'bg-emerald-500/10 border-emerald-500/30'
+                      : 'bg-red-500/10 border-red-500/30'
+                  }`}
+                >
                   <div className="text-xs text-zinc-400 mb-1">Prediction</div>
-                  <div className={`text-2xl font-bold ${
-                    result.prediction === 'BUY' ? 'text-emerald-400' : 'text-red-400'
-                  }`}>
+                  <div
+                    className={`text-2xl font-bold ${
+                      result.prediction === 'BUY' ? 'text-emerald-400' : 'text-red-400'
+                    }`}
+                  >
                     {result.prediction}
                   </div>
                 </div>
@@ -131,9 +125,7 @@ export function InteractiveDemoWidget() {
                   <span className="text-zinc-400 flex items-center gap-2">
                     <Wallet className="w-4 h-4" /> Whale Activity
                   </span>
-                  <span className="text-white font-mono">
-                    {result.whales} Large Txns
-                  </span>
+                  <span className="text-white font-mono">{result.whales} Large Txns</span>
                 </div>
               </div>
 

@@ -28,12 +28,6 @@ export const COMPLIANCE_CONFIG = {
 /**
  * Check if user needs to accept updated ToS/Privacy
  */
-export function needsComplianceUpdate(
-  tosVersion?: string | null,
-  privacyVersion?: string | null
-): boolean {
-  return (
-    tosVersion !== CURRENT_TOS_VERSION ||
-    privacyVersion !== CURRENT_PRIVACY_VERSION
-  );
+export function needsComplianceUpdate(tosVersion?: string | null, privacyVersion?: string | null): boolean {
+  return tosVersion !== CURRENT_TOS_VERSION || privacyVersion !== CURRENT_PRIVACY_VERSION;
 }

@@ -1,6 +1,6 @@
+import { UNIFIED_TIERS } from '@apex-os/vibe-payment';
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { UNIFIED_TIERS, TierId } from '@apex-os/vibe-payment';
 
 // Get AI limits from unified tiers (RaaS model)
 const TIER_LIMITS: Record<string, number> = {
@@ -20,7 +20,10 @@ export class RateLimiter {
    * Check if user has exceeded daily limit
    * 兵法: 上兵伐謀 (Use limits to force upgrade)
    */
-  static async checkLimit(userId: string, userTier: keyof typeof TIER_LIMITS): Promise<{
+  static async checkLimit(
+    userId: string,
+    userTier: keyof typeof TIER_LIMITS,
+  ): Promise<{
     allowed: boolean;
     remaining: number;
     limit: number;
@@ -36,7 +39,8 @@ export class RateLimiter {
       .eq('request_date', today)
       .single();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "Result contains 0 rows"
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 is "Result contains 0 rows"
       logger.error('[RateLimiter] Error checking limit:', error);
     }
 
@@ -59,7 +63,7 @@ export class RateLimiter {
     tokens: number,
     cost: number,
     model: string = 'unknown',
-    provider: string = 'unknown'
+    provider: string = 'unknown',
   ): Promise<number> {
     const supabase = getSupabaseClient();
 
@@ -68,7 +72,7 @@ export class RateLimiter {
       p_tokens: tokens,
       p_cost: cost,
       p_model: model,
-      p_provider: provider
+      p_provider: provider,
     });
 
     if (error) {

@@ -18,7 +18,7 @@ export function AnimatedNumber({
   prefix = '',
   suffix = '',
   className = '',
-  decimals = 0
+  decimals = 0,
 }: AnimatedNumberProps) {
   const [count, setCount] = useState(0);
   const { ref, inView } = useInView({ triggerOnce: true });
@@ -45,13 +45,13 @@ export function AnimatedNumber({
     }
   }, [inView, value, duration]);
 
-  const formatted = decimals > 0
-    ? count.toFixed(decimals)
-    : Math.floor(count).toLocaleString('en-US');
+  const formatted = decimals > 0 ? count.toFixed(decimals) : Math.floor(count).toLocaleString('en-US');
 
   return (
     <span ref={ref} className={`font-mono ${className}`}>
-      {prefix}{formatted}{suffix}
+      {prefix}
+      {formatted}
+      {suffix}
     </span>
   );
 }

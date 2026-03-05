@@ -1,6 +1,6 @@
-import { logger } from '@/lib/logger';
-import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(req: Request) {
   try {
@@ -16,13 +16,9 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const symbol = searchParams.get('symbol');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
 
-    let query = supabase
-      .from('trading_signals')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(limit);
+    let query = supabase.from('trading_signals').select('*').order('timestamp', { ascending: false }).limit(limit);
 
     if (symbol) {
       query = query.eq('symbol', symbol);
@@ -31,22 +27,22 @@ export async function GET(req: Request) {
     const { data, error } = await query;
 
     if (error) {
-        logger.warn('Database error (falling back to mocks):', error.message);
-        // Mock Data Fallback for Demo/Uninitialized DB
-        return NextResponse.json({
-            data: Array.from({ length: 5 }).map((_, i) => ({
-                id: `mock-srv-${i}`,
-                symbol: ['BTC', 'ETH', 'SOL', 'BNB'][i % 4],
-                prediction: Math.random() > 0.5 ? 'BUY' : 'SELL',
-                confidence: 0.8 + Math.random() * 0.15,
-                entry_price: 50000 + Math.random() * 5000,
-                price_contrib: 0.6,
-                sentiment_contrib: 0.3,
-                volume_contrib: 0.1,
-                timestamp: new Date().toISOString(),
-                created_at: new Date().toISOString()
-            }))
-        });
+      logger.warn('Database error (falling back to mocks):', error.message);
+      // Mock Data Fallback for Demo/Uninitialized DB
+      return NextResponse.json({
+        data: Array.from({ length: 5 }).map((_, i) => ({
+          id: `mock-srv-${i}`,
+          symbol: ['BTC', 'ETH', 'SOL', 'BNB'][i % 4],
+          prediction: Math.random() > 0.5 ? 'BUY' : 'SELL',
+          confidence: 0.8 + Math.random() * 0.15,
+          entry_price: 50000 + Math.random() * 5000,
+          price_contrib: 0.6,
+          sentiment_contrib: 0.3,
+          volume_contrib: 0.1,
+          timestamp: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+        })),
+      });
     }
 
     return NextResponse.json({ data });
@@ -55,4 +51,3 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

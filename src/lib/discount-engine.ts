@@ -15,7 +15,7 @@ interface DiscountCode {
 export async function validateDiscountCode(
   code: string,
   tier: string,
-  userId: string
+  userId: string,
 ): Promise<{ valid: boolean; discount?: number; error?: string }> {
   const supabase = getSupabaseClient();
 
@@ -64,7 +64,7 @@ export async function applyDiscount(
   originalPrice: number,
   discountCode: string,
   tier: string,
-  userId: string
+  userId: string,
 ): Promise<{ finalPrice: number; saved: number }> {
   const validation = await validateDiscountCode(discountCode, tier, userId);
 
@@ -92,7 +92,7 @@ export async function applyDiscount(
       user_id: userId,
       original_price: originalPrice,
       discounted_price: finalPrice,
-      saved_amount: saved
+      saved_amount: saved,
     });
 
     // Increment usage count

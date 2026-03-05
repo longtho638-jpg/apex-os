@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { executeWithdrawal } from '@/lib/agents/execution-agent';
+import crypto from 'node:crypto';
 import { nowPayments } from '@apex-os/vibe-payment';
-import crypto from 'crypto';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { executeWithdrawal } from '@/lib/agents/execution-agent';
 
 // Mock Supabase
 const mockRpc = vi.fn();
@@ -15,28 +15,28 @@ const mockInsert = vi.fn();
 vi.mock('@/lib/supabase', () => ({
   getSupabaseClient: () => ({
     rpc: mockRpc,
-    from: mockFrom
-  })
+    from: mockFrom,
+  }),
 }));
 
-vi.mock('@/lib/payments/nowpayments-client', () => ({
+vi.mock('@apex-os/vibe-payment', () => ({
   nowPayments: {
     createPayout: vi.fn(),
-    getPayoutStatus: vi.fn()
-  }
+    getPayoutStatus: vi.fn(),
+  },
 }));
 
 describe('Execution Agent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.SUPABASE_JWT_SECRET = 'test-secret';
-    
+
     // Chain mocks
     mockFrom.mockReturnValue({
       select: mockSelect,
       update: mockUpdate,
       insert: mockInsert,
-      delete: vi.fn().mockReturnValue({ eq: vi.fn() })
+      delete: vi.fn().mockReturnValue({ eq: vi.fn() }),
     });
     mockSelect.mockReturnValue({ eq: mockEq });
     mockEq.mockReturnValue({ single: mockSingle, eq: mockEq }); // Chainable eq
@@ -50,13 +50,13 @@ describe('Execution Agent', () => {
     const amount = 100;
     const address = 'TAddress123';
     const nonce = 'randomNonce';
-    
+
     // Generate valid checksum
     const checksum = crypto
       .createHash('sha256')
       .update(`${userId}:${amount}:${address}:${nonce}:test-secret`)
       .digest('hex');
-      
+
     // Mock Database Response
     mockSingle.mockResolvedValue({
       data: {
@@ -66,30 +66,30 @@ describe('Execution Agent', () => {
         crypto_address: address,
         status: 'approved',
         data_checksum: checksum,
-        agent_notes: `nonce:${nonce}`
+        agent_notes: `nonce:${nonce}`,
       },
-      error: null
+      error: null,
     });
-    
+
     // Mock NOWPayments
-    // @ts-ignore
+    // @ts-expect-error
     nowPayments.createPayout.mockResolvedValue({ success: true, payout_id: 'payout-1' });
-    // @ts-ignore
+    // @ts-expect-error
     nowPayments.getPayoutStatus.mockResolvedValue({ status: 'FINISHED', tx_hash: '0xHash', fee: 1 });
 
     const result = await executeWithdrawal(withdrawalId);
 
     expect(result.success).toBe(true);
     expect(result.tx_hash).toBe('0xHash');
-    
+
     // Verify Status Update
     expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ status: 'executing' }));
     expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ status: 'completed', tx_hash: '0xHash' }));
-    
+
     // Verify Finalize RPC
     expect(mockRpc).toHaveBeenCalledWith('finalize_withdrawal', {
-        p_user_id: userId,
-        p_amount: amount
+      p_user_id: userId,
+      p_amount: amount,
     });
   });
 
@@ -103,13 +103,13 @@ describe('Execution Agent', () => {
         crypto_address: 'TAddress123',
         status: 'approved',
         data_checksum: 'invalid_checksum',
-        agent_notes: `nonce:randomNonce`
+        agent_notes: 'nonce:randomNonce',
       },
-      error: null
+      error: null,
     });
 
     const result = await executeWithdrawal('wd-123');
-    
+
     expect(result.success).toBe(false);
     expect(result.error).toContain('Data integrity check failed');
     // Should not call NOWPayments

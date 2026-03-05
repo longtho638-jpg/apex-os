@@ -4,7 +4,7 @@
  * Defines tour steps for first-time users
  */
 
-import { Step } from 'react-joyride';
+import type { Step } from 'react-joyride';
 
 export const ONBOARDING_STEPS: Step[] = [
   {

@@ -1,111 +1,100 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../polar/route'; // Corrected path
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { POST } from '../polar/route';
 
-const { mockInsert, mockUpsert, mockUpdate, mockEq, mockTimingSafeEqual, mockCreateHmac } = vi.hoisted(() => ({
-    mockInsert: vi.fn(),
-    mockUpsert: vi.fn(),
-    mockUpdate: vi.fn(),
-    mockEq: vi.fn(),
-    mockTimingSafeEqual: vi.fn(),
-    mockCreateHmac: vi.fn()
+const { mockInsert, mockRpc, mockTimingSafeEqual, mockCreateHmac } = vi.hoisted(() => ({
+  mockInsert: vi.fn(),
+  mockRpc: vi.fn(),
+  mockTimingSafeEqual: vi.fn(),
+  mockCreateHmac: vi.fn(),
 }));
 
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
     from: (table: string) => {
       if (table === 'payment_transactions') return { insert: mockInsert };
-      if (table === 'subscriptions') return { upsert: mockUpsert, update: mockUpdate };
       return {};
     },
-    rpc: vi.fn().mockResolvedValue({ error: null })
-  }))
+    rpc: mockRpc,
+  })),
 }));
 
-// Mock crypto module for signature verification
-vi.mock('crypto', () => ({
+vi.mock('node:crypto', () => ({
   default: {
     createHmac: mockCreateHmac,
-    timingSafeEqual: mockTimingSafeEqual
-  }
+    timingSafeEqual: mockTimingSafeEqual,
+  },
 }));
-
-// Setup mocks for update chain and crypto
-mockUpdate.mockReturnValue({ eq: mockEq });
 
 const mockHmac = {
   update: vi.fn().mockReturnThis(),
-  digest: vi.fn()
+  digest: vi.fn(),
 };
 
-describe('Polar Webhook Handler', () => {
+describe('Polar Webhook Handler (RaaS)', () => {
   const secret = 'test_webhook_secret';
 
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.POLAR_WEBHOOK_SECRET = secret;
     mockInsert.mockResolvedValue({ error: null });
-    mockUpsert.mockResolvedValue({ error: null });
-    mockUpdate.mockReturnValue({ eq: mockEq });
-    mockEq.mockResolvedValue({ error: null });
+    mockRpc.mockResolvedValue({ error: null });
     mockCreateHmac.mockReturnValue(mockHmac);
     mockHmac.digest.mockReturnValue('valid');
   });
 
   it('should return 401 for invalid signature', async () => {
-    // Mock crypto to fail signature verification
     mockTimingSafeEqual.mockReturnValue(false);
 
     const req = {
-        text: vi.fn().mockResolvedValue(JSON.stringify({ type: 'test' })),
-        headers: {
-            get: (name: string) => {
-                if (name === 'polar-webhook-signature') return 'invalid';
-                return null;
-            }
-        }
+      text: vi.fn().mockResolvedValue(JSON.stringify({ type: 'test' })),
+      headers: {
+        get: (name: string) => {
+          if (name === 'polar-webhook-signature') return 'invalid';
+          return null;
+        },
+      },
     } as unknown as NextRequest;
 
     const res = await POST(req);
     expect(res.status).toBe(401);
   });
 
-  it('should return 400 for missing webhook headers', async () => {
+  it('should return 401 for missing webhook signature', async () => {
     const req = {
-        text: vi.fn().mockResolvedValue(JSON.stringify({ type: 'test' })),
-        headers: {
-            get: vi.fn().mockReturnValue(null) // No signature header
-        }
+      text: vi.fn().mockResolvedValue(JSON.stringify({ type: 'test' })),
+      headers: {
+        get: vi.fn().mockReturnValue(null),
+      },
     } as unknown as NextRequest;
 
     const res = await POST(req);
-    expect(res.status).toBe(401); // Changed from 400 to 401 to match handler logic
+    expect(res.status).toBe(401);
   });
 
-  it('should skip insert when metadata.userId missing', async () => {
-    // Mock valid signature
+  it('should skip processing when metadata.userId missing', async () => {
     mockTimingSafeEqual.mockReturnValue(true);
 
     const payload = {
       type: 'checkout.completed',
       data: {
         id: 'checkout_123',
-        metadata: { tier: 'FOUNDERS' } // Missing userId
-      }
+        metadata: { type: 'deposit' },
+      },
     };
 
     const req = {
-        text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
-        headers: {
-            get: (name: string) => {
-                if (name === 'polar-webhook-signature') return 'valid';
-                return null;
-            }
-        }
+      text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
+      headers: {
+        get: (name: string) => {
+          if (name === 'polar-webhook-signature') return 'valid';
+          return null;
+        },
+      },
     } as unknown as NextRequest;
 
     const res = await POST(req);
-    expect(res.status).toBe(200); // Webhook processed successfully (logged error internally)
+    expect(res.status).toBe(200);
     expect(mockInsert).not.toHaveBeenCalled();
   });
 
@@ -118,18 +107,18 @@ describe('Polar Webhook Handler', () => {
       data: {
         id: 'checkout_123',
         amount: 4900,
-        metadata: { userId: 'user_123', tier: 'FOUNDERS' }
-      }
+        metadata: { userId: 'user_123', type: 'wallet_deposit' },
+      },
     };
 
     const req = {
-        text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
-        headers: {
-            get: (name: string) => {
-                if (name === 'polar-webhook-signature') return 'valid';
-                return null;
-            }
-        }
+      text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
+      headers: {
+        get: (name: string) => {
+          if (name === 'polar-webhook-signature') return 'valid';
+          return null;
+        },
+      },
     } as unknown as NextRequest;
 
     const res = await POST(req);
@@ -137,68 +126,78 @@ describe('Polar Webhook Handler', () => {
   });
 
   it('should handle duplicate transaction idempotently', async () => {
-    mockInsert.mockResolvedValueOnce({ error: { code: '23505' } }); // Duplicate error code
+    mockTimingSafeEqual.mockReturnValue(true);
+    mockInsert.mockResolvedValueOnce({ error: { code: '23505' } });
 
     const payload = {
       type: 'checkout.completed',
       data: {
         id: 'checkout_123',
         amount: 4900,
-        metadata: { userId: 'user_123', tier: 'FOUNDERS' }
-      }
+        metadata: { userId: 'user_123', type: 'wallet_deposit' },
+      },
     };
 
     const req = {
-        text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
-        headers: {
-            get: (name: string) => {
-                if (name === 'polar-webhook-signature') return 'valid';
-                if (name === 'polar-webhook-signature-timestamp') return '123';
-                if (name === 'polar-webhook-id') return '1';
-                if (name === 'polar-webhook-event') return 'checkout.completed';
-                return null;
-            }
-        }
+      text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
+      headers: {
+        get: (name: string) => {
+          if (name === 'polar-webhook-signature') return 'valid';
+          return null;
+        },
+      },
     } as unknown as NextRequest;
 
     const res = await POST(req);
-    expect(res.status).toBe(200); // Should succeed (graceful duplicate handling)
+    expect(res.status).toBe(200);
   });
 
-  it('should process checkout.completed event', async () => {
+  it('should process checkout.completed and credit wallet', async () => {
+    mockTimingSafeEqual.mockReturnValue(true);
+
     const payload = {
       type: 'checkout.completed',
       data: {
         id: 'checkout_123',
-        amount: 4900,
+        amount: 5000,
         currency: 'USD',
-        metadata: { userId: 'user_123', tier: 'FOUNDERS' }
-      }
+        customer_email: 'trader@example.com',
+        metadata: { userId: 'user_123', type: 'wallet_deposit' },
+      },
     };
 
     const req = {
-        text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
-        headers: {
-            get: (name: string) => {
-                if (name === 'polar-webhook-signature') return 'valid';
-                if (name === 'polar-webhook-signature-timestamp') return '123';
-                if (name === 'polar-webhook-id') return '1';
-                if (name === 'polar-webhook-event') return 'checkout.completed';
-                return null;
-            }
-        }
+      text: vi.fn().mockResolvedValue(JSON.stringify(payload)),
+      headers: {
+        get: (name: string) => {
+          if (name === 'polar-webhook-signature') return 'valid';
+          return null;
+        },
+      },
     } as unknown as NextRequest;
 
     const res = await POST(req);
     expect(res.status).toBe(200);
 
-    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({
-      user_id: 'user_123',
-      gateway: 'polar',
-      amount: 49, // 4900 / 100
-      status: 'completed'
-    }));
+    // Verify transaction recorded
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: 'user_123',
+        gateway: 'polar',
+        amount: 50,
+        status: 'completed',
+        product_name: 'wallet_deposit',
+      }),
+    );
 
-    expect(mockUpsert).toHaveBeenCalled();
+    // Verify wallet credited via RPC (RaaS: no subscription, direct credit)
+    expect(mockRpc).toHaveBeenCalledWith(
+      'credit_user_balance_realtime',
+      expect.objectContaining({
+        p_user_id: 'user_123',
+        p_amount: 50,
+        p_source: 'polar_deposit',
+      }),
+    );
   });
 });

@@ -1,11 +1,11 @@
 'use client';
 
+import { Globe, Laptop, ShieldCheck, Smartphone, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { toast } from 'sonner';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { Laptop, Smartphone, Globe, Trash2, ShieldCheck } from 'lucide-react';
-import { toast } from 'sonner';
+import { GlassCard } from '@/components/ui/glass-card';
 
 interface Session {
   id: string;
@@ -18,21 +18,39 @@ interface Session {
 export default function SessionManagerPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
 
-  const [loading, setLoading] = useState(false);
+  const [_loading, _setLoading] = useState(false);
 
   useEffect(() => {
     // Mock data
     setSessions([
-      { id: '1', ip_address: '192.168.1.1', user_agent: 'Chrome (Mac OS)', last_active: new Date().toISOString(), is_current: true },
-      { id: '2', ip_address: '10.0.0.1', user_agent: 'Safari (iPhone)', last_active: new Date(Date.now() - 3600000).toISOString(), is_current: false },
-      { id: '3', ip_address: '172.16.0.5', user_agent: 'Firefox (Windows)', last_active: new Date(Date.now() - 86400000).toISOString(), is_current: false }
+      {
+        id: '1',
+        ip_address: '192.168.1.1',
+        user_agent: 'Chrome (Mac OS)',
+        last_active: new Date().toISOString(),
+        is_current: true,
+      },
+      {
+        id: '2',
+        ip_address: '10.0.0.1',
+        user_agent: 'Safari (iPhone)',
+        last_active: new Date(Date.now() - 3600000).toISOString(),
+        is_current: false,
+      },
+      {
+        id: '3',
+        ip_address: '172.16.0.5',
+        user_agent: 'Firefox (Windows)',
+        last_active: new Date(Date.now() - 86400000).toISOString(),
+        is_current: false,
+      },
     ]);
   }, []);
 
   const handleRevoke = async (id: string) => {
     const toastId = toast.loading('Revoking session access...');
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setSessions(prev => prev.filter(s => s.id !== id));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setSessions((prev) => prev.filter((s) => s.id !== id));
     toast.dismiss(toastId);
     toast.success('Session Terminated', { description: 'Device logged out successfully.' });
   };
@@ -40,8 +58,8 @@ export default function SessionManagerPage() {
   const handleRevokeAll = async () => {
     if (!confirm('Are you sure you want to log out of all other devices?')) return;
     const toastId = toast.loading('Securing account...');
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setSessions(prev => prev.filter(s => s.is_current));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setSessions((prev) => prev.filter((s) => s.is_current));
     toast.dismiss(toastId);
     toast.success('Account Secured', { description: 'All other active sessions have been killed.' });
   };
@@ -73,16 +91,26 @@ export default function SessionManagerPage() {
             {sessions.map((session) => (
               <GlassCard key={session.id} className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${session.is_current ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-400'}`}>
-                    {session.user_agent.includes('iPhone') ? <Smartphone className="w-6 h-6" /> : <Laptop className="w-6 h-6" />}
+                  <div
+                    className={`p-3 rounded-xl ${session.is_current ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-400'}`}
+                  >
+                    {session.user_agent.includes('iPhone') ? (
+                      <Smartphone className="w-6 h-6" />
+                    ) : (
+                      <Laptop className="w-6 h-6" />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-bold flex items-center gap-2">
                       {session.user_agent}
-                      {session.is_current && <span className="text-[10px] bg-emerald-500 px-2 py-0.5 rounded-full text-black">CURRENT</span>}
+                      {session.is_current && (
+                        <span className="text-[10px] bg-emerald-500 px-2 py-0.5 rounded-full text-black">CURRENT</span>
+                      )}
                     </h3>
                     <div className="flex items-center gap-4 text-xs text-zinc-500 mt-1">
-                      <span className="flex items-center gap-1"><Globe className="w-3 h-3" /> {session.ip_address}</span>
+                      <span className="flex items-center gap-1">
+                        <Globe className="w-3 h-3" /> {session.ip_address}
+                      </span>
                       <span>Last active: {new Date(session.last_active).toLocaleString()}</span>
                     </div>
                   </div>

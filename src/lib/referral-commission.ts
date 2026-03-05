@@ -1,23 +1,20 @@
 import 'server-only';
+import type { TierId } from '@apex-os/vibe-payment';
 import { getSupabaseClient } from '@/lib/supabase';
-import { TierId } from '@apex-os/vibe-payment';
 
 // RaaS commission structure — L1 = Direct Referral
 const COMMISSION_RATES: Record<TierId, number> = {
-  'EXPLORER': 0.10,   // 10%
-  'OPERATOR': 0.20,   // 20%
-  'ARCHITECT': 0.25,  // 25%
-  'SOVEREIGN': 0.30,  // 30%
+  EXPLORER: 0.1, // 10%
+  OPERATOR: 0.2, // 20%
+  ARCHITECT: 0.25, // 25%
+  SOVEREIGN: 0.3, // 30%
 };
 
 function getCommissionRate(tier: TierId): number {
   return COMMISSION_RATES[tier] || 0;
 }
 
-export async function calculateCommission(
-  referredUserId: string,
-  tradeRevenue: number
-) {
+export async function calculateCommission(referredUserId: string, tradeRevenue: number) {
   const supabase = getSupabaseClient();
 
   // 1. Find direct referrer via conversion table
@@ -57,7 +54,7 @@ export async function calculateCommission(
       p_user_id: conversion.referrer_id,
       p_amount: commissionAmount,
       p_source: 'referral_l1',
-      p_metadata: { referred_user: referredUserId }
+      p_metadata: { referred_user: referredUserId },
     });
   }
 

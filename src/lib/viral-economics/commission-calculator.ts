@@ -1,6 +1,6 @@
+import { getCommissionRate, type TierId } from '@apex-os/vibe-payment';
 import { getSupabaseClient } from '@/lib/supabase';
 import { EXCHANGE_AVG_REBATE_RATE } from './tier-manager';
-import { getCommissionRate, TierId } from '@apex-os/vibe-payment';
 
 interface CommissionResult {
   totalDistributed: number;
@@ -33,14 +33,10 @@ export async function calculateMonthlyCommissions(month: string): Promise<Commis
   // For now, we'll simulate by summing up 'monthly_volume' * average_fee_rate or similar from a source
   // Or fetch from commission_pool if it's already populated with raw rebate data
 
-  const { data: poolData } = await supabase
-    .from('commission_pool')
-    .select('*')
-    .eq('month', month)
-    .single();
+  const { data: poolData } = await supabase.from('commission_pool').select('*').eq('month', month).single();
 
   if (!poolData) {
-    throw new Error('Commission pool not initialized for month ' + month);
+    throw new Error(`Commission pool not initialized for month ${month}`);
   }
 
   const totalRebateAvailable = poolData.total_rebate;
@@ -85,7 +81,7 @@ export async function calculateMonthlyCommissions(month: string): Promise<Commis
     await supabase.from('commission_transactions').insert({
       user_id: comm.userId,
       month,
-      tier: (users?.find(u => u.user_id === comm.userId)?.tier) || 'EXPLORER',
+      tier: users?.find((u) => u.user_id === comm.userId)?.tier || 'EXPLORER',
       l1_commission: comm.l1 * scalingFactor,
       l2_commission: comm.l2 * scalingFactor,
       l3_commission: comm.l3 * scalingFactor,
@@ -93,24 +89,27 @@ export async function calculateMonthlyCommissions(month: string): Promise<Commis
       bonus_commission: comm.bonus * scalingFactor,
       total_commission: finalTotal,
       multiplier: scalingFactor,
-      status: 'pending'
+      status: 'pending',
     });
 
     totalPaid += finalTotal;
   }
 
   // 5. Update pool
-  await supabase.from('commission_pool').update({
-    total_commission_allocated: totalPaid,
-    scaling_factor: scalingFactor,
-    updated_at: new Date().toISOString()
-  }).eq('month', month);
+  await supabase
+    .from('commission_pool')
+    .update({
+      total_commission_allocated: totalPaid,
+      scaling_factor: scalingFactor,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('month', month);
 
   return {
     totalDistributed: totalPaid,
     companyRetained: totalRebateAvailable - totalPaid,
     scalingFactor,
-    transactionsCount: userCommissions.length
+    transactionsCount: userCommissions.length,
   };
 }
 
@@ -130,7 +129,10 @@ export async function calculateUserCommission(userId: string, _month: string): P
 
   if (!tierData) return { userId, l1: 0, l2: 0, l3: 0, l4: 0, bonus: 0, total: 0 };
 
-  let l1 = 0, l2 = 0, l3 = 0, l4 = 0;
+  let l1 = 0,
+    l2 = 0,
+    l3 = 0,
+    l4 = 0;
 
   const { data: network } = await supabase
     .from('referral_network')
@@ -170,18 +172,18 @@ export async function calculateUserCommission(userId: string, _month: string): P
 
   return {
     userId,
-    l1, l2, l3, l4, bonus,
-    total: l1 + l2 + l3 + l4 + bonus
+    l1,
+    l2,
+    l3,
+    l4,
+    bonus,
+    total: l1 + l2 + l3 + l4 + bonus,
   };
 }
 
 export async function validateCommissionPool(month: string): Promise<PoolValidation> {
   const supabase = getSupabaseClient();
-  const { data } = await supabase
-    .from('commission_pool')
-    .select('*')
-    .eq('month', month)
-    .single();
+  const { data } = await supabase.from('commission_pool').select('*').eq('month', month).single();
 
   if (!data) return { isValid: false, totalPayoutRatio: 0, requiredScaling: 0 };
 
@@ -190,7 +192,7 @@ export async function validateCommissionPool(month: string): Promise<PoolValidat
   return {
     isValid: ratio <= 0.9,
     totalPayoutRatio: ratio,
-    requiredScaling: ratio > 0.9 ? (0.9 / ratio) : 1.0
+    requiredScaling: ratio > 0.9 ? 0.9 / ratio : 1.0,
   };
 }
 
@@ -219,13 +221,16 @@ export async function scaleCommissions(month: string, scaleFactor: number): Prom
       .from('commission_transactions')
       .update({
         total_commission: tx.total_commission * scaleFactor,
-        multiplier: scaleFactor
+        multiplier: scaleFactor,
       })
       .eq('id', tx.id);
   }
 
   // Update pool
-  await supabase.from('commission_pool').update({
-    scaling_factor: scaleFactor
-  }).eq('month', month);
+  await supabase
+    .from('commission_pool')
+    .update({
+      scaling_factor: scaleFactor,
+    })
+    .eq('month', month);
 }

@@ -1,11 +1,11 @@
-import { logger } from '@/lib/logger';
-import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 import { executeWithdrawal } from '@/lib/agents/execution-agent';
 import { auditService } from '@/lib/audit';
+import { logger } from '@/lib/logger';
 
 // Mock 2FA verification
-async function verify2FA(userId: string, code: string) {
+async function verify2FA(_userId: string, code: string) {
   // In prod, check against Authenticator secret
   return code === '123456'; // Dev backdoor
 }
@@ -23,14 +23,11 @@ export async function POST(req: Request) {
     }
 
     // Verify 2FA
-    if (!await verify2FA(admin_id, two_fa_code)) {
+    if (!(await verify2FA(admin_id, two_fa_code))) {
       return NextResponse.json({ error: 'Invalid 2FA Code' }, { status: 401 });
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
     // Approve
     const { error } = await supabase
@@ -38,7 +35,7 @@ export async function POST(req: Request) {
       .update({
         status: 'approved',
         approved_by: admin_id, // UUID
-        approved_at: new Date().toISOString()
+        approved_at: new Date().toISOString(),
       })
       .eq('id', withdrawal_id)
       .eq('status', 'agent_approved'); // Must pass agent check first
@@ -58,11 +55,10 @@ export async function POST(req: Request) {
       action: 'WITHDRAWAL_APPROVED',
       resourceType: 'WITHDRAWAL',
       resourceId: withdrawal_id,
-      newValue: { status: 'approved', result }
+      newValue: { status: 'approved', result },
     });
 
     return NextResponse.json(result);
-
   } catch (error: any) {
     logger.error('Admin Approval Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -4,9 +4,9 @@
  * Handles user withdrawal requests
  */
 
-import { createClient } from '@/lib/supabase/server';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { logAuditEvent } from '@/lib/services/audit-service';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,7 +70,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (withdrawalError) {
-      console.error('[Withdrawal] Create error:', withdrawalError);
       return NextResponse.json({ error: 'Failed to create withdrawal request' }, { status: 500 });
     }
 
@@ -90,8 +89,7 @@ export async function POST(request: NextRequest) {
       referenceId,
       withdrawal,
     });
-  } catch (error) {
-    console.error('[Withdrawal] Error:', error);
+  } catch (_error) {
     return NextResponse.json({ error: 'Failed to process withdrawal' }, { status: 500 });
   }
 }

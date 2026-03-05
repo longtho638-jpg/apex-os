@@ -113,7 +113,7 @@ export interface PayoutStatus {
 
 export type BillingFetcher = <T>(
   endpoint: string,
-  options?: { params?: Record<string, string | number>; token?: string }
+  options?: { params?: Record<string, string | number>; token?: string },
 ) => Promise<T>;
 
 // ---- Hook Parameter Types ----
@@ -134,15 +134,31 @@ export interface UseUserTierParams {
 export interface UseUpgradeTierParams {
   supabaseClient: {
     functions: {
-      invoke: (name: string, options: { body: Record<string, unknown> }) => Promise<{ data: any; error: any }>;
+      invoke: (
+        name: string,
+        options: { body: Record<string, unknown> },
+      ) => Promise<{
+        data: { success?: boolean; message?: string } | null;
+        error: { message: string } | null;
+      }>;
     };
   } | null;
 }
 
 export type MenuId =
-  | 'overview' | 'trade' | 'copy-trading' | 'pnl'
-  | 'wolfpack' | 'rebates' | 'risk' | 'referrals'
-  | 'reports' | 'billing' | 'resources' | 'settings' | 'admin';
+  | 'overview'
+  | 'trade'
+  | 'copy-trading'
+  | 'pnl'
+  | 'wolfpack'
+  | 'rebates'
+  | 'risk'
+  | 'referrals'
+  | 'reports'
+  | 'billing'
+  | 'resources'
+  | 'settings'
+  | 'admin';
 
 // ---- Payment Tier IDs (legacy + RaaS) ----
 

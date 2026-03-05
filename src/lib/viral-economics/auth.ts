@@ -4,14 +4,12 @@ export async function authenticateRequest(request: Request): Promise<string | nu
   const authHeader = request.headers.get('authorization');
   if (!authHeader) return null;
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-  const { data: { user }, error } = await supabase.auth.getUser(
-    authHeader.replace('Bearer ', '')
-  );
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
 
   return error || !user ? null : user.id;
 }

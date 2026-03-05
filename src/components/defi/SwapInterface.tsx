@@ -1,18 +1,22 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { ArrowDown, Settings, Info, Loader2, Zap, ChevronDown, Clock } from 'lucide-react';
+import { RAAS_CONFIG, UNIFIED_TIERS } from '@apex-os/vibe-payment';
+import { ArrowDown, ChevronDown, Clock, Info, Loader2, Settings, Zap } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { WalletConnectButton } from './WalletConnectButton';
-import { RAAS_CONFIG, UNIFIED_TIERS } from '@apex-os/vibe-payment';
 
 const ETH_PRICE = 3000;
 const SPREAD_RATE = UNIFIED_TIERS.EXPLORER.spreadBps / 10000; // 0.30%
-const REBATE_RATE = UNIFIED_TIERS.EXPLORER.selfRebateRate;    // 10%
+const REBATE_RATE = UNIFIED_TIERS.EXPLORER.selfRebateRate; // 10%
 const BINANCE_FEE_RATE = 0.001; // 0.10%
 
 const CHAIN_LABELS: Record<string, string> = {
-  ethereum: 'ETH', bsc: 'BSC', polygon: 'POL', solana: 'SOL', tron: 'TRX',
+  ethereum: 'ETH',
+  bsc: 'BSC',
+  polygon: 'POL',
+  solana: 'SOL',
+  tron: 'TRX',
 };
 
 export default function SwapInterface() {
@@ -54,7 +58,6 @@ export default function SwapInterface() {
   return (
     <div className="max-w-md mx-auto">
       <div className="glass-panel p-4 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
-
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -100,7 +103,9 @@ export default function SwapInterface() {
               className="bg-transparent text-3xl font-bold text-white outline-none w-full placeholder-gray-600"
             />
             <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors shrink-0">
-              <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold">E</div>
+              <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold">
+                E
+              </div>
               <span className="text-white font-bold">ETH</span>
               <ChevronDown className="h-4 w-4 text-gray-400" />
             </button>
@@ -124,7 +129,9 @@ export default function SwapInterface() {
           <div className="flex items-center justify-between gap-4">
             <div className="text-3xl font-bold text-white w-full">{toAmount || '0'}</div>
             <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors shrink-0">
-              <div className="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center text-[10px] font-bold">T</div>
+              <div className="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center text-[10px] font-bold">
+                T
+              </div>
               <span className="text-white font-bold">USDT</span>
               <ChevronDown className="h-4 w-4 text-gray-400" />
             </button>
@@ -140,9 +147,13 @@ export default function SwapInterface() {
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Spread Breakdown</span>
             </div>
             <Row label="Trade amount" value={`$${usdValue.toLocaleString()}`} />
-            <Row label={`Spread rate`} value={`${breakdown.spreadPct}%`} valueClass="text-gray-300" />
+            <Row label={'Spread rate'} value={`${breakdown.spreadPct}%`} valueClass="text-gray-300" />
             <Row label="Spread cost" value={`-$${breakdown.spreadCost}`} valueClass="text-red-400" />
-            <Row label={`Your rebate (${REBATE_RATE * 100}%)`} value={`+$${breakdown.rebate}`} valueClass="text-emerald-400" />
+            <Row
+              label={`Your rebate (${REBATE_RATE * 100}%)`}
+              value={`+$${breakdown.rebate}`}
+              valueClass="text-emerald-400"
+            />
             <div className="border-t border-white/10 pt-1.5">
               <Row label="Net cost" value={`$${breakdown.netCost}`} valueClass="text-white font-bold" />
             </div>
@@ -161,7 +172,12 @@ export default function SwapInterface() {
           </div>
           <div className="flex gap-1">
             {RAAS_CONFIG.cryptoGate.stablecoins.slice(0, 3).map((t) => (
-              <span key={t} className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-gray-400">{t}</span>
+              <span
+                key={t}
+                className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-gray-400"
+              >
+                {t}
+              </span>
             ))}
           </div>
         </div>
@@ -176,14 +192,22 @@ export default function SwapInterface() {
         {/* Action */}
         <div className="mt-3">
           {!isConnected ? (
-            <div className="w-full"><WalletConnectButton /></div>
+            <div className="w-full">
+              <WalletConnectButton />
+            </div>
           ) : (
             <button
               onClick={handleSwap}
               disabled={!fromAmount || isLoading}
               className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              {isLoading ? <><Loader2 className="h-5 w-5 animate-spin" /> Swapping...</> : 'Swap'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" /> Swapping...
+                </>
+              ) : (
+                'Swap'
+              )}
             </button>
           )}
         </div>

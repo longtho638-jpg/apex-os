@@ -1,5 +1,5 @@
+import { type NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       eth: 3450,
       sol: 145,
       trend: 'bullish',
-      topGainer: 'PEPE (+15%)'
+      topGainer: 'PEPE (+15%)',
     };
 
     // 2. Generate Content via OpenRouter (DeepSeek)
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://apexrebate.com',
       },
@@ -57,11 +57,7 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseClient();
 
     // Check if post exists for today to prevent duplicates
-    const { data: existing } = await supabase
-      .from('blog_posts')
-      .select('id')
-      .eq('slug', slug)
-      .single();
+    const { data: existing } = await supabase.from('blog_posts').select('id').eq('slug', slug).single();
 
     if (!existing) {
       await supabase.from('blog_posts').insert({
@@ -71,12 +67,11 @@ export async function GET(req: NextRequest) {
         seo_keywords: ['Bitcoin', 'Crypto Analysis', 'Trading'],
         meta_description: `Daily crypto market analysis: BTC, ETH, and top movers for ${new Date().toLocaleDateString()}.`,
         status: 'published',
-        published_at: new Date().toISOString()
+        published_at: new Date().toISOString(),
       });
     }
 
     return NextResponse.json({ success: true, title });
-
   } catch (error: any) {
     logger.error('Market Analysis Cron Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -1,7 +1,7 @@
+import crypto from 'node:crypto';
+import { nowPayments } from '@apex-os/vibe-payment';
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { nowPayments } from '@apex-os/vibe-payment';
-import crypto from 'crypto';
 
 export async function executeWithdrawal(withdrawalId: string) {
   const supabase = getSupabaseClient();
@@ -27,7 +27,9 @@ export async function executeWithdrawal(withdrawalId: string) {
     const nonce = request.agent_notes?.split('nonce:')[1] || '';
     const expectedChecksum = crypto
       .createHash('sha256')
-      .update(`${request.user_id}:${request.amount}:${request.crypto_address}:${nonce}:${process.env.SUPABASE_JWT_SECRET}`)
+      .update(
+        `${request.user_id}:${request.amount}:${request.crypto_address}:${nonce}:${process.env.SUPABASE_JWT_SECRET}`,
+      )
       .digest('hex');
 
     if (request.data_checksum !== expectedChecksum) {
@@ -45,7 +47,7 @@ export async function executeWithdrawal(withdrawalId: string) {
       address: request.crypto_address,
       amount: request.amount,
       currency: 'usdttrc20', // Force USDT TRC20
-      withdrawal_id: withdrawalId
+      withdrawal_id: withdrawalId,
     });
 
     if (!result.success) {
@@ -56,7 +58,7 @@ export async function executeWithdrawal(withdrawalId: string) {
     await supabase
       .from('withdrawal_requests')
       .update({
-        metadata: { payout_id: result.payout_id }
+        metadata: { payout_id: result.payout_id },
       })
       .eq('id', withdrawalId);
 
@@ -67,7 +69,7 @@ export async function executeWithdrawal(withdrawalId: string) {
 
     // Poll a few times
     for (let i = 0; i < 5; i++) {
-      await new Promise(r => setTimeout(r, 2000)); // Wait 2s
+      await new Promise((r) => setTimeout(r, 2000)); // Wait 2s
       const status = await nowPayments.getPayoutStatus(result.payout_id!);
       if (status.status === 'FINISHED' || status.tx_hash) {
         txHash = status.tx_hash || '';
@@ -84,14 +86,14 @@ export async function executeWithdrawal(withdrawalId: string) {
           status: 'completed',
           tx_hash: txHash,
           tx_fee: fee,
-          payout_provider: 'nowpayments'
+          payout_provider: 'nowpayments',
         })
         .eq('id', withdrawalId);
 
       // Finalize Wallet Balance (RPC)
       await supabase.rpc('finalize_withdrawal', {
         p_user_id: request.user_id,
-        p_amount: request.amount
+        p_amount: request.amount,
       });
 
       // Log Audit
@@ -101,14 +103,13 @@ export async function executeWithdrawal(withdrawalId: string) {
         actor: 'agent:execution',
         previous_status: 'executing',
         new_status: 'completed',
-        metadata: { tx_hash: txHash, provider: 'nowpayments' }
+        metadata: { tx_hash: txHash, provider: 'nowpayments' },
       });
     } else {
       // Left in 'executing' status, waiting for Webhook or background poller
     }
 
     return { success: true, tx_hash: txHash };
-
   } catch (error: any) {
     logger.error('Execution Error:', error);
 
@@ -117,16 +118,20 @@ export async function executeWithdrawal(withdrawalId: string) {
       .from('withdrawal_requests')
       .update({
         status: 'execution_failed',
-        agent_notes: `Execution Error: ${error.message}`
+        agent_notes: `Execution Error: ${error.message}`,
       })
       .eq('id', withdrawalId);
 
     // RELEASE RESERVED BALANCE
-    const { data: req } = await supabase.from('withdrawal_requests').select('user_id, amount').eq('id', withdrawalId).single();
+    const { data: req } = await supabase
+      .from('withdrawal_requests')
+      .select('user_id, amount')
+      .eq('id', withdrawalId)
+      .single();
     if (req) {
       await supabase.rpc('release_reserved_balance', {
         p_user_id: req.user_id,
-        p_amount: req.amount
+        p_amount: req.amount,
       });
     }
 

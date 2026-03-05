@@ -17,8 +17,14 @@ export function useTenant() {
   return useContext(TenantContext);
 }
 
-export function TenantProvider({ children, initialTenant }: { children: React.ReactNode, initialTenant?: TenantConfig }) {
-  const [tenant, setTenant] = useState<TenantConfig | null>(initialTenant || null);
+export function TenantProvider({
+  children,
+  initialTenant,
+}: {
+  children: React.ReactNode;
+  initialTenant?: TenantConfig;
+}) {
+  const [tenant, _setTenant] = useState<TenantConfig | null>(initialTenant || null);
 
   useEffect(() => {
     if (tenant?.theme_config?.primaryColor) {
@@ -27,9 +33,5 @@ export function TenantProvider({ children, initialTenant }: { children: React.Re
     }
   }, [tenant]);
 
-  return (
-    <TenantContext.Provider value={tenant}>
-      {children}
-    </TenantContext.Provider>
-  );
+  return <TenantContext.Provider value={tenant}>{children}</TenantContext.Provider>;
 }

@@ -1,5 +1,5 @@
-import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 import { SystemStatsService } from '@/lib/system-stats';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export async function GET() {
       statsService.getRecentActivity(),
       statsService.getTradingStats(),
       statsService.getFinanceStats(),
-      statsService.getSignalStats()
+      statsService.getSignalStats(),
     ]);
 
     return NextResponse.json({
@@ -23,15 +23,11 @@ export async function GET() {
         recentActivity,
         trading: tradingStats,
         finance: financeStats,
-        signals: signalStats
-      }
+        signals: signalStats,
+      },
     });
-
   } catch (error: any) {
     logger.error('[System Stats API] Error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

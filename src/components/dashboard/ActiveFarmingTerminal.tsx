@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Play, Pause, Terminal as TerminalIcon, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Pause, Play, Terminal as TerminalIcon, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
 
 export function ActiveFarmingTerminal() {
   const t = useTranslations('DashboardComponents.ActiveFarming');
@@ -27,11 +27,11 @@ export function ActiveFarmingTerminal() {
       const action = actions[Math.floor(Math.random() * actions.length)];
       const timestamp = new Date().toLocaleTimeString();
 
-      setLogs(prev => [`[${timestamp}] ${action}`, ...prev].slice(0, 50));
+      setLogs((prev) => [`[${timestamp}] ${action}`, ...prev].slice(0, 50));
     }, 1500);
 
     return () => clearInterval(interval);
-  }, [active]);
+  }, [active, t]);
 
   return (
     <GlassCard className="p-6 h-full flex flex-col">
@@ -41,10 +41,11 @@ export function ActiveFarmingTerminal() {
         </h3>
         <button
           onClick={() => setActive(!active)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${active
-            ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30'
-            : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
-            }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${
+            active
+              ? 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30'
+              : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]'
+          }`}
         >
           {active ? (
             <>

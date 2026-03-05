@@ -1,8 +1,8 @@
 'use client';
 
-import { GlassCard } from '@/components/ui/glass-card';
-import { Terminal, Code, Shield, Zap, ArrowRight } from 'lucide-react';
+import { ArrowRight, Code, Shield, Terminal, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { GlassCard } from '@/components/ui/glass-card';
 
 export default function ApiDocsPage() {
   return (
@@ -79,12 +79,10 @@ export default function ApiDocsPage() {
   );
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
     <GlassCard className="p-6">
-      <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">
-        {icon}
-      </div>
+      <div className="p-3 bg-emerald-500/10 rounded-lg w-fit mb-4">{icon}</div>
       <h3 className="text-xl font-bold mb-2">{title}</h3>
       <p className="text-zinc-400">{description}</p>
     </GlassCard>

@@ -76,6 +76,16 @@
       "legal": "법적 고지",
       "rights": "All rights reserved.",
       "risk_disclosure": "위험 고지: 암호화폐 거래는 상당한 손실 위험을 수반합니다. ApexOS는 도구와 분석을 제공하지만 수익을 보장하지는 않습니다. 과거의 성과가 미래의 결과를 나타내지 않습니다. 책임감 있게 거래하고 감당할 수 있는 자본으로만 거래하십시오."
+    },
+    "raas": {
+      "subtitle": "Your tier is determined by trading volume, not your wallet. Trade more, pay less spread.",
+      "badge": "Revenue-as-a-Service",
+      "title": "Zero Subscription Fees. Forever."
+    },
+    "onboarding": {
+      "subtitle": "30-second setup. No forms. Just trade.",
+      "title": "AI Deploys Your Trading Agents",
+      "badge": "Agentic Onboarding"
     }
   },
   "Navigation": {
@@ -516,7 +526,47 @@
     "join_telegram": "텔레그램 참여",
     "claim_reward": "24시간 엘리트 체험권 받기",
     "task_completed": "작업 완료!",
-    "reward_claimed": "보상 수령 완료! 24시간 엘리트 체험권이 활성화되었습니다."
+    "reward_claimed": "보상 수령 완료! 24시간 엘리트 체험권이 활성화되었습니다.",
+    "steps": {
+      "funding": {
+        "subtitle": "Deposit crypto — zero fees, instant settlement",
+        "title": "Fund & Launch"
+      },
+      "agent-config": {
+        "title": "Agent Deployment",
+        "subtitle": "Your personal trading agents are being configured"
+      },
+      "risk-assessment": {
+        "title": "Risk Calibration",
+        "subtitle": "Autonomous risk profiling — no forms, just questions"
+      },
+      "profile": {
+        "title": "AI Profile Scan",
+        "subtitle": "Our AI analyzes your trading style in 30 seconds"
+      }
+    },
+    "actions": {
+      "start_trading": "Start Trading — Zero Fees",
+      "deploy_agents": "Deploy My Agents",
+      "fund_and_trade": "Fund & Start Trading",
+      "continue": "Continue"
+    },
+    "profile": {
+      "monthly_volume": "Expected monthly volume (USD)",
+      "experience": "Trading experience"
+    },
+    "funding": {
+      "networks": "Supported Networks",
+      "zero_fee": "Zero deposit fee"
+    },
+    "risk": {
+      "tolerance": "Risk tolerance",
+      "qualify": "Based on your volume of {volume}/mo, you qualify for {spread} spread with {agents} AI agents.",
+      "detected": "AI Detected: {tier} Tier"
+    },
+    "agents": {
+      "live": "LIVE"
+    }
   },
   "AI": {
     "core_title": "Apex AI 코어",
@@ -913,7 +963,8 @@
     "hero": {
       "title": "암호화폐 리베이트, 더 이상 놓치지 마세요",
       "subtitle": "모든 리베이트를 자동으로 추적하고 수익을 극대화하세요.",
-      "cta": "무료 체험 시작 - 신용카드 필요 없음"
+      "cta": "무료 체험 시작 - 신용카드 필요 없음",
+      "badge": "RaaS AGI — Zero-Fee Agentic Trading"
     },
     "calculator": {
       "volume": "월간 거래량",
@@ -921,68 +972,15 @@
       "claim": "청구하기"
     },
     "tiers": {
-      "free": {
-        "name": "FREE",
-        "price": "$0",
-        "period": "평생",
-        "features": [
-          "1개 거래소",
-          "기본 추적",
-          "7일 기록"
-        ]
-      },
-      "basic": {
-        "name": "BASIC",
-        "price": "$29",
-        "period": "월",
-        "annual_save": "$58 절약",
-        "features": [
-          "3개 거래소",
-          "전체 기록",
-          "데이터 내보내기",
-          "이메일 지원"
-        ]
-      },
-      "trader": {
-        "name": "TRADER",
-        "price": "$97",
-        "period": "월",
-        "badge": "가장 인기",
-        "annual_save": "$194 절약",
-        "features": [
-          "10개 거래소",
-          "무제한 기록",
-          "고급 분석",
-          "우선 지원",
-          "모바일 앱"
-        ]
-      },
-      "pro": {
-        "name": "PRO",
-        "price": "$297",
-        "period": "월",
-        "annual_save": "$594 절약",
-        "features": [
-          "무제한 거래소",
-          "API 액세스",
-          "맞춤 보고서",
-          "화이트 글러브 지원",
-          "기능 조기 액세스"
-        ]
-      },
-      "elite": {
-        "name": "ELITE",
-        "price": "$997",
-        "period": "월",
-        "annual_save": "$1,994 절약",
-        "features": [
-          "PRO의 모든 기능",
-          "전담 계정 관리자",
-          "맞춤 통합",
-          "SLA 보장",
-          "24/7 전화 지원"
-        ]
-      }
+      "free": {},
+      "basic": {},
+      "trader": {},
+      "pro": {},
+      "elite": {},
+      "section_title": "AI Agents + Multi-Org + Crypto = Zero-Fee Trading",
+      "section_subtitle": "Volume-based tiers — unlock automatically via agentic workflows",
+      "most_popular": "Most Popular",
+      "start_trading": "Start Trading Free"
     },
     "trust": {
       "users": "200+ 트레이더가 이미 리베이트를 추적 중입니다",
@@ -992,6 +990,40 @@
     "urgency": {
       "limited": "선착순 100명에게 평생 50% 할인",
       "spots": "이 가격으로 남은 자리: X자리"
+    },
+    "raas": {
+      "auto_upgrade": "Auto-upgrade with volume",
+      "vs_saas_title": "SaaS vs RaaS",
+      "volume_based": "Volume-Based Tiers",
+      "volume_operator": "$10K – $100K/mo volume",
+      "volume_explorer": "Up to $10K/mo volume",
+      "volume_architect": "$100K – $1M/mo volume",
+      "current_tier": "Current Tier",
+      "agents_label": "Agents",
+      "badge": "RaaS Model",
+      "zero_fee": "$0/mo",
+      "volume_sovereign": "$1M+/mo volume",
+      "volume_required": "Volume Required",
+      "vs_saas_new": "Apex RaaS",
+      "rebate_label": "Rebate",
+      "spread_label": "Spread",
+      "vs_saas_old": "Traditional SaaS"
+    },
+    "comparison": {
+      "saas_1": "Pay $97–$997/mo whether you trade or not",
+      "raas_1": "$0/mo — zero subscription fees forever",
+      "raas_title": "New RaaS Model",
+      "saas_title": "Old SaaS Model",
+      "title": "SaaS vs RaaS AGI — The Paradigm Shift",
+      "raas_2": "Multi-org: create teams, share agents, pool volume",
+      "raas_4": "AI agents auto-trade 24/7 — you earn while you sleep",
+      "raas_5": "Tiers unlock automatically via agentic volume",
+      "subtitle": "Multi-org zero-fee crypto agentic workflows replace legacy subscriptions",
+      "saas_4": "Annual billing traps with no refunds",
+      "raas_3": "Crypto-native: deposit/withdraw USDT on 5+ chains",
+      "saas_3": "Locked features behind higher tiers",
+      "saas_2": "Platform profits even when you lose",
+      "saas_5": "Zero incentive to help you succeed"
     }
   },
   "Offer": {
@@ -1000,5 +1032,29 @@
     "subtitle": "AI 기반 도구로 트레이딩 잠재력을 완전히 잠금 해제하세요.",
     "current_plan": "현재 요금제",
     "upgrade_now": "지금 업그레이드"
+  },
+  "Exchange": {
+    "spread_rate": "Spread Rate",
+    "settlement": "Settlement",
+    "zero_fee_badge": "Zero Trading Fees",
+    "supported_chains": "Supported Chains",
+    "your_rebate": "Your Rebate",
+    "spread_breakdown": "Spread Breakdown",
+    "spread_cost": "Spread Cost",
+    "net_cost": "Net Cost",
+    "swap_success": "Swap completed successfully!",
+    "trade_amount": "Trade Amount"
+  },
+  "AgenticWorkflow": {
+    "tier_progress": "Tier Progress",
+    "agent_error": "Error",
+    "pipeline": "Trading Pipeline",
+    "execution": "Execution",
+    "title": "Agentic Workflow",
+    "agent_idle": "Idle",
+    "signal_detection": "Signal Detection",
+    "agent_active": "Active",
+    "deployed_agents": "Deployed Agents",
+    "risk_assessment": "Risk Assessment"
   }
 }

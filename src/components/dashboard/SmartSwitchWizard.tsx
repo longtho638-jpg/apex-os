@@ -1,20 +1,13 @@
 'use client';
 
-import { logger } from '@/lib/logger';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, BarChart3, CheckCircle2, Sparkles, Zap } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Zap,
-  TrendingUp,
-  ArrowRight,
-  Sparkles,
-  BarChart3,
-  CheckCircle2
-} from 'lucide-react';
-import { GlassmorphicCard } from '@/components/marketing/GlassmorphicCard';
 import { AnimatedNumber } from '@/components/marketing/AnimatedNumber';
 import { Button3D } from '@/components/marketing/Button3D';
-import { useTranslations } from 'next-intl';
+import { GlassmorphicCard } from '@/components/marketing/GlassmorphicCard';
+import { logger } from '@/lib/logger';
 
 type DemoState = 'idle' | 'selecting' | 'analyzing' | 'results';
 
@@ -25,17 +18,38 @@ export default function SmartSwitchWizard() {
   const [pair, setPair] = useState('BTC/USDT');
   const [volume, setVolume] = useState(10000);
   const [progress, setProgress] = useState(0);
-  const [recommendation, setRecommendation] = useState({ name: 'OKX', reason: 'Highest Rebate', savings: 0, percent: 0 });
+  const [recommendation, setRecommendation] = useState({
+    name: 'OKX',
+    reason: 'Highest Rebate',
+    savings: 0,
+    percent: 0,
+  });
 
   const exchanges = [
-    'Binance', 'Bybit', 'OKX', 'Bitget',
-    'KuCoin', 'MEXC', 'Gate.io', 'HTX',
-    'BingX', 'Phemex', 'CoinEx', 'BitMart'
+    'Binance',
+    'Bybit',
+    'OKX',
+    'Bitget',
+    'KuCoin',
+    'MEXC',
+    'Gate.io',
+    'HTX',
+    'BingX',
+    'Phemex',
+    'CoinEx',
+    'BitMart',
   ];
   const pairs = [
-    'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT',
-    'XRP/USDT', 'DOGE/USDT', 'ADA/USDT', 'AVAX/USDT',
-    'LINK/USDT', 'DOT/USDT'
+    'BTC/USDT',
+    'ETH/USDT',
+    'SOL/USDT',
+    'BNB/USDT',
+    'XRP/USDT',
+    'DOGE/USDT',
+    'ADA/USDT',
+    'AVAX/USDT',
+    'LINK/USDT',
+    'DOT/USDT',
   ];
 
   const handleAnalyze = async () => {
@@ -50,35 +64,35 @@ export default function SmartSwitchWizard() {
     }, 100);
 
     try {
-        // Call Real-time Analysis API
-        const res = await fetch('/api/v1/market/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ exchange, pair, volume })
-        });
-        
-        const data = await res.json();
-        
-        clearInterval(interval);
-        setProgress(100);
+      // Call Real-time Analysis API
+      const res = await fetch('/api/v1/market/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exchange, pair, volume }),
+      });
 
-        if (data.success) {
-            setRecommendation({
-                name: data.analysis.name,
-                reason: 'Apex Optimized', // Simplified for now, can be dynamic from API
-                savings: data.analysis.savings,
-                percent: data.analysis.percent
-            });
-            setTimeout(() => setState('results'), 500);
-        } else {
-            // Fallback if API fails
-            setState('idle'); 
-            alert('Analysis failed. Please try again.');
-        }
-    } catch (error) {
-        clearInterval(interval);
+      const data = await res.json();
+
+      clearInterval(interval);
+      setProgress(100);
+
+      if (data.success) {
+        setRecommendation({
+          name: data.analysis.name,
+          reason: 'Apex Optimized', // Simplified for now, can be dynamic from API
+          savings: data.analysis.savings,
+          percent: data.analysis.percent,
+        });
+        setTimeout(() => setState('results'), 500);
+      } else {
+        // Fallback if API fails
         setState('idle');
-        logger.error("Operation failed", error);
+        alert('Analysis failed. Please try again.');
+      }
+    } catch (error) {
+      clearInterval(interval);
+      setState('idle');
+      logger.error('Operation failed', error);
     }
   };
 
@@ -100,9 +114,7 @@ export default function SmartSwitchWizard() {
           {t('title_prefix')} <span className="text-emerald-400">{t('title_suffix')}</span>
         </h2>
 
-        <p className="text-base text-zinc-400 max-w-2xl mx-auto">
-          {t('description')}
-        </p>
+        <p className="text-base text-zinc-400 max-w-2xl mx-auto">{t('description')}</p>
       </motion.div>
 
       {/* Interactive Demo Area */}
@@ -122,41 +134,39 @@ export default function SmartSwitchWizard() {
                 <div className="grid md:grid-cols-3 gap-4">
                   {/* Exchange Selector */}
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                      {t('your_exchange')}
-                    </label>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">{t('your_exchange')}</label>
                     <select
                       value={exchange}
                       onChange={(e) => setExchange(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
                     >
-                      {exchanges.map(ex => (
-                        <option key={ex} value={ex} className="bg-zinc-900">{ex}</option>
+                      {exchanges.map((ex) => (
+                        <option key={ex} value={ex} className="bg-zinc-900">
+                          {ex}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   {/* Pair Selector */}
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                      {t('trading_pair')}
-                    </label>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">{t('trading_pair')}</label>
                     <select
                       value={pair}
                       onChange={(e) => setPair(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
                     >
-                      {pairs.map(p => (
-                        <option key={p} value={p} className="bg-zinc-900">{p}</option>
+                      {pairs.map((p) => (
+                        <option key={p} value={p} className="bg-zinc-900">
+                          {p}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   {/* Volume Input */}
                   <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-                      {t('daily_volume')}
-                    </label>
+                    <label className="block text-xs font-medium text-zinc-400 mb-1.5">{t('daily_volume')}</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">$</span>
                       <input
@@ -173,7 +183,9 @@ export default function SmartSwitchWizard() {
                 <div>
                   <div className="flex justify-between text-xs text-zinc-500 mb-2">
                     <span>$1K</span>
-                    <span className="text-white font-bold">${(volume / 1000).toFixed(0)}K {t('daily_volume')}</span>
+                    <span className="text-white font-bold">
+                      ${(volume / 1000).toFixed(0)}K {t('daily_volume')}
+                    </span>
                     <span>$100K</span>
                   </div>
                   <input
@@ -189,10 +201,7 @@ export default function SmartSwitchWizard() {
 
                 {/* CTA */}
                 <div className="text-center pt-2">
-                  <Button3D
-                    onClick={handleAnalyze}
-                    className="group relative overflow-hidden px-6 py-2.5"
-                  >
+                  <Button3D onClick={handleAnalyze} className="group relative overflow-hidden px-6 py-2.5">
                     <span className="relative z-10 flex items-center gap-2 text-sm">
                       <Zap className="w-4 h-4" />
                       {t('analyze_button')}
@@ -200,9 +209,7 @@ export default function SmartSwitchWizard() {
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-cyan-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer" />
                   </Button3D>
-                  <p className="text-[10px] text-zinc-500 mt-2">
-                    🔒 {t('no_signup')}
-                  </p>
+                  <p className="text-[10px] text-zinc-500 mt-2">🔒 {t('no_signup')}</p>
                 </div>
               </motion.div>
             )}
@@ -220,7 +227,7 @@ export default function SmartSwitchWizard() {
                   <div className="inline-flex p-4 rounded-full bg-emerald-500/10 border-4 border-emerald-500/20 relative">
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                     >
                       <Sparkles className="w-8 h-8 text-emerald-400" />
                     </motion.div>
@@ -263,7 +270,7 @@ export default function SmartSwitchWizard() {
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: "spring", delay: 0.2 }}
+                    transition={{ type: 'spring', delay: 0.2 }}
                     className="inline-flex p-3 rounded-full bg-emerald-500/20 border-2 border-emerald-500/50 mb-3"
                   >
                     <CheckCircle2 className="w-6 h-6 text-emerald-400" />
@@ -305,10 +312,13 @@ export default function SmartSwitchWizard() {
                   </h4>
                   <ul className="space-y-2">
                     {[
-                      { label: t('breakdown.tier'), value: `${recommendation.name === 'OKX' ? '0.127%' : '0.055%'} vs 0.050%` },
+                      {
+                        label: t('breakdown.tier'),
+                        value: `${recommendation.name === 'OKX' ? '0.127%' : '0.055%'} vs 0.050%`,
+                      },
                       { label: t('breakdown.maker_fees'), value: '0.02% vs 0.10%' },
                       { label: t('breakdown.vip'), value: 'Within reach' },
-                      { label: t('breakdown.bonus'), value: 'Extra $50' }
+                      { label: t('breakdown.bonus'), value: 'Extra $50' },
                     ].map((item, i) => (
                       <motion.li
                         key={i}
@@ -335,7 +345,7 @@ export default function SmartSwitchWizard() {
                   >
                     {t('try_another')}
                   </button>
-                  <Button3D className="flex-1 px-4 py-2.5 text-xs" onClick={() => window.location.href = '/signup'}>
+                  <Button3D className="flex-1 px-4 py-2.5 text-xs" onClick={() => (window.location.href = '/signup')}>
                     {t('start_trial_arrow')}
                   </Button3D>
                 </div>
@@ -354,15 +364,13 @@ export default function SmartSwitchWizard() {
       >
         <p className="text-base text-zinc-400 mb-4">
           {t.rich('conversion_text', {
-            b: (chunks) => <span className="text-white font-bold">{chunks}</span>
+            b: (chunks) => <span className="text-white font-bold">{chunks}</span>,
           })}
         </p>
-        <Button3D className="text-sm px-8 py-3" onClick={() => window.location.href = '/signup'}>
+        <Button3D className="text-sm px-8 py-3" onClick={() => (window.location.href = '/signup')}>
           {t('start_trial_setup')}
         </Button3D>
-        <p className="text-[10px] text-zinc-500 mt-3">
-          {t('trial_benefits')}
-        </p>
+        <p className="text-[10px] text-zinc-500 mt-3">{t('trial_benefits')}</p>
       </motion.div>
     </div>
   );

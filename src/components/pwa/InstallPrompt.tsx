@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, Share } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Share, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function InstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../");
 
 @layer utilities {
   .animation-delay-2000 {
@@ -12,11 +12,15 @@
 
 @keyframes aurora {
   from {
-    background-position: 50% 50%, 50% 50%;
+    background-position:
+      50% 50%,
+      50% 50%;
   }
 
   to {
-    background-position: 350% 50%, 350% 50%;
+    background-position:
+      350% 50%,
+      350% 50%;
   }
 }
 
@@ -40,27 +44,27 @@
   --popover-foreground: #ffffff;
 
   /* Neon Accents */
-  --primary: #00FF94;
+  --primary: #00ff94;
   /* Neon Green */
   --primary-foreground: #000000;
 
-  --secondary: #8B5CF6;
+  --secondary: #8b5cf6;
   /* Electric Purple */
   --secondary-foreground: #ffffff;
 
-  --accent: #06B6D4;
+  --accent: #06b6d4;
   /* Cyan */
   --accent-foreground: #ffffff;
 
   --muted: rgba(255, 255, 255, 0.05);
   --muted-foreground: #a3a3a3;
 
-  --destructive: #FF4444;
+  --destructive: #ff4444;
   --destructive-foreground: #ffffff;
 
   --border: rgba(255, 255, 255, 0.05);
   --input: rgba(255, 255, 255, 0.05);
-  --ring: #00FF94;
+  --ring: #00ff94;
 }
 
 body {
@@ -121,13 +125,13 @@ body {
 
 /* Text Gradients */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #00FF94 0%, #06B6D4 100%);
+  background: linear-gradient(135deg, #00ff94 0%, #06b6d4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-secondary {
-  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -157,21 +161,23 @@ body {
 
 /* Glowing gradient border */
 @keyframes glow-border {
-  0%, 100% { 
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
   }
-  50% { 
+  50% {
     box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
   }
 }
 
 /* Pulse dot */
 @keyframes pulse-dot {
-  0%, 100% { 
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
-  50% { 
+  50% {
     transform: scale(1.5);
     opacity: 0.5;
   }
@@ -179,8 +185,12 @@ body {
 
 /* Shimmer effect */
 @keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
 }
 
 /* Particle float */
@@ -258,23 +268,46 @@ body {
 
 /* --- Micro-Interaction Keyframes --- */
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(16px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes neon-pulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(0, 255, 148, 0.2); }
-  50% { box-shadow: 0 0 24px rgba(0, 255, 148, 0.4); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(0, 255, 148, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(0, 255, 148, 0.4);
+  }
 }
 
 .animate-fade-in-up {
@@ -302,13 +335,17 @@ body {
 .page-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .page-exit-active {
   opacity: 0;
   transform: translateY(-8px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 /* --- Interactive Button States --- */

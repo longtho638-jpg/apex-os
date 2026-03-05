@@ -1,6 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { processTradeCommission } from '@/lib/viral-economics/realtime-commission';
-import { getSupabaseClient } from '@/lib/supabase';
+
+// Mock logger to prevent console output
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
 // Mock Supabase
 const mockRpc = vi.fn();
@@ -10,101 +14,95 @@ const mockEq = vi.fn();
 const mockLte = vi.fn();
 const mockSingle = vi.fn();
 
-// IMPORTANT: When mocking a module that exports a function used by the system under test,
-// ensure the mock factory returns a Mock function if you intend to change its implementation later.
-// Or better, use a mutable mock object pattern.
+let mockSupabaseClient: ReturnType<typeof createMockClient>;
 
-let mockSupabaseClient: any;
+function createMockClient() {
+  return { rpc: mockRpc, from: mockFrom };
+}
 
 vi.mock('@/lib/supabase', () => ({
-  getSupabaseClient: vi.fn(() => mockSupabaseClient)
+  getSupabaseClient: vi.fn(() => mockSupabaseClient),
 }));
 
 describe('Realtime Commission System', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
-    // Default chain mocks
+
     mockFrom.mockReturnValue({
       select: mockSelect,
-      update: vi.fn().mockReturnValue({ eq: vi.fn() })
+      update: vi.fn().mockReturnValue({ eq: vi.fn() }),
     });
     mockSelect.mockReturnValue({
       eq: mockEq,
       lte: mockLte,
-      single: mockSingle
+      single: mockSingle,
     });
     mockEq.mockReturnValue({
       single: mockSingle,
-      lte: mockLte // for chain
+      lte: mockLte,
     });
     mockLte.mockReturnValue({
-      // return data promise
-      then: (cb: any) => cb({ data: [] }) // Default empty referrers
+      then: (cb: (v: { data: unknown[] }) => void) => cb({ data: [] }),
     });
     mockRpc.mockResolvedValue({ error: null });
 
-    // Default client
-    mockSupabaseClient = {
-        rpc: mockRpc,
-        from: mockFrom
-    };
+    mockSupabaseClient = createMockClient();
   });
 
-  it('should credit self-rebate for FREE user', async () => {
-    // Mock User Tier
-    mockSingle.mockResolvedValueOnce({ data: { tier: 'FREE' } }); // user_tiers query
-    
+  it('should credit self-rebate for EXPLORER user', async () => {
+    // RaaS: EXPLORER tier (was FREE) — rebate = 0.10 (10%)
+    mockSingle.mockResolvedValueOnce({ data: { tier: 'EXPLORER' } });
+
     await processTradeCommission({
       user_id: 'user-1',
       volume: 10000,
       fee: 10,
       exchange: 'Binance',
-      symbol: 'BTC/USDT'
+      symbol: 'BTC/USDT',
     });
 
-    // FREE tier rebate is 0.05 (5% of revenue)
+    // EXPLORER tier rebate is 0.10 (10% of revenue)
     // Revenue = 10 (fee) * 0.4 (partner share) = 4
-    // Rebate = 4 * 0.05 = 0.2
+    // Rebate = 4 * 0.10 = 0.4
 
-    expect(mockRpc).toHaveBeenCalledWith('credit_user_balance_realtime', expect.objectContaining({
-      p_user_id: 'user-1',
-      p_amount: expect.closeTo(0.2, 5),
-      p_source: 'trading_rebate'
-    }));
+    expect(mockRpc).toHaveBeenCalledWith(
+      'credit_user_balance_realtime',
+      expect.objectContaining({
+        p_user_id: 'user-1',
+        p_amount: expect.closeTo(0.4, 5),
+        p_source: 'trading_rebate',
+      }),
+    );
   });
 
   it('should credit referrer commission', async () => {
-    // Redefine mocks for this specific test flow
-    // We need to handle different queries for user_tiers (user vs referrer) and referral_network
-    
+    // RaaS: EXPLORER user, ARCHITECT referrer (was TRADER)
     const customMockFrom = vi.fn((table: string) => {
-        if (table === 'user_tiers') {
-          return {
-            select: () => ({
-              eq: (col: string, val: string) => ({
-                single: async () => {
-                  if (val === 'user-1') return { data: { tier: 'FREE' } }; // User
-                  if (val === 'ref-1') return { data: { tier: 'TRADER', current_commission_rate: 0.25 } }; // Referrer
-                  return { data: null };
-                }
-              })
-            })
-          };
-        }
-        if (table === 'referral_network') {
-          return {
-            select: () => ({
-              eq: () => ({
-                lte: async () => ({ data: [{ referrer_id: 'ref-1', level: 1 }] })
-              })
-            })
-          };
-        }
-        return { select: () => ({ eq: () => ({ single: async () => ({}) }) }), update: () => ({ eq: () => ({}) }) }; // Fallback
+      if (table === 'user_tiers') {
+        return {
+          select: () => ({
+            eq: (_col: string, val: string) => ({
+              single: async () => {
+                if (val === 'user-1') return { data: { tier: 'EXPLORER' } };
+                if (val === 'ref-1') return { data: { tier: 'ARCHITECT' } };
+                return { data: null };
+              },
+            }),
+          }),
+        };
+      }
+      if (table === 'referral_network') {
+        return {
+          select: () => ({
+            eq: () => ({
+              lte: async () => ({ data: [{ referrer_id: 'ref-1', level: 1 }] }),
+            }),
+          }),
+        };
+      }
+      return { select: () => ({ eq: () => ({ single: async () => ({}) }) }), update: () => ({ eq: () => ({}) }) };
     });
 
-    // Update the client used by the module
     mockSupabaseClient.from = customMockFrom;
 
     await processTradeCommission({
@@ -112,20 +110,22 @@ describe('Realtime Commission System', () => {
       volume: 10000,
       fee: 10,
       exchange: 'Binance',
-      symbol: 'BTC/USDT'
+      symbol: 'BTC/USDT',
     });
 
     // Revenue = 4
-    // User Rebate (FREE 0.05) = 0.2
-
-    // Referrer (TRADER 0.25) at L1
-    // Commission = 4 * 0.25 = 1.0
+    // User Rebate (EXPLORER 0.10) = 0.4
+    // Referrer (ARCHITECT L1 = 0.25) commission = 4 * 0.25 = 1.0
 
     expect(mockRpc).toHaveBeenCalledTimes(3); // Self rebate + 1 referrer + volume update
-    expect(mockRpc).toHaveBeenNthCalledWith(2, 'credit_user_balance_realtime', expect.objectContaining({
-      p_user_id: 'ref-1',
-      p_amount: expect.closeTo(1.0, 5),
-      p_source: 'l1_commission'
-    }));
+    expect(mockRpc).toHaveBeenNthCalledWith(
+      2,
+      'credit_user_balance_realtime',
+      expect.objectContaining({
+        p_user_id: 'ref-1',
+        p_amount: expect.closeTo(1.0, 5),
+        p_source: 'l1_commission',
+      }),
+    );
   });
 });

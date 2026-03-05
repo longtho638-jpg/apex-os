@@ -1,19 +1,19 @@
 'use client';
 
+import { Calendar, Download, LineChart, TrendingUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { LineChart, TrendingUp, Calendar, Download } from 'lucide-react';
-// import { PnlChart } from '@/components/trading/PnlChart'; // TODO: Create component
-// import { PnlBreakdown } from '@/components/trading/PnlBreakdown'; // TODO: Create component
+// import { PnlChart } from '@/components/trading/PnlChart'; // Planned: chart visualization
+// import { PnlBreakdown } from '@/components/trading/PnlBreakdown'; // Planned: position breakdown table
 import { WowEmptyState } from '@/components/ui/WowEmptyState';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function PnlPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const userId = user?.id || '';
+  const _userId = user?.id || '';
 
   return (
     <div className="flex h-screen w-full bg-[#030303] text-white">
@@ -66,9 +66,7 @@ export default function PnlPage() {
               <GlassCard className="p-6">
                 <div className="text-sm text-zinc-400 mb-1">Profit Factor</div>
                 <div className="text-3xl font-mono font-bold text-blue-400">2.4</div>
-                <div className="text-xs text-zinc-500 mt-2">
-                  Gross Profit / Gross Loss
-                </div>
+                <div className="text-xs text-zinc-500 mt-2">Gross Profit / Gross Loss</div>
               </GlassCard>
             </div>
 
@@ -87,8 +85,8 @@ export default function PnlPage() {
                 description="Your trading journal is empty. Start executing trades to populate your PnL analysis."
                 icon={LineChart}
                 action={{
-                  label: "Start Trading",
-                  onClick: () => router.push('/en/trade')
+                  label: 'Start Trading',
+                  onClick: () => router.push('/en/trade'),
                 }}
               />
             </GlassCard>

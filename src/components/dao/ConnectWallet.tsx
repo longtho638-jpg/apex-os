@@ -1,8 +1,8 @@
 'use client';
 
+import { Wallet } from 'lucide-react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { Button } from '@/components/ui/button';
-import { Wallet } from 'lucide-react';
 
 export function ConnectWallet() {
   const { address, isConnected } = useAccount();
@@ -11,10 +11,7 @@ export function ConnectWallet() {
 
   if (isConnected) {
     return (
-      <Button 
-        onClick={() => disconnect()} 
-        className="bg-zinc-800 hover:bg-zinc-700 text-white flex items-center gap-2"
-      >
+      <Button onClick={() => disconnect()} className="bg-zinc-800 hover:bg-zinc-700 text-white flex items-center gap-2">
         <Wallet className="w-4 h-4 text-emerald-400" />
         {address?.slice(0, 6)}...{address?.slice(-4)}
       </Button>

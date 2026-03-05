@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function enterpriseAuthMiddleware(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function enterpriseAuthMiddleware(req: NextRequest) {
   const data = encoder.encode(apiKey);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const keyHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const keyHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   const supabase = getSupabaseClient();
 
   // 1. Validate Key
@@ -55,6 +55,6 @@ export async function logEnterpriseUsage(apiKeyId: string, endpoint: string, sta
     api_key_id: apiKeyId,
     endpoint,
     status_code: statusCode,
-    latency_ms: latencyMs
+    latency_ms: latencyMs,
   });
 }

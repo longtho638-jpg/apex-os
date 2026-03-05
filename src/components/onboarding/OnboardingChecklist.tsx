@@ -1,13 +1,23 @@
 'use client';
 
-import { logger } from '@/lib/logger';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Circle, Trophy, ArrowRight, Wallet, LineChart, PlayCircle, MessageCircle, Gift } from 'lucide-react';
-import { getSupabaseClientSide } from '@/lib/supabase';
-import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Circle,
+  Gift,
+  LineChart,
+  MessageCircle,
+  PlayCircle,
+  Trophy,
+  Wallet,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
+import { getSupabaseClientSide } from '@/lib/supabase';
 
 // Initialize Supabase client
 const supabase = getSupabaseClientSide();
@@ -29,25 +39,19 @@ export function OnboardingChecklist() {
     step_run_backtest: false,
     step_join_telegram: false,
     step_refer_friend: false,
-    reward_claimed: false
+    reward_claimed: false,
   });
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
 
-  useEffect(() => {
-    fetchOnboardingStatus();
-  }, []);
-
-  const fetchOnboardingStatus = async () => {
+  const fetchOnboardingStatus = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('user_onboarding')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const { data, error } = await supabase.from('user_onboarding').select('*').eq('user_id', user.id).single();
 
       if (error && error.code !== 'PGRST116') {
         logger.error('Error fetching onboarding:', error);
@@ -66,11 +70,17 @@ export function OnboardingChecklist() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchOnboardingStatus();
+  }, [fetchOnboardingStatus]);
 
   const updateStep = async (step: keyof OnboardingState) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { error } = await supabase
@@ -80,55 +90,72 @@ export function OnboardingChecklist() {
 
       if (error) throw error;
 
-      setState(prev => ({ ...prev, [step]: true }));
+      setState((prev) => ({ ...prev, [step]: true }));
       toast.success(t('task_completed'));
 
       // Check if all steps completed
       const newState = { ...state, [step]: true };
       const allCompleted = Object.keys(newState)
-        .filter(k => k.startsWith('step_'))
-        .every(k => newState[k as keyof OnboardingState]);
+        .filter((k) => k.startsWith('step_'))
+        .every((k) => newState[k as keyof OnboardingState]);
 
       if (allCompleted && !newState.reward_claimed) {
         confetti({
           particleCount: 100,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update progress');
     }
   };
 
   const claimReward = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error } = await supabase
-        .from('user_onboarding')
-        .update({ reward_claimed: true })
-        .eq('user_id', user.id);
+      const { error } = await supabase.from('user_onboarding').update({ reward_claimed: true }).eq('user_id', user.id);
 
       if (error) throw error;
 
-      setState(prev => ({ ...prev, reward_claimed: true }));
+      setState((prev) => ({ ...prev, reward_claimed: true }));
       toast.success(t('reward_claimed'));
       setIsOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to claim reward');
     }
   };
 
   const steps = [
-    { key: 'step_connect_wallet', label: t('connect_wallet'), icon: Wallet, action: () => updateStep('step_connect_wallet') }, // In real app, this would be triggered by actual wallet connection
+    {
+      key: 'step_connect_wallet',
+      label: t('connect_wallet'),
+      icon: Wallet,
+      action: () => updateStep('step_connect_wallet'),
+    }, // In real app, this would be triggered by actual wallet connection
     { key: 'step_view_signal', label: t('view_signal'), icon: LineChart, action: () => updateStep('step_view_signal') },
-    { key: 'step_run_backtest', label: t('run_backtest'), icon: PlayCircle, action: () => updateStep('step_run_backtest') },
-    { key: 'step_join_telegram', label: t('join_telegram'), icon: MessageCircle, action: () => { window.open('https://t.me/apex_os', '_blank'); updateStep('step_join_telegram'); } },
+    {
+      key: 'step_run_backtest',
+      label: t('run_backtest'),
+      icon: PlayCircle,
+      action: () => updateStep('step_run_backtest'),
+    },
+    {
+      key: 'step_join_telegram',
+      label: t('join_telegram'),
+      icon: MessageCircle,
+      action: () => {
+        window.open('https://t.me/apex_os', '_blank');
+        updateStep('step_join_telegram');
+      },
+    },
   ];
 
-  const completedCount = steps.filter(s => state[s.key as keyof OnboardingState]).length;
+  const completedCount = steps.filter((s) => state[s.key as keyof OnboardingState]).length;
   const progress = (completedCount / steps.length) * 100;
   const allCompleted = completedCount === steps.length;
 
@@ -146,21 +173,21 @@ export function OnboardingChecklist() {
           <Trophy className="h-5 w-5 text-yellow-500" />
           <span className="font-bold text-white">{t('setup_guide')}</span>
         </div>
-        <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white">×</button>
+        <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white">
+          ×
+        </button>
       </div>
 
       {/* Progress */}
       <div className="px-4 pt-4">
         <div className="flex justify-between text-xs text-zinc-400 mb-1">
-          <span>{completedCount}/{steps.length} {t('completed')}</span>
+          <span>
+            {completedCount}/{steps.length} {t('completed')}
+          </span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-emerald-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-          />
+          <motion.div className="h-full bg-emerald-500" initial={{ width: 0 }} animate={{ width: `${progress}%` }} />
         </div>
       </div>
 
@@ -168,7 +195,7 @@ export function OnboardingChecklist() {
       <div className="p-4 space-y-3">
         {steps.map((step) => {
           const isCompleted = state[step.key as keyof OnboardingState];
-          const Icon = step.icon;
+          const _Icon = step.icon;
           return (
             <div
               key={step.key}

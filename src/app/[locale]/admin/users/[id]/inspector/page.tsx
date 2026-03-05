@@ -1,11 +1,11 @@
 'use client';
 
+import { Activity, History, User, Wallet } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { User, Wallet, Activity, History } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { GlassCard } from '@/components/ui/glass-card';
 
 interface Position {
   id: string;
@@ -47,8 +47,8 @@ export default function UserInspectorPage() {
   useEffect(() => {
     if (!id) return;
     fetch(`/api/admin/users/${id}/portfolio`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setData(data);
         setLoading(false);
       });
@@ -102,9 +102,12 @@ export default function UserInspectorPage() {
                 {openPositions?.length === 0 && <p className="text-zinc-500 text-sm">No active trades.</p>}
                 {openPositions?.map((pos) => (
                   <div key={pos.id} className="flex justify-between text-sm border-b border-white/5 pb-2">
-                    <span>{pos.side} {pos.symbol}</span>
+                    <span>
+                      {pos.side} {pos.symbol}
+                    </span>
                     <span className={pos.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}>
-                      {pos.pnl >= 0 ? '+' : ''}{Number(pos.pnl).toFixed(2)}
+                      {pos.pnl >= 0 ? '+' : ''}
+                      {Number(pos.pnl).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -129,7 +132,9 @@ export default function UserInspectorPage() {
               <tbody>
                 {recentTrades?.map((trade) => (
                   <tr key={trade.id} className="border-b border-white/5">
-                    <td className="py-2 text-zinc-400">{new Date(trade.closed_at || trade.opened_at).toLocaleDateString()}</td>
+                    <td className="py-2 text-zinc-400">
+                      {new Date(trade.closed_at || trade.opened_at).toLocaleDateString()}
+                    </td>
                     <td className="py-2">{trade.status === 'CLOSED' ? 'Closed' : 'Opened'}</td>
                     <td className="py-2">{trade.symbol}</td>
                     <td className={`py-2 text-right ${trade.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>

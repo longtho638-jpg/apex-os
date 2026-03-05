@@ -1,6 +1,6 @@
-import { logger } from '@/lib/logger';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getClaudeClient } from '@/lib/claude';
-import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/claude
@@ -11,10 +11,7 @@ export async function POST(request: NextRequest) {
     const { prompt, context, mode = 'chat' } = await request.json();
 
     if (!prompt) {
-      return NextResponse.json(
-        { error: 'Prompt is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
     const claude = getClaudeClient();
@@ -32,9 +29,7 @@ export async function POST(request: NextRequest) {
         async start(controller) {
           try {
             for await (const chunk of claude.streamChat({
-              messages: [
-                { role: 'user', content: prompt },
-              ],
+              messages: [{ role: 'user', content: prompt }],
             })) {
               controller.enqueue(encoder.encode(chunk));
             }
@@ -63,10 +58,9 @@ export async function POST(request: NextRequest) {
     logger.error('Claude API error:', error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

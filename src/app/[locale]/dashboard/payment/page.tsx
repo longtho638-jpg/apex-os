@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Check, Zap, TrendingUp, Crown, Bot, ArrowRight } from 'lucide-react';
+import { TIER_ORDER, type TierId, UNIFIED_TIERS } from '@apex-os/vibe-payment';
 import { motion } from 'framer-motion';
+import { ArrowRight, Bot, Check, Crown, TrendingUp, Zap } from 'lucide-react';
 import { Button3D } from '@/components/marketing/Button3D';
-import { UNIFIED_TIERS, TIER_ORDER, type TierId } from '@apex-os/vibe-payment';
 import { useUserTier } from '@/hooks/useUserTier';
 
 const TIER_ICONS: Record<TierId, typeof Zap> = {
@@ -43,7 +43,9 @@ export default function PaymentPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight">RaaS Tier Overview</h1>
-            <p className="text-xs text-zinc-400 font-medium tracking-wide uppercase">Zero fees — auto-upgrade by volume</p>
+            <p className="text-xs text-zinc-400 font-medium tracking-wide uppercase">
+              Zero fees — auto-upgrade by volume
+            </p>
           </div>
         </div>
       </header>
@@ -51,7 +53,8 @@ export default function PaymentPage() {
       <div className="p-8 relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-lg text-zinc-400">
-            All tiers are <span className="text-emerald-400 font-bold">$0/mo</span>. Trade more volume to unlock better spreads & more AI agents.
+            All tiers are <span className="text-emerald-400 font-bold">$0/mo</span>. Trade more volume to unlock better
+            spreads & more AI agents.
           </p>
         </div>
 
@@ -81,7 +84,9 @@ export default function PaymentPage() {
                 )}
 
                 <div className="mb-6">
-                  <div className={`w-12 h-12 rounded-2xl ${colors.bg} border ${colors.border} flex items-center justify-center mb-4`}>
+                  <div
+                    className={`w-12 h-12 rounded-2xl ${colors.bg} border ${colors.border} flex items-center justify-center mb-4`}
+                  >
                     <Icon className={`w-6 h-6 ${colors.text}`} />
                   </div>
                   <h3 className={`text-xl font-black tracking-tight ${colors.text}`}>{tier.name}</h3>
@@ -89,7 +94,9 @@ export default function PaymentPage() {
                 </div>
 
                 <div className="mb-6">
-                  <div className="text-4xl font-black text-white tracking-tighter">$0<span className="text-sm text-zinc-500">/mo</span></div>
+                  <div className="text-4xl font-black text-white tracking-tighter">
+                    $0<span className="text-sm text-zinc-500">/mo</span>
+                  </div>
                 </div>
 
                 <div className="mb-6 space-y-2">
@@ -117,7 +124,9 @@ export default function PaymentPage() {
                 </div>
 
                 <Button3D full variant={isPopular ? 'primary' : 'glass'}>
-                  {currentTier === tierId ? 'Current Tier' : (
+                  {currentTier === tierId ? (
+                    'Current Tier'
+                  ) : (
                     <span className="flex items-center gap-2">
                       View Details <ArrowRight className="w-4 h-4" />
                     </span>

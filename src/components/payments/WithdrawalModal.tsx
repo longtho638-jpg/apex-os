@@ -6,9 +6,9 @@
  * Allows users to request withdrawals from their wallet
  */
 
-import { useState } from 'react';
+import { AlertCircle, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { X, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export interface WithdrawalModalProps {
@@ -18,12 +18,7 @@ export interface WithdrawalModalProps {
   currency?: string;
 }
 
-export function WithdrawalModal({
-  isOpen,
-  onClose,
-  availableBalance,
-  currency = 'USD',
-}: WithdrawalModalProps) {
+export function WithdrawalModal({ isOpen, onClose, availableBalance, currency = 'USD' }: WithdrawalModalProps) {
   const t = useTranslations('payments.withdrawal');
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<'bank' | 'crypto'>('bank');
@@ -34,7 +29,7 @@ export function WithdrawalModal({
     e.preventDefault();
 
     const withdrawalAmount = parseFloat(amount);
-    if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
+    if (Number.isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
       toast.error(t('errorInvalidAmount', { defaultValue: 'Invalid amount' }));
       return;
     }
@@ -45,9 +40,7 @@ export function WithdrawalModal({
     }
 
     if (!destination.trim()) {
-      toast.error(
-        t('errorDestination', { defaultValue: 'Please provide withdrawal destination' })
-      );
+      toast.error(t('errorDestination', { defaultValue: 'Please provide withdrawal destination' }));
       return;
     }
 
@@ -74,10 +67,10 @@ export function WithdrawalModal({
       toast.success(
         t('success', {
           defaultValue: `Withdrawal request submitted. Reference: ${data.referenceId}`,
-        })
+        }),
       );
       onClose();
-    } catch (error) {
+    } catch (_error) {
       toast.error(t('errorGeneric', { defaultValue: 'Withdrawal failed' }));
     } finally {
       setLoading(false);
@@ -107,10 +100,8 @@ export function WithdrawalModal({
           {/* Available Balance */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-900 dark:text-blue-100">
-              <span className="font-medium">
-                {t('available', { defaultValue: 'Available' })}:
-              </span>{' '}
-              ${availableBalance.toLocaleString()} {currency}
+              <span className="font-medium">{t('available', { defaultValue: 'Available' })}:</span> $
+              {availableBalance.toLocaleString()} {currency}
             </p>
           </div>
 
@@ -174,9 +165,7 @@ export function WithdrawalModal({
               type="text"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              placeholder={
-                method === 'bank' ? 'Account number or IBAN' : '0x...'
-              }
+              placeholder={method === 'bank' ? 'Account number or IBAN' : '0x...'}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800"
               required
             />
@@ -187,8 +176,7 @@ export function WithdrawalModal({
             <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
             <p className="text-sm text-yellow-900 dark:text-yellow-100">
               {t('warning', {
-                defaultValue:
-                  'Withdrawals are processed within 1-3 business days. Ensure your details are correct.',
+                defaultValue: 'Withdrawals are processed within 1-3 business days. Ensure your details are correct.',
               })}
             </p>
           </div>

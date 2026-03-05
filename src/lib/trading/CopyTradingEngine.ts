@@ -2,82 +2,79 @@ import { logger } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 
 interface TradeSignal {
-    leaderId: string;
-    symbol: string;
-    type: 'LONG' | 'SHORT';
-    entryPrice: number;
-    leverage: number;
+  leaderId: string;
+  symbol: string;
+  type: 'LONG' | 'SHORT';
+  entryPrice: number;
+  leverage: number;
 }
 
 export class CopyTradingEngine {
-    /**
-     * Execute copy trades for a given leader signal
-     */
-    static async processSignal(signal: TradeSignal) {
-        const supabase = await createClient();
+  /**
+   * Execute copy trades for a given leader signal
+   */
+  static async processSignal(signal: TradeSignal) {
+    const supabase = await createClient();
 
-        logger.info(`[CopyEngine] Processing signal from leader ${signal.leaderId} for ${signal.symbol}`);
+    logger.info(`[CopyEngine] Processing signal from leader ${signal.leaderId} for ${signal.symbol}`);
 
-        // 1. Get all active followers for this leader
-        const { data: followers, error: followerError } = await supabase
-            .from('copy_settings')
-            .select('*')
-            .eq('leader_id', signal.leaderId)
-            .eq('status', 'ACTIVE');
+    // 1. Get all active followers for this leader
+    const { data: followers, error: followerError } = await supabase
+      .from('copy_settings')
+      .select('*')
+      .eq('leader_id', signal.leaderId)
+      .eq('status', 'ACTIVE');
 
-        if (followerError) {
-            logger.error('[CopyEngine] Failed to fetch followers:', followerError);
-            return;
-        }
+    if (followerError) {
+      logger.error('[CopyEngine] Failed to fetch followers:', followerError);
+      return;
+    }
 
-        if (!followers || followers.length === 0) {
-            logger.info('[CopyEngine] No active followers found.');
-            return;
-        }
+    if (!followers || followers.length === 0) {
+      logger.info('[CopyEngine] No active followers found.');
+      return;
+    }
 
-        logger.info(`[CopyEngine] Found ${followers.length} followers. Executing trades...`);
+    logger.info(`[CopyEngine] Found ${followers.length} followers. Executing trades...`);
 
-        // 2. Execute trade for each follower
-        const tradePromises = followers.map(async (setting) => {
-            try {
-                // Calculate Position Size
-                // Logic: Use the allocated 'copy_amount' as the margin
-                const margin = setting.copy_amount;
-                const size = margin * signal.leverage; // Total position size
+    // 2. Execute trade for each follower
+    const tradePromises = followers.map(async (setting) => {
+      try {
+        // Calculate Position Size
+        // Logic: Use the allocated 'copy_amount' as the margin
+        const margin = setting.copy_amount;
+        const size = margin * signal.leverage; // Total position size
 
-                // Insert Position into Database
-                const { error: tradeError } = await supabase
-                    .from('positions')
-                    .insert({
-                        user_id: setting.follower_id,
-                        symbol: signal.symbol,
-                        type: signal.type,
-                        entry_price: signal.entryPrice,
-                        size: size,
-                        leverage: signal.leverage,
-                        entry_time: new Date().toISOString(),
-                        status: 'OPEN',
-                        pnl: 0, // Initial PnL
-                        copy_leader_id: signal.leaderId // Track who we copied
-                    });
-
-                if (tradeError) throw tradeError;
-
-                logger.info(`[CopyEngine] ✅ Executed trade for user ${setting.follower_id}`);
-
-                // Log to history
-                await supabase.from('copy_trade_history').insert({
-                    copy_setting_id: setting.id,
-                    pnl: 0,
-                    status: 'OPEN'
-                });
-
-            } catch (err) {
-                logger.error(`[CopyEngine] ❌ Failed to execute for user ${setting.follower_id}:`, err);
-            }
+        // Insert Position into Database
+        const { error: tradeError } = await supabase.from('positions').insert({
+          user_id: setting.follower_id,
+          symbol: signal.symbol,
+          type: signal.type,
+          entry_price: signal.entryPrice,
+          size: size,
+          leverage: signal.leverage,
+          entry_time: new Date().toISOString(),
+          status: 'OPEN',
+          pnl: 0, // Initial PnL
+          copy_leader_id: signal.leaderId, // Track who we copied
         });
 
-        await Promise.all(tradePromises);
-        return { success: true, executedCount: followers.length };
-    }
+        if (tradeError) throw tradeError;
+
+        logger.info(`[CopyEngine] ✅ Executed trade for user ${setting.follower_id}`);
+
+        // Log to history
+        await supabase.from('copy_trade_history').insert({
+          copy_setting_id: setting.id,
+          pnl: 0,
+          status: 'OPEN',
+        });
+      } catch (err) {
+        logger.error(`[CopyEngine] ❌ Failed to execute for user ${setting.follower_id}:`, err);
+      }
+    });
+
+    await Promise.all(tradePromises);
+    return { success: true, executedCount: followers.length };
+  }
 }

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { AlertCircle, CheckCircle, Clock, Rocket } from 'lucide-react';
+import { useState } from 'react';
+import { ConnectWallet } from '@/components/dao/ConnectWallet';
+import { ClaimWidget } from '@/components/launchpad/ClaimWidget';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { ConnectWallet } from '@/components/dao/ConnectWallet';
-import { Rocket, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
 import { usePresale } from '@/hooks/usePresale';
-import { ClaimWidget } from '@/components/launchpad/ClaimWidget';
 
 export default function LaunchpadPage() {
   const [amount, setAmount] = useState('');
@@ -42,7 +42,8 @@ export default function LaunchpadPage() {
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-                      {currentRound?.name || 'Loading...'} <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">LIVE</span>
+                      {currentRound?.name || 'Loading...'}{' '}
+                      <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full">LIVE</span>
                     </h2>
                     <p className="text-zinc-400">Join the revolution of AI-powered trading.</p>
                   </div>
@@ -55,13 +56,17 @@ export default function LaunchpadPage() {
                 {/* Progress */}
                 <div className="mb-8">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-zinc-400">Raised: ${(currentRound?.tokens_sold * currentRound?.price || 0).toLocaleString()}</span>
-                    <span className="text-zinc-400">Target: ${(currentRound?.token_allocation * currentRound?.price || 0).toLocaleString()}</span>
+                    <span className="text-zinc-400">
+                      Raised: ${(currentRound?.tokens_sold * currentRound?.price || 0).toLocaleString()}
+                    </span>
+                    <span className="text-zinc-400">
+                      Target: ${(currentRound?.token_allocation * currentRound?.price || 0).toLocaleString()}
+                    </span>
                   </div>
                   <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
-                    <div 
-                        className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-1000" 
-                        style={{ width: `${progress}%` }}
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-1000"
+                      style={{ width: `${progress}%` }}
                     />
                   </div>
                   <p className="text-right text-xs text-zinc-500 mt-1">{progress.toFixed(1)}% Sold</p>
@@ -82,13 +87,13 @@ export default function LaunchpadPage() {
                       placeholder="1000"
                     />
                     <button className="absolute right-4 top-4 text-sm bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition">
-                        MAX
+                      MAX
                     </button>
                   </div>
 
                   <div className="flex justify-center mb-6">
                     <div className="bg-white/5 rounded-full p-2">
-                        <span className="text-zinc-500">↓</span>
+                      <span className="text-zinc-500">↓</span>
                     </div>
                   </div>
 
@@ -108,14 +113,14 @@ export default function LaunchpadPage() {
                   </button>
 
                   {isSuccess && (
-                      <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2 text-emerald-400 text-sm">
-                          <CheckCircle className="w-4 h-4" /> Purchase successful!
-                      </div>
+                    <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2 text-emerald-400 text-sm">
+                      <CheckCircle className="w-4 h-4" /> Purchase successful!
+                    </div>
                   )}
                   {error && (
-                      <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-sm">
-                          <AlertCircle className="w-4 h-4" /> {error}
-                      </div>
+                    <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-sm">
+                      <AlertCircle className="w-4 h-4" /> {error}
+                    </div>
                   )}
                 </div>
               </GlassCard>
@@ -123,55 +128,55 @@ export default function LaunchpadPage() {
 
             {/* Sidebar Info */}
             <div className="space-y-6">
-                <GlassCard className="p-6">
-                    <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-zinc-400" /> Sale Ends In
-                    </h3>
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                        <div className="bg-white/5 rounded-lg p-2">
-                            <p className="text-xl font-bold text-white">12</p>
-                            <p className="text-[10px] text-zinc-500">DAYS</p>
-                        </div>
-                        <div className="bg-white/5 rounded-lg p-2">
-                            <p className="text-xl font-bold text-white">04</p>
-                            <p className="text-[10px] text-zinc-500">HRS</p>
-                        </div>
-                        <div className="bg-white/5 rounded-lg p-2">
-                            <p className="text-xl font-bold text-white">32</p>
-                            <p className="text-[10px] text-zinc-500">MIN</p>
-                        </div>
-                        <div className="bg-white/5 rounded-lg p-2">
-                            <p className="text-xl font-bold text-white">10</p>
-                            <p className="text-[10px] text-zinc-500">SEC</p>
-                        </div>
-                    </div>
-                </GlassCard>
+              <GlassCard className="p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-zinc-400" /> Sale Ends In
+                </h3>
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <p className="text-xl font-bold text-white">12</p>
+                    <p className="text-[10px] text-zinc-500">DAYS</p>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <p className="text-xl font-bold text-white">04</p>
+                    <p className="text-[10px] text-zinc-500">HRS</p>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <p className="text-xl font-bold text-white">32</p>
+                    <p className="text-[10px] text-zinc-500">MIN</p>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <p className="text-xl font-bold text-white">10</p>
+                    <p className="text-[10px] text-zinc-500">SEC</p>
+                  </div>
+                </div>
+              </GlassCard>
 
-                <GlassCard className="p-6">
-                    <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                        <Rocket className="w-5 h-5 text-purple-400" /> Token Info
-                    </h3>
-                    <ul className="space-y-3 text-sm">
-                        <li className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-zinc-400">Symbol</span>
-                            <span className="font-bold">APEX</span>
-                        </li>
-                        <li className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-zinc-400">Network</span>
-                            <span className="font-bold">Ethereum</span>
-                        </li>
-                        <li className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-zinc-400">Total Supply</span>
-                            <span className="font-bold">1,000,000,000</span>
-                        </li>
-                        <li className="flex justify-between">
-                            <span className="text-zinc-400">Vesting</span>
-                            <span className="font-bold text-right">10% TGE, 12m linear</span>
-                        </li>
-                    </ul>
-                </GlassCard>
+              <GlassCard className="p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Rocket className="w-5 h-5 text-purple-400" /> Token Info
+                </h3>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex justify-between border-b border-white/5 pb-2">
+                    <span className="text-zinc-400">Symbol</span>
+                    <span className="font-bold">APEX</span>
+                  </li>
+                  <li className="flex justify-between border-b border-white/5 pb-2">
+                    <span className="text-zinc-400">Network</span>
+                    <span className="font-bold">Ethereum</span>
+                  </li>
+                  <li className="flex justify-between border-b border-white/5 pb-2">
+                    <span className="text-zinc-400">Total Supply</span>
+                    <span className="font-bold">1,000,000,000</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span className="text-zinc-400">Vesting</span>
+                    <span className="font-bold text-right">10% TGE, 12m linear</span>
+                  </li>
+                </ul>
+              </GlassCard>
 
-                <ClaimWidget />
+              <ClaimWidget />
             </div>
           </div>
         </div>

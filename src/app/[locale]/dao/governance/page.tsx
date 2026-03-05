@@ -1,16 +1,16 @@
 'use client';
 
+import { CheckCircle2, Clock, ShieldCheck, Vote, XCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { toast } from 'sonner';
+import { ConnectWallet } from '@/components/dao/ConnectWallet';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { ConnectWallet } from '@/components/dao/ConnectWallet';
-import { Vote, CheckCircle2, XCircle, Clock, ShieldCheck } from 'lucide-react';
-import { getSupabaseClientSide } from '@/lib/supabase';
-import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
+import { GlassCard } from '@/components/ui/glass-card';
 import { useUserTier } from '@/hooks/useUserTier';
 import { useWallet } from '@/hooks/useWallet';
+import { getSupabaseClientSide } from '@/lib/supabase';
 
 // Initialize Supabase client (ensure env vars are set)
 const supabase = getSupabaseClientSide();
@@ -28,7 +28,7 @@ interface Proposal {
 export default function GovernancePage() {
   const t = useTranslations('DAO');
   const [proposals, setProposals] = useState<Proposal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProposals = async () => {
@@ -46,20 +46,20 @@ export default function GovernancePage() {
 
   useEffect(() => {
     // Cross-Map: Voting Power = Wallet Balance * Tier Multiplier
-    const multiplier = tier === 'WHALE' ? 3 : tier === 'ELITE' ? 2 : 1;
+    const multiplier = tier === 'SOVEREIGN' ? 3 : tier === 'ARCHITECT' ? 2 : 1;
     setVotingPower(Math.floor(available * multiplier));
   }, [available, tier]);
 
-  const handleVote = (id: string, type: 'for' | 'against') => {
+  const handleVote = (_id: string, type: 'for' | 'against') => {
     if (votingPower <= 0) {
       toast.error('You need to stake APEX to vote!');
       return;
     }
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), {
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
       loading: 'Casting vote on-chain...',
       success: `Successfully voted ${type.toUpperCase()} with ${votingPower} VP!`,
-      error: 'Vote failed'
+      error: 'Vote failed',
     });
   };
 
@@ -85,7 +85,7 @@ export default function GovernancePage() {
                 <span className="text-xs text-zinc-400">Voting Power:</span>
                 <span className="font-bold text-purple-400">{votingPower.toLocaleString()} VP</span>
                 <span className="text-[10px] text-zinc-500 bg-purple-500/10 px-1 rounded">
-                  {tier === 'WHALE' ? '3x' : tier === 'ELITE' ? '2x' : '1x'} Boost
+                  {tier === 'SOVEREIGN' ? '3x' : tier === 'ARCHITECT' ? '2x' : '1x'} Boost
                 </span>
               </div>
               <ConnectWallet />
@@ -103,10 +103,15 @@ export default function GovernancePage() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${proposal.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                          proposal.status === 'passed' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                            'bg-red-500/10 text-red-400 border-red-500/20'
-                          }`}>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                            proposal.status === 'active'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : proposal.status === 'passed'
+                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                : 'bg-red-500/10 text-red-400 border-red-500/20'
+                          }`}
+                        >
                           {proposal.status}
                         </span>
                         <span className="text-zinc-500 text-xs flex items-center gap-1">
@@ -122,8 +127,12 @@ export default function GovernancePage() {
                   {/* Voting Progress */}
                   <div className="mb-6">
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-emerald-400">{t('for')}: {forPercent.toFixed(1)}%</span>
-                      <span className="text-red-400">{t('against')}: {againstPercent.toFixed(1)}%</span>
+                      <span className="text-emerald-400">
+                        {t('for')}: {forPercent.toFixed(1)}%
+                      </span>
+                      <span className="text-red-400">
+                        {t('against')}: {againstPercent.toFixed(1)}%
+                      </span>
                     </div>
                     <div className="h-2 bg-zinc-800 rounded-full overflow-hidden flex">
                       <div style={{ width: `${forPercent}%` }} className="bg-emerald-500 h-full" />

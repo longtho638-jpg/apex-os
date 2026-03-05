@@ -1,12 +1,12 @@
 'use client';
 
-import { logger } from '@/lib/logger';
+import { Activity, DollarSign, TrendingUp, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { DollarSign, Users, Activity, TrendingUp } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
+import { logger } from '@/lib/logger';
 
 interface RevenueMetrics {
   totalVolume30d: number;
@@ -36,9 +36,9 @@ export default function AnalyticsDashboard() {
       try {
         const [revRes, funnelRes] = await Promise.all([
           fetch('/api/admin/analytics/revenue'),
-          fetch('/api/admin/analytics/funnel')
+          fetch('/api/admin/analytics/funnel'),
         ]);
-        
+
         const revData = await revRes.json();
         const funnelData = await funnelRes.json();
 
@@ -126,7 +126,7 @@ export default function AnalyticsDashboard() {
               <BarChart data={funnel} layout="vertical" margin={{ left: 20 }}>
                 <XAxis type="number" stroke="#52525b" />
                 <YAxis dataKey="name" type="category" stroke="#a1a1aa" width={100} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a' }}
                   itemStyle={{ color: '#fff' }}
                 />

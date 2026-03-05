@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { Filter, X, Wallet, TrendingUp } from 'lucide-react';
+import { Filter, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export interface FilterState {
@@ -17,15 +16,12 @@ interface SignalFiltersProps {
 
 export function SignalFilters({ filters, onChange }: SignalFiltersProps) {
   const t = useTranslations('DashboardComponents.SignalFilters');
-  const SYMBOLS = [
-    'BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE',
-    'PEPE', 'WIF', 'SUI', 'NEAR', 'APT', 'FET'
-  ];
+  const SYMBOLS = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'PEPE', 'WIF', 'SUI', 'NEAR', 'APT', 'FET'];
   const TIMEFRAMES = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 
   const toggleSymbol = (sym: string) => {
     const newSymbols = filters.symbols.includes(sym)
-      ? filters.symbols.filter(s => s !== sym)
+      ? filters.symbols.filter((s) => s !== sym)
       : [...filters.symbols, sym];
     onChange({ ...filters, symbols: newSymbols });
   };
@@ -34,21 +30,21 @@ export function SignalFilters({ filters, onChange }: SignalFiltersProps) {
     <div className="flex flex-col h-full">
       {/* FILTERS (Compact Mode for 200px width) */}
       <div className="flex-1 space-y-6 p-3">
-
         {/* Assets */}
         <div>
           <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-2">
             <Filter size={10} /> {t('assets')}
           </h3>
           <div className="grid grid-cols-3 gap-1.5">
-            {SYMBOLS.map(sym => (
+            {SYMBOLS.map((sym) => (
               <button
                 key={sym}
                 onClick={() => toggleSymbol(sym)}
-                className={`px-1 py-1 rounded text-[9px] font-bold transition-all border text-center ${filters.symbols.includes(sym)
-                  ? 'bg-emerald-500 text-black border-emerald-500'
-                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 border-white/5'
-                  }`}
+                className={`px-1 py-1 rounded text-[9px] font-bold transition-all border text-center ${
+                  filters.symbols.includes(sym)
+                    ? 'bg-emerald-500 text-black border-emerald-500'
+                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 border-white/5'
+                }`}
               >
                 {sym}
               </button>
@@ -60,14 +56,15 @@ export function SignalFilters({ filters, onChange }: SignalFiltersProps) {
         <div>
           <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">{t('timeframe')}</h3>
           <div className="grid grid-cols-4 gap-1.5">
-            {TIMEFRAMES.map(tf => (
+            {TIMEFRAMES.map((tf) => (
               <button
                 key={tf}
                 onClick={() => onChange({ ...filters, timeframe: tf })}
-                className={`px-1 py-1 rounded text-[9px] font-medium transition-all border text-center ${filters.timeframe === tf
-                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 border-white/5'
-                  }`}
+                className={`px-1 py-1 rounded text-[9px] font-medium transition-all border text-center ${
+                  filters.timeframe === tf
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                    : 'bg-white/5 text-zinc-400 hover:bg-white/10 border-white/5'
+                }`}
               >
                 {tf}
               </button>
@@ -86,7 +83,7 @@ export function SignalFilters({ filters, onChange }: SignalFiltersProps) {
             max="90"
             step="5"
             value={filters.minConfidence}
-            onChange={(e) => onChange({ ...filters, minConfidence: parseInt(e.target.value) })}
+            onChange={(e) => onChange({ ...filters, minConfidence: parseInt(e.target.value, 10) })}
             className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
           />
         </div>

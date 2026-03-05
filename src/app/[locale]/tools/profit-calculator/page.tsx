@@ -1,9 +1,9 @@
 'use client';
 
+import { Calculator, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Calculator, DollarSign, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
 
 export default function ProfitCalculatorPage() {
   const [entryPrice, setEntryPrice] = useState<number>(0);
@@ -32,9 +32,7 @@ export default function ProfitCalculatorPage() {
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
             Crypto Profit Calculator
           </h1>
-          <p className="text-zinc-400">
-            Calculate potential profits, ROI, and risk for your crypto trades.
-          </p>
+          <p className="text-zinc-400">Calculate potential profits, ROI, and risk for your crypto trades.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -129,9 +127,7 @@ export default function ProfitCalculatorPage() {
 
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/5">
                   <span className="text-zinc-400">Total Value</span>
-                  <span className="text-xl font-bold text-white">
-                    ${(positionSize + profit).toFixed(2)}
-                  </span>
+                  <span className="text-xl font-bold text-white">${(positionSize + profit).toFixed(2)}</span>
                 </div>
               </div>
             </GlassCard>

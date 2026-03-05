@@ -76,6 +76,16 @@
       "legal": "法的事項",
       "rights": "All rights reserved.",
       "risk_disclosure": "リスク開示: 暗号資産の取引には多大な損失リスクが伴います。ApexOSはツールと分析を提供しますが、利益を保証するものではありません。過去のパフォーマンスは将来の結果を示すものではありません。責任を持って、失っても構わない資金でのみ取引してください。"
+    },
+    "raas": {
+      "subtitle": "Your tier is determined by trading volume, not your wallet. Trade more, pay less spread.",
+      "badge": "Revenue-as-a-Service",
+      "title": "Zero Subscription Fees. Forever."
+    },
+    "onboarding": {
+      "subtitle": "30-second setup. No forms. Just trade.",
+      "title": "AI Deploys Your Trading Agents",
+      "badge": "Agentic Onboarding"
     }
   },
   "Navigation": {
@@ -516,7 +526,47 @@
     "join_telegram": "Telegramに参加",
     "claim_reward": "24時間エリートトライアルを請求",
     "task_completed": "タスク完了！",
-    "reward_claimed": "報酬請求済み！24時間エリートトライアルが有効化されました。"
+    "reward_claimed": "報酬請求済み！24時間エリートトライアルが有効化されました。",
+    "steps": {
+      "funding": {
+        "subtitle": "Deposit crypto — zero fees, instant settlement",
+        "title": "Fund & Launch"
+      },
+      "agent-config": {
+        "title": "Agent Deployment",
+        "subtitle": "Your personal trading agents are being configured"
+      },
+      "risk-assessment": {
+        "title": "Risk Calibration",
+        "subtitle": "Autonomous risk profiling — no forms, just questions"
+      },
+      "profile": {
+        "title": "AI Profile Scan",
+        "subtitle": "Our AI analyzes your trading style in 30 seconds"
+      }
+    },
+    "actions": {
+      "start_trading": "Start Trading — Zero Fees",
+      "deploy_agents": "Deploy My Agents",
+      "fund_and_trade": "Fund & Start Trading",
+      "continue": "Continue"
+    },
+    "profile": {
+      "monthly_volume": "Expected monthly volume (USD)",
+      "experience": "Trading experience"
+    },
+    "funding": {
+      "networks": "Supported Networks",
+      "zero_fee": "Zero deposit fee"
+    },
+    "risk": {
+      "tolerance": "Risk tolerance",
+      "qualify": "Based on your volume of {volume}/mo, you qualify for {spread} spread with {agents} AI agents.",
+      "detected": "AI Detected: {tier} Tier"
+    },
+    "agents": {
+      "live": "LIVE"
+    }
   },
   "AI": {
     "core_title": "Apex AIコア",
@@ -913,7 +963,8 @@
     "hero": {
       "title": "暗号資産リベートでの損失を止めよう",
       "subtitle": "すべてのリベートを自動的に追跡。利益を最大化。",
-      "cta": "無料トライアルを開始 - クレジットカード不要"
+      "cta": "無料トライアルを開始 - クレジットカード不要",
+      "badge": "RaaS AGI — Zero-Fee Agentic Trading"
     },
     "calculator": {
       "volume": "月間ボリューム",
@@ -921,68 +972,15 @@
       "claim": "これを受け取る"
     },
     "tiers": {
-      "free": {
-        "name": "FREE",
-        "price": "$0",
-        "period": "永久",
-        "features": [
-          "1 取引所",
-          "基本追跡",
-          "7日間の履歴"
-        ]
-      },
-      "basic": {
-        "name": "BASIC",
-        "price": "$29",
-        "period": "月額",
-        "annual_save": "$58 節約",
-        "features": [
-          "3 取引所",
-          "完全な履歴",
-          "データエクスポート",
-          "メールサポート"
-        ]
-      },
-      "trader": {
-        "name": "TRADER",
-        "price": "$97",
-        "period": "月額",
-        "badge": "一番人気",
-        "annual_save": "$194 節約",
-        "features": [
-          "10 取引所",
-          "無制限の履歴",
-          "高度な分析",
-          "優先サポート",
-          "モバイルアプリ"
-        ]
-      },
-      "pro": {
-        "name": "PRO",
-        "price": "$297",
-        "period": "月額",
-        "annual_save": "$594 節約",
-        "features": [
-          "無制限の取引所",
-          "APIアクセス",
-          "カスタムレポート",
-          "ホワイトグローブサポート",
-          "機能への早期アクセス"
-        ]
-      },
-      "elite": {
-        "name": "ELITE",
-        "price": "$997",
-        "period": "月額",
-        "annual_save": "$1,994 節約",
-        "features": [
-          "PROのすべての機能",
-          "専任アカウントマネージャー",
-          "カスタム統合",
-          "SLA保証",
-          "24時間電話サポート"
-        ]
-      }
+      "free": {},
+      "basic": {},
+      "trader": {},
+      "pro": {},
+      "elite": {},
+      "section_title": "AI Agents + Multi-Org + Crypto = Zero-Fee Trading",
+      "section_subtitle": "Volume-based tiers — unlock automatically via agentic workflows",
+      "most_popular": "Most Popular",
+      "start_trading": "Start Trading Free"
     },
     "trust": {
       "users": "200人以上のトレーダーがリベートを追跡中",
@@ -992,6 +990,40 @@
     "urgency": {
       "limited": "先着100名様限定 永久50%オフ",
       "spots": "この価格は残りX枠のみ"
+    },
+    "raas": {
+      "auto_upgrade": "Auto-upgrade with volume",
+      "vs_saas_title": "SaaS vs RaaS",
+      "volume_based": "Volume-Based Tiers",
+      "volume_operator": "$10K – $100K/mo volume",
+      "volume_explorer": "Up to $10K/mo volume",
+      "volume_architect": "$100K – $1M/mo volume",
+      "current_tier": "Current Tier",
+      "agents_label": "Agents",
+      "badge": "RaaS Model",
+      "zero_fee": "$0/mo",
+      "volume_sovereign": "$1M+/mo volume",
+      "volume_required": "Volume Required",
+      "vs_saas_new": "Apex RaaS",
+      "rebate_label": "Rebate",
+      "spread_label": "Spread",
+      "vs_saas_old": "Traditional SaaS"
+    },
+    "comparison": {
+      "saas_1": "Pay $97–$997/mo whether you trade or not",
+      "raas_1": "$0/mo — zero subscription fees forever",
+      "raas_title": "New RaaS Model",
+      "saas_title": "Old SaaS Model",
+      "title": "SaaS vs RaaS AGI — The Paradigm Shift",
+      "raas_2": "Multi-org: create teams, share agents, pool volume",
+      "raas_4": "AI agents auto-trade 24/7 — you earn while you sleep",
+      "raas_5": "Tiers unlock automatically via agentic volume",
+      "subtitle": "Multi-org zero-fee crypto agentic workflows replace legacy subscriptions",
+      "saas_4": "Annual billing traps with no refunds",
+      "raas_3": "Crypto-native: deposit/withdraw USDT on 5+ chains",
+      "saas_3": "Locked features behind higher tiers",
+      "saas_2": "Platform profits even when you lose",
+      "saas_5": "Zero incentive to help you succeed"
     }
   },
   "Offer": {
@@ -1000,5 +1032,29 @@
     "subtitle": "AI搭載ツールでトレードの可能性を最大限に引き出す。",
     "current_plan": "現在のプラン",
     "upgrade_now": "今すぐアップグレード"
+  },
+  "Exchange": {
+    "spread_rate": "Spread Rate",
+    "settlement": "Settlement",
+    "zero_fee_badge": "Zero Trading Fees",
+    "supported_chains": "Supported Chains",
+    "your_rebate": "Your Rebate",
+    "spread_breakdown": "Spread Breakdown",
+    "spread_cost": "Spread Cost",
+    "net_cost": "Net Cost",
+    "swap_success": "Swap completed successfully!",
+    "trade_amount": "Trade Amount"
+  },
+  "AgenticWorkflow": {
+    "tier_progress": "Tier Progress",
+    "agent_error": "Error",
+    "pipeline": "Trading Pipeline",
+    "execution": "Execution",
+    "title": "Agentic Workflow",
+    "agent_idle": "Idle",
+    "signal_detection": "Signal Detection",
+    "agent_active": "Active",
+    "deployed_agents": "Deployed Agents",
+    "risk_assessment": "Risk Assessment"
   }
 }

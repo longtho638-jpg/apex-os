@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
 import { Clock, Coins, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
+import { GlassCard } from '@/components/ui/glass-card';
 
 export default function DCACalculatorPage() {
   const [monthlyInvestment, setMonthlyInvestment] = useState<number>(500);
@@ -15,18 +15,18 @@ export default function DCACalculatorPage() {
     // Simplified compound interest for monthly contribution
     // FV = P * (((1 + r)^n - 1) / r) * (1 + r)
     // where P is monthly payment, r is monthly interest rate, n is number of months
-    
+
     const r = expectedGrowth / 100 / 12;
     let futureValue = 0;
-    
+
     if (r === 0) {
-        futureValue = totalInvested;
+      futureValue = totalInvested;
     } else {
-        futureValue = monthlyInvestment * (((Math.pow(1 + r, duration) - 1) / r)) * (1 + r);
+      futureValue = monthlyInvestment * (((1 + r) ** duration - 1) / r) * (1 + r);
     }
-    
+
     const profit = futureValue - totalInvested;
-    
+
     return { totalInvested, futureValue, profit };
   };
 
@@ -39,9 +39,7 @@ export default function DCACalculatorPage() {
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
             DCA Calculator
           </h1>
-          <p className="text-zinc-400">
-            Visualize the power of Dollar Cost Averaging over time.
-          </p>
+          <p className="text-zinc-400">Visualize the power of Dollar Cost Averaging over time.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -49,7 +47,7 @@ export default function DCACalculatorPage() {
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <Coins className="w-5 h-5 text-emerald-400" /> Investment Plan
             </h3>
-            
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm text-zinc-400 mb-2">Monthly Investment ($)</label>
@@ -73,9 +71,11 @@ export default function DCACalculatorPage() {
                   className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 mb-2"
                 />
                 <div className="flex justify-between text-xs text-zinc-500">
-                    <span>1 Mo</span>
-                    <span className="text-emerald-400 font-bold">{duration} Months ({Math.floor(duration/12)}y {duration%12}m)</span>
-                    <span>10 Yrs</span>
+                  <span>1 Mo</span>
+                  <span className="text-emerald-400 font-bold">
+                    {duration} Months ({Math.floor(duration / 12)}y {duration % 12}m)
+                  </span>
+                  <span>10 Yrs</span>
                 </div>
               </div>
 
@@ -97,13 +97,11 @@ export default function DCACalculatorPage() {
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-emerald-400" /> Projection
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/5">
                   <span className="text-zinc-400">Total Invested</span>
-                  <span className="text-xl font-bold text-white">
-                    ${totalInvested.toLocaleString()}
-                  </span>
+                  <span className="text-xl font-bold text-white">${totalInvested.toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/5">
@@ -127,7 +125,7 @@ export default function DCACalculatorPage() {
                 <Clock className="w-5 h-5 text-emerald-400" /> Automate Your DCA
               </h3>
               <p className="text-zinc-400 text-sm mb-4">Our bots can execute DCA trades for you automatically, 24/7.</p>
-              <Link 
+              <Link
                 href="/signup"
                 className="inline-block px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors text-sm"
               >

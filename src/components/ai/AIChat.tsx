@@ -1,11 +1,11 @@
 'use client';
 
-import { logger } from '@/lib/logger';
-import { useState, useRef, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Button } from '@/components/ui/button';
 import { Send, Sparkles } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { PricingModal } from '@/components/pricing/PricingModal';
+import { Button } from '@/components/ui/button';
+import { GlassCard } from '@/components/ui/glass-card';
+import { logger } from '@/lib/logger';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -34,13 +34,13 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [scrollToBottom]);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
     const userMessage: Message = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
 
@@ -60,10 +60,13 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
         setRateLimitHit(true);
         setShowPricingModal(true);
 
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: `⚠️ You've reached your daily limit of ${data.limit} AI requests. Upgrade to continue!`,
-        }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `⚠️ You've reached your daily limit of ${data.limit} AI requests. Upgrade to continue!`,
+          },
+        ]);
 
         return;
       }
@@ -74,19 +77,24 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
 
       const data = await response.json();
 
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.content,
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: data.content,
+        },
+      ]);
 
       setUsage(data.usage);
-
     } catch (error) {
       logger.error('AI Chat error:', error);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: '❌ Sorry, something went wrong. Please try again.',
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: '❌ Sorry, something went wrong. Please try again.',
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -105,9 +113,7 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
           {usage && (
             <div className="text-sm text-zinc-400">
               {usage.remaining}/{usage.limit} requests left today
-              {usage.remaining <= 3 && (
-                <span className="ml-2 text-yellow-400">⚠️ Low quota</span>
-              )}
+              {usage.remaining <= 3 && <span className="ml-2 text-yellow-400">⚠️ Low quota</span>}
             </div>
           )}
         </div>
@@ -120,15 +126,11 @@ export function AIChat({ userId, userTier }: { userId: string; userTier: string 
             </div>
           )}
           {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div
-                className={`max-w-[80%] p-3 rounded-lg ${msg.role === 'user'
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-zinc-800 text-zinc-100'
-                  }`}
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  msg.role === 'user' ? 'bg-emerald-500 text-white' : 'bg-zinc-800 text-zinc-100'
+                }`}
               >
                 {msg.content}
               </div>

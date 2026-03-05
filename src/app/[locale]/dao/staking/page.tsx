@@ -1,13 +1,13 @@
 'use client';
 
+import { Coins, Lock, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { toast } from 'sonner';
+import { ConnectWallet } from '@/components/dao/ConnectWallet';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { ConnectWallet } from '@/components/dao/ConnectWallet';
-import { Lock, TrendingUp, Clock, Coins } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
 import { useWallet } from '@/hooks/useWallet';
-import { toast } from 'sonner';
 
 export default function StakingPage() {
   const [amount, setAmount] = useState('');
@@ -23,29 +23,29 @@ export default function StakingPage() {
     if (!val || val <= 0) return toast.error('Invalid Amount');
     if (val > available) return toast.error('Insufficient Funds');
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), {
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
       loading: 'Staking tokens...',
       success: () => {
-        setStakedBalance(prev => prev + val);
+        setStakedBalance((prev) => prev + val);
         setAmount('');
         refresh(); // Update wallet balance
         return `Successfully staked ${val} APEX!`;
       },
-      error: 'Staking failed'
+      error: 'Staking failed',
     });
   };
 
   const handleClaim = async () => {
     if (rewards <= 0) return toast.error('No rewards to claim');
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
       loading: 'Claiming rewards...',
       success: () => {
         setRewards(0);
         refresh();
         return 'Rewards claimed to wallet!';
       },
-      error: 'Claim failed'
+      error: 'Claim failed',
     });
   };
 
@@ -53,7 +53,7 @@ export default function StakingPage() {
   useState(() => {
     const interval = setInterval(() => {
       if (stakedBalance > 0) {
-        setRewards(prev => prev + (stakedBalance * (apy / 100) / 365 / 24 / 60)); // Per minute
+        setRewards((prev) => prev + (stakedBalance * (apy / 100)) / 365 / 24 / 60); // Per minute
       }
     }, 1000);
     return () => clearInterval(interval);
@@ -89,7 +89,9 @@ export default function StakingPage() {
                 <div>
                   <div className="flex justify-between mb-2">
                     <label className="block text-sm text-zinc-400">Amount to Stake (APEX)</label>
-                    <span className="text-xs text-zinc-500">Available: <span className="text-white font-mono">${available.toLocaleString()}</span></span>
+                    <span className="text-xs text-zinc-500">
+                      Available: <span className="text-white font-mono">${available.toLocaleString()}</span>
+                    </span>
                   </div>
                   <div className="relative">
                     <input
@@ -110,13 +112,16 @@ export default function StakingPage() {
                       <button
                         key={days}
                         onClick={() => setLockPeriod(days)}
-                        className={`py-3 rounded-lg border font-bold transition-all ${lockPeriod === days
+                        className={`py-3 rounded-lg border font-bold transition-all ${
+                          lockPeriod === days
                             ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400'
                             : 'bg-zinc-900 border-white/10 text-zinc-400 hover:border-white/20'
-                          }`}
+                        }`}
                       >
                         {days} Days
-                        <span className="block text-xs font-normal mt-1">{days === 30 ? '5%' : days === 90 ? '10%' : '20%'} APY</span>
+                        <span className="block text-xs font-normal mt-1">
+                          {days === 30 ? '5%' : days === 90 ? '10%' : '20%'} APY
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -149,7 +154,9 @@ export default function StakingPage() {
                   <h3 className="text-lg font-bold">Your Staked Balance</h3>
                   <Lock className="w-5 h-5 text-zinc-500" />
                 </div>
-                <p className="text-4xl font-bold text-white font-mono">{stakedBalance.toFixed(2)} <span className="text-sm text-zinc-500">APEX</span></p>
+                <p className="text-4xl font-bold text-white font-mono">
+                  {stakedBalance.toFixed(2)} <span className="text-sm text-zinc-500">APEX</span>
+                </p>
               </GlassCard>
 
               <GlassCard className="p-6">
@@ -157,7 +164,9 @@ export default function StakingPage() {
                   <h3 className="text-lg font-bold">Claimable Rewards</h3>
                   <TrendingUp className="w-5 h-5 text-emerald-400" />
                 </div>
-                <p className="text-4xl font-bold text-emerald-400 font-mono">{rewards.toFixed(6)} <span className="text-sm text-zinc-500">APEX</span></p>
+                <p className="text-4xl font-bold text-emerald-400 font-mono">
+                  {rewards.toFixed(6)} <span className="text-sm text-zinc-500">APEX</span>
+                </p>
                 <button
                   onClick={handleClaim}
                   className="mt-4 w-full py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg font-bold hover:bg-emerald-500/20 transition"
@@ -168,9 +177,7 @@ export default function StakingPage() {
 
               <GlassCard className="p-6">
                 <h3 className="text-lg font-bold mb-4">Staking History</h3>
-                <div className="text-center py-8 text-zinc-500">
-                  No staking history found.
-                </div>
+                <div className="text-center py-8 text-zinc-500">No staking history found.</div>
               </GlassCard>
             </div>
           </div>

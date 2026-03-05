@@ -30,7 +30,7 @@ export class MarketMakerBot {
         logger.info(`[MM] Placing BID @ ${buyPrice} | ASK @ ${sellPrice}`);
 
         // 4. Wait 1s
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise((r) => setTimeout(r, 1000));
       } catch (e) {
         logger.error('MM Loop Error', e);
       }

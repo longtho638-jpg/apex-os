@@ -1,22 +1,17 @@
-import { logger } from '@/lib/logger';
-import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { type NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 function verifyPolarWebhook(payload: string, signature: string): boolean {
   const secret = process.env.POLAR_WEBHOOK_SECRET!;
   const hmac = crypto.createHmac('sha256', secret);
   const digest = hmac.update(payload).digest('hex');
-  // Prevent timing attacks
   const signatureBuffer = Buffer.from(signature.startsWith('whsec_') ? signature.substring(6) : signature);
   const digestBuffer = Buffer.from(digest);
 
-  // In case lengths are different (shouldn't happen with correct sigs but good for safety)
   if (signatureBuffer.length !== digestBuffer.length) {
     return false;
   }
@@ -28,122 +23,107 @@ export async function POST(request: NextRequest) {
   try {
     const payload = await request.text();
     const signature = request.headers.get('polar-webhook-signature');
-    // Note: Check actual header name from Polar docs, sometimes it's 'Polar-Webhook-Signature'
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'No signature provided' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No signature provided' }, { status: 401 });
     }
 
-    // CRITICAL SECURITY FIX: Strictly verify signature
     if (!verifyPolarWebhook(payload, signature)) {
       logger.error('Polar signature mismatch');
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     const event = JSON.parse(payload);
 
     switch (event.type) {
       case 'checkout.created':
-        // Optional: Log checkout creation
         break;
 
       case 'checkout.completed':
         await handleCheckoutCompleted(event.data);
         break;
 
-      case 'subscription.created':
-        await handleSubscriptionCreated(event.data);
-        break;
-
-      case 'subscription.updated':
-        await handleSubscriptionUpdated(event.data);
+      case 'order.created':
+        await handleOrderCreated(event.data);
         break;
 
       default:
-        logger.info(`Unhandled event type: ${event.type}`);
+        logger.info(`Unhandled Polar event: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
     logger.error('Polar webhook error:', error);
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 }
 
-async function handleCheckoutCompleted(data: any) {
-  const { id, customer_email, metadata, amount, currency } = data;
+/**
+ * RaaS: Checkout = one-time deposit/credit purchase (not subscription).
+ * Credits go to user wallet for trading capital or marketplace purchases.
+ */
+async function handleCheckoutCompleted(data: Record<string, unknown>) {
+  const { id, customer_email, metadata, amount, currency } = data as {
+    id: string;
+    customer_email: string;
+    metadata: { userId?: string; type?: string };
+    amount: number;
+    currency: string;
+  };
 
   if (!metadata?.userId) {
-    logger.warn('Missing userId in metadata, skipping processing');
+    logger.warn('Missing userId in Polar checkout metadata, skipping');
     return;
   }
 
-  // Create transaction record
+  // Record payment transaction
   const { error: txError } = await supabase.from('payment_transactions').insert({
     user_id: metadata.userId,
     gateway: 'polar',
     gateway_transaction_id: id,
-    amount: amount / 100, // Convert cents to dollars
+    amount: amount / 100,
     currency,
     status: 'completed',
-    product_name: `${metadata.tier} Plan`,
+    product_name: metadata.type || 'wallet_deposit',
     metadata: { checkout_data: data },
-    completed_at: new Date().toISOString()
+    completed_at: new Date().toISOString(),
   });
 
   if (txError) {
-    // Ignore duplicate key errors (idempotency)
     if (txError.code === '23505') {
-      logger.warn(`Duplicate transaction ignored: ${id}`);
-    } else {
-      logger.error('Error inserting transaction:', txError);
-      throw new Error('Failed to insert transaction');
+      logger.warn(`Duplicate Polar transaction ignored: ${id}`);
+      return;
     }
+    logger.error('Error inserting Polar transaction:', txError);
+    throw new Error('Failed to insert transaction');
   }
 
-  // Update user subscription
-  const { error: subError } = await supabase.from('subscriptions').upsert({
-    user_id: metadata.userId,
-    tier: metadata.tier,
-    status: 'active',
-    gateway: 'polar',
-    gateway_subscription_id: id, // Using checkout ID as sub ID initially, or extract sub ID if available
-    current_period_start: new Date().toISOString(),
-    current_period_end: getNextBillingDate()
-  }, { onConflict: 'user_id, status' }); // Note: Check your unique constraints
+  // Credit user wallet (RaaS: no subscription, direct wallet credit)
+  await supabase.rpc('credit_user_balance_realtime', {
+    p_user_id: metadata.userId,
+    p_amount: amount / 100,
+    p_source: 'polar_deposit',
+    p_metadata: { gateway_tx_id: id, email: customer_email },
+  });
 
-  if (subError) {
-    logger.error('Error updating subscription:', subError);
-    throw new Error('Failed to update subscription');
-  }
-
-  // Auto-claim any pending missed commissions (Grace Period Reward)
+  // Auto-claim any pending vault funds
   const { error: claimError } = await supabase.rpc('claim_pending_vault_funds', {
-    p_user_id: metadata.userId
+    p_user_id: metadata.userId,
   });
 
   if (claimError) logger.error('Error claiming pending funds:', claimError);
 }
 
-async function handleSubscriptionCreated(data: any) {
-  // Logic to handle new subscription creation if different from checkout.completed
-}
+/**
+ * RaaS: Order = marketplace strategy/agent purchase.
+ */
+async function handleOrderCreated(data: Record<string, unknown>) {
+  const { id, metadata } = data as {
+    id: string;
+    metadata: { userId?: string; productType?: string };
+  };
 
-async function handleSubscriptionUpdated(data: any) {
-  // Logic to handle renewals or cancellations
-}
+  if (!metadata?.userId) return;
 
-function getNextBillingDate(): string {
-  const date = new Date();
-  date.setMonth(date.getMonth() + 1);
-  return date.toISOString();
+  logger.info(`[Polar] Order ${id} for user ${metadata.userId}, type: ${metadata.productType}`);
 }

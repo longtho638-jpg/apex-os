@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Activity, Zap, Search } from 'lucide-react';
-import { useCryptoPrice } from '@/hooks/useCryptoPrice';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Activity, Brain, Search, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import { useCryptoPrice } from '@/hooks/useCryptoPrice';
 
 interface LogEntry {
   id: string;
@@ -35,16 +35,16 @@ export function AlgoVisualizer() {
   // Simulate Realtime Price Ticker (Micro-movements)
   useEffect(() => {
     if (!mounted) return;
-    
+
     const interval = setInterval(() => {
-        if (realPrice > 0) {
-            // Add micro-noise to make it look alive between API updates
-            const noise = (Math.random() - 0.5) * (realPrice * 0.0005); 
-            setPrice(p => (p === 0 ? realPrice : realPrice + noise));
-        } else if (!priceLoading) {
-             // Fallback if API fails
-             setPrice(p => p > 0 ? p + (Math.random() - 0.5) * 50 : 96500);
-        }
+      if (realPrice > 0) {
+        // Add micro-noise to make it look alive between API updates
+        const noise = (Math.random() - 0.5) * (realPrice * 0.0005);
+        setPrice((p) => (p === 0 ? realPrice : realPrice + noise));
+      } else if (!priceLoading) {
+        // Fallback if API fails
+        setPrice((p) => (p > 0 ? p + (Math.random() - 0.5) * 50 : 96500));
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, [realPrice, priceLoading, mounted]);
@@ -61,40 +61,43 @@ export function AlgoVisualizer() {
     ];
 
     const actions = [
-      "Scanning Order Book depth...",
-      "Calculating RSI (14) divergence...",
-      "Analyzing Twitter sentiment for $BTC...",
-      "Detected large wallet movement (500 BTC)...",
-      "Cross-referencing Binance vs Coinbase spread...",
-      "Liquidity check passed.",
-      "Optimizing entry point...",
-      "Rebalancing portfolio weights..."
+      'Scanning Order Book depth...',
+      'Calculating RSI (14) divergence...',
+      'Analyzing Twitter sentiment for $BTC...',
+      'Detected large wallet movement (500 BTC)...',
+      'Cross-referencing Binance vs Coinbase spread...',
+      'Liquidity check passed.',
+      'Optimizing entry point...',
+      'Rebalancing portfolio weights...',
     ];
 
     const interval = setInterval(() => {
       const randomAgent = agents[Math.floor(Math.random() * agents.length)];
       const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      
+
       let message = randomAction;
       let type: LogEntry['type'] = 'info';
 
       if (randomAgent.name === 'TECHNICAL' && Math.random() > 0.7) {
-        message = `RSI Oversold (28.5). Potential Reversal.`;
+        message = 'RSI Oversold (28.5). Potential Reversal.';
         type = 'success';
       }
       if (randomAgent.name === 'WHALE' && Math.random() > 0.8) {
-        message = `🐋 WHALE ALERT: 1,000 BTC moved to Exchange. Volatility expected.`;
+        message = '🐋 WHALE ALERT: 1,000 BTC moved to Exchange. Volatility expected.';
         type = 'warning';
       }
 
-      setLogs(prev => {
-        const newLogs = [...prev, {
-          id: Math.random().toString(36).substr(2, 9),
-          timestamp: new Date().toLocaleTimeString(),
-          agent: randomAgent.name as any,
-          message,
-          type
-        }];
+      setLogs((prev) => {
+        const newLogs = [
+          ...prev,
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            timestamp: new Date().toLocaleTimeString(),
+            agent: randomAgent.name as any,
+            message,
+            type,
+          },
+        ];
         return newLogs.slice(-8);
       });
     }, 1500);
@@ -104,7 +107,7 @@ export function AlgoVisualizer() {
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+  }, []);
 
   if (!mounted) return <div className="h-full w-full bg-white/5 animate-pulse rounded-2xl" />;
 
@@ -124,7 +127,11 @@ export function AlgoVisualizer() {
         <div className="text-right">
           <div className="text-xs text-zinc-500">BTC/USDT</div>
           <div className={`text-xl font-mono font-bold ${price > 96500 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {price > 0 ? `$${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : <span className="text-sm animate-pulse">{t('connecting')}</span>}
+            {price > 0 ? (
+              `$${price.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+            ) : (
+              <span className="text-sm animate-pulse">{t('connecting')}</span>
+            )}
           </div>
         </div>
       </div>
@@ -132,7 +139,7 @@ export function AlgoVisualizer() {
       {/* Visualizer Area */}
       <div className="flex-1 relative bg-black/50 rounded-xl overflow-hidden border border-white/5 p-4 font-mono text-xs">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
-        
+
         <div className="space-y-2 relative z-10">
           <AnimatePresence initial={false}>
             {logs.map((log) => (
@@ -144,17 +151,28 @@ export function AlgoVisualizer() {
                 className="flex gap-3 items-start"
               >
                 <span className="text-zinc-600 shrink-0">[{log.timestamp}]</span>
-                <span className={`font-bold shrink-0 w-24 ${
-                  log.agent === 'SENTIMENT' ? 'text-blue-400' :
-                  log.agent === 'TECHNICAL' ? 'text-emerald-400' :
-                  log.agent === 'WHALE' ? 'text-purple-400' : 'text-yellow-400'
-                }`}>
+                <span
+                  className={`font-bold shrink-0 w-24 ${
+                    log.agent === 'SENTIMENT'
+                      ? 'text-blue-400'
+                      : log.agent === 'TECHNICAL'
+                        ? 'text-emerald-400'
+                        : log.agent === 'WHALE'
+                          ? 'text-purple-400'
+                          : 'text-yellow-400'
+                  }`}
+                >
                   {log.agent}
                 </span>
-                <span className={`${
-                  log.type === 'warning' ? 'text-yellow-200' :
-                  log.type === 'success' ? 'text-emerald-200' : 'text-zinc-300'
-                }`}>
+                <span
+                  className={`${
+                    log.type === 'warning'
+                      ? 'text-yellow-200'
+                      : log.type === 'success'
+                        ? 'text-emerald-200'
+                        : 'text-zinc-300'
+                  }`}
+                >
                   {log.message}
                 </span>
               </motion.div>

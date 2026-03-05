@@ -1,10 +1,10 @@
 'use client';
 
+import { BarChart2, GitBranch, Play, Settings } from 'lucide-react';
+import { Button3D } from '@/components/marketing/Button3D';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { GitBranch, Play, BarChart2, Settings } from 'lucide-react';
-import { Button3D } from '@/components/marketing/Button3D';
 
 export default function AgentStrategiesPage() {
   return (
@@ -14,7 +14,7 @@ export default function AgentStrategiesPage() {
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
         </AuroraBackground>
-        
+
         <div className="relative z-10 h-full flex flex-col overflow-y-auto">
           <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
             <div className="flex items-center justify-between">
@@ -37,11 +37,11 @@ export default function AgentStrategiesPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-bold text-lg">{strategy}</h3>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Active
+                    </span>
                   </div>
-                  <p className="text-sm text-zinc-400">
-                    High-frequency momentum strategy focused on BTC/ETH pairs.
-                  </p>
+                  <p className="text-sm text-zinc-400">High-frequency momentum strategy focused on BTC/ETH pairs.</p>
                 </div>
 
                 <div className="flex gap-8 text-center">

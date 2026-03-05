@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
+import { type NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email-service'; // Now uses Resend
 import { emailTemplates } from '@/lib/email-templates';
+import { getSupabaseClient } from '@/lib/supabase';
 
 // Remove mock email sender
 // async function sendEmail(params: any) { ... }
@@ -44,8 +44,8 @@ export async function GET(req: NextRequest) {
 
       if (existingEmail) continue;
 
-      // TODO: Calculate profit missed (would need historical signal data)
-      const profitMissed = Math.random() * 500 + 100; // Placeholder
+      // Placeholder: actual profit missed requires historical signal data from the signals table
+      const profitMissed = Math.random() * 500 + 100;
 
       const actionUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
       const template = emailTemplates.winBack;

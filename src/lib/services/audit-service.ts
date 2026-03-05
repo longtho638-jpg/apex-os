@@ -22,12 +22,7 @@ export type AuditAction =
   | 'MFA_ENABLED'
   | 'MFA_DISABLED';
 
-export type AuditResourceType =
-  | 'USER'
-  | 'TRADE'
-  | 'WALLET'
-  | 'SETTINGS'
-  | 'COMPLIANCE';
+export type AuditResourceType = 'USER' | 'TRADE' | 'WALLET' | 'SETTINGS' | 'COMPLIANCE';
 
 export interface AuditLogEntry {
   userId?: string;
@@ -47,26 +42,21 @@ export async function logAuditEvent(entry: AuditLogEntry): Promise<void> {
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from('audit_logs')
-      .insert({
-        user_id: entry.userId || null,
-        action: entry.action,
-        resource_type: entry.resourceType || null,
-        resource_id: entry.resourceId || null,
-        old_value: entry.oldValue || null,
-        new_value: entry.newValue || null,
-        ip_address: entry.ipAddress || null,
-        user_agent: entry.userAgent || null,
-      });
+    const { error } = await supabase.from('audit_logs').insert({
+      user_id: entry.userId || null,
+      action: entry.action,
+      resource_type: entry.resourceType || null,
+      resource_id: entry.resourceId || null,
+      old_value: entry.oldValue || null,
+      new_value: entry.newValue || null,
+      ip_address: entry.ipAddress || null,
+      user_agent: entry.userAgent || null,
+    });
 
     if (error) {
-      console.error('[AuditService] Failed to log event:', error);
       // Don't throw - audit logging should not break application flow
     }
-  } catch (err) {
-    console.error('[AuditService] Exception logging event:', err);
-  }
+  } catch (_err) {}
 }
 
 /**
@@ -90,7 +80,7 @@ export async function logTosAcceptance(
   userId: string,
   version: string,
   ipAddress?: string,
-  userAgent?: string
+  userAgent?: string,
 ): Promise<void> {
   await logAuditEvent({
     userId,
@@ -109,7 +99,7 @@ export async function logPrivacyAcceptance(
   userId: string,
   version: string,
   ipAddress?: string,
-  userAgent?: string
+  userAgent?: string,
 ): Promise<void> {
   await logAuditEvent({
     userId,
@@ -124,11 +114,7 @@ export async function logPrivacyAcceptance(
 /**
  * Log data export request (GDPR)
  */
-export async function logDataExportRequest(
-  userId: string,
-  ipAddress?: string,
-  userAgent?: string
-): Promise<void> {
+export async function logDataExportRequest(userId: string, ipAddress?: string, userAgent?: string): Promise<void> {
   await logAuditEvent({
     userId,
     action: 'DATA_EXPORT_REQUESTED',

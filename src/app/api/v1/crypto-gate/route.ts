@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { RAAS_CONFIG } from '@apex-os/vibe-payment';
+import { type NextRequest, NextResponse } from 'next/server';
 
 /**
  * Crypto Payment Gate API — Zero-fee deposit/withdrawal
@@ -22,7 +22,7 @@ interface CryptoGateRequest {
   userId?: string;
 }
 
-type SupportedChain = typeof RAAS_CONFIG.cryptoGate.chains[number];
+type SupportedChain = (typeof RAAS_CONFIG.cryptoGate.chains)[number];
 
 // Chain-specific config (deposit addresses would come from vault in production)
 const CHAIN_CONFIG: Record<SupportedChain, { name: string; confirmations: number; avgBlockTime: number }> = {
@@ -71,18 +71,12 @@ export async function POST(req: NextRequest) {
 
     if (body.action === 'estimate') {
       if (!body.chain || !body.token || !body.amount) {
-        return NextResponse.json(
-          { success: false, error: 'chain, token, and amount required' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: 'chain, token, and amount required' }, { status: 400 });
       }
 
       const chain = body.chain as SupportedChain;
       if (!RAAS_CONFIG.cryptoGate.chains.includes(chain)) {
-        return NextResponse.json(
-          { success: false, error: `Unsupported chain: ${body.chain}` },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: `Unsupported chain: ${body.chain}` }, { status: 400 });
       }
 
       const config = CHAIN_CONFIG[chain];
@@ -102,10 +96,7 @@ export async function POST(req: NextRequest) {
 
     if (body.action === 'deposit') {
       if (!body.chain || !body.token) {
-        return NextResponse.json(
-          { success: false, error: 'chain and token required' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: 'chain and token required' }, { status: 400 });
       }
 
       // In production: generate unique deposit address from HD wallet
@@ -129,15 +120,12 @@ export async function POST(req: NextRequest) {
       if (!body.chain || !body.token || !body.amount || !body.toAddress) {
         return NextResponse.json(
           { success: false, error: 'chain, token, amount, and toAddress required' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (body.amount < 10) {
-        return NextResponse.json(
-          { success: false, error: 'Minimum withdrawal: $10' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: 'Minimum withdrawal: $10' }, { status: 400 });
       }
 
       // In production: queue withdrawal, sign tx, broadcast
@@ -158,12 +146,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { success: false, error: 'Invalid action. Use: deposit, withdraw, estimate, chains' },
-      { status: 400 }
+      { status: 400 },
     );
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Invalid request body' },
-      { status: 400 }
-    );
+  } catch (_error) {
+    return NextResponse.json({ success: false, error: 'Invalid request body' }, { status: 400 });
   }
 }

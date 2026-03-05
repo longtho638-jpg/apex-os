@@ -1,29 +1,107 @@
 'use client';
 
-import { Sidebar } from '@/components/os/sidebar';
+import { motion } from 'framer-motion';
+import { CheckCircle, MoreHorizontal, Shield, Users, XCircle } from 'lucide-react';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Users, MoreHorizontal, Shield, CheckCircle, XCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 export default function AdminUsersPage() {
   // Enhanced mock users data from God Mode
   const users = [
-    { id: 'UID-001', name: 'Nguyen Van Hung', email: 'hung.whale@gmail.com', role: 'User', status: 'Active', tier: 'PRO', volume: '$12.5M' },
-    { id: 'UID-002', name: 'Tran Thi Linh', email: 'linh.kol@crypto.vn', role: 'Admin', status: 'Active', tier: 'ELITE', volume: '$4.2M' },
-    { id: 'UID-003', name: 'Le Hoang Nam', email: 'nam.fund@capital.com', role: 'User', status: 'Active', tier: 'BASIC', volume: '$8.9M' },
-    { id: 'UID-004', name: 'Pham Minh Tuan', email: 'tuan.bot@gmail.com', role: 'User', status: 'Banned', tier: 'BASIC', volume: '$0.00' },
-    { id: 'UID-005', name: 'Doan Van Hau', email: 'hau.trader@yahoo.com', role: 'User', status: 'Active', tier: 'PRO', volume: '$150K' },
-    { id: 'UID-006', name: 'Sarah Jenkins', email: 'sarah.j@global.com', role: 'User', status: 'Active', tier: 'ELITE', volume: '$2.1M' },
-    { id: 'UID-007', name: 'Michael Chen', email: 'm.chen@asia.net', role: 'User', status: 'Active', tier: 'PRO', volume: '$5.6M' },
-    { id: 'UID-008', name: 'Bot Network 01', email: 'bot01@scam.net', role: 'User', status: 'Banned', tier: 'BASIC', volume: '$12K' },
-    { id: 'UID-009', name: 'Kevin Durant', email: 'kd.sniper@nba.com', role: 'User', status: 'Active', tier: 'ELITE', volume: '$3.4M' },
-    { id: 'UID-010', name: 'Elon Musk', email: 'doge.father@x.com', role: 'User', status: 'Active', tier: 'LIFETIME', volume: '$42.0B' },
+    {
+      id: 'UID-001',
+      name: 'Nguyen Van Hung',
+      email: 'hung.whale@gmail.com',
+      role: 'User',
+      status: 'Active',
+      tier: 'SOVEREIGN',
+      volume: '$12.5M',
+    },
+    {
+      id: 'UID-002',
+      name: 'Tran Thi Linh',
+      email: 'linh.kol@crypto.vn',
+      role: 'Admin',
+      status: 'Active',
+      tier: 'SOVEREIGN',
+      volume: '$4.2M',
+    },
+    {
+      id: 'UID-003',
+      name: 'Le Hoang Nam',
+      email: 'nam.fund@capital.com',
+      role: 'User',
+      status: 'Active',
+      tier: 'ARCHITECT',
+      volume: '$8.9M',
+    },
+    {
+      id: 'UID-004',
+      name: 'Pham Minh Tuan',
+      email: 'tuan.bot@gmail.com',
+      role: 'User',
+      status: 'Banned',
+      tier: 'EXPLORER',
+      volume: '$0.00',
+    },
+    {
+      id: 'UID-005',
+      name: 'Doan Van Hau',
+      email: 'hau.trader@yahoo.com',
+      role: 'User',
+      status: 'Active',
+      tier: 'OPERATOR',
+      volume: '$150K',
+    },
+    {
+      id: 'UID-006',
+      name: 'Sarah Jenkins',
+      email: 'sarah.j@global.com',
+      role: 'User',
+      status: 'Active',
+      tier: 'SOVEREIGN',
+      volume: '$2.1M',
+    },
+    {
+      id: 'UID-007',
+      name: 'Michael Chen',
+      email: 'm.chen@asia.net',
+      role: 'User',
+      status: 'Active',
+      tier: 'ARCHITECT',
+      volume: '$5.6M',
+    },
+    {
+      id: 'UID-008',
+      name: 'Bot Network 01',
+      email: 'bot01@scam.net',
+      role: 'User',
+      status: 'Banned',
+      tier: 'EXPLORER',
+      volume: '$12K',
+    },
+    {
+      id: 'UID-009',
+      name: 'Kevin Durant',
+      email: 'kd.sniper@nba.com',
+      role: 'User',
+      status: 'Active',
+      tier: 'SOVEREIGN',
+      volume: '$3.4M',
+    },
+    {
+      id: 'UID-010',
+      name: 'Elon Musk',
+      email: 'doge.father@x.com',
+      role: 'User',
+      status: 'Active',
+      tier: 'SOVEREIGN',
+      volume: '$42.0B',
+    },
   ];
 
   return (
     <div className="flex h-screen w-full bg-[#030303] text-white">
-
       <main className="flex-1 relative overflow-hidden">
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
@@ -90,21 +168,34 @@ export default function AdminUsersPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-md text-xs font-bold border ${user.tier === 'PRO' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' :
-                            user.tier === 'ELITE' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
-                              user.tier === 'LIFETIME' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' :
-                                'bg-zinc-500/10 border-zinc-500/20 text-zinc-400'
-                            }`}>
+                          <span
+                            className={`px-2 py-1 rounded-md text-xs font-bold border ${
+                              user.tier === 'OPERATOR'
+                                ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                                : user.tier === 'ARCHITECT'
+                                  ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+                                  : user.tier === 'SOVEREIGN'
+                                    ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                                    : 'bg-zinc-500/10 border-zinc-500/20 text-zinc-400'
+                            }`}
+                          >
                             {user.tier}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-mono text-emerald-400">
-                          {user.volume}
-                        </td>
+                        <td className="px-6 py-4 font-mono text-emerald-400">{user.volume}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${user.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-                            }`}>
-                            {user.status === 'Active' ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
+                              user.status === 'Active'
+                                ? 'bg-emerald-500/10 text-emerald-400'
+                                : 'bg-red-500/10 text-red-400'
+                            }`}
+                          >
+                            {user.status === 'Active' ? (
+                              <CheckCircle className="w-3 h-3" />
+                            ) : (
+                              <XCircle className="w-3 h-3" />
+                            )}
                             {user.status}
                           </span>
                         </td>

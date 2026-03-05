@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getSupabaseClientSide } from '@/lib/supabase';
-import { ArrowLeft, Activity, BarChart2, Zap } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { Activity, ArrowLeft, BarChart2, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { formatDistanceToNow } from 'date-fns';
+import { useEffect, useState } from 'react';
+import { getSupabaseClientSide } from '@/lib/supabase';
 
 export default function SignalDetailPage({ params }: { params: { id: string } }) {
   const [signal, setSignal] = useState<any>(null);
@@ -14,11 +14,7 @@ export default function SignalDetailPage({ params }: { params: { id: string } })
 
   useEffect(() => {
     async function fetchSignal() {
-      const { data, error } = await supabase
-        .from('trading_signals')
-        .select('*')
-        .eq('id', params.id)
-        .single();
+      const { data, error } = await supabase.from('trading_signals').select('*').eq('id', params.id).single();
 
       if (error || !data) {
         // handle error or 404
@@ -36,7 +32,10 @@ export default function SignalDetailPage({ params }: { params: { id: string } })
   return (
     <div className="min-h-screen bg-[#030303] text-white p-6">
       <div className="max-w-5xl mx-auto">
-        <Link href="/en/dashboard/signals" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors">
+        <Link
+          href="/en/dashboard/signals"
+          className="inline-flex items-center gap-2 text-zinc-500 hover:text-white mb-8 transition-colors"
+        >
           <ArrowLeft size={16} /> Back to Signals
         </Link>
 
@@ -48,7 +47,9 @@ export default function SignalDetailPage({ params }: { params: { id: string } })
                 <div>
                   <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
                     {signal.symbol}
-                    <span className={`px-3 py-1 rounded-lg text-lg ${signal.prediction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                    <span
+                      className={`px-3 py-1 rounded-lg text-lg ${signal.prediction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}
+                    >
                       {signal.prediction}
                     </span>
                   </h1>
@@ -79,9 +80,9 @@ export default function SignalDetailPage({ params }: { params: { id: string } })
                 <div className="prose prose-invert max-w-none">
                   <p className="text-zinc-300 leading-relaxed">
                     The ensemble model detected a strong {signal.prediction} opportunity based on a convergence of
-                    Technical Price Action ({Math.round(signal.price_contrib * 100)}%),
-                    Social Sentiment ({Math.round(signal.sentiment_contrib * 100)}%), and
-                    On-Chain Volume ({Math.round(signal.volume_contrib * 100)}%).
+                    Technical Price Action ({Math.round(signal.price_contrib * 100)}%), Social Sentiment (
+                    {Math.round(signal.sentiment_contrib * 100)}%), and On-Chain Volume (
+                    {Math.round(signal.volume_contrib * 100)}%).
                   </p>
                 </div>
               </div>
@@ -98,8 +99,8 @@ export default function SignalDetailPage({ params }: { params: { id: string } })
                 {[
                   { label: 'Price Model', val: signal.price_contrib, color: 'bg-blue-500' },
                   { label: 'Sentiment', val: signal.sentiment_contrib, color: 'bg-purple-500' },
-                  { label: 'Volume/Whale', val: signal.volume_contrib, color: 'bg-orange-500' }
-                ].map(item => (
+                  { label: 'Volume/Whale', val: signal.volume_contrib, color: 'bg-orange-500' },
+                ].map((item) => (
                   <div key={item.label}>
                     <div className="flex justify-between text-sm mb-2">
                       <span className="text-zinc-400">{item.label}</span>

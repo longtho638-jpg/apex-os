@@ -1,6 +1,6 @@
 /**
  * Machine Learning - Type Definitions
- * 
+ *
  * Comprehensive interfaces for ML models, predictions, and training.
  */
 
@@ -12,29 +12,29 @@ export type MLModelType = 'dense_nn' | 'lstm' | 'ensemble' | 'random_forest';
 export type PredictionClass = 'BUY' | 'SELL' | 'HOLD';
 
 export interface MLModel {
-    id: string;
-    name: string;
-    type: MLModelType;
-    version: string;
+  id: string;
+  name: string;
+  type: MLModelType;
+  version: string;
 
-    // Model metadata
-    inputShape: number[];      // e.g., [34] for 34 features
-    outputShape: number[];     // e.g., [3] for BUY/SELL/HOLD
+  // Model metadata
+  inputShape: number[]; // e.g., [34] for 34 features
+  outputShape: number[]; // e.g., [3] for BUY/SELL/HOLD
 
-    // Performance metrics
-    accuracy: number;          // Validation accuracy
-    precision: number;
-    recall: number;
-    f1Score: number;
+  // Performance metrics
+  accuracy: number; // Validation accuracy
+  precision: number;
+  recall: number;
+  f1Score: number;
 
-    // Training info
-    trainedOn: number;         // Timestamp
-    epochs: number;
-    sampleCount: number;
+  // Training info
+  trainedOn: number; // Timestamp
+  epochs: number;
+  sampleCount: number;
 
-    // Model file
-    modelPath?: string;        // Path to saved model
-    weightsPath?: string;
+  // Model file
+  modelPath?: string; // Path to saved model
+  weightsPath?: string;
 }
 
 // ============================================================================
@@ -42,35 +42,35 @@ export interface MLModel {
 // ============================================================================
 
 export interface MLPrediction {
-    // Probabilities
-    buyProbability: number;    // 0-1
-    sellProbability: number;
-    holdProbability: number;
+  // Probabilities
+  buyProbability: number; // 0-1
+  sellProbability: number;
+  holdProbability: number;
 
-    // Prediction
-    predictedClass: PredictionClass;
-    confidence: number;        // Max probability
+  // Prediction
+  predictedClass: PredictionClass;
+  confidence: number; // Max probability
 
-    // Model info
-    modelId: string;
-    timestamp: number;
+  // Model info
+  modelId: string;
+  timestamp: number;
 
-    // Features used
-    features: number[];
-    featureNames: string[];
+  // Features used
+  features: number[];
+  featureNames: string[];
 }
 
 export interface EnsemblePrediction extends MLPrediction {
-    // Individual model predictions
-    modelPredictions: MLPrediction[];
+  // Individual model predictions
+  modelPredictions: MLPrediction[];
 
-    // Ensemble metrics
-    agreement: number;         // % of models agreeing
-    disagreement: number;      // Maximum probability spread
-    consensusStrength: number; // How strong is the consensus
+  // Ensemble metrics
+  agreement: number; // % of models agreeing
+  disagreement: number; // Maximum probability spread
+  consensusStrength: number; // How strong is the consensus
 
-    // Voting weights
-    weights: number[];
+  // Voting weights
+  weights: number[];
 }
 
 // ============================================================================
@@ -78,27 +78,27 @@ export interface EnsemblePrediction extends MLPrediction {
 // ============================================================================
 
 export interface FeatureVector {
-    raw: number[];             // Raw feature values
-    normalized: number[];      // Normalized features
-    names: string[];           // Feature names
-    timestamp: number;
+  raw: number[]; // Raw feature values
+  normalized: number[]; // Normalized features
+  names: string[]; // Feature names
+  timestamp: number;
 }
 
 export interface FeatureScaler {
-    method: 'minmax' | 'standard' | 'robust';
+  method: 'minmax' | 'standard' | 'robust';
 
-    // Scaling parameters
-    min?: number[];
-    max?: number[];
-    mean?: number[];
-    std?: number[];
+  // Scaling parameters
+  min?: number[];
+  max?: number[];
+  mean?: number[];
+  std?: number[];
 }
 
 export interface SequenceData {
-    sequences: number[][][];   // [samples, timesteps, features]
-    labels: number[][];        // [samples, classes]
-    timesteps: number;
-    featureCount: number;
+  sequences: number[][][]; // [samples, timesteps, features]
+  labels: number[][]; // [samples, classes]
+  timesteps: number;
+  featureCount: number;
 }
 
 // ============================================================================
@@ -106,62 +106,62 @@ export interface SequenceData {
 // ============================================================================
 
 export interface TrainingConfig {
-    // Data split
-    trainSplit: number;        // e.g., 0.8 for 80% train
-    validationSplit: number;   // e.g., 0.2 for 20% validation
+  // Data split
+  trainSplit: number; // e.g., 0.8 for 80% train
+  validationSplit: number; // e.g., 0.2 for 20% validation
 
-    // Hyperparameters
-    epochs: number;
-    batchSize: number;
-    learningRate: number;
+  // Hyperparameters
+  epochs: number;
+  batchSize: number;
+  learningRate: number;
 
-    // Regularization
-    dropout?: number;
-    l1?: number;
-    l2?: number;
+  // Regularization
+  dropout?: number;
+  l1?: number;
+  l2?: number;
 
-    // Early stopping
-    patience?: number;
-    minDelta?: number;
+  // Early stopping
+  patience?: number;
+  minDelta?: number;
 
-    // Callbacks
-    callbacks?: string[];
+  // Callbacks
+  callbacks?: string[];
 }
 
 export interface TrainingMetrics {
-    epoch: number;
+  epoch: number;
 
-    // Loss
-    trainLoss: number;
-    validationLoss: number;
+  // Loss
+  trainLoss: number;
+  validationLoss: number;
 
-    // Accuracy
-    trainAccuracy: number;
-    validationAccuracy: number;
+  // Accuracy
+  trainAccuracy: number;
+  validationAccuracy: number;
 
-    // Time
-    epochDurationMs: number;
-    totalDurationMs: number;
+  // Time
+  epochDurationMs: number;
+  totalDurationMs: number;
 }
 
 export interface TrainingHistory {
-    modelId: string;
-    config: TrainingConfig;
+  modelId: string;
+  config: TrainingConfig;
 
-    // Metrics per epoch
-    epochs: TrainingMetrics[];
+  // Metrics per epoch
+  epochs: TrainingMetrics[];
 
-    // Final metrics
-    finalAccuracy: number;
-    finalLoss: number;
-    bestEpoch: number;
+  // Final metrics
+  finalAccuracy: number;
+  finalLoss: number;
+  bestEpoch: number;
 
-    // Confusion matrix
-    confusionMatrix?: number[][];
+  // Confusion matrix
+  confusionMatrix?: number[][];
 
-    // Training time
-    startTime: number;
-    endTime: number;
+  // Training time
+  startTime: number;
+  endTime: number;
 }
 
 // ============================================================================
@@ -169,24 +169,24 @@ export interface TrainingHistory {
 // ============================================================================
 
 export interface FeatureImportance {
-    featureName: string;
-    importance: number;        // 0-1 normalized importance
-    rank: number;              // 1-based ranking
+  featureName: string;
+  importance: number; // 0-1 normalized importance
+  rank: number; // 1-based ranking
 
-    // Statistical significance
-    pValue?: number;
-    confidence?: number;
+  // Statistical significance
+  pValue?: number;
+  confidence?: number;
 }
 
 export interface FeatureImportanceAnalysis {
-    method: 'permutation' | 'shap' | 'gradient' | 'weights';
-    features: FeatureImportance[];
+  method: 'permutation' | 'shap' | 'gradient' | 'weights';
+  features: FeatureImportance[];
 
-    // Top features
-    top5: FeatureImportance[];
-    top10: FeatureImportance[];
+  // Top features
+  top5: FeatureImportance[];
+  top10: FeatureImportance[];
 
-    timestamp: number;
+  timestamp: number;
 }
 
 // ============================================================================
@@ -194,45 +194,45 @@ export interface FeatureImportanceAnalysis {
 // ============================================================================
 
 export interface ConfusionMatrix {
-    truePositives: number;
-    trueNegatives: number;
-    falsePositives: number;
-    falseNegatives: number;
+  truePositives: number;
+  trueNegatives: number;
+  falsePositives: number;
+  falseNegatives: number;
 
-    // Derived metrics
-    accuracy: number;
-    precision: number;
-    recall: number;
-    f1Score: number;
-    specificity: number;
+  // Derived metrics
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+  specificity: number;
 }
 
 export interface ModelEvaluation {
-    modelId: string;
+  modelId: string;
 
-    // Performance
-    confusionMatrix: ConfusionMatrix;
-    accuracy: number;
-    loss: number;
+  // Performance
+  confusionMatrix: ConfusionMatrix;
+  accuracy: number;
+  loss: number;
 
-    // Per-class metrics
-    classMetrics: {
-        className: PredictionClass;
-        precision: number;
-        recall: number;
-        f1Score: number;
-        support: number;        // Number of samples
-    }[];
+  // Per-class metrics
+  classMetrics: {
+    className: PredictionClass;
+    precision: number;
+    recall: number;
+    f1Score: number;
+    support: number; // Number of samples
+  }[];
 
-    // ROC/AUC (if binary)
-    rocAuc?: number;
+  // ROC/AUC (if binary)
+  rocAuc?: number;
 
-    // Calibration
-    calibrationError?: number; // Expected Calibration Error
+  // Calibration
+  calibrationError?: number; // Expected Calibration Error
 
-    // Testing info
-    testSamples: number;
-    timestamp: number;
+  // Testing info
+  testSamples: number;
+  timestamp: number;
 }
 
 // ============================================================================
@@ -240,32 +240,32 @@ export interface ModelEvaluation {
 // ============================================================================
 
 export interface MLBacktestResult {
-    modelId: string;
+  modelId: string;
 
-    // Period
-    startDate: number;
-    endDate: number;
-    totalDays: number;
+  // Period
+  startDate: number;
+  endDate: number;
+  totalDays: number;
 
-    // Trades
-    totalTrades: number;
-    winningTrades: number;
-    losingTrades: number;
-    winRate: number;
+  // Trades
+  totalTrades: number;
+  winningTrades: number;
+  losingTrades: number;
+  winRate: number;
 
-    // Performance
-    totalReturn: number;
-    annualizedReturn: number;
-    sharpeRatio: number;
-    maxDrawdown: number;
+  // Performance
+  totalReturn: number;
+  annualizedReturn: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
 
-    // Vs baseline
-    baselineReturn: number;     // Buy & hold
-    alpha: number;              // Excess return
+  // Vs baseline
+  baselineReturn: number; // Buy & hold
+  alpha: number; // Excess return
 
-    // Prediction accuracy
-    predictionAccuracy: number;
-    avgConfidence: number;
+  // Prediction accuracy
+  predictionAccuracy: number;
+  avgConfidence: number;
 }
 
 // ============================================================================
@@ -273,20 +273,20 @@ export interface MLBacktestResult {
 // ============================================================================
 
 export interface InferenceRequest {
-    features: number[];
-    featureNames?: string[];
-    modelId?: string;          // Use specific model, or default
-    useEnsemble?: boolean;
+  features: number[];
+  featureNames?: string[];
+  modelId?: string; // Use specific model, or default
+  useEnsemble?: boolean;
 }
 
 export interface InferenceResponse {
-    prediction: MLPrediction | EnsemblePrediction;
+  prediction: MLPrediction | EnsemblePrediction;
 
-    // Performance
-    inferenceTimeMs: number;
+  // Performance
+  inferenceTimeMs: number;
 
-    // Feature importance for this prediction
-    topFeatures?: FeatureImportance[];
+  // Feature importance for this prediction
+  topFeatures?: FeatureImportance[];
 }
 
 // ============================================================================
@@ -294,12 +294,12 @@ export interface InferenceResponse {
 // ============================================================================
 
 export interface ModelRegistry {
-    models: MLModel[];
-    activeModelId: string;
+  models: MLModel[];
+  activeModelId: string;
 
-    // Version control
-    latestVersion: string;
-    previousVersions: string[];
+  // Version control
+  latestVersion: string;
+  previousVersions: string[];
 }
 
 // ============================================================================
@@ -307,26 +307,26 @@ export interface ModelRegistry {
 // ============================================================================
 
 export interface MLConfig {
-    // Model selection
-    defaultModel: MLModelType;
-    useEnsemble: boolean;
+  // Model selection
+  defaultModel: MLModelType;
+  useEnsemble: boolean;
 
-    // Inference
-    inferenceTimeout: number;  // ms
-    batchInference: boolean;
+  // Inference
+  inferenceTimeout: number; // ms
+  batchInference: boolean;
 
-    // Features
-    maxFeatures: number;       // Feature selection
-    featureSelectionMethod: 'correlation' | 'importance' | 'pca';
+  // Features
+  maxFeatures: number; // Feature selection
+  featureSelectionMethod: 'correlation' | 'importance' | 'pca';
 
-    // Performance
-    useWebGL: boolean;
-    cacheModels: boolean;
+  // Performance
+  useWebGL: boolean;
+  cacheModels: boolean;
 
-    // Retraining
-    autoRetrain: boolean;
-    retrainIntervalDays: number;
-    minSamplesForRetrain: number;
+  // Retraining
+  autoRetrain: boolean;
+  retrainIntervalDays: number;
+  minSamplesForRetrain: number;
 }
 
 // ============================================================================
@@ -334,15 +334,15 @@ export interface MLConfig {
 // ============================================================================
 
 export interface PredictionStream {
-    symbol: string;
-    predictions: MLPrediction[];
+  symbol: string;
+  predictions: MLPrediction[];
 
-    // Rolling accuracy
-    recentAccuracy: number;    // Last 100 predictions
+  // Rolling accuracy
+  recentAccuracy: number; // Last 100 predictions
 
-    // Prediction consistency
-    flipCount: number;         // How many times prediction changed
-    strongestPrediction: PredictionClass;
+  // Prediction consistency
+  flipCount: number; // How many times prediction changed
+  strongestPrediction: PredictionClass;
 
-    lastUpdate: number;
+  lastUpdate: number;
 }

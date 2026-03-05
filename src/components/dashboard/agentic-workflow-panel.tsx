@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import { getTierByVolume, TIER_ORDER, type TierId, UNIFIED_TIERS } from '@apex-os/vibe-payment';
 import { motion } from 'framer-motion';
-import { Bot, Brain, Shield, Zap, TrendingUp, Activity, CheckCircle } from 'lucide-react';
-import { UNIFIED_TIERS, TIER_ORDER, getTierByVolume, type TierId } from '@apex-os/vibe-payment';
+import { Activity, Bot, Brain, CheckCircle, Shield, TrendingUp, Zap } from 'lucide-react';
+import React from 'react';
 
 interface AgenticWorkflowPanelProps {
   currentTierId: TierId;
@@ -18,20 +18,25 @@ interface AgenticWorkflowPanelProps {
 }
 
 const STATUS_STYLES = {
-  active: { color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/30', dot: 'bg-emerald-400', label: 'Active' },
-  idle:   { color: 'text-amber-400',   bg: 'bg-amber-400/10 border-amber-400/30',   dot: 'bg-amber-400',   label: 'Idle'   },
-  error:  { color: 'text-red-400',     bg: 'bg-red-400/10 border-red-400/30',        dot: 'bg-red-400',     label: 'Error'  },
+  active: {
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-400/10 border-emerald-400/30',
+    dot: 'bg-emerald-400',
+    label: 'Active',
+  },
+  idle: { color: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/30', dot: 'bg-amber-400', label: 'Idle' },
+  error: { color: 'text-red-400', bg: 'bg-red-400/10 border-red-400/30', dot: 'bg-red-400', label: 'Error' },
 } as const;
 
 const PIPELINE_STEPS = [
-  { icon: Brain,  label: 'Signal Detection',  desc: 'AI pattern scan'    },
-  { icon: Shield, label: 'Risk Assessment',   desc: 'Portfolio guard'    },
-  { icon: Zap,    label: 'Execution',         desc: 'Order dispatch'     },
+  { icon: Brain, label: 'Signal Detection', desc: 'AI pattern scan' },
+  { icon: Shield, label: 'Risk Assessment', desc: 'Portfolio guard' },
+  { icon: Zap, label: 'Execution', desc: 'Order dispatch' },
 ] as const;
 
 function formatVolume(v: number) {
   if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
-  if (v >= 1_000)     return `$${(v / 1_000).toFixed(1)}K`;
+  if (v >= 1_000) return `$${(v / 1_000).toFixed(1)}K`;
   return `$${v}`;
 }
 
@@ -70,7 +75,9 @@ export default function AgenticWorkflowPanel({
               </span>
             )}
           </div>
-          <span className="text-xs text-zinc-400">{formatVolume(monthlyVolume)} / {nextTier ? formatVolume(nextTier.volumeThreshold) : '∞'}</span>
+          <span className="text-xs text-zinc-400">
+            {formatVolume(monthlyVolume)} / {nextTier ? formatVolume(nextTier.volumeThreshold) : '∞'}
+          </span>
         </div>
         <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
           <motion.div
@@ -82,7 +89,9 @@ export default function AgenticWorkflowPanel({
         </div>
         {nextTier && (
           <p className="text-xs text-zinc-500 mt-1.5">
-            {formatVolume(nextTier.volumeThreshold - monthlyVolume)} to unlock <span className="text-zinc-300">{nextTier.name}</span> — {nextTier.agentSlots} agents, {(100 - nextTier.spreadBps / 10).toFixed(1)}% tighter spread
+            {formatVolume(nextTier.volumeThreshold - monthlyVolume)} to unlock{' '}
+            <span className="text-zinc-300">{nextTier.name}</span> — {nextTier.agentSlots} agents,{' '}
+            {(100 - nextTier.spreadBps / 10).toFixed(1)}% tighter spread
           </p>
         )}
       </motion.div>
@@ -98,7 +107,9 @@ export default function AgenticWorkflowPanel({
           <div className="flex items-center gap-2 mb-3">
             <Bot size={16} className="text-zinc-400" />
             <span className="text-sm font-semibold text-white">Deployed Agents</span>
-            <span className="ml-auto text-xs text-zinc-500">{deployedAgents.length}/{tier.agentSlots === Infinity ? '∞' : tier.agentSlots} slots</span>
+            <span className="ml-auto text-xs text-zinc-500">
+              {deployedAgents.length}/{tier.agentSlots === Infinity ? '∞' : tier.agentSlots} slots
+            </span>
           </div>
 
           {deployedAgents.length === 0 ? (
@@ -178,7 +189,10 @@ export default function AgenticWorkflowPanel({
 
           <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2">
             <CheckCircle size={14} className="text-emerald-400" />
-            <span className="text-xs text-zinc-400">Pipeline operational — {tier.aiRequestsPerDay === Infinity ? 'unlimited' : tier.aiRequestsPerDay} AI req/day</span>
+            <span className="text-xs text-zinc-400">
+              Pipeline operational — {tier.aiRequestsPerDay === Infinity ? 'unlimited' : tier.aiRequestsPerDay} AI
+              req/day
+            </span>
           </div>
         </motion.div>
       </div>

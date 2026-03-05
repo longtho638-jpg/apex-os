@@ -6,9 +6,9 @@
  * Allows users to claim paper trading funds
  */
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { DollarSign, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export function PaperFaucetButton() {
@@ -32,9 +32,9 @@ export function PaperFaucetButton() {
       toast.success(
         t('faucetSuccess', {
           defaultValue: `Added $${data.amount.toLocaleString()}! New balance: $${data.newBalance.toLocaleString()}`,
-        })
+        }),
       );
-    } catch (error) {
+    } catch (_error) {
       toast.error(t('faucetError', { defaultValue: 'Failed to claim funds' }));
     } finally {
       setLoading(false);

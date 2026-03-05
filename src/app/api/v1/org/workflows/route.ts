@@ -1,13 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { getAgentSlots, type TierId } from '@apex-os/vibe-payment';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { getAgentSlots, type TierId } from '@apex-os/vibe-payment';
+import { type NextRequest, NextResponse } from 'next/server';
 import { checkOrgRole } from '@/lib/org/org-role-guard';
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -46,7 +48,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -68,11 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check agent slot limit based on tier
-    const { data: tierData } = await supabase
-      .from('user_tiers')
-      .select('tier')
-      .eq('user_id', user.id)
-      .single();
+    const { data: tierData } = await supabase.from('user_tiers').select('tier').eq('user_id', user.id).single();
 
     const userTier = (tierData?.tier || 'EXPLORER') as TierId;
     const maxSlots = getAgentSlots(userTier);
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     if ((count || 0) >= maxSlots) {
       return NextResponse.json(
         { error: `Agent slot limit reached (${maxSlots} for ${userTier} tier). Upgrade by trading more volume.` },
-        { status: 403 }
+        { status: 403 },
       );
     }
 

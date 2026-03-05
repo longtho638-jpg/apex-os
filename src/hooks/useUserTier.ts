@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
+import { useUserTier as useBillingUserTier } from '@apex-os/vibe-payment';
 /**
  * Thin wrapper — injects AuthContext + apiBaseUrl into vibe-payment parameterized hook.
  */
 import { useAuth } from '@/contexts/AuthContext';
 import { getApiUrl } from '@/lib/api/config';
-import { useUserTier as useBillingUserTier } from '@apex-os/vibe-payment';
 
 export type { MenuId } from '@apex-os/vibe-payment';
 

@@ -1,19 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { type NextRequest, NextResponse } from 'next/server';
 
 /**
  * Workflow execution history — Railway-inspired observability pattern.
  * Lists past runs for a specific agent workflow.
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Verify workflow ownership
@@ -31,7 +30,11 @@ export async function GET(
     const limit = Number(request.nextUrl.searchParams.get('limit') || '20');
     const offset = Number(request.nextUrl.searchParams.get('offset') || '0');
 
-    const { data: executions, error, count } = await supabase
+    const {
+      data: executions,
+      error,
+      count,
+    } = await supabase
       .from('workflow_executions')
       .select('*', { count: 'exact' })
       .eq('workflow_id', id)

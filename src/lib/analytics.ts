@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger';
 import { ph } from '@/lib/posthog';
 
-export type AnalyticsEvent = 
+export type AnalyticsEvent =
   | 'landing_page_view'
   | 'view_pricing_click'
   | 'start_trial_click'
@@ -37,7 +37,7 @@ export const analytics = {
   track: async (event: AnalyticsEvent, properties?: EventProperties) => {
     // 1. Send to PostHog (Client-side)
     if (typeof window !== 'undefined') {
-        ph.capture(event, properties);
+      ph.capture(event, properties);
     }
 
     // 2. Double-write to our Database (via API)
@@ -51,10 +51,10 @@ export const analytics = {
       logger.error('Internal Analytics error:', err);
     }
   },
-  
+
   identify: (userId: string, traits?: Record<string, any>) => {
     if (typeof window !== 'undefined') {
-        ph.identify(userId, traits);
+      ph.identify(userId, traits);
     }
   },
 };

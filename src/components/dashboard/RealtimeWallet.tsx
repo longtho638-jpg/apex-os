@@ -1,10 +1,10 @@
 'use client';
 
-import { logger } from '@/lib/logger';
-import { useEffect, useState } from 'react';
-import { getSupabaseClientSide } from '@/lib/supabase';
-import { useTranslations } from 'next-intl';
 import { ArrowUp, CheckCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { logger } from '@/lib/logger';
+import { getSupabaseClientSide } from '@/lib/supabase';
 
 interface Transaction {
   id: string;
@@ -37,7 +37,7 @@ export function RealtimeWallet({ userId }: { userId: string }) {
         .select('balance, total_earned')
         .eq('user_id', userId)
         .single();
-        
+
       if (walletData) setWallet(walletData);
 
       // 2. Fetch Recent Transactions
@@ -47,9 +47,9 @@ export function RealtimeWallet({ userId }: { userId: string }) {
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(5);
-        
+
       if (txs) setRecentTx(txs);
-      
+
       setLoading(false);
     }
 
@@ -64,15 +64,15 @@ export function RealtimeWallet({ userId }: { userId: string }) {
           event: 'UPDATE',
           schema: 'public',
           table: 'user_wallets',
-          filter: `user_id=eq.${userId}`
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           logger.info('Wallet Update:', payload);
           setWallet({
             balance: payload.new.balance,
-            total_earned: payload.new.total_earned
+            total_earned: payload.new.total_earned,
           });
-        }
+        },
       )
       .on(
         'postgres_changes',
@@ -80,19 +80,19 @@ export function RealtimeWallet({ userId }: { userId: string }) {
           event: 'INSERT',
           schema: 'public',
           table: 'wallet_transactions',
-          filter: `user_id=eq.${userId}`
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           logger.info('New Transaction:', payload);
           setRecentTx((prev) => [payload.new as Transaction, ...prev].slice(0, 5));
-        }
+        },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, supabase.from, supabase.channel, supabase.removeChannel]);
 
   if (loading) {
     return <div className="animate-pulse h-32 bg-gray-800 rounded-lg"></div>;
@@ -104,14 +104,17 @@ export function RealtimeWallet({ userId }: { userId: string }) {
       <div className="bg-gray-900 p-6 rounded-xl border border-gray-800">
         <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider">{t('current_balance')}</h3>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-4xl font-bold text-white">${wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span className="text-4xl font-bold text-white">
+            ${wallet.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
           <span className="text-sm text-green-400 flex items-center">
             <ArrowUp className="w-3 h-3 mr-1" />
             {t('realtime')}
           </span>
         </div>
         <div className="mt-4 text-sm text-gray-500">
-          {t('total_earned')}: ${wallet.total_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {t('total_earned')}: $
+          {wallet.total_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
         <button className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
           {t('withdraw')}
@@ -132,12 +135,8 @@ export function RealtimeWallet({ userId }: { userId: string }) {
                     <CheckCircle className="w-4 h-4 text-green-500" />
                   </div>
                   <div>
-                    <div className="text-white font-medium text-sm">
-                      {tx.description || tx.type}
-                    </div>
-                    <div className="text-gray-500 text-xs">
-                      {new Date(tx.created_at).toLocaleTimeString()}
-                    </div>
+                    <div className="text-white font-medium text-sm">{tx.description || tx.type}</div>
+                    <div className="text-gray-500 text-xs">{new Date(tx.created_at).toLocaleTimeString()}</div>
                   </div>
                 </div>
                 <div className="text-green-400 font-bold">+${Number(tx.amount).toFixed(2)}</div>

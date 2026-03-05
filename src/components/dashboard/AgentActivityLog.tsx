@@ -1,18 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Brain,
-  Shield,
-  Activity,
-  Zap,
-  Terminal,
-  Cpu,
-  Wifi,
-  Lock
-} from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Activity, Brain, Cpu, Lock, Shield, Terminal, Wifi, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Types
 interface LogEntry {
@@ -33,7 +24,7 @@ const generateMockLog = (id: number, t: any): LogEntry => {
   let type: LogEntry['type'] = 'info';
 
   switch (agent) {
-    case 'RISK':
+    case 'RISK': {
       const riskMsgs = [
         t('risk_calc'),
         t('risk_check'),
@@ -44,7 +35,8 @@ const generateMockLog = (id: number, t: any): LogEntry => {
       message = riskMsgs[Math.floor(Math.random() * riskMsgs.length)];
       type = 'warning';
       break;
-    case 'QUANT':
+    }
+    case 'QUANT': {
       const quantMsgs = [
         t('quant_pattern'),
         t('quant_depth'),
@@ -55,7 +47,8 @@ const generateMockLog = (id: number, t: any): LogEntry => {
       message = quantMsgs[Math.floor(Math.random() * quantMsgs.length)];
       type = 'info';
       break;
-    case 'EXEC':
+    }
+    case 'EXEC': {
       const execMsgs = [
         t('exec_order'),
         t('exec_fill'),
@@ -66,16 +59,13 @@ const generateMockLog = (id: number, t: any): LogEntry => {
       message = execMsgs[Math.floor(Math.random() * execMsgs.length)];
       type = 'success';
       break;
-    case 'SYS':
-      const sysMsgs = [
-        t('sys_sync'),
-        t('sys_latency'),
-        'Database backup completed.',
-        'Garbage collection complete.',
-      ];
+    }
+    case 'SYS': {
+      const sysMsgs = [t('sys_sync'), t('sys_latency'), 'Database backup completed.', 'Garbage collection complete.'];
       message = sysMsgs[Math.floor(Math.random() * sysMsgs.length)];
       type = 'info';
       break;
+    }
   }
 
   return { id, timestamp, agent, message, type };
@@ -97,7 +87,7 @@ export function AgentActivityLog() {
   // Live Log Stream
   useEffect(() => {
     const interval = setInterval(() => {
-      setLogs(prev => {
+      setLogs((prev) => {
         const newLog = generateMockLog(Date.now(), t);
         const newLogs = [...prev, newLog];
         if (newLogs.length > 50) newLogs.shift(); // Keep buffer size managed
@@ -105,7 +95,7 @@ export function AgentActivityLog() {
       });
 
       // Fluctuate system load
-      setSystemLoad(prev => {
+      setSystemLoad((prev) => {
         const change = Math.random() * 10 - 5;
         return Math.min(Math.max(Math.round(prev + change), 20), 98);
       });
@@ -140,14 +130,13 @@ export function AgentActivityLog() {
               className="w-1.5 bg-emerald-500/20 rounded-sm"
               animate={{
                 height: `${Math.random() * 100}%`,
-                backgroundColor: Math.random() > 0.8 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(16, 185, 129, 0.2)'
+                backgroundColor: Math.random() > 0.8 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(16, 185, 129, 0.2)',
               }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
             />
           ))}
         </div>
       </div>
-
 
       {/* --- AGENT STATUS CARDS --- */}
       <div className="relative z-10 grid grid-cols-3 gap-px bg-white/10 border-b border-white/10">
@@ -190,46 +179,56 @@ export function AgentActivityLog() {
 
       {/* --- LOG STREAM --- */}
       <div className="relative flex-1 p-4 h-[450px] overflow-hidden">
-
         {/* Scanning Laser Effect */}
         <motion.div
           className="absolute top-0 left-0 w-full h-1 bg-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.5)] z-20 pointer-events-none"
           animate={{ top: ['0%', '100%', '0%'] }}
-          transition={{ duration: 8, ease: "linear", repeat: Infinity }}
+          transition={{ duration: 8, ease: 'linear', repeat: Infinity }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80 z-10 pointer-events-none" />
 
         {/* Logs Container */}
-        <div
-          ref={scrollRef}
-          className="h-full overflow-y-auto scrollbar-hide space-y-1 pb-10 relative z-0"
-        >
+        <div ref={scrollRef} className="h-full overflow-y-auto scrollbar-hide space-y-1 pb-10 relative z-0">
           <AnimatePresence initial={false}>
             {logs.map((log) => (
               <motion.div
                 key={log.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
                 className="flex items-start gap-3 text-xs md:text-sm hover:bg-white/5 p-1 rounded transition-colors"
               >
                 <span className="text-zinc-600 shrink-0 font-mono">[{log.timestamp}]</span>
 
-                <span className={`
+                <span
+                  className={`
                   shrink-0 font-bold w-16
-                  ${log.agent === 'RISK' ? 'text-red-400' :
-                    log.agent === 'QUANT' ? 'text-blue-400' :
-                      log.agent === 'EXEC' ? 'text-amber-400' : 'text-emerald-400'}
-                `}>
+                  ${
+                    log.agent === 'RISK'
+                      ? 'text-red-400'
+                      : log.agent === 'QUANT'
+                        ? 'text-blue-400'
+                        : log.agent === 'EXEC'
+                          ? 'text-amber-400'
+                          : 'text-emerald-400'
+                  }
+                `}
+                >
                   {log.agent}::
                 </span>
 
-                <TypewriterText text={log.message} color={
-                  log.type === 'error' ? 'text-red-500' :
-                    log.type === 'warning' ? 'text-amber-500' :
-                      log.type === 'success' ? 'text-emerald-400' :
-                        'text-zinc-300'
-                } />
+                <TypewriterText
+                  text={log.message}
+                  color={
+                    log.type === 'error'
+                      ? 'text-red-500'
+                      : log.type === 'warning'
+                        ? 'text-amber-500'
+                        : log.type === 'success'
+                          ? 'text-emerald-400'
+                          : 'text-zinc-300'
+                  }
+                />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -253,15 +252,11 @@ export function AgentActivityLog() {
           <Lock className="w-3 h-3" /> ENCRYPTED // SHA-256
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 
 // Helper for Typewriter Effect
-function TypewriterText({ text, color }: { text: string, color: string }) {
-  return (
-    <span className={`${color} font-mono break-words`}>
-      {text}
-    </span>
-  );
+function TypewriterText({ text, color }: { text: string; color: string }) {
+  return <span className={`${color} font-mono break-words`}>{text}</span>;
 }

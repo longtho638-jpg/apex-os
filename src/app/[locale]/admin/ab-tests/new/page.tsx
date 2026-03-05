@@ -1,12 +1,12 @@
 'use client';
 
+import { ArrowRight, Beaker } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
+import { Button3D } from '@/components/marketing/Button3D';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Beaker, ArrowRight, Save } from 'lucide-react';
-import { Button3D } from '@/components/marketing/Button3D';
-import Link from 'next/link';
 
 export default function NewABTestPage() {
   const [step, setStep] = useState(1);
@@ -18,7 +18,7 @@ export default function NewABTestPage() {
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
         </AuroraBackground>
-        
+
         <div className="relative z-10 h-full flex flex-col overflow-y-auto">
           <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
             <div className="flex items-center justify-between">
@@ -32,7 +32,9 @@ export default function NewABTestPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button3D variant="glass" className="px-6">Draft</Button3D>
+                <Button3D variant="glass" className="px-6">
+                  Draft
+                </Button3D>
                 <Button3D className="px-6">Launch</Button3D>
               </div>
             </div>
@@ -43,13 +45,13 @@ export default function NewABTestPage() {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-zinc-400 mb-2">Experiment Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 focus:outline-none transition-colors"
                     placeholder="e.g. Pricing Page CTA Color"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-zinc-400 mb-2">Target Page</label>
@@ -61,8 +63,8 @@ export default function NewABTestPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-zinc-400 mb-2">Traffic Allocation</label>
-                    <input 
-                      type="range" 
+                    <input
+                      type="range"
                       className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-purple-500 mt-4"
                     />
                     <div className="flex justify-between text-xs text-zinc-500 mt-1">

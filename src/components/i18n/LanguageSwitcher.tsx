@@ -1,10 +1,10 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, Globe } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { useState } from 'react';
-import { Globe, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -26,7 +26,7 @@ export function LanguageSwitcher() {
     const segments = pathname.split('/');
     segments[1] = newLocale;
     const newPath = segments.join('/');
-    
+
     router.push(newPath);
     setIsOpen(false);
   };

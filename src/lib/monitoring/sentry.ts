@@ -1,34 +1,34 @@
-import { logger } from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
+import { logger } from '@/lib/logger';
 
 export const initSentry = () => {
-    // Sentry is initialized via sentry.*.config.ts files in Next.js
-    // This function can be used for manual initialization if needed, 
-    // but usually not required with the Next.js SDK.
-    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_SENTRY_DSN) {
-        logger.warn('Sentry DSN not found in production environment.');
-    }
+  // Sentry is initialized via sentry.*.config.ts files in Next.js
+  // This function can be used for manual initialization if needed,
+  // but usually not required with the Next.js SDK.
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_SENTRY_DSN) {
+    logger.warn('Sentry DSN not found in production environment.');
+  }
 };
 
 export const captureError = (error: Error, context?: Record<string, any>) => {
-    if (process.env.NODE_ENV === 'development') {
-        logger.error('Captured Error:', error, context);
-    }
+  if (process.env.NODE_ENV === 'development') {
+    logger.error('Captured Error:', error, context);
+  }
 
-    Sentry.captureException(error, { extra: context });
+  Sentry.captureException(error, { extra: context });
 };
 
 export const captureMessage = (message: string, level: 'info' | 'warning' | 'error' | 'fatal' | 'debug' = 'info') => {
-    if (process.env.NODE_ENV === 'development') {
-        logger.info(`[${level.toUpperCase()}] ${message}`);
-    }
+  if (process.env.NODE_ENV === 'development') {
+    logger.info(`[${level.toUpperCase()}] ${message}`);
+  }
 
-    Sentry.captureMessage(message, level);
+  Sentry.captureMessage(message, level);
 };
 
 export const setUserContext = (userId: string, email?: string) => {
-    Sentry.setUser({
-        id: userId,
-        email: email,
-    });
+  Sentry.setUser({
+    id: userId,
+    email: email,
+  });
 };

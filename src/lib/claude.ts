@@ -1,5 +1,5 @@
-import { logger } from '@/lib/logger';
 import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -18,11 +18,9 @@ export class ClaudeClient {
 
   constructor(apiKey?: string) {
     const key = apiKey || process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-    
+
     if (!key) {
-      throw new Error(
-        'API key not found. Set OPENROUTER_API_KEY or OPENAI_API_KEY in .env.local'
-      );
+      throw new Error('API key not found. Set OPENROUTER_API_KEY or OPENAI_API_KEY in .env.local');
     }
 
     this.client = new OpenAI({
@@ -66,12 +64,7 @@ ${context ? `Context: ${context}` : ''}`;
    * @returns Response text
    */
   async chat(options: ChatOptions): Promise<string> {
-    const {
-      messages,
-      model = 'anthropic/claude-3.5-sonnet',
-      temperature = 0.7,
-      max_tokens = 2048,
-    } = options;
+    const { messages, model = 'anthropic/claude-3.5-sonnet', temperature = 0.7, max_tokens = 2048 } = options;
 
     try {
       const response = await this.client.chat.completions.create({
@@ -94,12 +87,7 @@ ${context ? `Context: ${context}` : ''}`;
    * @yields Response chunks
    */
   async *streamChat(options: ChatOptions): AsyncGenerator<string> {
-    const {
-      messages,
-      model = 'anthropic/claude-3.5-sonnet',
-      temperature = 0.7,
-      max_tokens = 2048,
-    } = options;
+    const { messages, model = 'anthropic/claude-3.5-sonnet', temperature = 0.7, max_tokens = 2048 } = options;
 
     try {
       const stream = await this.client.chat.completions.create({

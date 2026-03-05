@@ -1,13 +1,13 @@
 'use client';
 
+import { Bot, DollarSign } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { AuroraBackground } from '@/components/ui/aurora-background';
-import { Bot, TrendingUp, Shield, DollarSign } from 'lucide-react';
-import { BacktestRunner } from '@/components/admin/agents/BacktestRunner';
-import { useWallet } from '@/hooks/useWallet';
 import { toast } from 'sonner';
+import { BacktestRunner } from '@/components/admin/agents/BacktestRunner';
 import { Button3D } from '@/components/marketing/Button3D';
+import { AuroraBackground } from '@/components/ui/aurora-background';
+import { GlassCard } from '@/components/ui/glass-card';
+import { useWallet } from '@/hooks/useWallet';
 
 interface Agent {
   id: string;
@@ -40,19 +40,19 @@ export default function AgentMarketplacePage() {
     // In real app: POST /api/invest { agentId, amount }
     // Here we simulate the "Deep x10" logic:
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
       loading: `Investing $${amount} in ${agent.name}...`,
       success: () => {
         // 1. Deduct from Wallet (Visual)
         // 2. Trigger "Management Fee" Commission (Mocked)
-        setMyInvestments(prev => ({
+        setMyInvestments((prev) => ({
           ...prev,
-          [agent.id]: (prev[agent.id] || 0) + amount
+          [agent.id]: (prev[agent.id] || 0) + amount,
         }));
-        setAmounts(prev => ({ ...prev, [agent.id]: '' }));
+        setAmounts((prev) => ({ ...prev, [agent.id]: '' }));
         return `Successfully invested $${amount}! Management Fee paid to Referrer.`;
       },
-      error: 'Investment failed'
+      error: 'Investment failed',
     });
   };
 
@@ -60,28 +60,52 @@ export default function AgentMarketplacePage() {
     const invested = myInvestments[agent.id] || 0;
     if (invested <= 0) return;
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
       loading: `Redeeming funds from ${agent.name}...`,
       success: () => {
         const profit = invested * (agent.roi_30d / 100); // Simulate profit
         const total = invested + profit;
-        setMyInvestments(prev => {
+        setMyInvestments((prev) => {
           const next = { ...prev };
           delete next[agent.id];
           return next;
         });
         return `Redeemed $${total.toFixed(2)} (Profit: +$${profit.toFixed(2)})`;
       },
-      error: 'Redemption failed'
+      error: 'Redemption failed',
     });
   };
 
   useEffect(() => {
     // Mock fetch (replace with API)
     setAgents([
-      { id: '1', name: 'DeepQuant Alpha', strategy_type: 'Sentiment', risk_level: 'High', description: 'Trades based on news sentiment.', total_aum: 450000, roi_30d: 42.5 },
-      { id: '2', name: 'BitFlow Trend', strategy_type: 'Momentum', risk_level: 'Medium', description: 'Follows strong BTC trends.', total_aum: 125000, roi_30d: 18.2 },
-      { id: '3', name: 'Stable Grid', strategy_type: 'Mean Reversion', risk_level: 'Low', description: 'Farms volatility in ranges.', total_aum: 850000, roi_30d: 5.8 },
+      {
+        id: '1',
+        name: 'DeepQuant Alpha',
+        strategy_type: 'Sentiment',
+        risk_level: 'High',
+        description: 'Trades based on news sentiment.',
+        total_aum: 450000,
+        roi_30d: 42.5,
+      },
+      {
+        id: '2',
+        name: 'BitFlow Trend',
+        strategy_type: 'Momentum',
+        risk_level: 'Medium',
+        description: 'Follows strong BTC trends.',
+        total_aum: 125000,
+        roi_30d: 18.2,
+      },
+      {
+        id: '3',
+        name: 'Stable Grid',
+        strategy_type: 'Mean Reversion',
+        risk_level: 'Low',
+        description: 'Farms volatility in ranges.',
+        total_aum: 850000,
+        roi_30d: 5.8,
+      },
     ]);
   }, []);
 
@@ -112,17 +136,20 @@ export default function AgentMarketplacePage() {
                     <p className="text-xs text-zinc-400 capitalize">{agent.strategy_type}</p>
                   </div>
                 </div>
-                <span className={`px-2 py-1 rounded text-[10px] font-bold border ${agent.risk_level === 'High' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                  agent.risk_level === 'Medium' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                  }`}>
+                <span
+                  className={`px-2 py-1 rounded text-[10px] font-bold border ${
+                    agent.risk_level === 'High'
+                      ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                      : agent.risk_level === 'Medium'
+                        ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                        : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  }`}
+                >
                   {agent.risk_level} Risk
                 </span>
               </div>
 
-              <p className="text-sm text-zinc-300 mb-6 flex-1">
-                {agent.description}
-              </p>
+              <p className="text-sm text-zinc-300 mb-6 flex-1">{agent.description}</p>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-black/30 p-3 rounded-lg border border-white/5">
@@ -148,12 +175,7 @@ export default function AgentMarketplacePage() {
                 </div>
               </div>
 
-              <Button3D
-                full
-                variant="primary"
-                className="mb-2"
-                onClick={() => handleInvest(agent)}
-              >
+              <Button3D full variant="primary" className="mb-2" onClick={() => handleInvest(agent)}>
                 Invest Now
               </Button3D>
 
@@ -163,12 +185,7 @@ export default function AgentMarketplacePage() {
                     <span className="text-emerald-400 font-bold">Your Stake</span>
                     <span className="text-white font-mono">${myInvestments[agent.id].toLocaleString()}</span>
                   </div>
-                  <Button3D
-                    full
-                    variant="glass"
-                    className="h-8 text-xs"
-                    onClick={() => handleRedeem(agent)}
-                  >
+                  <Button3D full variant="glass" className="h-8 text-xs" onClick={() => handleRedeem(agent)}>
                     Redeem & Take Profit
                   </Button3D>
                 </div>

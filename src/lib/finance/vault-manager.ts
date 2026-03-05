@@ -9,19 +9,17 @@ export const vaultManager = {
    */
   captureMissedCommission: async (userId: string, amount: number, source: string) => {
     const supabase = getSupabaseClient();
-    
+
     // 24 Hour Grace Period
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    const { error } = await supabase
-      .from('pending_vault')
-      .insert({
-        user_id: userId,
-        amount,
-        source,
-        expires_at: expiresAt,
-        status: 'pending'
-      });
+    const { error } = await supabase.from('pending_vault').insert({
+      user_id: userId,
+      amount,
+      source,
+      expires_at: expiresAt,
+      status: 'pending',
+    });
 
     if (error) {
       logger.error('Failed to capture missed commission:', error);
@@ -41,7 +39,7 @@ export const vaultManager = {
 
     // Call the DB function to handle transaction atomically
     const { data, error } = await supabase.rpc('claim_pending_vault_funds', {
-      p_user_id: userId
+      p_user_id: userId,
     });
 
     if (error) {
@@ -57,7 +55,7 @@ export const vaultManager = {
    */
   getPendingAmount: async (userId: string) => {
     const supabase = getSupabaseClient();
-    
+
     const { data, error } = await supabase
       .from('pending_vault')
       .select('amount')
@@ -68,5 +66,5 @@ export const vaultManager = {
     if (error || !data) return 0;
 
     return data.reduce((sum, record) => sum + Number(record.amount), 0);
-  }
+  },
 };

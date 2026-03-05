@@ -1,4 +1,4 @@
-import { analytics, AnalyticsEvent } from '@/lib/analytics';
+import { type AnalyticsEvent, analytics } from '@/lib/analytics';
 
 function trackEvent(event: AnalyticsEvent, metadata: any) {
   analytics.track(event, metadata);
@@ -14,21 +14,21 @@ export const sessionTracking = {
 
   trackPageView: (page: string) => {
     if (typeof window === 'undefined') return;
-    const sessionStart = parseInt(sessionStorage.getItem('session_start') || '0');
+    const sessionStart = parseInt(sessionStorage.getItem('session_start') || '0', 10);
     const timeOnPage = Date.now() - sessionStart;
-    
+
     trackEvent('page_view', {
-        page,
-        time_on_page_ms: timeOnPage,
-        session_id: sessionStorage.getItem('session_id') || generateSessionId(),
+      page,
+      time_on_page_ms: timeOnPage,
+      session_id: sessionStorage.getItem('session_id') || generateSessionId(),
     });
   },
 
   trackExit: (page: string) => {
     if (typeof window === 'undefined') return;
     trackEvent('exit_intent', {
-        page,
-        time_on_site: Date.now() - parseInt(sessionStorage.getItem('session_start') || '0'),
+      page,
+      time_on_site: Date.now() - parseInt(sessionStorage.getItem('session_start') || '0', 10),
     });
   },
 };
@@ -52,18 +52,18 @@ export const featureTracking = {
 export const errorTracking = {
   apiError: (endpoint: string, errorCode: number) => {
     trackEvent('error_encountered', {
-        error_type: 'api_error',
-        endpoint,
-        error_code: errorCode,
-        severity: errorCode >= 500 ? 'high' : 'medium',
+      error_type: 'api_error',
+      endpoint,
+      error_code: errorCode,
+      severity: errorCode >= 500 ? 'high' : 'medium',
     });
   },
 
   paymentFailed: (reason: string) => {
     trackEvent('error_encountered', {
-        error_type: 'payment_failed',
-        reason,
-        severity: 'high',
+      error_type: 'payment_failed',
+      reason,
+      severity: 'high',
     });
   },
 };

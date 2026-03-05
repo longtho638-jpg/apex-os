@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Sidebar } from '@/components/os/sidebar';
+import { AlertTriangle, Power, ShieldOff, Terminal } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { AlertTriangle, Power, ShieldOff, Terminal, Activity, Server, Shield, Zap } from 'lucide-react';
+import { GlassCard } from '@/components/ui/glass-card';
 import { cn } from '@/lib/utils';
 
 export default function SystemOverridePage() {
@@ -31,7 +30,7 @@ export default function SystemOverridePage() {
       const action = actions[Math.floor(Math.random() * actions.length)];
       const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
 
-      setLogs(prev => [`[${timestamp}] [${agent}] ${action}`, ...prev].slice(0, 15));
+      setLogs((prev) => [`[${timestamp}] [${agent}] ${action}`, ...prev].slice(0, 15));
     }, 1500);
 
     return () => clearInterval(interval);
@@ -39,7 +38,6 @@ export default function SystemOverridePage() {
 
   return (
     <div className="flex h-screen w-full bg-[#030303] text-white font-sans">
-
       <main className="flex-1 relative overflow-hidden">
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
@@ -64,8 +62,9 @@ export default function SystemOverridePage() {
                 </div>
                 <button
                   onClick={() => setMaintenance(!maintenance)}
-                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${maintenance ? 'bg-red-500 text-white' : 'bg-zinc-800 text-zinc-400'
-                    }`}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${
+                    maintenance ? 'bg-red-500 text-white' : 'bg-zinc-800 text-zinc-400'
+                  }`}
                 >
                   <Power className="w-5 h-5" /> {maintenance ? 'ENABLED' : 'DISABLED'}
                 </button>
@@ -78,8 +77,9 @@ export default function SystemOverridePage() {
                 </div>
                 <button
                   onClick={() => setWithdrawals(!withdrawals)}
-                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${!withdrawals ? 'bg-yellow-500 text-black' : 'bg-zinc-800 text-zinc-400'
-                    }`}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${
+                    !withdrawals ? 'bg-yellow-500 text-black' : 'bg-zinc-800 text-zinc-400'
+                  }`}
                 >
                   <ShieldOff className="w-5 h-5" /> {withdrawals ? 'ACTIVE' : 'HALTED'}
                 </button>
@@ -90,10 +90,34 @@ export default function SystemOverridePage() {
             <div>
               <h2 className="text-xl font-bold text-white mb-4">Agent Status</h2>
               <div className="space-y-4">
-                <AgentStatusCard name="DATA COLLECTOR" status="ONLINE" uptime="99.99%" load="42%" color="text-emerald-500" />
-                <AgentStatusCard name="RISK AUDITOR" status="ONLINE" uptime="99.95%" load="12%" color="text-emerald-500" />
-                <AgentStatusCard name="SECURITY GUARDIAN" status="ONLINE" uptime="100.00%" load="05%" color="text-emerald-500" />
-                <AgentStatusCard name="USER CONCIERGE" status="BUSY" uptime="98.50%" load="89%" color="text-yellow-500" />
+                <AgentStatusCard
+                  name="DATA COLLECTOR"
+                  status="ONLINE"
+                  uptime="99.99%"
+                  load="42%"
+                  color="text-emerald-500"
+                />
+                <AgentStatusCard
+                  name="RISK AUDITOR"
+                  status="ONLINE"
+                  uptime="99.95%"
+                  load="12%"
+                  color="text-emerald-500"
+                />
+                <AgentStatusCard
+                  name="SECURITY GUARDIAN"
+                  status="ONLINE"
+                  uptime="100.00%"
+                  load="05%"
+                  color="text-emerald-500"
+                />
+                <AgentStatusCard
+                  name="USER CONCIERGE"
+                  status="BUSY"
+                  uptime="98.50%"
+                  load="89%"
+                  color="text-yellow-500"
+                />
               </div>
             </div>
           </div>
@@ -107,7 +131,10 @@ export default function SystemOverridePage() {
             <div className="flex-1 overflow-hidden relative">
               <div className="absolute inset-0 overflow-y-auto space-y-2">
                 {logs.map((log, i) => (
-                  <div key={i} className="text-green-500/80 border-l-2 border-transparent hover:border-green-500 pl-2 transition-colors">
+                  <div
+                    key={i}
+                    className="text-green-500/80 border-l-2 border-transparent hover:border-green-500 pl-2 transition-colors"
+                  >
                     {log}
                   </div>
                 ))}
@@ -128,8 +155,8 @@ function AgentStatusCard({ name, status, uptime, load, color }: any) {
         <div className="text-xs text-gray-500">Uptime: {uptime}</div>
       </div>
       <div className="text-right">
-        <div className={cn("font-bold text-sm flex items-center gap-2 justify-end", color || "text-green-500")}>
-          <div className={cn("h-2 w-2 rounded-full", color === 'text-yellow-500' ? "bg-yellow-500" : "bg-green-500")} />
+        <div className={cn('font-bold text-sm flex items-center gap-2 justify-end', color || 'text-green-500')}>
+          <div className={cn('h-2 w-2 rounded-full', color === 'text-yellow-500' ? 'bg-yellow-500' : 'bg-green-500')} />
           {status}
         </div>
         <div className="text-xs text-gray-500">Load: {load}</div>

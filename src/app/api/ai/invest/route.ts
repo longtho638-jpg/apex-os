@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -6,18 +6,14 @@ export async function POST(req: NextRequest) {
   const { userId, agentId, amount } = await req.json();
 
   if (!userId || !agentId || !amount) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   // 1. Check Wallet Balance
-  const { data: wallet } = await supabase
-    .from('virtual_wallets')
-    .select('balance')
-    .eq('user_id', userId)
-    .single();
+  const { data: wallet } = await supabase.from('virtual_wallets').select('balance').eq('user_id', userId).single();
 
   if (!wallet || wallet.balance < amount) {
-      return NextResponse.json({ error: 'Insufficient funds' }, { status: 400 });
+    return NextResponse.json({ error: 'Insufficient funds' }, { status: 400 });
   }
 
   // 2. Deduct Funds
@@ -28,13 +24,13 @@ export async function POST(req: NextRequest) {
 
   // 3. Add Investment
   const { error } = await supabase.from('ai_investments').insert({
-      user_id: userId,
-      agent_id: agentId,
-      amount
+    user_id: userId,
+    agent_id: agentId,
+    amount,
   });
 
   if (error) {
-      return NextResponse.json({ error: 'Failed to invest' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to invest' }, { status: 500 });
   }
 
   // 4. Update Agent AUM

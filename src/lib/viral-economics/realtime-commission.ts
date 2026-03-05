@@ -1,7 +1,7 @@
+import { getCommissionRate, type TierId } from '@apex-os/vibe-payment';
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { TIERS, EXCHANGE_AVG_REBATE_RATE } from './tier-manager';
-import { getCommissionRate, TierId } from '@apex-os/vibe-payment';
+import { EXCHANGE_AVG_REBATE_RATE, TIERS } from './tier-manager';
 
 interface TradeExecution {
   user_id: string;
@@ -21,11 +21,7 @@ export async function processTradeCommission(trade: TradeExecution) {
     // =============================================
 
     // Fetch user tier
-    const { data: userTierData } = await supabase
-      .from('user_tiers')
-      .select('tier')
-      .eq('user_id', user_id)
-      .single();
+    const { data: userTierData } = await supabase.from('user_tiers').select('tier').eq('user_id', user_id).single();
 
     const userTier = (userTierData?.tier || 'FREE') as keyof typeof TIERS;
     const tierConfig = TIERS[userTier];
@@ -61,8 +57,8 @@ export async function processTradeCommission(trade: TradeExecution) {
           exchange: exchange,
           symbol: symbol,
           tier: userTier,
-          trade_id
-        }
+          trade_id,
+        },
       });
 
       if (creditError) {
@@ -129,8 +125,8 @@ export async function processTradeCommission(trade: TradeExecution) {
               level: ref.level,
               trade_id,
               referrer_tier: refTier,
-              applied_rate: commissionRate
-            }
+              applied_rate: commissionRate,
+            },
           });
         }
       }
@@ -143,7 +139,7 @@ export async function processTradeCommission(trade: TradeExecution) {
     try {
       await supabase.rpc('increment_user_volume', {
         p_user_id: user_id,
-        p_volume: volume
+        p_volume: volume,
       });
     } catch {
       // Fallback: direct update if RPC not available
@@ -154,14 +150,16 @@ export async function processTradeCommission(trade: TradeExecution) {
         .single();
 
       if (existing) {
-        await supabase.from('user_tiers').update({
-          monthly_volume: (existing.monthly_volume || 0) + volume,
-          total_volume: (existing.total_volume || 0) + volume,
-          updated_at: new Date().toISOString()
-        }).eq('user_id', user_id);
+        await supabase
+          .from('user_tiers')
+          .update({
+            monthly_volume: (existing.monthly_volume || 0) + volume,
+            total_volume: (existing.total_volume || 0) + volume,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user_id);
       }
     }
-
   } catch (error) {
     logger.error('ProcessTradeCommission Error:', error);
     throw error; // Re-throw for caller to handle

@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SignalGenerator } from '../signal-generator';
-import { CONFIG } from '../../config';
+
+// Mock config BEFORE importing SignalGenerator
+vi.mock('../../config', () => ({
+    CONFIG: {
+        SUPABASE: {
+            URL: 'http://test-supabase.local',
+            KEY: 'test-service-role-key'
+        }
+    }
+}));
 
 // Mock Logger to prevent console output during tests
 vi.mock('../utils/logger', () => ({
@@ -16,34 +24,32 @@ const mockSupabaseQueryMethods = {
     eq: vi.fn(),
     order: vi.fn(),
     limit: vi.fn(),
-    // insert is part of the "from" chain too
-    insert: vi.fn(), // Moved insert here
+    insert: vi.fn(),
 };
 
 const mockSupabaseClient = {
-    from: vi.fn(() => mockSupabaseQueryMethods), // from() will return our query methods
-    // insert: vi.fn(), // Removed from here, now part of mockSupabaseQueryMethods
+    from: vi.fn(() => mockSupabaseQueryMethods),
 };
 
 vi.mock('@supabase/supabase-js', () => ({
     createClient: vi.fn(() => mockSupabaseClient),
 }));
 
+// Import AFTER mocks are set up
+import { SignalGenerator } from '../signal-generator';
 
 describe('SignalGenerator', () => {
     let signalGenerator: SignalGenerator;
 
     beforeEach(() => {
-        vi.clearAllMocks(); // Clear all mocks including those set in vi.mock calls
+        vi.clearAllMocks();
 
-        // Reset mock implementations for common chain methods
         mockSupabaseClient.from.mockClear().mockImplementation(() => mockSupabaseQueryMethods);
         mockSupabaseQueryMethods.select.mockClear().mockReturnThis();
         mockSupabaseQueryMethods.eq.mockClear().mockReturnThis();
         mockSupabaseQueryMethods.order.mockClear().mockReturnThis();
-        mockSupabaseQueryMethods.limit.mockClear().mockReturnThis(); // Default return this, will be overridden by mockResolvedValueOnce in tests
-        
-        mockSupabaseQueryMethods.insert.mockClear().mockResolvedValue({ data: null, error: null }); // Default for saveSignal, now on query methods
+        mockSupabaseQueryMethods.limit.mockClear().mockReturnThis();
+        mockSupabaseQueryMethods.insert.mockClear().mockResolvedValue({ data: null, error: null });
 
         signalGenerator = new SignalGenerator();
     });
@@ -79,7 +85,7 @@ describe('SignalGenerator', () => {
 
     describe('calculateMACD', () => {
         it('should calculate MACD correctly for a simple trend', () => {
-            const prices = Array.from({ length: 50 }, (_, i) => 100 + i); // Upward trend
+            const prices = Array.from({ length: 50 }, (_, i) => 100 + i);
             const { macd, signal, histogram } = signalGenerator.calculateMACD(prices);
 
             expect(histogram).toBeCloseTo(0);
@@ -104,35 +110,33 @@ describe('SignalGenerator', () => {
     describe('generateSignal', () => {
         it('should return a HOLD signal for insufficient market data', async () => {
             const insufficientMarketData = Array(10).fill({ price: 100, updated_at: new Date().toISOString() });
-            mockSupabaseQueryMethods.limit.mockResolvedValueOnce({ data: insufficientMarketData, error: null }); // Mock the actual limit call
+            mockSupabaseQueryMethods.limit.mockResolvedValueOnce({ data: insufficientMarketData, error: null });
 
             const signal = await signalGenerator.generateSignal('TESTSYM');
             expect(signal.type).toBe('HOLD');
             expect(signal.reason).toBe('Insufficient data');
             expect(signal.confidence).toBe(0);
             expect(mockSupabaseClient.from).toHaveBeenCalledWith('market_data');
-            expect(mockSupabaseQueryMethods.insert).not.toHaveBeenCalled(); // saveSignal should not be called
+            expect(mockSupabaseQueryMethods.insert).not.toHaveBeenCalled();
         });
 
         it('should return a BUY signal when RSI is oversold and MACD is neutral', async () => {
             const mockMarketData = Array(50).fill({ price: 100, updated_at: new Date().toISOString() });
             mockSupabaseQueryMethods.limit.mockResolvedValueOnce({ data: mockMarketData, error: null });
 
-            // Mock RSI to be oversold
             const originalCalculateRSI = signalGenerator.calculateRSI;
-            signalGenerator.calculateRSI = vi.fn(() => 20); // Force RSI to oversold
+            signalGenerator.calculateRSI = vi.fn(() => 20);
 
-            // Mock MACD to be strictly neutral
             const originalCalculateMACD = signalGenerator.calculateMACD;
             signalGenerator.calculateMACD = vi.fn(() => ({ macd: 0, signal: 0, histogram: 0 }));
 
             const signal = await signalGenerator.generateSignal('TESTSYM');
             expect(signal.type).toBe('BUY');
-            expect(signal.reason).toContain('RSI oversold (20.0)'); // Check against mocked RSI value
-            expect(signal.confidence).toBeCloseTo(0.7); // Use toBeCloseTo for float comparison
-            expect(mockSupabaseQueryMethods.insert).toHaveBeenCalledTimes(1); // Now checking on mockSupabaseQueryMethods.insert
+            expect(signal.reason).toContain('RSI oversold (20.0)');
+            expect(signal.confidence).toBeCloseTo(0.7);
+            expect(mockSupabaseQueryMethods.insert).toHaveBeenCalledTimes(1);
 
-            signalGenerator.calculateRSI = originalCalculateRSI; // Restore original
+            signalGenerator.calculateRSI = originalCalculateRSI;
             signalGenerator.calculateMACD = originalCalculateMACD;
         });
 
@@ -140,21 +144,19 @@ describe('SignalGenerator', () => {
             const mockMarketData = Array(50).fill({ price: 100, updated_at: new Date().toISOString() });
             mockSupabaseQueryMethods.limit.mockResolvedValueOnce({ data: mockMarketData, error: null });
 
-            // Mock RSI to be overbought
             const originalCalculateRSI = signalGenerator.calculateRSI;
-            signalGenerator.calculateRSI = vi.fn(() => 80); // Force RSI to overbought
+            signalGenerator.calculateRSI = vi.fn(() => 80);
 
-            // Mock MACD to be strictly neutral
             const originalCalculateMACD = signalGenerator.calculateMACD;
             signalGenerator.calculateMACD = vi.fn(() => ({ macd: 0, signal: 0, histogram: 0 }));
 
             const signal = await signalGenerator.generateSignal('TESTSYM');
             expect(signal.type).toBe('SELL');
-            expect(signal.reason).toContain('RSI overbought (80.0)'); // Check against mocked RSI value
-            expect(signal.confidence).toBeCloseTo(0.7); // Use toBeCloseTo for float comparison
-            expect(mockSupabaseQueryMethods.insert).toHaveBeenCalledTimes(1); // Now checking on mockSupabaseQueryMethods.insert
+            expect(signal.reason).toContain('RSI overbought (80.0)');
+            expect(signal.confidence).toBeCloseTo(0.7);
+            expect(mockSupabaseQueryMethods.insert).toHaveBeenCalledTimes(1);
 
-            signalGenerator.calculateRSI = originalCalculateRSI; // Restore original
+            signalGenerator.calculateRSI = originalCalculateRSI;
             signalGenerator.calculateMACD = originalCalculateMACD;
         });
 
@@ -162,11 +164,9 @@ describe('SignalGenerator', () => {
             const mockMarketData = Array(50).fill({ price: 100, updated_at: new Date().toISOString() });
             mockSupabaseQueryMethods.limit.mockResolvedValueOnce({ data: mockMarketData, error: null });
 
-            // Mock RSI to be oversold
             const originalCalculateRSI = signalGenerator.calculateRSI;
-            signalGenerator.calculateRSI = vi.fn(() => 20); // Force RSI to oversold
+            signalGenerator.calculateRSI = vi.fn(() => 20);
 
-            // Mock MACD to be bullish
             const originalCalculateMACD = signalGenerator.calculateMACD;
             signalGenerator.calculateMACD = vi.fn(() => ({ macd: 1, signal: 0.5, histogram: 0.5 }));
 
@@ -174,21 +174,20 @@ describe('SignalGenerator', () => {
             expect(signal.type).toBe('BUY');
             expect(signal.reason).toContain('RSI oversold');
             expect(signal.reason).toContain('MACD bullish crossover');
-            expect(signal.confidence).toBeCloseTo(0.9); // Use toBeCloseTo for float comparison
+            expect(signal.confidence).toBeCloseTo(0.9);
 
-            signalGenerator.calculateRSI = originalCalculateRSI; // Restore original
-            signalGenerator.calculateMACD = originalCalculateMACD; // Restore original
+            signalGenerator.calculateRSI = originalCalculateRSI;
+            signalGenerator.calculateMACD = originalCalculateMACD;
         });
 
         it('should save the generated signal to Supabase', async () => {
             const mockMarketData = Array(50).fill({ price: 100, updated_at: new Date().toISOString() });
             mockSupabaseQueryMethods.limit.mockResolvedValueOnce({ data: mockMarketData, error: null });
-            mockSupabaseQueryMethods.insert.mockResolvedValueOnce({ data: null, error: null }); // Now checking on mockSupabaseQueryMethods.insert
-
+            mockSupabaseQueryMethods.insert.mockResolvedValueOnce({ data: null, error: null });
 
             const signal = await signalGenerator.generateSignal('TESTSYM');
 
-            expect(mockSupabaseQueryMethods.insert).toHaveBeenCalledTimes(1); // Now checking on mockSupabaseQueryMethods.insert
+            expect(mockSupabaseQueryMethods.insert).toHaveBeenCalledTimes(1);
             expect(mockSupabaseQueryMethods.insert).toHaveBeenCalledWith(
                 expect.objectContaining({
                     symbol: 'TESTSYM',
@@ -199,7 +198,6 @@ describe('SignalGenerator', () => {
         });
 
         it('should handle errors during signal generation gracefully', async () => {
-            // Mock `limit` to reject, simulating a fetch error
             mockSupabaseQueryMethods.limit.mockRejectedValueOnce(new Error('Supabase fetch failed'));
 
             const signal = await signalGenerator.generateSignal('FAILS_SYM');
@@ -207,7 +205,7 @@ describe('SignalGenerator', () => {
             expect(signal.reason).toBe('Error generating signal');
             expect(signal.confidence).toBe(0);
             expect(mockSupabaseClient.from).toHaveBeenCalledWith('market_data');
-            expect(mockSupabaseQueryMethods.insert).not.toHaveBeenCalled(); // saveSignal should not be called on error
+            expect(mockSupabaseQueryMethods.insert).not.toHaveBeenCalled();
         });
     });
 });

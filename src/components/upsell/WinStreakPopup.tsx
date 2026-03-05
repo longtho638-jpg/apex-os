@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { Flame, X, ArrowRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, Flame, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { UpgradeModal } from '@/components/checkout/UpgradeModal';
+import { GlassCard } from '@/components/ui/glass-card';
 
 export function WinStreakPopup() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +35,7 @@ export function WinStreakPopup() {
               <div className="bg-orange-500/20 p-3 rounded-xl ml-2">
                 <Flame className="w-6 h-6 text-orange-400 animate-pulse" />
               </div>
-              
+
               <div className="flex-1 py-2">
                 <h3 className="font-bold text-white text-sm">You're on fire! 🔥</h3>
                 <p className="text-xs text-zinc-300">
@@ -45,7 +45,10 @@ export function WinStreakPopup() {
 
               <div className="flex items-center gap-2 pr-2">
                 <button
-                  onClick={() => { setIsOpen(false); setShowUpgrade(true); }}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setShowUpgrade(true);
+                  }}
                   className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1"
                 >
                   Upgrade <ArrowRight className="w-3 h-3" />
@@ -67,9 +70,9 @@ export function WinStreakPopup() {
         onClose={() => setShowUpgrade(false)}
         trigger={{
           type: 'win_achieved',
-          message: "Lock in your winning streak with automated risk management.",
+          message: 'Lock in your winning streak with automated risk management.',
           urgency: 'high',
-          discount: 'STREAK20'
+          discount: 'STREAK20',
         }}
         userId="current-user" // Replace with actual user ID context
       />

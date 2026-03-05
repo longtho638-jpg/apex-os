@@ -1,28 +1,27 @@
-import createMiddleware from 'next-intl/middleware';
-import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { jwtVerify } from 'jose';
-import { applyRateLimit } from '@/middleware/rateLimit';
-import { validateRequestSignature } from '@/middleware/signature';
+import { type NextRequest, NextResponse } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { defaultLocale, isValidLocale, locales } from '@/config/locales';
+import { logger } from '@/lib/logger';
 import { handleCsrf, injectCsrfToken } from '@/middleware/csrf';
 import { enterpriseAuthMiddleware } from '@/middleware/enterprise-auth';
-import { logger } from '@/lib/logger';
-import { locales, defaultLocale, isValidLocale } from '@/config/locales';
+import { applyRateLimit } from '@/middleware/rateLimit';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.SUPABASE_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  process.env.SUPABASE_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || '',
 );
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Initialize next-intl middleware with centralized config
 const intlMiddleware = createMiddleware({
   locales: [...locales],
   defaultLocale,
-  localePrefix: 'always'
+  localePrefix: 'always',
 });
 
 export async function middleware(request: NextRequest) {
@@ -62,9 +61,9 @@ export async function middleware(request: NextRequest) {
 
   // 2. Enterprise API Authentication (with Session Fallback for Dashboard)
   if (request.nextUrl.pathname.startsWith('/api/v1/signals')) {
-
     // Check for session cookie first (Internal Dashboard Access)
-    let token = request.cookies.get('apex_session')?.value ||
+    const token =
+      request.cookies.get('apex_session')?.value ||
       request.cookies.get('sb-access-token')?.value ||
       request.cookies.get(`sb-${process.env.NEXT_PUBLIC_SUPABASE_REFERENCE_ID}-auth-token`)?.value;
 
@@ -73,7 +72,7 @@ export async function middleware(request: NextRequest) {
       try {
         await jwtVerify(token, JWT_SECRET);
         isSessionValid = true;
-      } catch (e) {
+      } catch (_e) {
         // Token invalid, proceed to API Key check
       }
     }
@@ -91,11 +90,13 @@ export async function middleware(request: NextRequest) {
   if (csrfResponse) return csrfResponse;
 
   // 4. Run Admin Auth Check
-  if (request.nextUrl.pathname.includes('/admin') &&
+  if (
+    request.nextUrl.pathname.includes('/admin') &&
     !request.nextUrl.pathname.includes('/admin/login') &&
-    !request.nextUrl.pathname.includes('/api/v1/admin/me')) {
-
-    let token = request.cookies.get('apex_session')?.value ||
+    !request.nextUrl.pathname.includes('/api/v1/admin/me')
+  ) {
+    let token =
+      request.cookies.get('apex_session')?.value ||
       request.cookies.get('sb-access-token')?.value ||
       request.cookies.get(`sb-${process.env.NEXT_PUBLIC_SUPABASE_REFERENCE_ID}-auth-token`)?.value;
 
@@ -142,8 +143,7 @@ export async function middleware(request: NextRequest) {
       if (request.nextUrl.pathname.startsWith('/api/')) {
         return NextResponse.next({ request: { headers: requestHeaders } });
       }
-
-    } catch (err) {
+    } catch (_err) {
       if (request.nextUrl.pathname.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 401 }); // Changed 403 to 401 for Invalid Token
       }
@@ -162,18 +162,18 @@ export async function middleware(request: NextRequest) {
     '/reports',
     '/referral',
     '/affiliate',
-    '/admin-inspector'
+    '/admin-inspector',
   ];
 
   // Check if current path is protected (ignoring locale prefix)
   const pathname = request.nextUrl.pathname;
-  const isProtected = protectedPaths.some(path =>
-    pathname.startsWith(path) ||
-    pathname.match(new RegExp(`^/(${locales.join('|')})${path}`))
+  const isProtected = protectedPaths.some(
+    (path) => pathname.startsWith(path) || pathname.match(new RegExp(`^/(${locales.join('|')})${path}`)),
   );
 
   if (isProtected) {
-    let token = request.cookies.get('apex_session')?.value ||
+    let token =
+      request.cookies.get('apex_session')?.value ||
       request.cookies.get('sb-access-token')?.value ||
       request.cookies.get(`sb-${process.env.NEXT_PUBLIC_SUPABASE_REFERENCE_ID}-auth-token`)?.value;
 
@@ -197,7 +197,7 @@ export async function middleware(request: NextRequest) {
       // Verify token
       const { payload } = await jwtVerify(token as string, JWT_SECRET);
       if (!payload.sub) throw new Error('No subject in JWT');
-    } catch (err) {
+    } catch (_err) {
       // Token invalid/expired
       const url = request.nextUrl.clone();
       const localeMatch = pathname.match(new RegExp(`^/(${locales.join('|')})`));
@@ -209,11 +209,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // 5. Run Internationalization Routing (for pages)
-  if (!request.nextUrl.pathname.startsWith('/api') &&
+  if (
+    !request.nextUrl.pathname.startsWith('/api') &&
     !request.nextUrl.pathname.startsWith('/_next') &&
     !request.nextUrl.pathname.startsWith('/_sites') && // Exclude rewritten sites
-    !request.nextUrl.pathname.includes('.')) {
-
+    !request.nextUrl.pathname.includes('.')
+  ) {
     logger.debug('[i18n Debug] Processing path:', { path: request.nextUrl.pathname });
 
     // Check if path already has a locale prefix
@@ -262,17 +263,18 @@ export async function middleware(request: NextRequest) {
       '/api/v1/user/verify-account', // Public verification endpoint
       '/api/v1/user/verify-account', // Public verification endpoint
       '/api/marketplace', // Public marketplace endpoint
-      '/api/v1/referral/stats' // Handled by route handler (Custom Auth)
+      '/api/v1/referral/stats', // Handled by route handler (Custom Auth)
     ];
 
-    const isPublicApi = publicApiRoutes.some(route => request.nextUrl.pathname.startsWith(route));
+    const isPublicApi = publicApiRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
 
     // Special case: Copy Trading Leaderboard is public (GET), but Actions are protected (POST/DELETE)
     const isCopyTradingPublic = request.nextUrl.pathname === '/api/v1/trading/copy-trading' && request.method === 'GET';
 
     if (!isPublicApi && !isCopyTradingPublic) {
       // Check for authentication
-      let token = request.cookies.get('apex_session')?.value ||
+      let token =
+        request.cookies.get('apex_session')?.value ||
         request.cookies.get('sb-access-token')?.value ||
         request.cookies.get(`sb-${process.env.NEXT_PUBLIC_SUPABASE_REFERENCE_ID}-auth-token`)?.value;
 
@@ -289,13 +291,13 @@ export async function middleware(request: NextRequest) {
 
       try {
         await jwtVerify(token, JWT_SECRET);
-      } catch (err) {
+      } catch (_err) {
         return NextResponse.json({ error: 'Invalid Token' }, { status: 401 });
       }
     }
   }
 
-  let response = NextResponse.next();
+  const response = NextResponse.next();
   return injectCsrfToken(request, response);
 }
 
@@ -305,6 +307,6 @@ export const config = {
     // - … if they start with `/_next` or `/_vercel`
     // - … the ones containing a dot (e.g. `favicon.ico`)
     // REMOVED 'api' from exclusion to ensure API routes are protected
-    '/((?!_next/static|_next/image|_vercel|favicon.ico|.*\\..*).*)'
-  ]
+    '/((?!_next/static|_next/image|_vercel|favicon.ico|.*\\..*).*)',
+  ],
 };

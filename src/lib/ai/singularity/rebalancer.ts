@@ -22,19 +22,19 @@ export async function rebalancePortfolio(userId: string) {
 
   // 3. Rebalance Logic (Simplified)
   // Strategy: Distribute total capital equally among top 3 agents
-  
+
   const totalCapital = currentAllocations?.reduce((sum, a) => sum + Number(a.amount), 0) || 0;
   if (totalCapital === 0) return;
 
-  const targetAmountPerAgent = totalCapital / topAgents.length;
+  const _targetAmountPerAgent = totalCapital / topAgents.length;
 
   // 4. Execute Adjustments
   // This would involve withdrawing from underperformers and depositing to top performers
   // For Phase 30 demo, we'll just log the intention or update records if simple
-  
-  logger.info(`[Rebalancer] Rebalancing User ${userId}: Moving capital to ${topAgents.map(a => a.name).join(', ')}`);
-  
-  // In production: 
+
+  logger.info(`[Rebalancer] Rebalancing User ${userId}: Moving capital to ${topAgents.map((a) => a.name).join(', ')}`);
+
+  // In production:
   // - Create 'rebalance_transactions'
   // - Update 'ai_investments'
 }

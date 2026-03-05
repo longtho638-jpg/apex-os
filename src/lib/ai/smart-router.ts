@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+
 // OpenRouter client
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY!;
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
@@ -8,17 +9,22 @@ const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
 // Model pricing (per 1M tokens)
 const MODEL_COSTS: Record<string, number> = {
-  'deepseek/deepseek-chat': 0.14,           // Ultra cheap for simple queries
-  'meta-llama/llama-3-8b-instruct': 0.06,   // Cheap for medium
-  'anthropic/claude-3-haiku': 0.25,         // Mid-tier
-  'anthropic/claude-3.5-sonnet': 3.0,       // Premium for complex
-  'google/gemini-pro': 0.5,                 // Vertex fallback
+  'deepseek/deepseek-chat': 0.14, // Ultra cheap for simple queries
+  'meta-llama/llama-3-8b-instruct': 0.06, // Cheap for medium
+  'anthropic/claude-3-haiku': 0.25, // Mid-tier
+  'anthropic/claude-3.5-sonnet': 3.0, // Premium for complex
+  'google/gemini-pro': 0.5, // Vertex fallback
 };
 
 export interface SmartRouterConfig {
   userTier: 'EXPLORER' | 'OPERATOR' | 'ARCHITECT' | 'SOVEREIGN' | string;
   maxCostPerRequest?: number; // USD
   preferredProvider?: 'openrouter' | 'vertex';
+}
+
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
 }
 
 export interface AIResponse {
@@ -68,7 +74,7 @@ export class SmartRouter {
     // Explorer tier gets cheapest models
     if (this.config.userTier === 'EXPLORER' || this.config.userTier === 'free') {
       return complexity === 'simple'
-        ? 'deepseek/deepseek-chat'          // $0.14/1M
+        ? 'deepseek/deepseek-chat' // $0.14/1M
         : 'meta-llama/llama-3-8b-instruct'; // $0.06/1M
     }
 
@@ -85,14 +91,11 @@ export class SmartRouter {
   /**
    * Call OpenRouter API
    */
-  private async callOpenRouter(
-    model: string,
-    messages: any[]
-  ): Promise<AIResponse> {
+  private async callOpenRouter(model: string, messages: ChatMessage[]): Promise<AIResponse> {
     const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://apexrebate.com',
         'X-Title': 'ApexOS Trading Platform',
@@ -129,7 +132,7 @@ export class SmartRouter {
    * Fallback to Vertex AI
    * 兵法: 先為不可勝 (Prepare backup before attack)
    */
-  private async callVertexAI(messages: any[]): Promise<AIResponse> {
+  private async callVertexAI(messages: ChatMessage[]): Promise<AIResponse> {
     // Lazy load VertexAI to prevent cold start latency
     const { VertexAI } = await import('@google-cloud/vertexai');
 
@@ -142,7 +145,7 @@ export class SmartRouter {
       model: 'gemini-pro',
     });
 
-    const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+    const prompt = messages.map((m) => `${m.role}: ${m.content}`).join('\n');
     const result = await generativeModel.generateContent(prompt);
     const content = result.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -163,7 +166,7 @@ export class SmartRouter {
    * Main routing logic with fallback
    * 兵法: 攻守兼備 (Attack with defense)
    */
-  async complete(messages: any[]): Promise<AIResponse> {
+  async complete(messages: ChatMessage[]): Promise<AIResponse> {
     const userPrompt = messages[messages.length - 1].content;
     const complexity = this.analyzeComplexity(userPrompt);
     const model = this.selectModel(complexity);
@@ -174,7 +177,6 @@ export class SmartRouter {
         logger.info(`[SmartRouter] Complexity: ${complexity}, Model: ${model}, Provider: OpenRouter`);
       }
       return await this.callOpenRouter(model, messages);
-
     } catch (error) {
       // Fallback: Vertex AI
       logger.error('[SmartRouter] OpenRouter failed, falling back to Vertex AI:', error);

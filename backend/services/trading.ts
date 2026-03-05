@@ -65,7 +65,7 @@ export class TradingService {
         const currentPositions = await this.getPositions(userId);
 
         // 2. Simulate Exchange Execution to get Price
-        let exchangeOrderId = `PAPER_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        const exchangeOrderId = `PAPER_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         let fillPrice = price;
 
         if (type === 'MARKET' && !fillPrice) {

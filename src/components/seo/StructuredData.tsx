@@ -6,18 +6,13 @@ export interface BlogPost {
 
 export function BlogPostStructuredData({ post }: { post: BlogPost }) {
   const schema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": post.title,
-    "datePublished": post.published_at,
-    "author": { "@type": "Organization", "name": "Apex Rebate" },
-    "keywords": post.seo_keywords ? post.seo_keywords.join(', ') : '',
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    datePublished: post.published_at,
+    author: { '@type': 'Organization', name: 'Apex Rebate' },
+    keywords: post.seo_keywords ? post.seo_keywords.join(', ') : '',
   };
-  
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }

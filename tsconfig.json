@@ -25,13 +25,6 @@
       "@apex-os/vibe-payment/*": ["./packages/vibe-payment/src/*"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts"],
   "exclude": ["node_modules", "mobile", "scripts", "backend", "supabase", "claudekit-docs", "packages/*/node_modules"]
 }

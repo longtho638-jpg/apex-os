@@ -4,9 +4,9 @@
  * Allows users to add demo funds to their paper trading account
  */
 
-import { createClient } from '@/lib/supabase/server';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { logAuditEvent } from '@/lib/services/audit-service';
+import { createClient } from '@/lib/supabase/server';
 
 const FAUCET_AMOUNT = 10000; // $10k USD
 const FAUCET_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
@@ -26,17 +26,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is in paper trading mode
-    const { data: profile } = await supabase
-      .from('users')
-      .select('trading_mode')
-      .eq('id', user.id)
-      .single();
+    const { data: profile } = await supabase.from('users').select('trading_mode').eq('id', user.id).single();
 
     if (profile?.trading_mode !== 'paper') {
-      return NextResponse.json(
-        { error: 'Faucet only available in paper trading mode' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Faucet only available in paper trading mode' }, { status: 403 });
     }
 
     // Check cooldown (rate limiting)
@@ -55,7 +48,7 @@ export async function POST(request: NextRequest) {
         const remainingMinutes = Math.ceil((FAUCET_COOLDOWN_MS - timeSinceLastClaim) / 1000 / 60);
         return NextResponse.json(
           { error: `Faucet on cooldown. Try again in ${remainingMinutes} minutes.` },
-          { status: 429 }
+          { status: 429 },
         );
       }
     }
@@ -83,10 +76,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (createError || !newWallet) {
-        return NextResponse.json(
-          { error: 'Failed to create paper wallet' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to create paper wallet' }, { status: 500 });
       }
 
       wallet = newWallet;
@@ -98,10 +88,7 @@ export async function POST(request: NextRequest) {
         .eq('id', wallet.id);
 
       if (updateError) {
-        return NextResponse.json(
-          { error: 'Failed to add funds' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to add funds' }, { status: 500 });
       }
 
       wallet.balance = (wallet.balance || 0) + FAUCET_AMOUNT;
@@ -123,11 +110,7 @@ export async function POST(request: NextRequest) {
       amount: FAUCET_AMOUNT,
       newBalance: wallet.balance,
     });
-  } catch (error) {
-    console.error('[PaperFaucet] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to claim faucet' },
-      { status: 500 }
-    );
+  } catch (_error) {
+    return NextResponse.json({ error: 'Failed to claim faucet' }, { status: 500 });
   }
 }

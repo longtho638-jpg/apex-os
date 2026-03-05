@@ -1,28 +1,28 @@
+import { UNIFIED_TIERS } from '@apex-os/vibe-payment';
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { UNIFIED_TIERS } from '@apex-os/vibe-payment';
 
 // RaaS tier config — volume-based auto-upgrade (no subscription required)
 const TIER_CONFIG = {
   EXPLORER: {
     commission: UNIFIED_TIERS.EXPLORER.commissionRates.total,
     rebate: UNIFIED_TIERS.EXPLORER.selfRebateRate,
-    requirements: { referrals: 0, volume: 0 }
+    requirements: { referrals: 0, volume: 0 },
   },
   OPERATOR: {
     commission: UNIFIED_TIERS.OPERATOR.commissionRates.total,
     rebate: UNIFIED_TIERS.OPERATOR.selfRebateRate,
-    requirements: { referrals: 5, volume: 10000 }
+    requirements: { referrals: 5, volume: 10000 },
   },
   ARCHITECT: {
     commission: UNIFIED_TIERS.ARCHITECT.commissionRates.total,
     rebate: UNIFIED_TIERS.ARCHITECT.selfRebateRate,
-    requirements: { referrals: 20, volume: 100000 }
+    requirements: { referrals: 20, volume: 100000 },
   },
   SOVEREIGN: {
     commission: UNIFIED_TIERS.SOVEREIGN.commissionRates.total,
     rebate: UNIFIED_TIERS.SOVEREIGN.selfRebateRate,
-    requirements: { referrals: 50, volume: 1000000 }
+    requirements: { referrals: 50, volume: 1000000 },
   },
 } as const;
 
@@ -79,11 +79,7 @@ export async function promoteTier(userId: string): Promise<boolean> {
   const calculatedTier = await calculateUserTier(userId);
 
   // Get current tier to check if upgrade needed
-  const { data: currentData } = await supabase
-    .from('user_tiers')
-    .select('tier')
-    .eq('user_id', userId)
-    .single();
+  const { data: currentData } = await supabase.from('user_tiers').select('tier').eq('user_id', userId).single();
 
   const currentTier = currentData?.tier || 'EXPLORER';
 
@@ -100,7 +96,7 @@ export async function promoteTier(userId: string): Promise<boolean> {
           tier: calculatedTier,
           current_commission_rate: TIER_CONFIG[calculatedTier as keyof typeof TIER_CONFIG].commission,
           tier_updated_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
 

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
 /**
  * Parameterized user-tier hook — accepts auth state + apiBaseUrl instead of importing AuthContext.
  */
 
-import { useState, useEffect } from 'react';
-import type { TierId, AnyTierId, MenuId, UseUserTierParams } from '../types/billing-types';
+import { useEffect, useState } from 'react';
 import { TIER_ORDER } from '../config/unified-tiers';
+import type { AnyTierId, MenuId, TierId, UseUserTierParams } from '../types/billing-types';
 
 interface TierInfo {
   tier: TierId | 'ADMIN';
@@ -16,8 +16,13 @@ interface TierInfo {
 /** Map legacy tier names to RaaS volume-based tier names */
 export function normalizeTier(raw: string): TierId {
   const legacy: Record<string, TierId> = {
-    FREE: 'EXPLORER', FOUNDERS: 'SOVEREIGN', PREMIUM: 'ARCHITECT',
-    PRO: 'OPERATOR', TRADER: 'ARCHITECT', ELITE: 'SOVEREIGN', WHALE: 'SOVEREIGN',
+    FREE: 'EXPLORER',
+    FOUNDERS: 'SOVEREIGN',
+    PREMIUM: 'ARCHITECT',
+    PRO: 'OPERATOR',
+    TRADER: 'ARCHITECT',
+    ELITE: 'SOVEREIGN',
+    WHALE: 'SOVEREIGN',
   };
   const upper = raw.toUpperCase();
   if (TIER_ORDER.includes(upper as TierId)) return upper as TierId;
@@ -38,12 +43,12 @@ export function useUserTier({ isAuthenticated, userId, token, apiBaseUrl }: UseU
     }
 
     fetch(`${apiBaseUrl}/user/tier`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-      cache: 'no-store'
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
     })
-      .then(res => res.json())
-      .then(data => {
-        const tier = data.tier === 'ADMIN' ? 'ADMIN' as const : normalizeTier(data.tier || 'EXPLORER');
+      .then((res) => res.json())
+      .then((data) => {
+        const tier = data.tier === 'ADMIN' ? ('ADMIN' as const) : normalizeTier(data.tier || 'EXPLORER');
         setTierInfo({ tier, joinedAt: data.joined_at || null });
         setLoading(false);
       })
@@ -54,11 +59,19 @@ export function useUserTier({ isAuthenticated, userId, token, apiBaseUrl }: UseU
 
   const canViewMenu = (menuId: MenuId): boolean => {
     const minTierForMenu: Record<MenuId, TierId> = {
-      overview: 'EXPLORER', trade: 'EXPLORER', 'copy-trading': 'EXPLORER',
-      pnl: 'EXPLORER', wolfpack: 'OPERATOR', rebates: 'EXPLORER',
-      risk: 'OPERATOR', referrals: 'EXPLORER', reports: 'EXPLORER',
-      billing: 'EXPLORER', resources: 'EXPLORER', settings: 'EXPLORER',
-      admin: 'SOVEREIGN'
+      overview: 'EXPLORER',
+      trade: 'EXPLORER',
+      'copy-trading': 'EXPLORER',
+      pnl: 'EXPLORER',
+      wolfpack: 'OPERATOR',
+      rebates: 'EXPLORER',
+      risk: 'OPERATOR',
+      referrals: 'EXPLORER',
+      reports: 'EXPLORER',
+      billing: 'EXPLORER',
+      resources: 'EXPLORER',
+      settings: 'EXPLORER',
+      admin: 'SOVEREIGN',
     };
 
     if (tierInfo.tier === 'ADMIN') return true;

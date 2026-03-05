@@ -76,6 +76,16 @@
       "legal": "法律",
       "rights": "版权所有。",
       "risk_disclosure": "风险披露：交易加密货币涉及巨大的损失风险。ApexOS 提供工具和分析，但不保证利润。过往表现并不预示未来结果。请负责任地交易，且仅使用您能承受损失的资金。"
+    },
+    "raas": {
+      "subtitle": "Your tier is determined by trading volume, not your wallet. Trade more, pay less spread.",
+      "badge": "Revenue-as-a-Service",
+      "title": "Zero Subscription Fees. Forever."
+    },
+    "onboarding": {
+      "subtitle": "30-second setup. No forms. Just trade.",
+      "title": "AI Deploys Your Trading Agents",
+      "badge": "Agentic Onboarding"
     }
   },
   "Navigation": {
@@ -516,7 +526,47 @@
     "join_telegram": "加入 Telegram",
     "claim_reward": "领取 24h 精英试用",
     "task_completed": "任务已完成！",
-    "reward_claimed": "奖励已领取！24h 精英试用已激活。"
+    "reward_claimed": "奖励已领取！24h 精英试用已激活。",
+    "steps": {
+      "funding": {
+        "subtitle": "Deposit crypto — zero fees, instant settlement",
+        "title": "Fund & Launch"
+      },
+      "agent-config": {
+        "title": "Agent Deployment",
+        "subtitle": "Your personal trading agents are being configured"
+      },
+      "risk-assessment": {
+        "title": "Risk Calibration",
+        "subtitle": "Autonomous risk profiling — no forms, just questions"
+      },
+      "profile": {
+        "title": "AI Profile Scan",
+        "subtitle": "Our AI analyzes your trading style in 30 seconds"
+      }
+    },
+    "actions": {
+      "start_trading": "Start Trading — Zero Fees",
+      "deploy_agents": "Deploy My Agents",
+      "fund_and_trade": "Fund & Start Trading",
+      "continue": "Continue"
+    },
+    "profile": {
+      "monthly_volume": "Expected monthly volume (USD)",
+      "experience": "Trading experience"
+    },
+    "funding": {
+      "networks": "Supported Networks",
+      "zero_fee": "Zero deposit fee"
+    },
+    "risk": {
+      "tolerance": "Risk tolerance",
+      "qualify": "Based on your volume of {volume}/mo, you qualify for {spread} spread with {agents} AI agents.",
+      "detected": "AI Detected: {tier} Tier"
+    },
+    "agents": {
+      "live": "LIVE"
+    }
   },
   "AI": {
     "core_title": "Apex AI 核心",
@@ -913,7 +963,8 @@
     "hero": {
       "title": "停止在加密货币返佣上亏钱",
       "subtitle": "自动追踪每一笔返佣。最大化您的利润。",
-      "cta": "开始免费试用 - 无需信用卡"
+      "cta": "开始免费试用 - 无需信用卡",
+      "badge": "RaaS AGI — Zero-Fee Agentic Trading"
     },
     "calculator": {
       "volume": "月交易量",
@@ -921,68 +972,15 @@
       "claim": "领取此项"
     },
     "tiers": {
-      "free": {
-        "name": "免费",
-        "price": "$0",
-        "period": "永久",
-        "features": [
-          "1 个交易所",
-          "基础追踪",
-          "7 天历史记录"
-        ]
-      },
-      "basic": {
-        "name": "基础",
-        "price": "$29",
-        "period": "每月",
-        "annual_save": "省 $58",
-        "features": [
-          "3 个交易所",
-          "完整历史记录",
-          "导出数据",
-          "邮件支持"
-        ]
-      },
-      "trader": {
-        "name": "交易者",
-        "price": "$97",
-        "period": "每月",
-        "badge": "最受欢迎",
-        "annual_save": "省 $194",
-        "features": [
-          "10 个交易所",
-          "无限历史记录",
-          "高级分析",
-          "优先支持",
-          "移动应用"
-        ]
-      },
-      "pro": {
-        "name": "专业",
-        "price": "$297",
-        "period": "每月",
-        "annual_save": "省 $594",
-        "features": [
-          "无限交易所",
-          "API 访问",
-          "自定义报告",
-          "白手套支持",
-          "抢先体验功能"
-        ]
-      },
-      "elite": {
-        "name": "精英",
-        "price": "$997",
-        "period": "每月",
-        "annual_save": "省 $1,994",
-        "features": [
-          "包含专业版所有功能",
-          "专属客户经理",
-          "自定义集成",
-          "SLA 保证",
-          "7x24 小时电话支持"
-        ]
-      }
+      "free": {},
+      "basic": {},
+      "trader": {},
+      "pro": {},
+      "elite": {},
+      "section_title": "AI Agents + Multi-Org + Crypto = Zero-Fee Trading",
+      "section_subtitle": "Volume-based tiers — unlock automatically via agentic workflows",
+      "most_popular": "Most Popular",
+      "start_trading": "Start Trading Free"
     },
     "trust": {
       "users": "200+ 交易者已在追踪返佣",
@@ -992,6 +990,40 @@
     "urgency": {
       "limited": "前 100 名用户终身 5 折",
       "spots": "此价格仅剩 X 个名额"
+    },
+    "raas": {
+      "auto_upgrade": "Auto-upgrade with volume",
+      "vs_saas_title": "SaaS vs RaaS",
+      "volume_based": "Volume-Based Tiers",
+      "volume_operator": "$10K – $100K/mo volume",
+      "volume_explorer": "Up to $10K/mo volume",
+      "volume_architect": "$100K – $1M/mo volume",
+      "current_tier": "Current Tier",
+      "agents_label": "Agents",
+      "badge": "RaaS Model",
+      "zero_fee": "$0/mo",
+      "volume_sovereign": "$1M+/mo volume",
+      "volume_required": "Volume Required",
+      "vs_saas_new": "Apex RaaS",
+      "rebate_label": "Rebate",
+      "spread_label": "Spread",
+      "vs_saas_old": "Traditional SaaS"
+    },
+    "comparison": {
+      "saas_1": "Pay $97–$997/mo whether you trade or not",
+      "raas_1": "$0/mo — zero subscription fees forever",
+      "raas_title": "New RaaS Model",
+      "saas_title": "Old SaaS Model",
+      "title": "SaaS vs RaaS AGI — The Paradigm Shift",
+      "raas_2": "Multi-org: create teams, share agents, pool volume",
+      "raas_4": "AI agents auto-trade 24/7 — you earn while you sleep",
+      "raas_5": "Tiers unlock automatically via agentic volume",
+      "subtitle": "Multi-org zero-fee crypto agentic workflows replace legacy subscriptions",
+      "saas_4": "Annual billing traps with no refunds",
+      "raas_3": "Crypto-native: deposit/withdraw USDT on 5+ chains",
+      "saas_3": "Locked features behind higher tiers",
+      "saas_2": "Platform profits even when you lose",
+      "saas_5": "Zero incentive to help you succeed"
     }
   },
   "Offer": {
@@ -1000,5 +1032,29 @@
     "subtitle": "利用 AI 驱动的工具释放您的交易潜力。",
     "current_plan": "当前计划",
     "upgrade_now": "立即升级"
+  },
+  "Exchange": {
+    "spread_rate": "Spread Rate",
+    "settlement": "Settlement",
+    "zero_fee_badge": "Zero Trading Fees",
+    "supported_chains": "Supported Chains",
+    "your_rebate": "Your Rebate",
+    "spread_breakdown": "Spread Breakdown",
+    "spread_cost": "Spread Cost",
+    "net_cost": "Net Cost",
+    "swap_success": "Swap completed successfully!",
+    "trade_amount": "Trade Amount"
+  },
+  "AgenticWorkflow": {
+    "tier_progress": "Tier Progress",
+    "agent_error": "Error",
+    "pipeline": "Trading Pipeline",
+    "execution": "Execution",
+    "title": "Agentic Workflow",
+    "agent_idle": "Idle",
+    "signal_detection": "Signal Detection",
+    "agent_active": "Active",
+    "deployed_agents": "Deployed Agents",
+    "risk_assessment": "Risk Assessment"
   }
 }

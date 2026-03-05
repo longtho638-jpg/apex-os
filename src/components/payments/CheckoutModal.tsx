@@ -1,10 +1,10 @@
 'use client';
 
-import { logger } from '@/lib/logger';
+import { getTierById, getTierPrice, type PaymentTier, type TierId } from '@apex-os/vibe-payment';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
-import { getTierById, getTierPrice, TierId, PaymentTier } from '@apex-os/vibe-payment';
 
 interface CheckoutModalProps {
   tier: PaymentTier | TierId;
@@ -18,11 +18,10 @@ export function CheckoutModal({ tier, userEmail, onClose }: CheckoutModalProps) 
 
   // Get tier config (handles normalization)
   const tierConfig = getTierById(tier);
-  console.log('CheckoutModal render:', { tier, tierConfig });
 
   if (!tierConfig) {
-      logger.error('Invalid tier ID:', tier);
-      return null; 
+    logger.error('Invalid tier ID:', tier);
+    return null;
   }
 
   // RaaS model: $0 subscription, revenue from spread only
@@ -57,7 +56,6 @@ export function CheckoutModal({ tier, userEmail, onClose }: CheckoutModalProps) 
       // Success for wallet or non-redirect flows
       toast.success('Payment successful!');
       onClose();
-
     } catch (error) {
       logger.error('Checkout error:', error);
       toast.error('Checkout Failed', {
@@ -105,9 +103,7 @@ export function CheckoutModal({ tier, userEmail, onClose }: CheckoutModalProps) 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4">
-          Activate {tierConfig.name} Tier
-        </h2>
+        <h2 className="text-2xl font-bold mb-4">Activate {tierConfig.name} Tier</h2>
 
         <PaymentMethodSelector value={gateway} onChange={setGateway} />
 
@@ -127,14 +123,14 @@ export function CheckoutModal({ tier, userEmail, onClose }: CheckoutModalProps) 
           </div>
 
           {gateway === 'wallet' && (
-            <div className={`mt-3 p-3 rounded-lg text-sm ${isWalletInsufficient ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+            <div
+              className={`mt-3 p-3 rounded-lg text-sm ${isWalletInsufficient ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}
+            >
               <div className="flex justify-between font-medium">
                 <span>Wallet Balance:</span>
                 <span>${walletBalance?.toFixed(2) || '0.00'}</span>
               </div>
-              {isWalletInsufficient && (
-                <div className="mt-1 font-bold">⚠️ Insufficient funds</div>
-              )}
+              {isWalletInsufficient && <div className="mt-1 font-bold">⚠️ Insufficient funds</div>}
             </div>
           )}
         </div>
@@ -145,9 +141,13 @@ export function CheckoutModal({ tier, userEmail, onClose }: CheckoutModalProps) 
             disabled={loading || isWalletInsufficient}
             className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Processing...' :
-              gateway === 'wallet' ? 'Pay with Wallet' :
-                gateway === 'polar' ? 'Pay with Card' : 'Pay with Crypto'}
+            {loading
+              ? 'Processing...'
+              : gateway === 'wallet'
+                ? 'Pay with Wallet'
+                : gateway === 'polar'
+                  ? 'Pay with Card'
+                  : 'Pay with Crypto'}
           </button>
 
           <button

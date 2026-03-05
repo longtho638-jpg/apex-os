@@ -1,9 +1,9 @@
 'use client';
 
-import { GlassCard } from '@/components/ui/glass-card';
+import { TIER_ORDER, type TierId, UNIFIED_TIERS } from '@apex-os/vibe-payment';
+import { Bot, Check, Crown, TrendingUp, X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { X, Check, Zap, TrendingUp, Crown, Bot } from 'lucide-react';
-import { UNIFIED_TIERS, TIER_ORDER, type TierId } from '@apex-os/vibe-payment';
+import { GlassCard } from '@/components/ui/glass-card';
 import { trackEvent } from '@/lib/analytics-mock';
 
 interface PricingModalProps {
@@ -37,9 +37,10 @@ export function PricingModal({ isOpen, onClose, userId, currentTier, trigger }: 
     metadata: { trigger, current_tier: currentTier },
   });
 
-  const urgencyMessage = trigger === 'rate_limit'
-    ? "You've hit your daily limit! Trade more to unlock higher tiers."
-    : "Trade more volume to auto-unlock better spreads & more agents.";
+  const urgencyMessage =
+    trigger === 'rate_limit'
+      ? "You've hit your daily limit! Trade more to unlock higher tiers."
+      : 'Trade more volume to auto-unlock better spreads & more agents.';
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -68,9 +69,11 @@ export function PricingModal({ isOpen, onClose, userId, currentTier, trigger }: 
                 <div
                   key={tierId}
                   className={`relative border-2 rounded-lg p-6 transition-all ${
-                    isHighlighted ? 'border-blue-400 bg-blue-400/5 scale-105' :
-                    isCurrent ? 'border-emerald-400 bg-emerald-400/5' :
-                    'border-white/10 hover:border-white/20'
+                    isHighlighted
+                      ? 'border-blue-400 bg-blue-400/5 scale-105'
+                      : isCurrent
+                        ? 'border-emerald-400 bg-emerald-400/5'
+                        : 'border-white/10 hover:border-white/20'
                   }`}
                 >
                   {isHighlighted && (
@@ -83,7 +86,9 @@ export function PricingModal({ isOpen, onClose, userId, currentTier, trigger }: 
                     <Icon className={`w-8 h-8 ${color}`} />
                     <div>
                       <h3 className="text-xl font-bold">{tier.name}</h3>
-                      <p className="text-2xl font-bold text-emerald-400">$0<span className="text-sm text-zinc-400">/mo</span></p>
+                      <p className="text-2xl font-bold text-emerald-400">
+                        $0<span className="text-sm text-zinc-400">/mo</span>
+                      </p>
                     </div>
                   </div>
 
@@ -111,9 +116,7 @@ export function PricingModal({ isOpen, onClose, userId, currentTier, trigger }: 
                     ))}
                   </ul>
 
-                  {isCurrent && (
-                    <div className="mt-4 text-center text-sm text-emerald-400 font-bold">Current Tier</div>
-                  )}
+                  {isCurrent && <div className="mt-4 text-center text-sm text-emerald-400 font-bold">Current Tier</div>}
                 </div>
               );
             })}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Crown, TrendingUp, Users } from 'lucide-react';
 
 interface TierProgressProps {
@@ -16,7 +15,7 @@ export function TierProgressCard({
   referralCount,
   referralTarget,
   volume,
-  volumeTarget
+  volumeTarget,
 }: TierProgressProps) {
   const refProgress = Math.min(100, (referralCount / referralTarget) * 100);
   const volProgress = Math.min(100, (volume / volumeTarget) * 100);
@@ -40,8 +39,12 @@ export function TierProgressCard({
       <div className="space-y-4">
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="flex items-center gap-2"><Users className="w-4 h-4 text-blue-400" /> Active Referrals</span>
-            <span className="font-mono">{referralCount} / {referralTarget}</span>
+            <span className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-400" /> Active Referrals
+            </span>
+            <span className="font-mono">
+              {referralCount} / {referralTarget}
+            </span>
           </div>
           <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
             <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${refProgress}%` }} />
@@ -50,8 +53,12 @@ export function TierProgressCard({
 
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-purple-400" /> Monthly Volume</span>
-            <span className="font-mono">${volume.toLocaleString()} / ${volumeTarget.toLocaleString()}</span>
+            <span className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-purple-400" /> Monthly Volume
+            </span>
+            <span className="font-mono">
+              ${volume.toLocaleString()} / ${volumeTarget.toLocaleString()}
+            </span>
           </div>
           <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
             <div className="h-full bg-purple-500 transition-all duration-500" style={{ width: `${volProgress}%` }} />

@@ -1,10 +1,10 @@
 'use client';
 
+import { Bot, Power, Terminal } from 'lucide-react';
+import { Button3D } from '@/components/marketing/Button3D';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Bot, Power, Activity, Terminal } from 'lucide-react';
-import { Button3D } from '@/components/marketing/Button3D';
 
 export default function AgentsPage() {
   const agents = [
@@ -20,7 +20,7 @@ export default function AgentsPage() {
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
         </AuroraBackground>
-        
+
         <div className="relative z-10 h-full flex flex-col overflow-y-auto">
           <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
             <div className="flex items-center justify-between">
@@ -40,16 +40,22 @@ export default function AgentsPage() {
           </header>
 
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {agents.map((agent, i) => (
-              <GlassCard key={i} className="p-6 flex flex-col gap-6">
+            {agents.map((agent) => (
+              <GlassCard key={agent.name} className="p-6 flex flex-col gap-6">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${agent.status === 'online' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-zinc-600'}`} />
+                    <div
+                      className={`w-3 h-3 rounded-full ${agent.status === 'online' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-zinc-600'}`}
+                    />
                     <h3 className="font-bold text-lg">{agent.name}</h3>
                   </div>
-                  <button className={`p-2 rounded-lg transition-colors ${
-                    agent.status === 'online' ? 'hover:bg-red-500/20 text-emerald-400 hover:text-red-400' : 'hover:bg-emerald-500/20 text-zinc-500 hover:text-emerald-400'
-                  }`}>
+                  <button
+                    className={`p-2 rounded-lg transition-colors ${
+                      agent.status === 'online'
+                        ? 'hover:bg-red-500/20 text-emerald-400 hover:text-red-400'
+                        : 'hover:bg-emerald-500/20 text-zinc-500 hover:text-emerald-400'
+                    }`}
+                  >
                     <Power className="w-5 h-5" />
                   </button>
                 </div>

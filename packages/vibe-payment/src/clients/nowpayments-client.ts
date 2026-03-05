@@ -3,25 +3,29 @@
  * Server-side only (uses process.env for API keys).
  */
 
+import { PAYMENT_TIERS } from '../config/unified-tiers';
 import type {
   CreateInvoiceParams,
-  NOWPaymentsInvoiceResponse,
   CreatePayoutParams,
+  NOWPaymentsInvoiceResponse,
   PayoutResult,
   PayoutStatus,
 } from '../types/billing-types';
-import { PAYMENT_TIERS } from '../config/unified-tiers';
 
 // ---- Checkout / Invoices ----
 
 export async function createNOWPaymentsInvoice({
   userId,
   tier,
-  amountOverride
+  amountOverride,
 }: CreateInvoiceParams): Promise<NOWPaymentsInvoiceResponse> {
   const tierConfig = PAYMENT_TIERS[tier];
 
-  const npConfig = tierConfig.nowPayments as { price_amount: number; price_currency: string; cryptoDiscount?: number } | null;
+  const npConfig = tierConfig.nowPayments as {
+    price_amount: number;
+    price_currency: string;
+    cryptoDiscount?: number;
+  } | null;
   if (!npConfig) {
     throw new Error(`Tier ${tier} does not support NOWPayments`);
   }
@@ -48,16 +52,16 @@ export async function createNOWPaymentsInvoice({
     order_description: `Subscription to ${tierConfig.name} (User: ${userId})`,
     ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments`,
     success_url: `${process.env.PAYMENT_SUCCESS_URL}&tier=${tier}`,
-    cancel_url: process.env.PAYMENT_CANCEL_URL
+    cancel_url: process.env.PAYMENT_CANCEL_URL,
   };
 
   const response = await fetch('https://api.nowpayments.io/v1/invoice', {
     method: 'POST',
     headers: {
       'x-api-key': apiKey,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -74,8 +78,7 @@ async function createPayout(params: CreatePayoutParams): Promise<PayoutResult> {
   const apiKey = process.env.NOWPAYMENTS_API_KEY;
   if (!apiKey) {
     throw new Error(
-      'NOWPAYMENTS_API_KEY is required for payout operations. ' +
-      'Set this environment variable in production.'
+      'NOWPAYMENTS_API_KEY is required for payout operations. ' + 'Set this environment variable in production.',
     );
   }
 
@@ -84,16 +87,18 @@ async function createPayout(params: CreatePayoutParams): Promise<PayoutResult> {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        withdrawals: [{
-          address: params.address,
-          currency: params.currency,
-          amount: params.amount,
-          ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments-payout`
-        }]
-      })
+        withdrawals: [
+          {
+            address: params.address,
+            currency: params.currency,
+            amount: params.amount,
+            ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments-payout`,
+          },
+        ],
+      }),
     });
 
     if (!response.ok) {
@@ -103,8 +108,9 @@ async function createPayout(params: CreatePayoutParams): Promise<PayoutResult> {
 
     const data = await response.json();
     return { success: true, payout_id: data.id };
-  } catch (e: any) {
-    return { success: false, error: e.message };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Unknown error';
+    return { success: false, error: message };
   }
 }
 
@@ -115,18 +121,18 @@ async function getPayoutStatus(payoutId: string): Promise<PayoutStatus> {
   }
 
   const response = await fetch(`https://api.nowpayments.io/v1/payout/${payoutId}`, {
-    headers: { 'x-api-key': apiKey }
+    headers: { 'x-api-key': apiKey },
   });
 
   const data = await response.json();
   return {
     status: data.status,
     tx_hash: data.hash,
-    fee: data.fee
+    fee: data.fee,
   };
 }
 
 export const nowPayments = {
   createPayout,
-  getPayoutStatus
+  getPayoutStatus,
 };

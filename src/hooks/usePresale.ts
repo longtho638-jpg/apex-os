@@ -1,8 +1,8 @@
-import { logger } from '@/lib/logger';
-import { useState, useEffect } from 'react';
-import { useWallet } from './useWallet';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
+import { useWallet } from './useWallet';
 
 export function usePresale() {
   const { user } = useAuth();
@@ -16,7 +16,7 @@ export function usePresale() {
     name: 'Public Sale',
     price: 0.05,
     token_allocation: 10000000,
-    tokens_sold: 4500000
+    tokens_sold: 4500000,
   });
 
   const buyTokens = async (amountUSDT: number) => {
@@ -34,8 +34,8 @@ export function usePresale() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: amountUSDT,
-          userId: user.id
-        })
+          userId: user.id,
+        }),
       });
 
       const data = await res.json();
@@ -49,11 +49,10 @@ export function usePresale() {
       // Update local round data simulation
       setCurrentRound((prev: any) => ({
         ...prev,
-        tokens_sold: prev.tokens_sold + (amountUSDT / prev.price)
+        tokens_sold: prev.tokens_sold + amountUSDT / prev.price,
       }));
-
     } catch (e: any) {
-      logger.error("Error occurred", e);
+      logger.error('Error occurred', e);
       setError(e.message);
       toast.error(e.message);
     } finally {
@@ -66,6 +65,6 @@ export function usePresale() {
     isLoading,
     isSuccess,
     error,
-    currentRound
+    currentRound,
   };
 }

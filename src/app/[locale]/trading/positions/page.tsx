@@ -1,11 +1,11 @@
 'use client';
 
+import { Layers } from 'lucide-react';
 import { Sidebar } from '@/components/os/sidebar';
+import { LivePositionTracker } from '@/components/trading/LivePositionTracker';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { LivePositionTracker } from '@/components/trading/LivePositionTracker';
 import { useAuth } from '@/contexts/AuthContext';
-import { Layers } from 'lucide-react';
 
 export default function PositionsPage() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export default function PositionsPage() {
         <AuroraBackground className="absolute inset-0 z-0 pointer-events-none">
           <div />
         </AuroraBackground>
-        
+
         <div className="relative z-10 h-full flex flex-col overflow-y-auto">
           <header className="sticky top-0 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/10 p-6">
             <div className="flex items-center gap-4">
@@ -34,7 +34,7 @@ export default function PositionsPage() {
 
           <div className="p-6">
             <GlassCard className="p-6">
-                <LivePositionTracker userId={userId} />
+              <LivePositionTracker userId={userId} />
             </GlassCard>
           </div>
         </div>

@@ -1,9 +1,9 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
+import { Anchor, Crosshair } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Crosshair, Anchor } from 'lucide-react';
 
 interface WhaleTrade {
   id: string;
@@ -29,7 +29,7 @@ export function WhaleWatcherWidget() {
         timestamp: Date.now(),
       };
 
-      setTrades(prev => [newTrade, ...prev].slice(0, 5));
+      setTrades((prev) => [newTrade, ...prev].slice(0, 5));
     }, 3500);
 
     return () => clearInterval(interval);
@@ -70,22 +70,22 @@ export function WhaleWatcherWidget() {
                 </div>
               </div>
               <div className="text-right">
-                <p className={`text-sm font-mono font-bold ${trade.side === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                <p
+                  className={`text-sm font-mono font-bold ${trade.side === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}
+                >
                   {trade.side === 'BUY' ? '+' : '-'}${(trade.amount / 1000000).toFixed(2)}M
                 </p>
-                <p className="text-xs text-zinc-500">
-                  {new Date(trade.timestamp).toLocaleTimeString()}
-                </p>
+                <p className="text-xs text-zinc-500">{new Date(trade.timestamp).toLocaleTimeString()}</p>
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
-        
+
         {trades.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-40 text-zinc-500">
-                <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-2" />
-                <p className="text-xs">Scanning Deep Liquidity...</p>
-            </div>
+          <div className="flex flex-col items-center justify-center h-40 text-zinc-500">
+            <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-2" />
+            <p className="text-xs">Scanning Deep Liquidity...</p>
+          </div>
         )}
       </div>
     </GlassCard>

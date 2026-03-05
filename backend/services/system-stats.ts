@@ -170,38 +170,3 @@ export class SystemStatsService {
         };
     }
 }
-// Combine recent orders and new users
-const { data: recentOrders } = await this.supabase
-    .from('orders')
-    .select('id, created_at, symbol, side, user_id')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-const { data: newUsers } = await this.supabase
-    .from('users')
-    .select('id, created_at, email')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-// Merge and sort
-const activities = [
-    ...(recentOrders?.map(o => ({
-        type: 'ORDER',
-        text: `New ${o.side} order for ${o.symbol}`,
-        time: o.created_at,
-        icon: 'TrendingUp',
-        color: 'text-emerald-400'
-    })) || []),
-    ...(newUsers?.map(u => ({
-        type: 'USER',
-        text: `New user joined`,
-        time: u.created_at,
-        icon: 'Users',
-        color: 'text-blue-400'
-    })) || [])
-].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-    .slice(0, limit);
-
-return activities;
-    }
-}

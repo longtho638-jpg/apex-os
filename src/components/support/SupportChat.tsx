@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Bot, MessageCircle, Send, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -12,7 +12,7 @@ interface Message {
 export function SupportChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hi! I\'m the ApexOS Support Bot. How can I help you today?' }
+    { role: 'assistant', content: "Hi! I'm the ApexOS Support Bot. How can I help you today?" },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,13 +22,13 @@ export function SupportChat() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isOpen]);
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
     const userMsg: Message = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setLoading(true);
 
@@ -38,11 +38,14 @@ export function SupportChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: userMsg.content }),
       });
-      
+
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.answer }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again later.' }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.answer }]);
+    } catch (_error) {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Sorry, I encountered an error. Please try again later.' },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -88,12 +91,9 @@ export function SupportChat() {
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
               {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[85%] p-3 rounded-xl text-sm ${ 
+                    className={`max-w-[85%] p-3 rounded-xl text-sm ${
                       msg.role === 'user'
                         ? 'bg-emerald-600 text-white rounded-br-none'
                         : 'bg-zinc-800 text-zinc-200 rounded-bl-none'

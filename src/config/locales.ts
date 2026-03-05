@@ -13,54 +13,57 @@ export const defaultLocale: Locale = 'en';
 /**
  * Locale metadata for UI display (language switcher, etc.)
  */
-export const localeMetadata: Record<Locale, {
-  name: string;
-  nativeName: string;
-  flag: string;
-  dir: 'ltr' | 'rtl';
-}> = {
+export const localeMetadata: Record<
+  Locale,
+  {
+    name: string;
+    nativeName: string;
+    flag: string;
+    dir: 'ltr' | 'rtl';
+  }
+> = {
   en: {
     name: 'English',
     nativeName: 'English',
     flag: '🇺🇸',
-    dir: 'ltr'
+    dir: 'ltr',
   },
   vi: {
     name: 'Vietnamese',
     nativeName: 'Tiếng Việt',
     flag: '🇻🇳',
-    dir: 'ltr'
+    dir: 'ltr',
   },
   th: {
     name: 'Thai',
     nativeName: 'ไทย',
     flag: '🇹🇭',
-    dir: 'ltr'
+    dir: 'ltr',
   },
   id: {
     name: 'Indonesian',
     nativeName: 'Bahasa Indonesia',
     flag: '🇮🇩',
-    dir: 'ltr'
+    dir: 'ltr',
   },
   ko: {
     name: 'Korean',
     nativeName: '한국어',
     flag: '🇰🇷',
-    dir: 'ltr'
+    dir: 'ltr',
   },
   ja: {
     name: 'Japanese',
     nativeName: '日本語',
     flag: '🇯🇵',
-    dir: 'ltr'
+    dir: 'ltr',
   },
   zh: {
     name: 'Chinese',
     nativeName: '中文',
     flag: '🇨🇳',
-    dir: 'ltr'
-  }
+    dir: 'ltr',
+  },
 };
 
 /**

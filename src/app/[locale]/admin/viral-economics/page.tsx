@@ -1,14 +1,11 @@
 'use client';
 
-import React from 'react';
-import { getSupabaseClientSide } from '@/lib/supabase';
-
 // Simple admin dashboard for Viral Economics
 export default function ViralAdminPage() {
   return (
     <div className="p-8 text-white">
       <h1 className="text-2xl font-bold mb-8">Viral Economics Command Center</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Commission Pool */}
         <div className="bg-white/5 p-6 rounded-xl border border-white/10">
@@ -36,7 +33,7 @@ export default function ViralAdminPage() {
         <div className="bg-white/5 p-6 rounded-xl border border-white/10">
           <h2 className="text-lg font-bold mb-4">Tier Distribution</h2>
           <div className="space-y-3">
-            {['FREE', 'BASIC', 'TRADER', 'PRO', 'ELITE', 'APEX'].map(tier => (
+            {['FREE', 'BASIC', 'TRADER', 'PRO', 'ELITE', 'APEX'].map((tier) => (
               <div key={tier} className="flex items-center gap-2">
                 <span className="w-20 text-xs text-zinc-500">{tier}</span>
                 <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">

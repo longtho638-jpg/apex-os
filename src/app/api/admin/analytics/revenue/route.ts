@@ -1,22 +1,20 @@
-import { logger } from '@/lib/logger';
-import { NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
 import { RAAS_CONFIG } from '@apex-os/vibe-payment';
+import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET() {
   const supabase = getSupabaseClient();
 
   try {
     // RaaS Revenue Model: Revenue = trading volume × spread (basis points)
-    // No subscriptions — all revenue comes from exchange spread
+    // RaaS: all revenue comes from exchange spread, zero subscription fees
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     // 1. Total 30-day trading volume from all users
-    const { data: volumeData } = await supabase
-      .from('users')
-      .select('monthly_volume, subscription_tier');
+    const { data: volumeData } = await supabase.from('users').select('monthly_volume');
 
     let totalVolume = 0;
     let activeTraders = 0;
@@ -31,7 +29,7 @@ export async function GET() {
     const grossSpreadRevenue = totalVolume * (avgSpreadBps / 10_000);
 
     // 3. Estimate net revenue after rebates (~20% avg rebate)
-    const avgRebateRate = 0.20;
+    const avgRebateRate = 0.2;
     const netRevenue = grossSpreadRevenue * (1 - avgRebateRate);
 
     // 4. Monthly Run Rate (MRR equivalent in RaaS)
@@ -42,9 +40,7 @@ export async function GET() {
     const arpt = activeTraders > 0 ? monthlyRunRate / activeTraders : 0;
 
     // 6. Revenue per million volume (efficiency metric)
-    const revenuePerMillion = totalVolume > 0
-      ? (netRevenue / totalVolume) * 1_000_000
-      : 0;
+    const revenuePerMillion = totalVolume > 0 ? (netRevenue / totalVolume) * 1_000_000 : 0;
 
     return NextResponse.json({
       totalVolume30d: totalVolume,
@@ -57,7 +53,6 @@ export async function GET() {
       revenuePerMillion,
       avgSpreadBps,
     });
-
   } catch (error) {
     logger.error('Analytics Revenue Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

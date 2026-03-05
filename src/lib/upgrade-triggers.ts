@@ -1,4 +1,4 @@
-import { analytics, AnalyticsEvent } from '@/lib/analytics';
+import { type AnalyticsEvent, analytics } from '@/lib/analytics';
 
 // Simple wrapper for trackEvent to match usage in other files
 function trackEvent(event: AnalyticsEvent, metadata: any) {
@@ -20,7 +20,7 @@ export const upgradeTriggers = {
   limitReached: (feature: string, currentLimit: number): UpgradeTrigger => {
     trackEvent('upgrade_trigger_shown', {
       trigger_type: 'limit_reached',
-      feature 
+      feature,
     });
 
     return {
@@ -34,7 +34,7 @@ export const upgradeTriggers = {
   winAchieved: (profit: number): UpgradeTrigger => {
     trackEvent('upgrade_trigger_shown', {
       trigger_type: 'win_achieved',
-      profit 
+      profit,
     });
 
     return {
@@ -49,7 +49,7 @@ export const upgradeTriggers = {
   trialEnding: (daysLeft: number): UpgradeTrigger => {
     trackEvent('upgrade_trigger_shown', {
       trigger_type: 'trial_ending',
-      days_left: daysLeft 
+      days_left: daysLeft,
     });
 
     return {
@@ -64,30 +64,30 @@ export const upgradeTriggers = {
   missedCommission: (amount: number): UpgradeTrigger => {
     trackEvent('upgrade_trigger_shown', {
       trigger_type: 'missed_money',
-      amount 
+      amount,
     });
 
     return {
       type: 'missed_money',
       message: `💰 You have $${amount.toFixed(2)} pending in your vault. Upgrade within 24h to claim it!`,
       urgency: 'high',
-      value: amount
+      value: amount,
     };
-  }
+  },
 };
 
 // Hook to check triggers (Mock implementation for now)
-export function useUpgradeTriggers(userId: string) {
+export function useUpgradeTriggers(_userId: string) {
   // Check user's trial status, feature usage, recent trades
   // Return trigger if conditions met
-  
+
   // Example: Check if trial ending
   const trialEndsAt = new Date('2025-12-05'); // from user data (mock)
   const daysLeft = Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  
+
   if (daysLeft === 2) {
     return upgradeTriggers.trialEnding(daysLeft);
   }
-  
+
   return null;
 }

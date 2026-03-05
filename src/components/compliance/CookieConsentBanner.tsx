@@ -7,9 +7,9 @@
  * Uses localStorage for preference persistence
  */
 
-import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 const CONSENT_KEY = 'apex_cookie_consent';
 
@@ -64,8 +64,7 @@ export function CookieConsentBanner({ onConsentChange }: CookieConsentBannerProp
                 {t('message', {
                   defaultValue:
                     'We use cookies to enhance your experience. By clicking "Accept All", you consent to our use of cookies.',
-                })}
-                {' '}
+                })}{' '}
                 <button
                   onClick={() => setShowDetails(true)}
                   className="text-blue-600 dark:text-blue-400 underline hover:no-underline"
@@ -109,8 +108,7 @@ export function CookieConsentBanner({ onConsentChange }: CookieConsentBannerProp
                 </h4>
                 <p className="text-gray-600 dark:text-gray-400">
                   {t('essentialDesc', {
-                    defaultValue:
-                      'Required for the website to function. Cannot be disabled.',
+                    defaultValue: 'Required for the website to function. Cannot be disabled.',
                   })}
                 </p>
               </div>
@@ -120,8 +118,7 @@ export function CookieConsentBanner({ onConsentChange }: CookieConsentBannerProp
                 </h4>
                 <p className="text-gray-600 dark:text-gray-400">
                   {t('analyticsDesc', {
-                    defaultValue:
-                      'Help us understand how visitors interact with our website.',
+                    defaultValue: 'Help us understand how visitors interact with our website.',
                   })}
                 </p>
               </div>

@@ -1,15 +1,30 @@
-# Apex OS - Complete Project Summary
+# Apex OS — RaaS AGI Trading Platform
 
-**Project:** Apex OS - Institutional-Grade Trading Platform  
-**Timeline:** 55+ hours total development  
-**Tonight's Session:** 4h+ autonomous execution  
+**Project:** Apex OS — Revenue-as-a-Service Agentic Trading OS
+**Model:** RaaS AGI — Zero-Fee, Crypto-Native, Agentic Workflows
 **Status:** Production-Ready ✅
 
 ---
 
 ## 🎯 Project Overview
 
-Apex OS is a complete trading platform with institutional-grade security, real-time trading capabilities, advanced AI features, and comprehensive admin oversight.
+Apex OS is a **RaaS (Revenue-as-a-Service)** agentic trading platform that replaces traditional SaaS subscriptions with a zero-fee, volume-based model. AI agents trade autonomously 24/7, users earn from every trade in their network, and tiers unlock automatically via trading volume.
+
+### RaaS Model — Zero Subscription Fees
+
+| Tier | Volume | Spread | Self-Rebate | AI Agents |
+|------|--------|--------|-------------|-----------|
+| Explorer | $0–$10K/mo | 0.30% | 10% | 1 |
+| Operator | $10K–$100K/mo | 0.20% | 20% | 3 |
+| Architect | $100K–$1M/mo | 0.12% | 30% | 7 |
+| Sovereign | $1M+/mo | 0.05% | 50% | Unlimited |
+
+### Key Differentiators
+- **Zero fees** — $0/mo forever, revenue from exchange spread only
+- **Crypto-native** — Deposit/withdraw USDT on 5+ chains
+- **Agentic workflows** — AI agents auto-trade, rebalance, and optimize
+- **Viral economics** — 4-level referral commission tree
+- **Multi-org** — Create teams, share agents, pool volume
 
 ---
 
@@ -25,13 +40,16 @@ Apex OS is a complete trading platform with institutional-grade security, real-t
 - **Documentation:** 9 comprehensive guides
 
 ### Technology Stack
-- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS v4
 - **Backend:** Node.js, TypeScript, Redis, WebSocket
-- **Database:** Supabase (PostgreSQL)
+- **Database:** Supabase (PostgreSQL) with RLS
 - **Real-Time:** ioredis, ws (WebSocket)
-- **Trading:** ccxt (Binance integration)
-- **Security:** bcrypt, JWT, MFA (TOTP)
-- **ML:** Custom RSI/MACD calculation
+- **Trading:** ccxt (40+ exchange support), Binance primary
+- **AI/ML:** Vertex AI, OpenAI, Custom RSI/MACD/Momentum/Sentiment
+- **Crypto/Web3:** wagmi, viem, RainbowKit
+- **Payments:** Polar SDK (marketplace), NowPayments (crypto gateway)
+- **Security:** bcrypt, JWT, MFA (TOTP), Sentry
+- **i18n:** next-intl — 7 locales (en, vi, th, id, ko, ja, zh)
 
 ---
 
@@ -66,15 +84,26 @@ Apex OS is a complete trading platform with institutional-grade security, real-t
 22. **IP Management** - Whitelist control
 23. **MFA Management** - Admin MFA setup
 
+### RaaS & Agentic Features
+24. **Zero-Fee Model** - Volume-based tiers, no subscription
+25. **Viral Economics** - 4-level referral commission tree
+26. **Agentic Onboarding** - AI-driven 4-step setup wizard
+27. **Agent Workflow Orchestrator** - Event bus: trade→commission→tier→badge
+28. **Self-Rebate Engine** - Auto-cashback on every trade (10–50%)
+29. **Tier Auto-Upgrade** - Volume-based automatic tier progression
+30. **Crypto Exchange** - Zero-fee USDT deposit/withdraw (5+ chains)
+31. **DeFi Swap** - In-app token swap interface
+
 ### Background Services
-24. **WebSocket Server** - Real-time communication
-25. **Price Feed** - Market data sync
-26. **Order Manager** - Limit order matching
-27. **Automation Engine** - SL/TP execution
-28. **Copy Trading** - Trade replication
-29. **Guardian Agent** - Risk monitoring (4 instances)
-30. **Auditor Agent** - Rebate optimization
-31. **Signal Generator** - ML calculations
+32. **WebSocket Server** - Real-time communication
+33. **Price Feed** - Market data sync
+34. **Order Manager** - Limit order matching
+35. **Automation Engine** - SL/TP execution
+36. **Copy Trading** - Trade replication
+37. **Guardian Agent** - Risk monitoring (4 instances)
+38. **Auditor Agent** - Rebate optimization
+39. **Signal Generator** - ML calculations
+40. **Singularity Rebalancer** - Auto-rebalance portfolio among top agents
 
 ---
 
@@ -331,20 +360,19 @@ pm2 start ecosystem.config.js
 
 ## 🎉 Conclusion
 
-**Apex OS is a complete, production-ready, institutional-grade trading platform** built in 55 hours with:
+**Apex OS is a RaaS AGI agentic trading platform** — zero subscription fees, crypto-native, AI agents trade 24/7, viral referral economics.
 
-- Advanced trading features
-- Real-time infrastructure
-- Enterprise security
-- AI-powered insights
-- Comprehensive admin tools
-- Full documentation
-- Zero technical debt
+- RaaS model: $0/mo, revenue from spread only
+- Agentic workflows: AI agents auto-trade and optimize
+- Crypto zero-fee exchange: USDT deposit/withdraw on 5+ chains
+- 4-level viral referral commission tree
+- 7-locale i18n, OS-style desktop UI
+- Enterprise security (MFA, RLS, audit trails)
 
 **Ready to launch! 🚀**
 
 ---
 
-**Built with ❤️ and .claude methodology**  
-**For support:** Refer to documentation in /docs  
-**Last Updated:** 2025-11-24
+**Built with .claude methodology**
+**For support:** Refer to documentation in /docs
+**Last Updated:** 2026-03-01

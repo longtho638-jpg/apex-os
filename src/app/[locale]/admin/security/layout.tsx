@@ -1,14 +1,5 @@
-import React from 'react';
+import type React from 'react';
 
-
-export default function AdminSecurityLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    return (
-        <>
-            {children}
-        </>
-    );
+export default function AdminSecurityLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

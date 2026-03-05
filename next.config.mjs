@@ -1,4 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
@@ -9,7 +9,12 @@ const nextConfig = {
   reactCompiler: true,
   transpilePackages: ['@apex-os/vibe-payment'],
   images: {
-    domains: ['ryvpqbuftmlsynmajecx.supabase.co'], // Supabase Storage
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ryvpqbuftmlsynmajecx.supabase.co',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   async headers() {
@@ -31,9 +36,30 @@ const nextConfig = {
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-              "frame-ancestors 'self' https://telegram.org https://*.telegram.org"
-            ].join('; ')
-          }
+              "frame-ancestors 'self' https://telegram.org https://*.telegram.org",
+              'upgrade-insecure-requests',
+            ].join('; '),
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), payment=(self)',
+          },
         ],
       },
     ];
@@ -83,8 +109,8 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
-  org: "apex-os",
-  project: "apex-os",
+  org: 'apex-os',
+  project: 'apex-os',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

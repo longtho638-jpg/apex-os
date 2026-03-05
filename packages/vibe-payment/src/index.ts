@@ -3,30 +3,50 @@
  * RaaS AGI model: zero subscription, volume-based tiers, crypto + Polar gateways.
  */
 
-// ---- Types ----
-export type {
-  TierId, LegacyTierId, AnyTierId, UnifiedTier, PaymentTier, CommissionRates,
-  RaaSBillingInfo, CreateCheckoutParams,
-  NOWPaymentsInvoiceResponse, CreateInvoiceParams, CreatePayoutParams, PayoutResult, PayoutStatus,
-  BillingFetcher, UseSubscriptionParams, UseUserTierParams, UseUpgradeTierParams, MenuId,
-} from './types/billing-types';
-export { PAYMENT_TIER_IDS } from './types/billing-types';
-
-// ---- Config ----
-export {
-  RAAS_CONFIG, UNIFIED_TIERS, PAYMENT_TIERS, TIER_ORDER,
-  getTierById, getTierPrice, getCommissionRate, getSelfRebateRate,
-  getSpreadBps, getAILimit, getAgentSlots, getTierByVolume, canUpgrade,
-} from './config/unified-tiers';
-
-// ---- Hooks (parameterized — app injects auth deps) ----
-export { useSubscription } from './hooks/use-subscription';
-export { useUserTier, normalizeTier } from './hooks/use-user-tier';
-export { useUpgradeTier } from './hooks/use-upgrade-tier';
-
-// ---- Payment Clients (server-side) ----
-export { createPolarCheckout, getPolarCheckout, polarClient } from './clients/polar-client';
-export { createNOWPaymentsInvoice, nowPayments } from './clients/nowpayments-client';
-
 // ---- Billing API Factory ----
 export { createBillingApi } from './api/billing-api';
+export { createNOWPaymentsInvoice, nowPayments } from './clients/nowpayments-client';
+// ---- Payment Clients (server-side) ----
+export { createPolarCheckout, getPolarCheckout, polarClient } from './clients/polar-client';
+// ---- Config ----
+export {
+  canUpgrade,
+  getAgentSlots,
+  getAILimit,
+  getCommissionRate,
+  getSelfRebateRate,
+  getSpreadBps,
+  getTierById,
+  getTierByVolume,
+  getTierPrice,
+  PAYMENT_TIERS,
+  RAAS_CONFIG,
+  TIER_ORDER,
+  UNIFIED_TIERS,
+} from './config/unified-tiers';
+// ---- Hooks (parameterized — app injects auth deps) ----
+export { useSubscription } from './hooks/use-subscription';
+export { useUpgradeTier } from './hooks/use-upgrade-tier';
+export { normalizeTier, useUserTier } from './hooks/use-user-tier';
+// ---- Types ----
+export type {
+  AnyTierId,
+  BillingFetcher,
+  CommissionRates,
+  CreateCheckoutParams,
+  CreateInvoiceParams,
+  CreatePayoutParams,
+  LegacyTierId,
+  MenuId,
+  NOWPaymentsInvoiceResponse,
+  PaymentTier,
+  PayoutResult,
+  PayoutStatus,
+  RaaSBillingInfo,
+  TierId,
+  UnifiedTier,
+  UseSubscriptionParams,
+  UseUpgradeTierParams,
+  UseUserTierParams,
+} from './types/billing-types';
+export { PAYMENT_TIER_IDS } from './types/billing-types';

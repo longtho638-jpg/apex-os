@@ -1,13 +1,13 @@
-import { logger } from '@/lib/logger';
-import { NextResponse } from 'next/server';
+import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
-import { agentCheckWithdrawal } from '@/lib/agents/withdrawal-agent';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { agentCheckWithdrawal } from '@/lib/agents/withdrawal-agent';
+import { logger } from '@/lib/logger';
 
 // Helper to validate Tron address (Basic regex check)
 // Starts with T, 34 chars long, base58 characters
-function isValidTronAddress(address: string): boolean {
+function _isValidTronAddress(address: string): boolean {
   return /^T[a-zA-Z0-9]{33}$/.test(address);
 }
 
@@ -22,20 +22,19 @@ export async function POST(req: Request) {
     const token = authHeader.substring(7);
 
     // Initialize Supabase with USER TOKEN
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      }
-    );
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
 
     // Verify Token & Get User ID
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Invalid Token' }, { status: 401 });
@@ -55,11 +54,14 @@ export async function POST(req: Request) {
     }
 
     if (profile.kyc_status !== 'verified') {
-      return NextResponse.json({
-        error: 'KYC Verification Required',
-        message: 'Please complete identity verification to withdraw funds.',
-        current_status: profile.kyc_status
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: 'KYC Verification Required',
+          message: 'Please complete identity verification to withdraw funds.',
+          current_status: profile.kyc_status,
+        },
+        { status: 403 },
+      );
     }
 
     const body = await req.json();
@@ -73,17 +75,20 @@ export async function POST(req: Request) {
     const validation = withdrawSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json({
-        error: 'Validation Error',
-        details: validation.error.flatten().fieldErrors
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Validation Error',
+          details: validation.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
     }
 
     const { amount, crypto_address } = validation.data;
 
     // 3. Create Checksum (CRITICAL for Fraud Prevention)
     // We bind the request data to a hash. If database is tampered, this hash won't match.
-    const timestamp = new Date().toISOString(); // We'll use the DB timestamp ideally, but close enough for verify
+    const _timestamp = new Date().toISOString(); // We'll use the DB timestamp ideally, but close enough for verify
     // Actually, we let the DB set the timestamp, but we need a unique verifiable string.
     // Let's use a nonce or just hash the intent.
     const nonce = crypto.randomBytes(16).toString('hex');
@@ -106,7 +111,7 @@ export async function POST(req: Request) {
         network: 'TRC20',
         status: 'pending',
         data_checksum: checksum,
-        agent_notes: `nonce:${nonce}` // Store nonce to verify later
+        agent_notes: `nonce:${nonce}`, // Store nonce to verify later
       })
       .select()
       .single();
@@ -120,7 +125,7 @@ export async function POST(req: Request) {
     const { data: reserved, error: reserveError } = await supabase.rpc('reserve_balance_for_withdrawal', {
       p_user_id: user_id,
       p_amount: amount,
-      p_withdrawal_id: request.id
+      p_withdrawal_id: request.id,
     });
 
     if (reserveError || !reserved) {
@@ -138,11 +143,8 @@ export async function POST(req: Request) {
       request_id: request.id,
       status: agentResult.approved ? 'agent_approved' : 'flagged',
       risk_score: agentResult.risk_score,
-      message: agentResult.approved
-        ? 'Passed AI check. Waiting for Admin approval.'
-        : 'Flagged for manual review.'
+      message: agentResult.approved ? 'Passed AI check. Waiting for Admin approval.' : 'Flagged for manual review.',
     });
-
   } catch (error: any) {
     logger.error('Withdrawal Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

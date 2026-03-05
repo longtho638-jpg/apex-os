@@ -22,8 +22,7 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
           } else {
             // Fallback
             document.documentElement.style.setProperty('--tg-theme-bg-color', tg.backgroundColor || '#000000');
-            // @ts-ignore
-            document.documentElement.style.setProperty('--tg-theme-text-color', tg.textColor || '#ffffff');
+            document.documentElement.style.setProperty('--tg-theme-text-color', (tg as any).textColor || '#ffffff');
           }
 
           // Handle Start Param
@@ -40,9 +39,9 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
       if (!initTelegram()) {
         // If not ready, poll a few times (Telegram script should be fast with beforeInteractive, but just in case)
         const intervalId = setInterval(() => {
-            if (initTelegram()) {
-                clearInterval(intervalId);
-            }
+          if (initTelegram()) {
+            clearInterval(intervalId);
+          }
         }, 100);
 
         // Stop polling after 2 seconds
@@ -51,9 +50,5 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

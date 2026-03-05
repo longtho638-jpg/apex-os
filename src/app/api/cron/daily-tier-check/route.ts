@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { dailyTierCheck } from '@/lib/viral-economics/cron-jobs';
 
 /**
@@ -16,9 +16,6 @@ export async function GET(req: NextRequest) {
     await dailyTierCheck();
     return NextResponse.json({ success: true, job: 'daily-tier-check' });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

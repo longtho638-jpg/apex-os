@@ -4,10 +4,10 @@
  * Records user acceptance of ToS and Privacy Policy
  */
 
+import { type NextRequest, NextResponse } from 'next/server';
+import { CURRENT_PRIVACY_VERSION, CURRENT_TOS_VERSION } from '@/config/compliance';
+import { logPrivacyAcceptance, logTosAcceptance } from '@/lib/services/audit-service';
 import { createClient } from '@/lib/supabase/server';
-import { NextRequest, NextResponse } from 'next/server';
-import { logTosAcceptance, logPrivacyAcceptance } from '@/lib/services/audit-service';
-import { CURRENT_TOS_VERSION, CURRENT_PRIVACY_VERSION } from '@/config/compliance';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,11 +39,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id);
 
     if (updateError) {
-      console.error('[TermsAcceptance] Update error:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to update compliance status' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to update compliance status' }, { status: 500 });
     }
 
     // Log acceptance events
@@ -57,11 +53,7 @@ export async function POST(request: NextRequest) {
       tosVersion: CURRENT_TOS_VERSION,
       privacyVersion: CURRENT_PRIVACY_VERSION,
     });
-  } catch (error) {
-    console.error('[TermsAcceptance] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to record acceptance' },
-      { status: 500 }
-    );
+  } catch (_error) {
+    return NextResponse.json({ error: 'Failed to record acceptance' }, { status: 500 });
   }
 }

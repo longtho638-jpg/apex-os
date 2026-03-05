@@ -24,7 +24,7 @@ export function ParticleBackground() {
               width: `${Math.random() * 4 + 1}px`,
               height: `${Math.random() * 4 + 1}px`,
               animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${10 + Math.random() * 20}s`
+              animationDuration: `${10 + Math.random() * 20}s`,
             }}
           />
         ))}

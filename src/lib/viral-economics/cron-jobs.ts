@@ -1,14 +1,13 @@
 import { logger } from '@/lib/logger';
-import { calculateMonthlyCommissions } from './commission-calculator';
-import { promoteTier } from './tier-manager';
-import { updateRefereeMetrics } from './referral-manager';
-import { checkBadgeEligibility } from './gamification';
 import { getSupabaseClient } from '@/lib/supabase';
+import { calculateMonthlyCommissions } from './commission-calculator';
+import { checkBadgeEligibility } from './gamification';
+import { promoteTier } from './tier-manager';
 
 export async function monthlyCommissionCalculation() {
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  
+
   logger.info(`Starting monthly commission calculation for ${month}...`);
   const result = await calculateMonthlyCommissions(month);
   logger.info('Commission calculation complete:', result);
@@ -17,13 +16,13 @@ export async function monthlyCommissionCalculation() {
 export async function dailyTierCheck() {
   const supabase = getSupabaseClient();
   const { data: users } = await supabase.from('user_tiers').select('user_id');
-  
+
   if (users) {
     let promotedCount = 0;
     for (const user of users) {
       const promoted = await promoteTier(user.user_id);
       if (promoted) promotedCount++;
-      
+
       // Also check badges
       await checkBadgeEligibility(user.user_id);
     }

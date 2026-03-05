@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { getSupabaseClient } from '@/lib/supabase';
-import { publish, createEvent, AGENT_EVENTS } from './agent-event-bus';
+import { AGENT_EVENTS, createEvent, publish } from './agent-event-bus';
 
 const HEARTBEAT_TIMEOUT_MS = 5 * 60 * 1000; // 5 min — agent considered dead
 
@@ -36,18 +36,23 @@ export async function checkAgentHealth(): Promise<{
       // Agent missed heartbeat — mark as dead
       dead.push(agent.agent_id);
 
-      await supabase.from('agent_heartbeats')
+      await supabase
+        .from('agent_heartbeats')
         .update({ status: 'dead', last_heartbeat: new Date().toISOString() })
         .eq('agent_id', agent.agent_id);
 
-      await publish(createEvent(
-        AGENT_EVENTS.AGENT_ERROR,
-        agent.agent_id,
-        { error: 'Heartbeat timeout — agent unresponsive', severity: 'critical' },
-        { orgId: agent.org_id }
-      ));
+      await publish(
+        createEvent(
+          AGENT_EVENTS.AGENT_ERROR,
+          agent.agent_id,
+          { error: 'Heartbeat timeout — agent unresponsive', severity: 'critical' },
+          { orgId: agent.org_id },
+        ),
+      );
 
-      logger.warn(`[HealthMonitor] Agent ${agent.agent_id} (${agent.agent_type}) is dead — no heartbeat since ${agent.last_heartbeat}`);
+      logger.warn(
+        `[HealthMonitor] Agent ${agent.agent_id} (${agent.agent_type}) is dead — no heartbeat since ${agent.last_heartbeat}`,
+      );
     } else {
       healthy++;
     }
@@ -61,7 +66,8 @@ export async function checkAgentHealth(): Promise<{
  */
 export async function recordHeartbeat(agentId: string, metadata?: Record<string, unknown>): Promise<void> {
   const supabase = getSupabaseClient();
-  await supabase.from('agent_heartbeats')
+  await supabase
+    .from('agent_heartbeats')
     .update({
       status: 'running',
       last_heartbeat: new Date().toISOString(),

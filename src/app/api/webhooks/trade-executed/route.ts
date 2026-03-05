@@ -1,5 +1,5 @@
-import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 import { processTradeCommission } from '@/lib/viral-economics/realtime-commission';
 
 export async function POST(req: Request) {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     // Process commission
-    // We await it here to ensure reliability for the MVP. 
+    // We await it here to ensure reliability for the MVP.
     // In high-scale prod, push to a queue (Redis/BullMQ).
     await processTradeCommission({
       user_id,
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       fee: Number(fee || 0),
       exchange: exchange || 'unknown',
       symbol: symbol || 'UNKNOWN',
-      trade_id
+      trade_id,
     });
 
     return NextResponse.json({ success: true });

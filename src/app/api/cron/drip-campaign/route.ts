@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
+import { type NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email-service';
 import { emailTemplates } from '@/lib/email-templates';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   for (const stage of STAGES) {
     // Calculate target date range for this stage
-    // e.g. for Day 2, find users created between 48h and 72h ago? 
+    // e.g. for Day 2, find users created between 48h and 72h ago?
     // Simplified: Find users created exactly 'day' days ago (ignoring time for simplicity, or use range)
 
     const targetDateStart = new Date();
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
           await supabase.from('email_logs').insert({
             user_id: user.id,
             email_type: stage.type,
-            sent_at: new Date().toISOString()
+            sent_at: new Date().toISOString(),
           });
 
           emailsSent++;

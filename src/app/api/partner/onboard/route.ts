@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -9,17 +9,17 @@ export async function POST(req: NextRequest) {
   const { data: tenant, error: tenantError } = await supabase
     .from('tenants')
     .insert({
-        name,
-        slug,
-        custom_domain: customDomain,
-        theme_config: { primaryColor, logoUrl },
-        subscription_status: 'active'
+      name,
+      slug,
+      custom_domain: customDomain,
+      theme_config: { primaryColor, logoUrl },
+      subscription_status: 'active',
     })
     .select()
     .single();
 
   if (tenantError) {
-      return NextResponse.json({ error: 'Failed to create tenant' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create tenant' }, { status: 500 });
   }
 
   // 2. Invite/Create Admin User (Simplified)

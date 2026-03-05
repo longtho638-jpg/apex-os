@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger';
  * Connects frontend to backend APIs
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getApiUrl } from '@/lib/api/config';
 
 const API_BASE = getApiUrl();
@@ -62,12 +62,12 @@ export function usePnL() {
     }
 
     fetch(`${API_BASE}/pnl/summary?user_id=${USER_ID}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         queryCache.set(cacheKey, data);
         setData(data);
       })
-      .catch(err => setError(err.message))
+      .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
 
@@ -89,8 +89,8 @@ export function useRebates() {
     }
 
     fetch(`${API_BASE}/auditor/rebates?user_id=${USER_ID}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         queryCache.set(cacheKey, data);
         setData(data);
       })
@@ -115,8 +115,8 @@ export function useLeverage() {
     }
 
     fetch(`${API_BASE}/guardian/leverage-check?user_id=${USER_ID}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         queryCache.set(cacheKey, data);
         setData(data);
       })
@@ -142,7 +142,7 @@ export function usePortfolio() {
         pnl: pnl.total_pnl,
         pnlPercent: ((pnl.total_pnl / 10000) * 100).toFixed(2),
         winRate: pnl.win_rate,
-        totalTrades: pnl.total_trades
+        totalTrades: pnl.total_trades,
       });
     };
 
@@ -153,8 +153,8 @@ export function usePortfolio() {
     }
 
     fetch(`${API_BASE}/pnl/summary?user_id=${USER_ID}`)
-      .then(res => res.json())
-      .then(pnl => {
+      .then((res) => res.json())
+      .then((pnl) => {
         queryCache.set(cacheKey, pnl);
         processData(pnl);
       })
@@ -182,7 +182,7 @@ export function useSystemMetrics() {
 
       if (!pnl) {
         try {
-          pnl = await fetch(`${API_BASE}/pnl/summary?user_id=${USER_ID}`).then(r => r.json());
+          pnl = await fetch(`${API_BASE}/pnl/summary?user_id=${USER_ID}`).then((r) => r.json());
           if (pnl) queryCache.set(pnlKey, pnl);
         } catch (e) {
           logger.error('Failed to fetch PnL', e);
@@ -191,7 +191,7 @@ export function useSystemMetrics() {
 
       if (!rebate) {
         try {
-          rebate = await fetch(`${API_BASE}/auditor/rebates?user_id=${USER_ID}`).then(r => r.json());
+          rebate = await fetch(`${API_BASE}/auditor/rebates?user_id=${USER_ID}`).then((r) => r.json());
           if (rebate) queryCache.set(rebateKey, rebate);
         } catch (e) {
           logger.error('Failed to fetch Rebates', e);
@@ -205,7 +205,7 @@ export function useSystemMetrics() {
           totalVolume: (pnl.total_trades * 2500).toFixed(0),
           totalFees: rebate.total_fees_paid,
           totalRebates: rebate.user_rebate,
-          systemStatus: 'healthy'
+          systemStatus: 'healthy',
         });
       }
       setLoading(false);
@@ -230,10 +230,8 @@ export function useApi() {
         ...options?.headers,
       };
 
-
-
       if (token) {
-        (headers as any)['Authorization'] = `Bearer ${token}`;
+        (headers as any).Authorization = `Bearer ${token}`;
         logger.info(`[useApi] Sending request to ${endpoint} with token: ${token.substring(0, 10)}...`);
       } else {
         logger.warn(`[useApi] Sending request to ${endpoint} WITHOUT token`);
@@ -250,7 +248,7 @@ export function useApi() {
           const errorData = await response.json();
           logger.error('[useApi] Request failed:', errorData);
           errorDetails = errorData.details || errorData.message || errorData.error || JSON.stringify(errorData);
-        } catch (e) {
+        } catch (_e) {
           logger.error('[useApi] Failed to parse error response');
         }
         throw new Error(`API error: ${response.status} - ${errorDetails}`);
@@ -278,7 +276,7 @@ export function useApiClient() {
       };
 
       if (token) {
-        (headers as any)['Authorization'] = `Bearer ${token}`;
+        (headers as any).Authorization = `Bearer ${token}`;
       }
 
       const response = await fetch(endpoint, {
@@ -292,7 +290,7 @@ export function useApiClient() {
           const errorData = await response.json();
           logger.error('[useApi] Request failed:', errorData);
           errorDetails = errorData.details || errorData.message || errorData.error || JSON.stringify(errorData);
-        } catch (e) {
+        } catch (_e) {
           logger.error('[useApi] Failed to parse error response');
         }
         throw new Error(`API error: ${response.status} - ${errorDetails}`);
@@ -309,7 +307,7 @@ export function useApiClient() {
     get: (endpoint: string) => fetchApi(endpoint, { method: 'GET' }),
     post: (endpoint: string, data: any) => fetchApi(endpoint, { method: 'POST', body: JSON.stringify(data) }),
     put: (endpoint: string, data: any) => fetchApi(endpoint, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (endpoint: string) => fetchApi(endpoint, { method: 'DELETE' })
+    delete: (endpoint: string) => fetchApi(endpoint, { method: 'DELETE' }),
   };
 
   return { api, fetchApi };

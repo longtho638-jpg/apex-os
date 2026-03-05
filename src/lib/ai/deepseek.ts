@@ -1,75 +1,95 @@
 import { logger } from '@/lib/logger';
-import { createClient } from '@supabase/supabase-js';
 
 const DEEPSEEK_API_URL = 'https://openrouter.ai/api/v1';
 
+export interface QuantStrategy {
+  signal: 'LONG' | 'SHORT' | 'NEUTRAL';
+  confidence: number;
+  entry_zone: { min: number; max: number };
+  stop_loss: number;
+  take_profit_targets: [number, number, number];
+  leverage_limit: number;
+  reasoning: string;
+}
+
+export interface VolumeStrategy {
+  strategy_type: 'GRID_BOT' | 'DELTA_NEUTRAL_HEDGE' | 'HIGH_FREQ_SCALP';
+  pair: string;
+  leverage: number;
+  grid_range: { low: number; high: number; grids: number };
+  hedge_ratio: number;
+  estimated_volume_24h: number;
+  estimated_rebate_earnings: number;
+  reasoning: string;
+}
+
 export interface DeepSeekMessage {
-    role: 'system' | 'user' | 'assistant';
-    content: string;
+  role: 'system' | 'user' | 'assistant';
+  content: string;
 }
 
 export interface DeepSeekResponse {
-    id: string;
-    choices: {
-        message: {
-            content: string;
-            role: string;
-        };
-        finish_reason: string;
-    }[];
-    usage: {
-        prompt_tokens: number;
-        completion_tokens: number;
-        total_tokens: number;
+  id: string;
+  choices: {
+    message: {
+      content: string;
+      role: string;
     };
+    finish_reason: string;
+  }[];
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 
 export class DeepSeekClient {
-    private apiKey: string;
+  private apiKey: string;
 
-    constructor(apiKey?: string) {
-        // Use OPENROUTER_API_KEY as primary source
-        this.apiKey = apiKey || process.env.OPENROUTER_API_KEY || '';
-        if (!this.apiKey) {
-            logger.warn('OpenRouter API Key is missing');
-        }
+  constructor(apiKey?: string) {
+    // Use OPENROUTER_API_KEY as primary source
+    this.apiKey = apiKey || process.env.OPENROUTER_API_KEY || '';
+    if (!this.apiKey) {
+      logger.warn('OpenRouter API Key is missing');
+    }
+  }
+
+  async chatCompletion(messages: DeepSeekMessage[], temperature: number = 0.7): Promise<DeepSeekResponse> {
+    if (!this.apiKey) {
+      throw new Error('OpenRouter API Key is required');
     }
 
-    async chatCompletion(messages: DeepSeekMessage[], temperature: number = 0.7): Promise<DeepSeekResponse> {
-        if (!this.apiKey) {
-            throw new Error('OpenRouter API Key is required');
-        }
+    const response = await fetch(`${DEEPSEEK_API_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.apiKey}`,
+        'HTTP-Referer': 'https://apexrebate.com', // Required by OpenRouter
+        'X-Title': 'ApexOS Quant Brain',
+      },
+      body: JSON.stringify({
+        model: 'deepseek/deepseek-chat', // OpenRouter model ID
+        messages,
+        temperature,
+        stream: false,
+      }),
+    });
 
-        const response = await fetch(`${DEEPSEEK_API_URL}/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.apiKey}`,
-                'HTTP-Referer': 'https://apexrebate.com', // Required by OpenRouter
-                'X-Title': 'ApexOS Quant Brain',
-            },
-            body: JSON.stringify({
-                model: 'deepseek/deepseek-chat', // OpenRouter model ID
-                messages,
-                temperature,
-                stream: false
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`DeepSeek API Error: ${response.status} - ${error}`);
-        }
-
-        return await response.json();
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`DeepSeek API Error: ${response.status} - ${error}`);
     }
 
-    /**
-     * Specialized method for Quant Analysis
-     * Forces DeepSeek to output structured JSON strategy
-     */
-    async generateQuantStrategy(marketContext: string): Promise<any> {
-        const systemPrompt = `
+    return await response.json();
+  }
+
+  /**
+   * Specialized method for Quant Analysis
+   * Forces DeepSeek to output structured JSON strategy
+   */
+  async generateQuantStrategy(marketContext: string): Promise<QuantStrategy> {
+    const systemPrompt = `
 You are "The General" (Sun Tzu of Trading) - a Senior Quantitative AI.
 Your philosophy is based on The Art of War:
 1. "Know the enemy and know yourself": Analyze market structure (Enemy) and risk parameters (Yourself).
@@ -92,28 +112,31 @@ Output MUST be valid JSON with the following structure:
 }
         `;
 
-        const response = await this.chatCompletion([
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: marketContext }
-        ], 0.2); // Low temperature for deterministic output
+    const response = await this.chatCompletion(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: marketContext },
+      ],
+      0.2,
+    ); // Low temperature for deterministic output
 
-        try {
-            const content = response.choices[0].message.content;
-            // Strip markdown code blocks if present
-            const jsonStr = content.replace(/```json\n|\n```/g, '');
-            return JSON.parse(jsonStr);
-        } catch (e) {
-            logger.error('Failed to parse DeepSeek strategy:', e);
-            throw new Error('Invalid JSON response from DeepSeek');
-        }
+    try {
+      const content = response.choices[0].message.content;
+      // Strip markdown code blocks if present
+      const jsonStr = content.replace(/```json\n|\n```/g, '');
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      logger.error('Failed to parse DeepSeek strategy:', e);
+      throw new Error('Invalid JSON response from DeepSeek');
     }
+  }
 
-    /**
-     * Specialized method for Volume/Rebate Farming Strategy
-     * Focuses on Delta Neutral, High Turnover, and Capital Preservation
-     */
-    async generateVolumeStrategy(marketContext: string, userTier: string): Promise<any> {
-        const systemPrompt = `
+  /**
+   * Specialized method for Volume/Rebate Farming Strategy
+   * Focuses on Delta Neutral, High Turnover, and Capital Preservation
+   */
+  async generateVolumeStrategy(marketContext: string, userTier: string): Promise<VolumeStrategy> {
+    const systemPrompt = `
 You are "The Farmer" - a Senior Quantitative AI specializing in Market Making and Rebate Arbitrage.
 Your goal is NOT to predict price direction, but to MAXIMIZE TRADING VOLUME while maintaining DELTA NEUTRALITY (Zero Risk).
 
@@ -138,20 +161,23 @@ Output MUST be valid JSON:
 }
         `;
 
-        const response = await this.chatCompletion([
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: `User Tier: ${userTier}\n${marketContext}` }
-        ], 0.2);
+    const response = await this.chatCompletion(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `User Tier: ${userTier}\n${marketContext}` },
+      ],
+      0.2,
+    );
 
-        try {
-            const content = response.choices[0].message.content;
-            const jsonStr = content.replace(/```json\n|\n```/g, '');
-            return JSON.parse(jsonStr);
-        } catch (e) {
-            logger.error('Failed to parse DeepSeek volume strategy:', e);
-            throw new Error('Invalid JSON response from DeepSeek');
-        }
+    try {
+      const content = response.choices[0].message.content;
+      const jsonStr = content.replace(/```json\n|\n```/g, '');
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      logger.error('Failed to parse DeepSeek volume strategy:', e);
+      throw new Error('Invalid JSON response from DeepSeek');
     }
+  }
 }
 
 export const deepseek = new DeepSeekClient();

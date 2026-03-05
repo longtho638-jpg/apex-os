@@ -11,6 +11,6 @@ export function createBillingApi(fetcher: BillingFetcher) {
         params: { user_id: userId },
         token,
       });
-    }
+    },
   };
 }

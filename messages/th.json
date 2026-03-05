@@ -76,6 +76,16 @@
       "legal": "กฎหมาย",
       "rights": "สงวนลิขสิทธิ์",
       "risk_disclosure": "การเปิดเผยความเสี่ยง: การเทรดคริปโตเคอเรนซีมีความเสี่ยงสูงต่อการสูญเสีย ApexOS ให้เครื่องมือและการวิเคราะห์แต่ไม่ได้รับประกันผลกำไร ผลการดำเนินงานในอดีตไม่ได้บ่งบอกถึงผลลัพธ์ในอนาคต โปรดเทรดอย่างรับผิดชอบและใช้เงินทุนที่คุณสามารถยอมรับการสูญเสียได้เท่านั้น"
+    },
+    "raas": {
+      "subtitle": "Your tier is determined by trading volume, not your wallet. Trade more, pay less spread.",
+      "badge": "Revenue-as-a-Service",
+      "title": "Zero Subscription Fees. Forever."
+    },
+    "onboarding": {
+      "subtitle": "30-second setup. No forms. Just trade.",
+      "title": "AI Deploys Your Trading Agents",
+      "badge": "Agentic Onboarding"
     }
   },
   "Navigation": {
@@ -516,7 +526,47 @@
     "join_telegram": "เข้าร่วม Telegram",
     "claim_reward": "รับสิทธิ์ทดลองใช้ Elite 24 ชม.",
     "task_completed": "ภารกิจเสร็จสมบูรณ์!",
-    "reward_claimed": "รับรางวัลแล้ว! เปิดใช้งานสิทธิ์ทดลองใช้ Elite 24 ชม. แล้ว"
+    "reward_claimed": "รับรางวัลแล้ว! เปิดใช้งานสิทธิ์ทดลองใช้ Elite 24 ชม. แล้ว",
+    "steps": {
+      "funding": {
+        "subtitle": "Deposit crypto — zero fees, instant settlement",
+        "title": "Fund & Launch"
+      },
+      "agent-config": {
+        "title": "Agent Deployment",
+        "subtitle": "Your personal trading agents are being configured"
+      },
+      "risk-assessment": {
+        "title": "Risk Calibration",
+        "subtitle": "Autonomous risk profiling — no forms, just questions"
+      },
+      "profile": {
+        "title": "AI Profile Scan",
+        "subtitle": "Our AI analyzes your trading style in 30 seconds"
+      }
+    },
+    "actions": {
+      "start_trading": "Start Trading — Zero Fees",
+      "deploy_agents": "Deploy My Agents",
+      "fund_and_trade": "Fund & Start Trading",
+      "continue": "Continue"
+    },
+    "profile": {
+      "monthly_volume": "Expected monthly volume (USD)",
+      "experience": "Trading experience"
+    },
+    "funding": {
+      "networks": "Supported Networks",
+      "zero_fee": "Zero deposit fee"
+    },
+    "risk": {
+      "tolerance": "Risk tolerance",
+      "qualify": "Based on your volume of {volume}/mo, you qualify for {spread} spread with {agents} AI agents.",
+      "detected": "AI Detected: {tier} Tier"
+    },
+    "agents": {
+      "live": "LIVE"
+    }
   },
   "AI": {
     "core_title": "Apex AI Core",
@@ -913,7 +963,8 @@
     "hero": {
       "title": "หยุดเสียเงินกับส่วนลดคริปโต",
       "subtitle": "ติดตามทุกส่วนลดโดยอัตโนมัติ เพิ่มผลกำไรของคุณให้สูงสุด",
-      "cta": "เริ่มทดลองใช้งานฟรี - ไม่ต้องใช้บัตรเครดิต"
+      "cta": "เริ่มทดลองใช้งานฟรี - ไม่ต้องใช้บัตรเครดิต",
+      "badge": "RaaS AGI — Zero-Fee Agentic Trading"
     },
     "calculator": {
       "volume": "ปริมาณรายเดือน",
@@ -921,68 +972,15 @@
       "claim": "รับสิทธิ์นี้"
     },
     "tiers": {
-      "free": {
-        "name": "ฟรี",
-        "price": "$0",
-        "period": "ตลอดไป",
-        "features": [
-          "1 กระดานเทรด",
-          "การติดตามพื้นฐาน",
-          "ประวัติ 7 วัน"
-        ]
-      },
-      "basic": {
-        "name": "พื้นฐาน",
-        "price": "$29",
-        "period": "ต่อเดือน",
-        "annual_save": "ประหยัด $58",
-        "features": [
-          "3 กระดานเทรด",
-          "ประวัติครบถ้วน",
-          "ส่งออกข้อมูล",
-          "การสนับสนุนทางอีเมล"
-        ]
-      },
-      "trader": {
-        "name": "เทรดเดอร์",
-        "price": "$97",
-        "period": "ต่อเดือน",
-        "badge": "ยอดนิยม",
-        "annual_save": "ประหยัด $194",
-        "features": [
-          "10 กระดานเทรด",
-          "ประวัติไม่จำกัด",
-          "การวิเคราะห์ขั้นสูง",
-          "การสนับสนุนลำดับความสำคัญ",
-          "แอปมือถือ"
-        ]
-      },
-      "pro": {
-        "name": "โปร",
-        "price": "$297",
-        "period": "ต่อเดือน",
-        "annual_save": "ประหยัด $594",
-        "features": [
-          "กระดานเทรดไม่จำกัด",
-          "การเข้าถึง API",
-          "รายงานแบบกำหนดเอง",
-          "การสนับสนุนแบบพรีเมียม",
-          "เข้าถึงฟีเจอร์ก่อนใคร"
-        ]
-      },
-      "elite": {
-        "name": "อีลิท",
-        "price": "$997",
-        "period": "ต่อเดือน",
-        "annual_save": "ประหยัด $1,994",
-        "features": [
-          "ทุกอย่างในโปร",
-          "ผู้จัดการบัญชีส่วนตัว",
-          "การบูรณาการแบบกำหนดเอง",
-          "การรับประกัน SLA",
-          "การสนับสนุนทางโทรศัพท์ 24/7"
-        ]
-      }
+      "free": {},
+      "basic": {},
+      "trader": {},
+      "pro": {},
+      "elite": {},
+      "section_title": "AI Agents + Multi-Org + Crypto = Zero-Fee Trading",
+      "section_subtitle": "Volume-based tiers — unlock automatically via agentic workflows",
+      "most_popular": "Most Popular",
+      "start_trading": "Start Trading Free"
     },
     "trust": {
       "users": "เทรดเดอร์กว่า 200+ คนติดตามส่วนลดแล้ว",
@@ -992,6 +990,40 @@
     "urgency": {
       "limited": "100 ท่านแรกรับส่วนลด 50% ตลอดชีพ",
       "spots": "เหลือเพียง X ที่ในราคานี้"
+    },
+    "raas": {
+      "auto_upgrade": "Auto-upgrade with volume",
+      "vs_saas_title": "SaaS vs RaaS",
+      "volume_based": "Volume-Based Tiers",
+      "volume_operator": "$10K – $100K/mo volume",
+      "volume_explorer": "Up to $10K/mo volume",
+      "volume_architect": "$100K – $1M/mo volume",
+      "current_tier": "Current Tier",
+      "agents_label": "Agents",
+      "badge": "RaaS Model",
+      "zero_fee": "$0/mo",
+      "volume_sovereign": "$1M+/mo volume",
+      "volume_required": "Volume Required",
+      "vs_saas_new": "Apex RaaS",
+      "rebate_label": "Rebate",
+      "spread_label": "Spread",
+      "vs_saas_old": "Traditional SaaS"
+    },
+    "comparison": {
+      "saas_1": "Pay $97–$997/mo whether you trade or not",
+      "raas_1": "$0/mo — zero subscription fees forever",
+      "raas_title": "New RaaS Model",
+      "saas_title": "Old SaaS Model",
+      "title": "SaaS vs RaaS AGI — The Paradigm Shift",
+      "raas_2": "Multi-org: create teams, share agents, pool volume",
+      "raas_4": "AI agents auto-trade 24/7 — you earn while you sleep",
+      "raas_5": "Tiers unlock automatically via agentic volume",
+      "subtitle": "Multi-org zero-fee crypto agentic workflows replace legacy subscriptions",
+      "saas_4": "Annual billing traps with no refunds",
+      "raas_3": "Crypto-native: deposit/withdraw USDT on 5+ chains",
+      "saas_3": "Locked features behind higher tiers",
+      "saas_2": "Platform profits even when you lose",
+      "saas_5": "Zero incentive to help you succeed"
     }
   },
   "Offer": {
@@ -1000,5 +1032,29 @@
     "subtitle": "ปลดล็อคศักยภาพการเทรดของคุณอย่างเต็มที่ด้วยเครื่องมือพลัง AI",
     "current_plan": "แผนปัจจุบัน",
     "upgrade_now": "อัปเกรดทันที"
+  },
+  "Exchange": {
+    "spread_rate": "Spread Rate",
+    "settlement": "Settlement",
+    "zero_fee_badge": "Zero Trading Fees",
+    "supported_chains": "Supported Chains",
+    "your_rebate": "Your Rebate",
+    "spread_breakdown": "Spread Breakdown",
+    "spread_cost": "Spread Cost",
+    "net_cost": "Net Cost",
+    "swap_success": "Swap completed successfully!",
+    "trade_amount": "Trade Amount"
+  },
+  "AgenticWorkflow": {
+    "tier_progress": "Tier Progress",
+    "agent_error": "Error",
+    "pipeline": "Trading Pipeline",
+    "execution": "Execution",
+    "title": "Agentic Workflow",
+    "agent_idle": "Idle",
+    "signal_detection": "Signal Detection",
+    "agent_active": "Active",
+    "deployed_agents": "Deployed Agents",
+    "risk_assessment": "Risk Assessment"
   }
 }

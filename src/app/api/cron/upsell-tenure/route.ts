@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
-import { sendEmail } from '@/lib/email-service';
 import { getTierByVolume, UNIFIED_TIERS } from '@apex-os/vibe-payment';
+import { type NextRequest, NextResponse } from 'next/server';
+import { sendEmail } from '@/lib/email-service';
+import { getSupabaseClient } from '@/lib/supabase';
 
 /**
  * RaaS Volume Milestone Nudge
- * Replaces SaaS upsell-tenure cron. Instead of pushing monthly→annual,
- * we nudge users who are close to the next tier threshold.
+ * Nudges users approaching next tier threshold (zero-fee, volume-based progression).
  */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -19,7 +18,7 @@ export async function GET(req: NextRequest) {
   // Find users approaching next tier threshold (within 20% of upgrade)
   const { data: users } = await supabase
     .from('users')
-    .select('user_id, email, full_name, monthly_volume, subscription_tier')
+    .select('user_id, email, full_name, monthly_volume')
     .gt('monthly_volume', 0)
     .limit(100);
 
@@ -38,7 +37,7 @@ export async function GET(req: NextRequest) {
       const progress = volume / nextThreshold;
 
       // Nudge when user is 80%+ toward next tier
-      if (progress < 0.80) continue;
+      if (progress < 0.8) continue;
 
       // Check if nudge already sent this month
       const { data: log } = await supabase
@@ -52,8 +51,8 @@ export async function GET(req: NextRequest) {
       if (log) continue;
 
       const remaining = nextThreshold - volume;
-      const nextTierName = currentTier === 'EXPLORER' ? 'Operator'
-        : currentTier === 'OPERATOR' ? 'Architect' : 'Sovereign';
+      const nextTierName =
+        currentTier === 'EXPLORER' ? 'Operator' : currentTier === 'OPERATOR' ? 'Architect' : 'Sovereign';
 
       await sendEmail({
         to: user.email,
@@ -64,13 +63,13 @@ export async function GET(req: NextRequest) {
           <p>Just <strong>$${remaining.toLocaleString()}</strong> more to unlock <strong>${nextTierName}</strong> tier.</p>
           <p>Benefits: Lower spread, higher rebates, more AI agents.</p>
           <a href="https://apexrebate.com/trading">Keep Trading →</a>
-        `
+        `,
       });
 
       await supabase.from('email_logs').insert({
         user_id: user.user_id,
         email_type: 'volume_milestone_nudge',
-        sent_at: new Date().toISOString()
+        sent_at: new Date().toISOString(),
       });
 
       sentCount++;

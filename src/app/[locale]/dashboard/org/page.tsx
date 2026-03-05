@@ -1,13 +1,13 @@
 'use client';
 
+import { RAAS_CONFIG } from '@apex-os/vibe-payment';
+import { motion } from 'framer-motion';
+import { Bot, Building2, Copy, Crown, Plus, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Sidebar } from '@/components/os/sidebar';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Building2, Users, Plus, Copy, TrendingUp, Bot, Crown } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import { RAAS_CONFIG } from '@apex-os/vibe-payment';
 
 interface OrgMember {
   id: string;
@@ -99,10 +99,25 @@ export default function OrgDashboardPage() {
             {/* Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {[
-                { label: 'Pooled Volume (30d)', value: `$${(org.totalVolume / 1000).toFixed(0)}K`, icon: TrendingUp, color: 'text-emerald-400' },
+                {
+                  label: 'Pooled Volume (30d)',
+                  value: `$${(org.totalVolume / 1000).toFixed(0)}K`,
+                  icon: TrendingUp,
+                  color: 'text-emerald-400',
+                },
                 { label: 'Org Tier', value: org.tier, icon: Crown, color: 'text-amber-400' },
-                { label: 'Members', value: `${org.membersCount} / ${RAAS_CONFIG.multiOrg.maxOrgsPerUser * 10}`, icon: Users, color: 'text-cyan-400' },
-                { label: 'AI Agents', value: `${org.agentsUsed} / ${org.agentSlots}`, icon: Bot, color: 'text-purple-400' },
+                {
+                  label: 'Members',
+                  value: `${org.membersCount} / ${RAAS_CONFIG.multiOrg.maxOrgsPerUser * 10}`,
+                  icon: Users,
+                  color: 'text-cyan-400',
+                },
+                {
+                  label: 'AI Agents',
+                  value: `${org.agentsUsed} / ${org.agentSlots}`,
+                  icon: Bot,
+                  color: 'text-purple-400',
+                },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -179,9 +194,7 @@ export default function OrgDashboardPage() {
                             {member.role.toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-mono text-emerald-400">
-                          ${member.volume30d.toLocaleString()}
-                        </td>
+                        <td className="px-6 py-4 font-mono text-emerald-400">${member.volume30d.toLocaleString()}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1">
                             <Bot className="w-3 h-3 text-purple-400" />
