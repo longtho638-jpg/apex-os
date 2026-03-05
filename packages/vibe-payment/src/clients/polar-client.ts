@@ -24,7 +24,7 @@ export async function createPolarCheckout({ userId, userEmail, tier }: CreateChe
   }
 
   const checkout = await polarClient.checkouts.create({
-    product_price_id: polarConfig.productPriceId,
+    price_id: polarConfig.productPriceId,
     customer_email: userEmail,
     success_url: `${process.env.PAYMENT_SUCCESS_URL}&tier=${tier}`,
     metadata: {
@@ -32,7 +32,7 @@ export async function createPolarCheckout({ userId, userEmail, tier }: CreateChe
       tier,
       source: 'apexos',
     },
-  });
+  } as any);
 
   return checkout;
 }
