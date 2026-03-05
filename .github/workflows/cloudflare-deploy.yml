@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -27,8 +27,6 @@ jobs:
       - name: Run backend tests
         run: |
           cd backend
-          # python -m pytest tests/
-          # Uncomment above when tests are ready. For now, we fail if syntax error.
           python -m compileall -x 'venv.*' .
 
   test-frontend:

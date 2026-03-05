@@ -1,0 +1,32 @@
+name = "apex-os"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages project — frontend
+pages_build_output_dir = ".vercel/output/static"
+
+# Environment variables
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "${NEXT_PUBLIC_SUPABASE_URL}"
+SUPABASE_SERVICE_ROLE_KEY = "${SUPABASE_SERVICE_ROLE_KEY}"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+REDIS_URL = "${REDIS_URL}"
+
+# Cron triggers for scheduled functions
+[[triggers.crons]]
+schedules = ["0 10 * * *"]  # Daily drip campaign
+
+[[triggers.crons]]
+schedules = ["0 11 * * *"]  # Winback campaign
+
+[[triggers.crons]]
+schedules = ["0 2 * * *"]   # Tier check
+
+[[triggers.crons]]
+schedules = ["0 9 * * *"]   # Upsell tenure
+
+[[triggers.crons]]
+schedules = ["0 14 * * 1"]  # Referral reminder (weekly Monday)
+
+[[triggers.crons]]
+schedules = ["0 8 * * *"]   # Ghost profit
