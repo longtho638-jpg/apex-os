@@ -1,44 +1,9 @@
 import type React from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ResonanceBell } from '@/components/notifications/ResonanceBell';
-import { logger } from '@/lib/logger';
-import { getSupabaseClient } from '@/lib/supabase';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = getSupabaseClient();
-
-  // 1. Check Authentication
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    // redirect('/en/login'); // TEMPORARILY DISABLED
-  }
-
-  // 2. Check Admin Role (Optimized)
-  // Check metadata first (Fastest & Safest)
-  const appMetadata = user?.app_metadata || {};
-  const userRole = appMetadata.role;
-  const _isAdminViaAuth = userRole === 'admin' || userRole === 'super_admin' || userRole === 'service_role';
-
-  if (userRole === 'admin') {
-  } else {
-    // Fallback: Check admin_users table
-    const { data: adminUser } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('id', user?.id || '00000000-0000-0000-0000-000000000000') // Safe dummy ID
-      .single();
-
-    if (!adminUser) {
-      logger.warn(`[AdminLayout] Access NORMALLY DENIED but ALLOWED for DEBUG. User: ${user?.id}`);
-      // redirect('/en/dashboard'); // TEMPORARILY DISABLED
-    }
-  }
-
-  // ... imports
+  // Note: Auth check temporarily disabled for development
 
   return (
     <div className="flex h-screen w-full bg-black text-white font-mono overflow-hidden">

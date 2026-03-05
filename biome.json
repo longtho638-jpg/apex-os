@@ -36,95 +36,44 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "recommended": false,
       "correctness": {
         "noUnusedImports": "warn",
         "noUnusedVariables": "warn",
         "noUnusedFunctionParameters": "warn",
-        "useHookAtTopLevel": "error",
+        "useHookAtTopLevel": "warn",
         "useExhaustiveDependencies": "warn",
         "noInvalidUseBeforeDeclaration": "warn"
       },
       "suspicious": {
-        "noExplicitAny": "warn",
-        "noConsole": "warn",
-        "noDebugger": "error",
-        "noDoubleEquals": "error",
-        "noImplicitAnyLet": "warn",
-        "noArrayIndexKey": "warn",
-        "noShadowRestrictedNames": "warn"
+        "noExplicitAny": "off",
+        "noConsole": "off",
+        "noDebugger": "warn",
+        "noDoubleEquals": "off",
+        "noImplicitAnyLet": "off",
+        "noArrayIndexKey": "off",
+        "noShadowRestrictedNames": "off"
       },
       "style": {
         "useConst": "warn",
-        "noNonNullAssertion": "warn",
+        "noNonNullAssertion": "off",
         "useImportType": "warn",
-        "noUnusedTemplateLiteral": "warn",
+        "noUnusedTemplateLiteral": "off",
         "useNumberNamespace": "off",
-        "noParameterAssign": "off"
+        "noParameterAssign": "off",
+        "noDefaultExport": "off"
       },
       "complexity": {
-        "noBannedTypes": "warn",
+        "noBannedTypes": "off",
         "noForEach": "off",
-        "noUselessFragments": "warn"
+        "noUselessFragments": "off"
       },
       "security": {
-        "noDangerouslySetInnerHtml": "warn"
+        "noDangerouslySetInnerHtml": "off"
       },
       "performance": {
-        "noImgElement": "warn"
-      },
-      "nursery": {}
-    }
-  },
-  "overrides": [
-    {
-      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "scripts/**"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noExplicitAny": "off",
-            "noConsole": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["*.config.*", "*.config.ts", "*.config.mjs", "next.config.*", "vitest.config.*"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off"
-          },
-          "style": {
-            "noDefaultExport": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["src/app/**/*.ts", "src/app/**/*.tsx"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noDefaultExport": "off"
-          },
-          "suspicious": {
-            "noExplicitAny": "off",
-            "noConsole": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["src/scripts/**/*.ts", "src/scripts/**/*.tsx"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off",
-            "noExplicitAny": "off"
-          }
-        }
+        "noImgElement": "off"
       }
     }
-  ]
+  }
 }

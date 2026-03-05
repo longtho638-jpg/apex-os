@@ -33,7 +33,8 @@ export default function ProviderAnalytics({ providerId }: ProviderAnalyticsProps
   const { token } = useAuth();
   const [metrics, setMetrics] = useState<Metrics[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30'); // days
+  const [timeRange, setTimeRange] = useState('30');
+
   const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true);
@@ -49,7 +50,7 @@ export default function ProviderAnalytics({ providerId }: ProviderAnalyticsProps
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [providerId, timeRange, token]);
 
   useEffect(() => {
     fetchMetrics();
@@ -72,14 +73,12 @@ export default function ProviderAnalytics({ providerId }: ProviderAnalyticsProps
     );
   }
 
-  // Calculate totals
   const totalVolume = metrics.reduce((sum, m) => sum + Number(m.total_volume), 0);
   const totalRevenue = metrics.reduce((sum, m) => sum + Number(m.total_revenue), 0);
   const totalActive = metrics[metrics.length - 1]?.active_users || 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Controls */}
       <div className="flex justify-end">
         <select
           value={timeRange}
@@ -92,7 +91,6 @@ export default function ProviderAnalytics({ providerId }: ProviderAnalyticsProps
         </select>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
           <div className="flex items-center gap-3 mb-2">
@@ -129,9 +127,7 @@ export default function ProviderAnalytics({ providerId }: ProviderAnalyticsProps
         </div>
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Volume & Revenue Chart */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6">Volume & Revenue</h3>
           <div className="h-[300px]">
@@ -172,7 +168,6 @@ export default function ProviderAnalytics({ providerId }: ProviderAnalyticsProps
           </div>
         </div>
 
-        {/* Users Chart */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6">User Growth</h3>
           <div className="h-[300px]">

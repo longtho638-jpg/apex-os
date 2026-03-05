@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertCircle, RefreshCw, Save } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { getSupabaseClientSide } from '@/lib/supabase';
 
@@ -10,7 +10,7 @@ interface ExchangeConfig {
   standard_maker_fee: number;
   standard_taker_fee: number;
   apex_partner_rate: number;
-  partner_uuid: string; // New field
+  partner_uuid: string;
   is_active: boolean;
 }
 
@@ -19,13 +19,12 @@ export default function ExchangeConfigPage() {
   const [configs, setConfigs] = useState<ExchangeConfig[]>([]);
   const supabase = getSupabaseClientSide();
 
-  const fetchConfigs = async () => {
+  const fetchConfigs = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('exchange_configs').select('*').order('exchange_name');
 
     if (error) {
       logger.error('Error fetching configs:', error);
-      // Mock data
       setConfigs([
         {
           exchange_name: 'Binance',
@@ -56,13 +55,13 @@ export default function ExchangeConfigPage() {
       setConfigs(data);
     }
     setLoading(false);
-  };
+  }, [supabase]);
 
   useEffect(() => {
     fetchConfigs();
   }, [fetchConfigs]);
 
-  const updateConfig = (index: number, field: keyof ExchangeConfig, value: any) => {
+  const updateConfig = (index: number, field: keyof ExchangeConfig, value: unknown) => {
     const newConfigs = [...configs];
     newConfigs[index] = { ...newConfigs[index], [field]: value };
     setConfigs(newConfigs);
@@ -70,7 +69,6 @@ export default function ExchangeConfigPage() {
 
   const handleSave = async () => {
     setLoading(true);
-    // Ensure we only save fields that exist in the table
     const updates = configs.map((cfg) => ({
       exchange_name: cfg.exchange_name,
       standard_maker_fee: cfg.standard_maker_fee,
@@ -131,14 +129,14 @@ export default function ExchangeConfigPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {configs.map((cfg, idx) => (
+            {configs.map((cfg) => (
               <tr key={cfg.exchange_name} className="hover:bg-white/5 transition-colors">
                 <td className="px-6 py-4 font-bold text-white">{cfg.exchange_name}</td>
                 <td className="px-6 py-4">
                   <input
                     type="text"
                     value={cfg.partner_uuid || ''}
-                    onChange={(e) => updateConfig(idx, 'partner_uuid', e.target.value)}
+                    onChange={(e) => updateConfig(configs.indexOf(cfg), 'partner_uuid', e.target.value)}
                     placeholder="e.g. LIMITLESS_V2"
                     className="bg-transparent border border-white/10 rounded px-2 py-1 w-40 text-white focus:border-emerald-500 focus:outline-none"
                   />
@@ -147,7 +145,9 @@ export default function ExchangeConfigPage() {
                   <input
                     type="number"
                     value={cfg.standard_maker_fee}
-                    onChange={(e) => updateConfig(idx, 'standard_maker_fee', parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      updateConfig(configs.indexOf(cfg), 'standard_maker_fee', parseFloat(e.target.value))
+                    }
                     className="bg-transparent border border-white/10 rounded px-2 py-1 w-20 text-right focus:border-emerald-500 focus:outline-none"
                     step="0.0001"
                   />
@@ -156,7 +156,9 @@ export default function ExchangeConfigPage() {
                   <input
                     type="number"
                     value={cfg.standard_taker_fee}
-                    onChange={(e) => updateConfig(idx, 'standard_taker_fee', parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      updateConfig(configs.indexOf(cfg), 'standard_taker_fee', parseFloat(e.target.value))
+                    }
                     className="bg-transparent border border-white/10 rounded px-2 py-1 w-20 text-right focus:border-emerald-500 focus:outline-none"
                     step="0.0001"
                   />
@@ -166,7 +168,9 @@ export default function ExchangeConfigPage() {
                     <input
                       type="number"
                       value={(cfg.apex_partner_rate * 100).toFixed(1)}
-                      onChange={(e) => updateConfig(idx, 'apex_partner_rate', parseFloat(e.target.value) / 100)}
+                      onChange={(e) =>
+                        updateConfig(configs.indexOf(cfg), 'apex_partner_rate', parseFloat(e.target.value) / 100)
+                      }
                       className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold rounded px-2 py-1 w-full text-right focus:border-emerald-500 focus:outline-none pr-6"
                       step="0.1"
                     />
@@ -177,7 +181,7 @@ export default function ExchangeConfigPage() {
                   <input
                     type="checkbox"
                     checked={cfg.is_active}
-                    onChange={(e) => updateConfig(idx, 'is_active', e.target.checked)}
+                    onChange={(e) => updateConfig(configs.indexOf(cfg), 'is_active', e.target.checked)}
                     className="w-5 h-5 accent-emerald-500 cursor-pointer rounded"
                   />
                 </td>
