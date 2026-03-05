@@ -1,19 +1,53 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { gateTradingSignals, requireFeature } from '@/lib/raas-gate';
 
 export async function GET(req: Request) {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // 1. Auth — Get user from token
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!supabaseUrl || !supabaseKey) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
       logger.error('Missing Supabase environment variables');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: authHeader.replace('Bearer ', ''),
+        },
+      },
+    });
 
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 2. GATE — Check if user has access to trading signals
+    const gateResult = await gateTradingSignals(user.id);
+    try {
+      requireFeature(gateResult);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message, requiredTier: gateResult.requiredTier },
+        { status: 403 }
+      );
+    }
+
+    // 3. Fetch signals
     const { searchParams } = new URL(req.url);
     const symbol = searchParams.get('symbol');
     const limit = parseInt(searchParams.get('limit') || '10', 10);

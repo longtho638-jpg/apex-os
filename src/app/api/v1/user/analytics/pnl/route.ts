@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { type NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { applyRateLimit } from '@/middleware/rateLimit';
+import { gateAdvancedAnalytics, requireFeature } from '@/lib/raas-gate';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,6 @@ export async function GET(request: NextRequest) {
     if (!authHeader) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     const token = authHeader.replace('Bearer ', '');
 
-    // CRITICAL SECURITY FIX: Use user token instead of Service Role Key to enforce RLS
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
       global: {
         headers: {
@@ -29,7 +29,18 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-    // 3. Params
+    // 3. GATE — Check if user has access to advanced analytics
+    const gateResult = await gateAdvancedAnalytics(user.id);
+    try {
+      requireFeature(gateResult);
+    } catch (error: any) {
+      return NextResponse.json(
+        { success: false, message: error.message, requiredTier: gateResult.requiredTier },
+        { status: 403 }
+      );
+    }
+
+    // 4. Params
     const searchParams = request.nextUrl.searchParams;
     const range = searchParams.get('range') || '30d';
 
@@ -40,7 +51,7 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // 4. Fetch Summary Metrics (RPC)
+    // 5. Fetch Summary Metrics (RPC)
     const { data: summary, error: summaryError } = await supabase.rpc('get_user_pnl', {
       p_user_id: user.id,
       p_start_date: startDate.toISOString(),
@@ -48,9 +59,7 @@ export async function GET(request: NextRequest) {
 
     if (summaryError) throw summaryError;
 
-    // 5. Fetch Chart Data (Aggregation)
-    // Note: This is simplified. Real PnL chart requires tracking balance history.
-    // Here we chart "Realized PnL per Day".
+    // 6. Fetch Chart Data (Aggregation)
     const { data: chartData, error: chartError } = await supabase
       .from('trades')
       .select('created_at, price, quantity, side, fee')
@@ -60,30 +69,11 @@ export async function GET(request: NextRequest) {
 
     if (chartError) throw chartError;
 
-    // Process chart data in JS (for flexibility over complex SQL)
+    // Process chart data in JS
     const dailyMap = new Map<string, number>();
-    const _cumulativePnL = 0;
 
     chartData?.forEach((trade) => {
       const day = trade.created_at.split('T')[0];
-      const _tradePnL =
-        trade.side === 'sell'
-          ? trade.price * trade.quantity - (trade.fee || 0)
-          : -(trade.price * trade.quantity) - (trade.fee || 0); // This logic assumes "buying" is negative PnL which is wrong for Portfolio Value but correct for Cash Flow.
-
-      // Correct PnL logic requires marking-to-market.
-      // For this MVP, let's just show "Trading Volume/Activity" or "Cash Flow".
-      // OR, let's mock the PnL curve based on "random walk" from a base if no trades exist,
-      // but strictly speaking, we should show realized gains.
-
-      // Let's show Cumulative Realized PnL (Cashflow based).
-      // Buying = Outflow, Selling = Inflow.
-      // This isn't PnL.
-
-      // Let's stick to a simple "Daily Volume" chart for now as PnL is hard without mark-to-market.
-      // OR, we assume every Sell closes a position and we calculate diff. That's too complex for 1 file.
-
-      // Revert to: Daily Volume
       const vol = trade.price * trade.quantity;
       dailyMap.set(day, (dailyMap.get(day) || 0) + vol);
     });
